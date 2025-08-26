@@ -1,24 +1,3 @@
--- --------------------------------------------------------
--- Host:                         127.0.0.1
--- Versión del servidor:         12.0.2-MariaDB - mariadb.org binary distribution
--- SO del servidor:              Win64
--- HeidiSQL Versión:             12.11.0.7065
--- --------------------------------------------------------
-
-/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
-/*!40101 SET NAMES utf8 */;
-/*!50503 SET NAMES utf8mb4 */;
-/*!40103 SET @OLD_TIME_ZONE=@@TIME_ZONE */;
-/*!40103 SET TIME_ZONE='+00:00' */;
-/*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
-/*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
-/*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
-
-
--- Volcando estructura de base de datos para demopsicologia
-CREATE DATABASE IF NOT EXISTS `demopsicologia` /*!40100 DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_uca1400_ai_ci */;
-USE `demopsicologia`;
-
 -- Volcando estructura para tabla demopsicologia.patients
 CREATE TABLE IF NOT EXISTS `patients` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -49,7 +28,7 @@ CREATE TABLE IF NOT EXISTS `patients` (
   KEY `idx_patient_dni` (`dni`),
   KEY `idx_patient_created` (`created_at`),
   KEY `idx_patient_name` (`name`)
-) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci;
+);
 
 -- Volcando datos para la tabla demopsicologia.patients: ~5 rows (aproximadamente)
 INSERT INTO `patients` (`id`, `name`, `email`, `phone`, `dni`, `status`, `session_type`, `address`, `birth_date`, `emergency_contact_name`, `emergency_contact_phone`, `medical_history`, `current_medication`, `allergies`, `referred_by`, `insurance_provider`, `insurance_number`, `notes`, `created_at`, `updated_at`) VALUES
@@ -58,9 +37,3 @@ INSERT INTO `patients` (`id`, `name`, `email`, `phone`, `dni`, `status`, `sessio
 	(3, 'Carlos Martín Sánchez', 'carlos.martin@email.com', '+34 600 345 678', '11223344C', 'on-hold', 'individual', 'Plaza España 12, 3º B, 08002 Barcelona', '1992-11-08', 'Laura Martín', '+34 600 345 679', 'Trastorno de pánico diagnosticado en 2022. En tratamiento.', 'Sertralina 50mg (1 comp/día)', 'Aspirina, polen', 'Psiquiatra - Dr. González', 'Mutua Madrileña', 'MM556677889', 'Paciente en pausa temporal por motivos laborales. Retoma en enero 2025.', '2025-08-25 19:17:42', '2025-08-25 19:17:42'),
 	(4, 'María García Jiménez', 'maria.garcia@email.com', '+34 600 456 789', '55667788D', 'active', 'couples', 'Calle Alcalá 200, 1º A, 28028 Madrid', '1990-01-30', 'José García', '+34 600 456 790', 'Sin antecedentes médicos relevantes.', 'Anticonceptivos orales', 'Mariscos', 'Recomendación de amiga', 'DKV', 'DKV445566778', 'Terapia de pareja iniciada hace 3 meses. Buenos progresos observados.', '2025-08-25 19:17:42', '2025-08-25 19:17:42'),
 	(5, 'Roberto Silva Moreno', 'roberto.silva@email.com', '+34 600 567 890', '99887766E', 'discharged', 'group', 'Carrer de Balmes 150, 08008 Barcelona', '1975-09-12', 'Carmen Silva', '+34 600 567 891', 'Adicción al alcohol. Proceso de desintoxicación completado en 2023.', 'Naltrexona 50mg según necesidad', 'Ninguna conocida', 'Centro de Salud Mental - Dr. Ruiz', 'Seguridad Social', 'SS123456789', 'Alta médica conseguida tras 18 meses de terapia grupal. Excelente evolución.', '2025-08-25 19:17:42', '2025-08-25 19:17:42');
-
-/*!40103 SET TIME_ZONE=IFNULL(@OLD_TIME_ZONE, 'system') */;
-/*!40101 SET SQL_MODE=IFNULL(@OLD_SQL_MODE, '') */;
-/*!40014 SET FOREIGN_KEY_CHECKS=IFNULL(@OLD_FOREIGN_KEY_CHECKS, 1) */;
-/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
-/*!40111 SET SQL_NOTES=IFNULL(@OLD_SQL_NOTES, 1) */;
