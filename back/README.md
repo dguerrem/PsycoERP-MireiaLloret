@@ -17,8 +17,8 @@ Guía rápida para poner en marcha el backend.
 
 Asegúrate de tener instalados los siguientes componentes:
 
-- **Node.js 20.13.1**: [Descarga aquí](https://nodejs.org/). Verifica la instalación con `node -v`.
-- **HeidiSQL (Portable)**: Para gestionar la base de datos. [Descarga aquí](https://www.heidisql.com/download.php).
+- **Node.js 20.13.1**: [Descarga aquí](https://nodejs.org/download/release/v20.13.1/node-v20.13.1-x64.msi). Verifica la instalación con `node -v`.
+- **HeidiSQL (Portable)**: Para gestionar la base de datos. [Descarga aquí](https://www.heidisql.com/downloads/releases/HeidiSQL_12.11_64_Portable.zip).
 
 ### 2. Configuración del proyecto
 
@@ -48,7 +48,7 @@ Esto sucede porque PowerShell tiene la ejecución de scripts deshabilitada. Lanz
 Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy RemoteSigned
 ```
 
-Para más detalles, visita [este enlace](https://docs.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_execution_policies).
+Para más detalles, visita [este enlace](https://www.cdmon.com/es/blog/la-ejecucion-de-scripts-esta-deshabilitada-en-este-sistema-te-contamos-como-actuar).
 
 ## 📊 Gestión de la Base de Datos con HeidiSQL
 
