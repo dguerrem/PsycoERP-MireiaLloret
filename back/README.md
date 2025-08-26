@@ -18,7 +18,7 @@ Guía rápida para poner en marcha el backend.
 Asegúrate de tener instalados los siguientes componentes:
 
 - **Node.js 20.13.1**: [Descarga aquí](https://nodejs.org/download/release/v20.13.1/node-v20.13.1-x64.msi). Verifica la instalación con `node -v`.
-- **HeidiSQL (Portable)**: Para gestionar la base de datos. [Descarga aquí](https://www.heidisql.com/downloads/releases/HeidiSQL_12.11_64_Portable.zip2).
+- **HeidiSQL (Portable)**: Para gestionar la base de datos. [Descarga aquí](https://www.heidisql.com/downloads/releases/HeidiSQL_12.11_64_Portable.zip).
 
 ### 2. Configuración del proyecto
 
