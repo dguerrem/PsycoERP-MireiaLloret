@@ -1,6 +1,7 @@
 const {
   getSessions,
   createSession,
+  updateSession,
 } = require("../../models/sessions/sessions_model");
 
 const obtenerSesiones = async (req, res) => {
@@ -121,7 +122,74 @@ const crearSesion = async (req, res) => {
   }
 };
 
+const actualizarSesion = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const {
+      patient_id,
+      clinic_id,
+      session_date,
+      start_time,
+      end_time,
+      mode,
+      type,
+      status,
+      price,
+      payment_method,
+      payment_status,
+      notes,
+    } = req.body;
+
+    // Validar que el ID sea válido
+    if (!id || isNaN(parseInt(id))) {
+      return res.status(400).json({
+        success: false,
+        error: "ID de sesión inválido",
+      });
+    }
+
+    // Construir objeto con solo los campos que se envían
+    const updateData = {};
+    if (patient_id) updateData.patient_id = patient_id;
+    if (clinic_id) updateData.clinic_id = clinic_id;
+    if (session_date) updateData.session_date = session_date;
+    if (start_time) updateData.start_time = start_time;
+    if (end_time) updateData.end_time = end_time;
+    if (mode) updateData.mode = mode;
+    if (type) updateData.type = type;
+    if (status) updateData.status = status;
+    if (price) updateData.price = price;
+    if (payment_method) updateData.payment_method = payment_method;
+    if (payment_status) updateData.payment_status = payment_status;
+    if (notes) updateData.notes = notes;
+
+    // Verificar que se envió al menos un campo para actualizar
+    if (Object.keys(updateData).length === 0) {
+      return res.status(400).json({
+        success: false,
+        error: "No se proporcionaron campos para actualizar",
+      });
+    }
+
+    const sesionActualizada = await updateSession(parseInt(id), updateData);
+
+    res.json({
+      success: true,
+      message: "Sesión actualizada exitosamente",
+      data: sesionActualizada,
+    });
+  } catch (err) {
+    console.error("Error al actualizar sesión:", err.message);
+    res.status(500).json({
+      success: false,
+      error: "Error al actualizar la sesión",
+    });
+  }
+};
+
 module.exports = {
   obtenerSesiones,
   crearSesion,
+  actualizarSesion,
 };

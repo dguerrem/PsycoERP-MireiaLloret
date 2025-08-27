@@ -84,7 +84,6 @@ const getSessions = async (filters = {}) => {
 
 // Crear nueva sesión
 const createSession = async (sessionData) => {
-
   const {
     patient_id,
     clinic_id,
@@ -142,7 +141,36 @@ const createSession = async (sessionData) => {
   return newSession[0];
 };
 
+// Actualizar sesión existente
+const updateSession = async (sessionId, updateData) => {
+  // Construir query dinámicamente basado en los campos recibidos
+  const fields = Object.keys(updateData);
+
+  // Crear la parte SET de la query
+  const setClause = fields.map((field) => `${field} = ?`).join(", ");
+
+  const query = `
+    UPDATE sessions 
+    SET ${setClause}
+    WHERE id = ?
+  `;
+
+  // Crear array de parámetros: valores + ID al final
+  const params = [...Object.values(updateData), sessionId];
+  
+  await db.execute(query, params);
+
+  // Retornar la sesión actualizada
+  const [updatedSession] = await db.execute(
+    "SELECT * FROM sessions WHERE id = ?",
+    [sessionId]
+  );
+
+  return updatedSession[0];
+};
+
 module.exports = {
   getSessions,
-  createSession
+  createSession,
+  updateSession,
 };
