@@ -1,17 +1,36 @@
 const express = require('express');
-const { testConnection } = require('./config/db');
-const app = express();
-const port = 3000;
-
+const cors = require('cors');
 require('dotenv').config();
+
+const { testConnection } = require('./config/db');
+
+const app = express();
+const PORT = process.env.PORT || 3000;
+
+// Middlewares globales
+app.use(cors());
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+// Ruta de bienvenida
 app.get('/', (req, res) => {
-  res.send('¡Hola, mundo con Express!');
+  res.json({
+    message: '🚀 API de Psicología funcionando correctamente',
+    version: '1.0.0',
+    endpoints: {
+      sessions: '/api/sessions'
+    }
+  });
 });
 
+// Importar y usar rutas
+const sessionsRoutes = require('./routes/sessions/sessions_routes');
+app.use('/api/sessions', sessionsRoutes);
+
 // Iniciar servidor
-app.listen(port, async () => {
-    console.log(`🚀 Servidor corriendo en http://localhost:${port}`);
-    console.log(`🔧 Interfaz de testing en http://localhost:${port}/swagger`);
+app.listen(PORT, async () => {
+    console.log(`🚀 Servidor corriendo en http://localhost:${PORT}`);
     
+    // Probar conexión a la base de datos
     await testConnection();
 });
