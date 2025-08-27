@@ -3,9 +3,10 @@ const router = express.Router();
 
 const {
   obtenerSesiones,
+  crearSesion,
 } = require("../../controllers/sessions/sessions_controller");
 
-// Ruta para obtener sesiones
 router.get("/", obtenerSesiones);
+router.post("/", crearSesion);
 
 module.exports = router;

@@ -1,4 +1,7 @@
-const { getSessions } = require("../../models/sessions/sessions_model");
+const {
+  getSessions,
+  createSession,
+} = require("../../models/sessions/sessions_model");
 
 const obtenerSesiones = async (req, res) => {
   try {
@@ -47,6 +50,78 @@ const obtenerSesiones = async (req, res) => {
   }
 };
 
+const crearSesion = async (req, res) => {
+  try {
+    const {
+      patient_id,
+      clinic_id,
+      session_date,
+      start_time,
+      end_time,
+      mode,
+      type,
+      status = "scheduled",
+      price = 0.0,
+      payment_method = "cash",
+      payment_status = "pending",
+      notes,
+    } = req.body;
+
+    // Validar campos obligatorios
+    if (
+      !patient_id ||
+      !clinic_id ||
+      !session_date ||
+      !start_time ||
+      !end_time ||
+      !mode ||
+      !type
+    ) {
+      return res.status(400).json({
+        success: false,
+        error: "Faltan campos obligatorios",
+        required_fields: [
+          "patient_id",
+          "clinic_id",
+          "session_date",
+          "start_time",
+          "end_time",
+          "mode",
+          "type",
+        ],
+      });
+    }
+
+    const nuevaSesion = await createSession({
+      patient_id,
+      clinic_id,
+      session_date,
+      start_time,
+      end_time,
+      mode,
+      type,
+      status,
+      price,
+      payment_method,
+      payment_status,
+      notes,
+    });
+
+    res.status(201).json({
+      success: true,
+      message: "Sesión creada exitosamente",
+      data: nuevaSesion,
+    });
+  } catch (err) {
+    console.error("Error al crear sesión:", err.message);
+    res.status(500).json({
+      success: false,
+      error: "Error al crear la sesión",
+    });
+  }
+};
+
 module.exports = {
   obtenerSesiones,
+  crearSesion,
 };

@@ -78,12 +78,71 @@ const getSessions = async (filters = {}) => {
 
   query += " ORDER BY session_date DESC, start_time DESC";
 
-  console.log(query);
-  
   const [rows] = await db.execute(query, params);
   return rows;
 };
 
+// Crear nueva sesión
+const createSession = async (sessionData) => {
+
+  const {
+    patient_id,
+    clinic_id,
+    session_date,
+    start_time,
+    end_time,
+    mode,
+    type,
+    status,
+    price,
+    payment_method,
+    payment_status,
+    notes,
+  } = sessionData;
+
+  const query = `
+    INSERT INTO sessions (
+      patient_id,
+      clinic_id,
+      session_date,
+      start_time,
+      end_time,
+      mode,
+      type,
+      status,
+      price,
+      payment_method,
+      payment_status,
+      notes
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+  `;
+
+  const params = [
+    patient_id,
+    clinic_id,
+    session_date,
+    start_time,
+    end_time,
+    mode,
+    type,
+    status,
+    price,
+    payment_method,
+    payment_status,
+    notes,
+  ];
+
+  const [result] = await db.execute(query, params);
+
+  // Retornar la sesión creada con su ID
+  const [newSession] = await db.execute("SELECT * FROM sessions WHERE id = ?", [
+    result.insertId,
+  ]);
+
+  return newSession[0];
+};
+
 module.exports = {
   getSessions,
+  createSession
 };
