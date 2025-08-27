@@ -3,6 +3,7 @@ const cors = require('cors');
 require('dotenv').config();
 
 const { testConnection } = require('./config/db');
+const { swaggerUi, swaggerDefinition, swaggerOptions } = require('./swagger/swagger');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -11,6 +12,9 @@ const PORT = process.env.PORT || 3000;
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+// 🔧 SWAGGER UI - Documentación
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDefinition, swaggerOptions));
 
 // Ruta de bienvenida
 app.get('/', (req, res) => {
