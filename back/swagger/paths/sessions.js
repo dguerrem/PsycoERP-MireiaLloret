@@ -14,7 +14,6 @@ const sessionsPaths = {
             format: "int64",
           },
           description: "ID del paciente para filtrar",
-          example: 1,
         },
         {
           name: "clinic_id",
@@ -25,7 +24,6 @@ const sessionsPaths = {
             format: "int64",
           },
           description: "ID de la clínica para filtrar",
-          example: 1,
         },
         {
           name: "status",
@@ -36,7 +34,6 @@ const sessionsPaths = {
             enum: ["scheduled", "completed", "cancelled", "no-show"],
           },
           description: "Estado de la sesión",
-          example: "completed",
         },
         {
           name: "session_date",
@@ -47,7 +44,28 @@ const sessionsPaths = {
             format: "date",
           },
           description: "Fecha de la sesión (YYYY-MM-DD)",
-          example: "2024-12-15",
+        },
+        {
+          name: "fecha_desde",
+          in: "query",
+          required: false,
+          schema: {
+            type: "string",
+            format: "date",
+          },
+          description:
+            "Fecha de inicio del rango para filtrar sesiones (YYYY-MM-DD). Solo se usa si no se especifica session_date",
+        },
+        {
+          name: "fecha_hasta",
+          in: "query",
+          required: false,
+          schema: {
+            type: "string",
+            format: "date",
+          },
+          description:
+            "Fecha de fin del rango para filtrar sesiones (YYYY-MM-DD). Solo se usa si no se especifica session_date",
         },
         {
           name: "payment_method",
@@ -58,7 +76,6 @@ const sessionsPaths = {
             enum: ["cash", "card", "transfer", "insurance"],
           },
           description: "Método de pago",
-          example: "card",
         },
         {
           name: "payment_status",
@@ -69,7 +86,6 @@ const sessionsPaths = {
             enum: ["pending", "paid", "partially_paid"],
           },
           description: "Estado del pago",
-          example: "paid",
         },
       ],
       responses: {

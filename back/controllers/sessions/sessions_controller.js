@@ -7,114 +7,42 @@ const obtenerSesiones = async (req, res) => {
       status,
       clinic_id,
       session_date,
+      fecha_desde,
+      fecha_hasta,
       payment_status,
       payment_method,
     } = req.query;
 
-    // Lógica de negocio: construir filtros
+    // Construir filtros directamente
     const filters = {};
+    if (patient_id) filters.patient_id = patient_id;
+    if (status) filters.status = status;
+    if (clinic_id) filters.clinic_id = clinic_id;
+    if (payment_status) filters.payment_status = payment_status;
+    if (payment_method) filters.payment_method = payment_method;
 
-    if (patient_id) {
-      // Validar que sea un número (bigint en BD)
-      if (isNaN(patient_id)) {
-        return res.status(400).json({
-          error: "ID de paciente debe ser un número",
-          field: "patient_id",
-        });
-      }
-      filters.patient_id = patient_id;
-    }
-
-    if (status) {
-      // Validar estados permitidos según ENUM de la BD
-      const estadosPermitidos = [
-        "scheduled",
-        "completed",
-        "cancelled",
-        "no-show",
-      ];
-      if (!estadosPermitidos.includes(status)) {
-        return res.status(400).json({
-          error: "Estado inválido",
-          allowed_values: estadosPermitidos,
-          field: "status",
-        });
-      }
-      filters.status = status;
-    }
-
-    if (clinic_id) {
-      // Validar que sea un número (bigint en BD)
-      if (isNaN(clinic_id)) {
-        return res.status(400).json({
-          error: "ID de clínica debe ser un número",
-          field: "clinic_id",
-        });
-      }
-      filters.clinic_id = clinic_id;
-    }
-
+    // Lógica inteligente para fechas
     if (session_date) {
-      // Validar formato de fecha YYYY-MM-DD
-      const regexFecha = /^\d{4}-\d{2}-\d{2}$/;
-      if (!regexFecha.test(session_date) || isNaN(Date.parse(session_date))) {
-        return res.status(400).json({
-          error: "Formato de fecha inválido. Use YYYY-MM-DD",
-          field: "session_date",
-        });
-      }
+      // Si envía fecha específica, usar esa
       filters.session_date = session_date;
+    } else if (fecha_desde || fecha_hasta) {
+      // Si envía rango, usar rango
+      if (fecha_desde) filters.fecha_desde = fecha_desde;
+      if (fecha_hasta) filters.fecha_hasta = fecha_hasta;
     }
 
-    if (payment_status) {
-      // Validar payment_status según ENUM de la BD
-      const paymentStatusPermitidos = ["pending", "paid", "partially_paid"];
-      if (!paymentStatusPermitidos.includes(payment_status)) {
-        return res.status(400).json({
-          error: "Estado de pago inválido",
-          allowed_values: paymentStatusPermitidos,
-          field: "payment_status",
-        });
-      }
-      filters.payment_status = payment_status;
-    }
-
-    if (payment_method) {
-      // Validar payment_method según ENUM de la BD
-      const paymentMethodsPermitidos = [
-        "cash",
-        "card",
-        "transfer",
-        "insurance",
-      ];
-      if (!paymentMethodsPermitidos.includes(payment_method)) {
-        return res.status(400).json({
-          error: "Método de pago inválido",
-          allowed_values: paymentMethodsPermitidos,
-          field: "payment_method",
-        });
-      }
-      filters.payment_method = payment_method;
-    }
-
-    // Llamar al model para obtener las sesiones
     const sesiones = await getSessions(filters);
 
-    // Lógica de negocio: formatear respuesta
-    const respuesta = {
+    res.json({
       success: true,
       total: sesiones.length,
-      filters_applied: Object.keys(filters).length > 0 ? filters : null,
       data: sesiones,
-    };
-
-    res.json(respuesta);
+    });
   } catch (err) {
-    console.error("❌ Error al obtener sesiones:", err.message);
+    console.error("Error al obtener sesiones:", err.message);
     res.status(500).json({
       success: false,
-      error: "Error interno del servidor",
-      message: "Error al obtener las sesiones",
+      error: "Error al obtener las sesiones",
     });
   }
 };

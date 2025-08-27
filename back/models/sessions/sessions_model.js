@@ -2,7 +2,6 @@ const { db } = require("../../config/db");
 
 // Obtener todas las sesiones con filtros opcionales
 const getSessions = async (filters = {}) => {
-  debugger;
   let query = `
         SELECT 
             id,
@@ -55,12 +54,32 @@ const getSessions = async (filters = {}) => {
     params.push(filters.payment_method);
   }
 
+  // Lógica inteligente de fechas
+  if (filters.session_date) {
+    // Fecha específica
+    conditions.push("session_date = ?");
+    params.push(filters.session_date);
+  } else {
+    // Rango de fechas
+    if (filters.fecha_desde) {
+      conditions.push("session_date >= ?");
+      params.push(filters.fecha_desde);
+    }
+
+    if (filters.fecha_hasta) {
+      conditions.push("session_date <= ?");
+      params.push(filters.fecha_hasta);
+    }
+  }
+
   if (conditions.length > 0) {
     query += " WHERE " + conditions.join(" AND ");
   }
 
   query += " ORDER BY session_date DESC, start_time DESC";
 
+  console.log(query);
+  
   const [rows] = await db.execute(query, params);
   return rows;
 };
