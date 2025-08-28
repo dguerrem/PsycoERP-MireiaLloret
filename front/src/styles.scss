@@ -1,3 +1,126 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+:root {
+  /* Updated color tokens to match modern ERP design brief */
+  --background: #ffffff;
+  --foreground: #4b5563;
+  --card: #f9fafb;
+  --card-foreground: #4b5563;
+  --popover: #ffffff;
+  --popover-foreground: #4b5563;
+  --primary: #0891b2;
+  --primary-foreground: #ffffff;
+  --secondary: #ec4899;
+  --secondary-foreground: #ffffff;
+  --muted: #f9fafb;
+  --muted-foreground: #4b5563;
+  --accent: #ec4899;
+  --accent-foreground: #ffffff;
+  --destructive: #be123c;
+  --destructive-foreground: #ffffff;
+  --border: #e5e7eb;
+  --input: #ffffff;
+  --ring: #0891b2;
+  --chart-1: #6366f1;
+  --chart-2: #ec4899;
+  --chart-3: #be123c;
+  --chart-4: #4b5563;
+  --chart-5: #0891b2;
+  --radius: 0.5rem;
+  --sidebar: #f9fafb;
+  --sidebar-foreground: #4b5563;
+  --sidebar-primary: #ffffff;
+  --sidebar-primary-foreground: #4b5563;
+  --sidebar-accent: #ec4899;
+  --sidebar-accent-foreground: #ffffff;
+  --sidebar-border: #e5e7eb;
+  --sidebar-ring: #0891b2;
+
+  /* Added clinic color variables for calendar system */
+  --clinic-a: #0891b2;
+  --clinic-b: #ec4899;
+  --clinic-c: #6366f1;
+  --clinic-private: #be123c;
+}
+
+@layer components {
+  /* Background colors */
+  .bg-sidebar {
+    background-color: var(--sidebar);
+  }
+  .bg-sidebar-primary {
+    background-color: var(--sidebar-primary);
+  }
+  .bg-sidebar-accent {
+    background-color: var(--sidebar-accent);
+  }
+  .bg-background {
+    background-color: var(--background);
+  }
+  .bg-primary {
+    background-color: var(--primary);
+  }
+  .bg-destructive {
+    background-color: var(--destructive);
+  }
+  
+  /* Text colors */
+  .text-sidebar-foreground {
+    color: var(--sidebar-foreground);
+  }
+  .text-sidebar-primary-foreground {
+    color: var(--sidebar-primary-foreground);
+  }
+  .text-sidebar-accent-foreground {
+    color: var(--sidebar-accent-foreground);
+  }
+  .text-foreground {
+    color: var(--foreground);
+  }
+  .text-primary-foreground {
+    color: var(--primary-foreground);
+  }
+  .text-muted-foreground {
+    color: var(--muted-foreground);
+  }
+  .text-destructive-foreground {
+    color: var(--destructive-foreground);
+  }
+  
+  /* Border colors */
+  .border-sidebar-border {
+    border-color: var(--sidebar-border);
+  }
+  .border-border {
+    border-color: var(--border);
+  }
+  
+  /* Hover states */
+  .hover\:bg-sidebar-primary:hover {
+    background-color: var(--sidebar-primary);
+  }
+  .hover\:text-sidebar-primary-foreground:hover {
+    color: var(--sidebar-primary-foreground);
+  }
+  .hover\:bg-sidebar-accent:hover {
+    background-color: var(--sidebar-accent);
+  }
+  .hover\:bg-destructive:hover {
+    background-color: var(--destructive);
+  }
+  .hover\:text-destructive-foreground:hover {
+    color: var(--destructive-foreground);
+  }
+}
+
+@layer base {
+  * {
+    border-color: var(--border);
+  }
+  body {
+    background-color: var(--background);
+    color: var(--foreground);
+  }
+}
