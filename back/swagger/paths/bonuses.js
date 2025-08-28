@@ -68,6 +68,53 @@ const bonusesPaths = {
         },
       },
     },
+    post: {
+      tags: ["Bonuses"],
+      summary: "Crear un nuevo bonus",
+      description: "Crea un nuevo bonus para un paciente",
+      requestBody: {
+        required: true,
+        content: {
+          "application/json": {
+            schema: {
+              $ref: "#/components/schemas/CreateBonusRequest",
+            },
+          },
+        },
+      },
+      responses: {
+        201: {
+          description: "Bonus creado exitosamente",
+          content: {
+            "application/json": {
+              schema: {
+                $ref: "#/components/schemas/CreateBonusResponse",
+              },
+            },
+          },
+        },
+        400: {
+          description: "Datos de entrada inválidos",
+          content: {
+            "application/json": {
+              schema: {
+                $ref: "#/components/schemas/ErrorResponse",
+              },
+            },
+          },
+        },
+        500: {
+          description: "Error interno del servidor",
+          content: {
+            "application/json": {
+              schema: {
+                $ref: "#/components/schemas/ErrorResponse",
+              },
+            },
+          },
+        },
+      },
+    },
   },
   "/api/bonuses/patient/{patient_id}": {
     get: {

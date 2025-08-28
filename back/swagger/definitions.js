@@ -707,6 +707,53 @@ const definitions = {
     },
   },
 
+  CreateBonusRequest: {
+    type: "object",
+    required: ["patient_id", "total_sessions", "price_per_session", "total_price"],
+    properties: {
+      patient_id: {
+        type: "integer",
+        format: "int64",
+        description: "ID del paciente",
+        example: 1,
+      },
+      total_sessions: {
+        type: "integer",
+        description: "Número total de sesiones incluidas en el bonus",
+        example: 10,
+      },
+      price_per_session: {
+        type: "number",
+        format: "decimal",
+        description: "Precio por sesión en euros",
+        example: 50.00,
+      },
+      total_price: {
+        type: "number",
+        format: "decimal",
+        description: "Precio total del bonus",
+        example: 500.00,
+      },
+    },
+  },
+
+  CreateBonusResponse: {
+    type: "object",
+    properties: {
+      success: {
+        type: "boolean",
+        example: true,
+      },
+      message: {
+        type: "string",
+        example: "Bonus creado exitosamente",
+      },
+      data: {
+        $ref: "#/components/schemas/PatientBonusDetail",
+      },
+    },
+  },
+
 
   ErrorResponse: {
     type: "object",

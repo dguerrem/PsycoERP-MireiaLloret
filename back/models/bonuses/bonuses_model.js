@@ -97,7 +97,43 @@ const getBonusesByPatientId = async (patientId) => {
   };
 };
 
+// Crear un nuevo bonus
+const createBonus = async (bonusData) => {
+  // Calcular fecha de expiración (1 año desde la compra por defecto)
+  const purchaseDate = new Date();
+  const expiryDate = new Date(purchaseDate);
+  expiryDate.setFullYear(expiryDate.getFullYear() + 1);
+
+  const query = `
+        INSERT INTO bonuses (
+            patient_id,
+            total_sessions,
+            price_per_session,
+            total_price,
+            used_sessions,
+            status,
+            purchase_date,
+            expiry_date
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+    `;
+  
+  const params = [
+    bonusData.patient_id,
+    bonusData.total_sessions,
+    bonusData.price_per_session,
+    bonusData.total_price,
+    0, // used_sessions siempre empieza en 0
+    'active', // status siempre active para nuevos bonuses
+    purchaseDate.toISOString().split('T')[0], // fecha actual en formato YYYY-MM-DD
+    expiryDate.toISOString().split('T')[0] // fecha de expiración en formato YYYY-MM-DD
+  ];
+  
+  const [result] = await db.execute(query, params);
+  return result.insertId;
+};
+
 module.exports = {
   getBonuses,
   getBonusesByPatientId,
+  createBonus,
 };
