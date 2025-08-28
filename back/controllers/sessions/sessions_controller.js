@@ -2,6 +2,7 @@ const {
   getSessions,
   createSession,
   updateSession,
+  deleteSession,
 } = require("../../models/sessions/sessions_model");
 
 const obtenerSesiones = async (req, res) => {
@@ -188,8 +189,28 @@ const actualizarSesion = async (req, res) => {
   }
 };
 
+const eliminarSesion = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const sesionEliminada = await deleteSession(parseInt(id));
+
+    res.json({
+      success: true,
+      message: "Sesión eliminada exitosamente",
+      data: sesionEliminada,
+    });
+  } catch (err) {
+    res.status(500).json({
+      success: false,
+      error: "Error al eliminar la sesión",
+    });
+  }
+};
+
 module.exports = {
   obtenerSesiones,
   crearSesion,
   actualizarSesion,
+  eliminarSesion,
 };

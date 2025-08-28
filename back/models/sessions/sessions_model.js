@@ -169,8 +169,25 @@ const updateSession = async (sessionId, updateData) => {
   return updatedSession[0];
 };
 
+// Eliminar sesión
+const deleteSession = async (sessionId) => {
+  // Primero obtener la sesión antes de eliminarla
+  const [sessionToDelete] = await db.execute(
+    "SELECT * FROM sessions WHERE id = ?",
+    [sessionId]
+  );
+
+  if (sessionToDelete.length === 0) {
+    throw new Error("Sesión no encontrada");
+  }
+
+  // Eliminar la sesión
+  await db.execute("DELETE FROM sessions WHERE id = ?", [sessionId]);
+};
+
 module.exports = {
   getSessions,
   createSession,
   updateSession,
+  deleteSession,
 };

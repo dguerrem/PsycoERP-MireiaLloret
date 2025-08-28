@@ -402,6 +402,65 @@ const sessionsPaths = {
         },
       },
     },
+    delete: {
+      tags: ["Sessions"],
+      summary: "Eliminar sesión",
+      description: "Elimina una sesión existente del sistema",
+      parameters: [
+        {
+          name: "id",
+          in: "path",
+          required: true,
+          schema: {
+            type: "integer",
+            format: "int64",
+          },
+          description: "ID de la sesión a eliminar",
+        },
+      ],
+      responses: {
+        200: {
+          description: "Sesión eliminada exitosamente",
+          content: {
+            "application/json": {
+              schema: {
+                type: "object",
+                properties: {
+                  success: {
+                    type: "boolean",
+                    example: true,
+                  },
+                  message: {
+                    type: "string",
+                    example: "Sesión eliminada exitosamente",
+                  },
+                },
+              },
+            },
+          },
+        },
+        404: {
+          description: "Sesión no encontrada",
+          content: {
+            "application/json": {
+              schema: {
+                $ref: "#/components/schemas/ErrorResponse",
+              },
+            },
+          },
+        },
+        500: {
+          description: "Error interno del servidor",
+          content: {
+            "application/json": {
+              schema: {
+                $ref: "#/components/schemas/ErrorResponse",
+              },
+            },
+          },
+        },
+      },
+    },
   },
 };
 
