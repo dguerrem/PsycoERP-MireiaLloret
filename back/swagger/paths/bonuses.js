@@ -69,6 +69,56 @@ const bonusesPaths = {
       },
     },
   },
+  "/api/bonuses/patient/{patient_id}": {
+    get: {
+      tags: ["Bonuses"],
+      summary: "Obtener bonuses por paciente con KPIs",
+      description: "Obtiene todos los bonuses de un paciente específico con KPIs de resumen",
+      parameters: [
+        {
+          name: "patient_id",
+          in: "path",
+          required: true,
+          schema: {
+            type: "integer",
+          },
+          description: "ID del paciente",
+        },
+      ],
+      responses: {
+        200: {
+          description: "Bonuses del paciente obtenidos exitosamente",
+          content: {
+            "application/json": {
+              schema: {
+                $ref: "#/components/schemas/PatientBonusesResponse",
+              },
+            },
+          },
+        },
+        400: {
+          description: "ID del paciente inválido o no proporcionado",
+          content: {
+            "application/json": {
+              schema: {
+                $ref: "#/components/schemas/ErrorResponse",
+              },
+            },
+          },
+        },
+        500: {
+          description: "Error interno del servidor",
+          content: {
+            "application/json": {
+              schema: {
+                $ref: "#/components/schemas/ErrorResponse",
+              },
+            },
+          },
+        },
+      },
+    },
+  },
 };
 
 module.exports = bonusesPaths;

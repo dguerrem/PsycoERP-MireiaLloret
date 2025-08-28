@@ -599,6 +599,114 @@ const definitions = {
     },
   },
 
+  PatientBonusKpis: {
+    type: "object",
+    properties: {
+      total_bonos: {
+        type: "integer",
+        description: "Total de bonuses del paciente",
+        example: 5,
+      },
+      total_activos: {
+        type: "integer", 
+        description: "Total de bonuses activos",
+        example: 2,
+      },
+      total_consumidos: {
+        type: "integer",
+        description: "Total de bonuses consumidos",
+        example: 2,
+      },
+      total_expirados: {
+        type: "integer",
+        description: "Total de bonuses expirados",
+        example: 1,
+      },
+    },
+  },
+
+  PatientBonusDetail: {
+    type: "object",
+    properties: {
+      idBono: {
+        type: "integer",
+        format: "int64",
+        description: "ID único del bonus",
+        example: 1,
+      },
+      sesiones_totales: {
+        type: "integer",
+        description: "Número total de sesiones incluidas",
+        example: 10,
+      },
+      euros_por_sesion: {
+        type: "number",
+        format: "decimal",
+        description: "Precio por sesión en euros",
+        example: 50.00,
+      },
+      precio_total: {
+        type: "number",
+        format: "decimal",
+        description: "Precio total del bonus",
+        example: 500.00,
+      },
+      fecha_compra: {
+        type: "string",
+        format: "date",
+        description: "Fecha de compra del bonus (YYYY-MM-DD)",
+        example: "2024-01-15",
+      },
+      fecha_expiracion: {
+        type: "string",
+        format: "date",
+        description: "Fecha de expiración del bonus (YYYY-MM-DD)",
+        example: "2024-12-31",
+      },
+      sesiones_restantes: {
+        type: "integer",
+        description: "Sesiones restantes por usar",
+        example: 7,
+      },
+      sesiones_utilizadas: {
+        type: "integer",
+        description: "Sesiones ya utilizadas",
+        example: 3,
+      },
+      estado_bono: {
+        type: "string",
+        enum: ["active", "consumed", "expired"],
+        description: "Estado actual del bonus",
+        example: "active",
+      },
+    },
+  },
+
+  PatientBonusesResponse: {
+    type: "object",
+    properties: {
+      success: {
+        type: "boolean",
+        example: true,
+      },
+      data: {
+        type: "object",
+        properties: {
+          kpis: {
+            $ref: "#/components/schemas/PatientBonusKpis",
+          },
+          bonuses: {
+            type: "array",
+            items: {
+              $ref: "#/components/schemas/PatientBonusDetail",
+            },
+            description: "Lista detallada de bonuses del paciente",
+          },
+        },
+      },
+    },
+  },
+
 
   ErrorResponse: {
     type: "object",
