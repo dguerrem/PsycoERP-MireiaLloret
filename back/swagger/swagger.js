@@ -3,6 +3,7 @@ const swaggerUi = require("swagger-ui-express");
 
 const definitions = require("./definitions");
 const sessionsPaths = require("./paths/sessions");
+const patientsPaths = require("./paths/patients");
 
 const swaggerDefinition = {
   openapi: "3.0.0",
@@ -26,11 +27,16 @@ const swaggerDefinition = {
   },
   paths: {
     ...sessionsPaths,
+    ...patientsPaths,
   },
   tags: [
     {
       name: "Sessions",
       description: "Gestión de sesiones de terapia",
+    },
+    {
+      name: "Patients",
+      description: "Gestión de pacientes",
     },
   ],
 };

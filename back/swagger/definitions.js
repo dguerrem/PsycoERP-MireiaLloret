@@ -118,6 +118,150 @@ const definitions = {
     },
   },
 
+  Patient: {
+    type: "object",
+    properties: {
+      id: {
+        type: "integer",
+        format: "int64",
+        description: "ID único del paciente",
+        example: 1,
+      },
+      name: {
+        type: "string",
+        description: "Nombre completo del paciente",
+        example: "Juan Pérez García",
+      },
+      email: {
+        type: "string",
+        format: "email",
+        description: "Email del paciente",
+        example: "juan.perez@email.com",
+      },
+      phone: {
+        type: "string",
+        description: "Teléfono del paciente",
+        example: "+34 666 123 456",
+      },
+      dni: {
+        type: "string",
+        description: "DNI del paciente",
+        example: "12345678A",
+      },
+      status: {
+        type: "string",
+        enum: ["active", "inactive", "discharged", "on-hold"],
+        description: "Estado del paciente",
+        example: "active",
+      },
+      session_type: {
+        type: "string",
+        enum: ["individual", "group", "family", "couples"],
+        description: "Tipo de sesión preferida",
+        example: "individual",
+      },
+      address: {
+        type: "string",
+        nullable: true,
+        description: "Dirección del paciente",
+        example: "Calle Mayor 123, Valencia",
+      },
+      birth_date: {
+        type: "string",
+        format: "date",
+        nullable: true,
+        description: "Fecha de nacimiento",
+        example: "1985-03-15",
+      },
+      emergency_contact_name: {
+        type: "string",
+        nullable: true,
+        description: "Nombre del contacto de emergencia",
+        example: "María Pérez",
+      },
+      emergency_contact_phone: {
+        type: "string",
+        nullable: true,
+        description: "Teléfono del contacto de emergencia",
+        example: "+34 666 987 654",
+      },
+      medical_history: {
+        type: "string",
+        nullable: true,
+        description: "Historial médico",
+        example: "Antecedentes de ansiedad",
+      },
+      current_medication: {
+        type: "string",
+        nullable: true,
+        description: "Medicación actual",
+        example: "Sertralina 50mg",
+      },
+      allergies: {
+        type: "string",
+        nullable: true,
+        description: "Alergias conocidas",
+        example: "Penicilina",
+      },
+      referred_by: {
+        type: "string",
+        nullable: true,
+        description: "Referido por",
+        example: "Dr. Smith",
+      },
+      insurance_provider: {
+        type: "string",
+        nullable: true,
+        description: "Proveedor de seguros",
+        example: "Sanitas",
+      },
+      insurance_number: {
+        type: "string",
+        nullable: true,
+        description: "Número de póliza",
+        example: "POL123456789",
+      },
+      notes: {
+        type: "string",
+        nullable: true,
+        description: "Notas adicionales",
+        example: "Paciente muy colaborativo",
+      },
+      created_at: {
+        type: "string",
+        format: "date-time",
+        description: "Fecha de creación",
+        example: "2024-01-15T10:30:00Z",
+      },
+      updated_at: {
+        type: "string",
+        format: "date-time",
+        description: "Fecha de última actualización",
+        example: "2024-01-20T14:45:00Z",
+      },
+    },
+  },
+
+  PatientsResponse: {
+    type: "object",
+    properties: {
+      success: {
+        type: "boolean",
+        example: true,
+      },
+      total: {
+        type: "integer",
+        example: 5,
+      },
+      data: {
+        type: "array",
+        items: {
+          $ref: "#/components/schemas/Patient",
+        },
+      },
+    },
+  },
+
   ErrorResponse: {
     type: "object",
     properties: {

@@ -12,6 +12,9 @@ const {
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+const sessionsRoutes = require("./routes/sessions/sessions_routes");
+const patientsRoutes = require("./routes/patients/patients_routes");
+
 // Middlewares globales
 app.use(cors());
 app.use(express.json());
@@ -36,8 +39,8 @@ app.get("/", (req, res) => {
 });
 
 // Importar y usar rutas
-const sessionsRoutes = require("./routes/sessions/sessions_routes");
 app.use("/api/sessions", sessionsRoutes);
+app.use("/api/patients", patientsRoutes);
 
 // Iniciar servidor
 app.listen(PORT, async () => {
