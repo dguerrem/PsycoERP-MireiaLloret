@@ -503,6 +503,103 @@ const definitions = {
     },
   },
 
+  Bonus: {
+    type: "object",
+    properties: {
+      id: {
+        type: "integer",
+        format: "int64",
+        description: "ID único del bonus",
+        example: 1,
+      },
+      patient_id: {
+        type: "integer",
+        format: "int64",
+        description: "ID del paciente",
+        example: 1,
+      },
+      total_sessions: {
+        type: "integer",
+        description: "Número total de sesiones incluidas en el bonus",
+        example: 10,
+      },
+      price_per_session: {
+        type: "number",
+        format: "decimal",
+        description: "Precio por sesión",
+        example: 50.00,
+      },
+      total_price: {
+        type: "number",
+        format: "decimal",
+        description: "Precio total del bonus",
+        example: 500.00,
+      },
+      used_sessions: {
+        type: "integer",
+        description: "Número de sesiones utilizadas",
+        example: 3,
+      },
+      status: {
+        type: "string",
+        enum: ["active", "consumed", "expired"],
+        description: "Estado del bonus",
+        example: "active",
+      },
+      purchase_date: {
+        type: "string",
+        format: "date",
+        description: "Fecha de compra del bonus (YYYY-MM-DD)",
+        example: "2024-01-15",
+      },
+      expiry_date: {
+        type: "string",
+        format: "date",
+        description: "Fecha de expiración del bonus (YYYY-MM-DD)",
+        example: "2024-12-31",
+      },
+      notes: {
+        type: "string",
+        nullable: true,
+        description: "Notas adicionales",
+        example: "Bonus adquirido con descuento especial",
+      },
+      created_at: {
+        type: "string",
+        format: "date",
+        description: "Fecha de creación",
+        example: "2024-01-15",
+      },
+      updated_at: {
+        type: "string",
+        format: "date-time",
+        description: "Fecha de última actualización",
+        example: "2024-01-20T14:45:00Z",
+      },
+    },
+  },
+
+  BonusesResponse: {
+    type: "object",
+    properties: {
+      success: {
+        type: "boolean",
+        example: true,
+      },
+      total: {
+        type: "integer",
+        example: 3,
+      },
+      data: {
+        type: "array",
+        items: {
+          $ref: "#/components/schemas/Bonus",
+        },
+      },
+    },
+  },
+
+
   ErrorResponse: {
     type: "object",
     properties: {

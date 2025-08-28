@@ -14,6 +14,7 @@ const PORT = process.env.PORT || 3000;
 
 const sessionsRoutes = require("./routes/sessions/sessions_routes");
 const patientsRoutes = require("./routes/patients/patients_routes");
+const bonusesRoutes = require("./routes/bonuses/bonuses_routes");
 
 // Middlewares globales
 app.use(cors());
@@ -35,6 +36,7 @@ app.get("/", (req, res) => {
     endpoints: {
       sessions: "/api/sessions",
       patients: "/api/patients",
+      bonuses: "/api/bonuses",
     },
   });
 });
@@ -42,6 +44,7 @@ app.get("/", (req, res) => {
 // Importar y usar rutas
 app.use("/api/sessions", sessionsRoutes);
 app.use("/api/patients", patientsRoutes);
+app.use("/api/bonuses", bonusesRoutes);
 
 // Iniciar servidor
 app.listen(PORT, async () => {
