@@ -22,7 +22,7 @@ const getPatients = async (filters = {}) => {
             insurance_provider,
             insurance_number,
             notes,
-            created_at,
+            DATE_FORMAT(created_at,'%Y-%m-%d') as created_at,
             updated_at
         FROM patients
     `;
