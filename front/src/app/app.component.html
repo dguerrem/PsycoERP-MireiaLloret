@@ -1,4 +1,4 @@
-<div class="min-h-screen bg-gray-50 flex">
+<div class="min-h-screen  flex">
   <!-- Sidebar -->
   <app-sidebar
     [activeModule]="activeModule()"
@@ -9,7 +9,7 @@
 
   <!-- Mobile Overlay -->
   @if (isSidebarOpen()) {
-    <div 
+    <div
       class="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden"
       (click)="onOverlayClick()">
     </div>
