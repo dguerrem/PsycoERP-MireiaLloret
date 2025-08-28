@@ -136,6 +136,66 @@ const patientsPaths = {
       },
     },
   },
+  "/api/patients/{id}": {
+    get: {
+      tags: ["Patients"],
+      summary: "Obtener paciente por ID",
+      description: "Obtiene la información completa de un paciente específico dividida en 6 DTOs",
+      parameters: [
+        {
+          name: "id",
+          in: "path",
+          required: true,
+          schema: {
+            type: "integer",
+          },
+          description: "ID único del paciente",
+        },
+      ],
+      responses: {
+        200: {
+          description: "Información del paciente obtenida exitosamente",
+          content: {
+            "application/json": {
+              schema: {
+                $ref: "#/components/schemas/PatientDetailResponse",
+              },
+            },
+          },
+        },
+        400: {
+          description: "ID del paciente inválido o no proporcionado",
+          content: {
+            "application/json": {
+              schema: {
+                $ref: "#/components/schemas/ErrorResponse",
+              },
+            },
+          },
+        },
+        404: {
+          description: "Paciente no encontrado",
+          content: {
+            "application/json": {
+              schema: {
+                $ref: "#/components/schemas/ErrorResponse",
+              },
+            },
+          },
+        },
+        500: {
+          description: "Error interno del servidor",
+          content: {
+            "application/json": {
+              schema: {
+                $ref: "#/components/schemas/ErrorResponse",
+              },
+            },
+          },
+        },
+      },
+    },
+  },
 };
 
 module.exports = patientsPaths;

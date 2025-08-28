@@ -262,6 +262,247 @@ const definitions = {
     },
   },
 
+  PatientResumeSession: {
+    type: "object",
+    properties: {
+      idsesion: {
+        type: "integer",
+        format: "int64",
+        description: "ID único de la sesión",
+        example: 1,
+      },
+      tipo_sesion: {
+        type: "string",
+        description: "Tipo de sesión",
+        example: "Terapia Individual",
+      },
+      fecha: {
+        type: "string",
+        format: "date",
+        description: "Fecha de la sesión (YYYY-MM-DD)",
+        example: "2024-12-15",
+      },
+      precio: {
+        type: "number",
+        format: "decimal",
+        description: "Precio de la sesión",
+        example: 60.0,
+      },
+      metodo_pago: {
+        type: "string",
+        enum: ["cash", "card", "transfer", "insurance"],
+        description: "Método de pago",
+        example: "card",
+      },
+    },
+  },
+
+  PatientResume: {
+    type: "object",
+    properties: {
+      id: {
+        type: "integer",
+        format: "int64",
+        description: "ID único del paciente",
+        example: 1,
+      },
+      email: {
+        type: "string",
+        format: "email",
+        description: "Email del paciente",
+        example: "juan.perez@email.com",
+      },
+      phone: {
+        type: "string",
+        description: "Teléfono del paciente",
+        example: "+34 666 123 456",
+      },
+      tipo: {
+        type: "string",
+        enum: ["individual", "group", "family", "couples"],
+        description: "Tipo de sesión preferida",
+        example: "individual",
+      },
+      PatientResumeSessions: {
+        type: "array",
+        items: {
+          $ref: "#/components/schemas/PatientResumeSession",
+        },
+        description: "Historial de sesiones del paciente",
+      },
+    },
+  },
+
+  PatientData: {
+    type: "object",
+    properties: {
+      nombre: {
+        type: "string",
+        description: "Nombre completo del paciente",
+        example: "Juan Pérez García",
+      },
+      dni: {
+        type: "string",
+        description: "DNI del paciente",
+        example: "12345678A",
+      },
+      fecha_nacimiento: {
+        type: "string",
+        format: "date",
+        nullable: true,
+        description: "Fecha de nacimiento (YYYY-MM-DD)",
+        example: "1985-03-15",
+      },
+      estado: {
+        type: "string",
+        enum: ["active", "inactive", "discharged", "on-hold"],
+        description: "Estado del paciente",
+        example: "active",
+      },
+      email: {
+        type: "string",
+        format: "email",
+        description: "Email del paciente",
+        example: "juan.perez@email.com",
+      },
+      telefono: {
+        type: "string",
+        description: "Teléfono del paciente",
+        example: "+34 666 123 456",
+      },
+      direccion: {
+        type: "string",
+        nullable: true,
+        description: "Dirección del paciente",
+        example: "Calle Mayor 123, Valencia",
+      },
+      contacto_emergencia: {
+        type: "string",
+        nullable: true,
+        description: "Nombre del contacto de emergencia",
+        example: "María Pérez",
+      },
+      telefono_emergencia: {
+        type: "string",
+        nullable: true,
+        description: "Teléfono del contacto de emergencia",
+        example: "+34 666 987 654",
+      },
+      notas: {
+        type: "string",
+        nullable: true,
+        description: "Notas adicionales",
+        example: "Paciente muy colaborativo",
+      },
+    },
+  },
+
+  PatientSession: {
+    type: "object",
+    properties: {
+      id: {
+        type: "integer",
+        format: "int64",
+        description: "ID único de la sesión",
+        example: 1,
+      },
+      fecha: {
+        type: "string",
+        format: "date",
+        description: "Fecha de la sesión (YYYY-MM-DD)",
+        example: "2024-12-15",
+      },
+      clinica: {
+        type: "string",
+        nullable: true,
+        description: "Nombre de la clínica",
+        example: "Clínica Psicológica Centro",
+      },
+      tipo: {
+        type: "string",
+        description: "Tipo de sesión",
+        example: "Terapia Individual",
+      },
+      estado: {
+        type: "string",
+        enum: ["scheduled", "completed", "cancelled", "no-show"],
+        description: "Estado de la sesión",
+        example: "completed",
+      },
+      precio: {
+        type: "number",
+        format: "decimal",
+        description: "Precio de la sesión",
+        example: 60.0,
+      },
+      tipo_pago: {
+        type: "string",
+        enum: ["cash", "card", "transfer", "insurance"],
+        description: "Método de pago",
+        example: "card",
+      },
+      notas: {
+        type: "string",
+        nullable: true,
+        description: "Notas de la sesión",
+        example: "Sesión muy productiva, buen progreso del paciente",
+      },
+    },
+  },
+
+  PatientDetailResponse: {
+    type: "object",
+    properties: {
+      success: {
+        type: "boolean",
+        example: true,
+      },
+      data: {
+        type: "object",
+        properties: {
+          PatientResume: {
+            oneOf: [
+              { $ref: "#/components/schemas/PatientResume" },
+              { type: "null" }
+            ],
+          },
+          PatientData: {
+            oneOf: [
+              { $ref: "#/components/schemas/PatientData" },
+              { type: "object" }
+            ],
+            description: "Datos detallados del paciente",
+          },
+          PatientMedicalRecord: {
+            type: "array", 
+            items: {},
+            description: "Historial médico del paciente (vacío por ahora)",
+            example: [],
+          },
+          PatientSessions: {
+            type: "array",
+            items: {
+              $ref: "#/components/schemas/PatientSession",
+            },
+            description: "Sesiones detalladas del paciente",
+          },
+          PatientInvoice: {
+            type: "array",
+            items: {},
+            description: "Facturas del paciente (vacío por ahora)", 
+            example: [],
+          },
+          PatientBonus: {
+            type: "array",
+            items: {},
+            description: "Bonos del paciente (vacío por ahora)",
+            example: [],
+          },
+        },
+      },
+    },
+  },
+
   ErrorResponse: {
     type: "object",
     properties: {

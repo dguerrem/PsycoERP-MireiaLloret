@@ -1,5 +1,6 @@
 const {
   getPatients,
+  getPatientById,
 } = require("../../models/patients/patients_model");
 
 const obtenerPacientes = async (req, res) => {
@@ -54,6 +55,47 @@ const obtenerPacientes = async (req, res) => {
   }
 };
 
+const obtenerPacientePorId = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    if (!id) {
+      return res.status(400).json({
+        success: false,
+        error: "ID del paciente es requerido",
+      });
+    }
+
+    const pacienteData = await getPatientById(id);
+
+    if (!pacienteData.PatientResume) {
+      return res.status(404).json({
+        success: false,
+        error: "Paciente no encontrado",
+      });
+    }
+
+    res.json({
+      success: true,
+      data: {
+        PatientResume: pacienteData.PatientResume,
+        PatientData: pacienteData.PatientData,
+        PatientMedicalRecord: [],
+        PatientSessions: pacienteData.PatientSessions,
+        PatientInvoice: [],
+        PatientBonus: [],
+      },
+    });
+  } catch (err) {
+    console.error("Error al obtener paciente por ID:", err.message);
+    res.status(500).json({
+      success: false,
+      error: "Error al obtener el paciente",
+    });
+  }
+};
+
 module.exports = {
   obtenerPacientes,
+  obtenerPacientePorId,
 };

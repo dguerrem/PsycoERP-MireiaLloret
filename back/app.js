@@ -34,6 +34,7 @@ app.get("/", (req, res) => {
     version: "1.0.0",
     endpoints: {
       sessions: "/api/sessions",
+      patients: "/api/patients",
     },
   });
 });

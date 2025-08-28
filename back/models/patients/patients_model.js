@@ -91,6 +91,91 @@ const getPatients = async (filters = {}) => {
   return rows;
 };
 
+// Obtener un paciente por ID con información específica para PatientResume
+const getPatientById = async (id) => {
+  // Consulta para obtener datos básicos del paciente
+  const patientQuery = `
+        SELECT 
+            id,
+            email,
+            phone,
+            session_type as tipo
+        FROM patients
+        WHERE id = ?
+    `;
+  
+  const [patientRows] = await db.execute(patientQuery, [id]);
+  
+  if (patientRows.length === 0) {
+    return {
+      PatientResume: null
+    };
+  }
+
+  // Consulta para obtener sesiones del paciente
+  const sessionsQuery = `
+        SELECT 
+            id as idsesion,
+            type as tipo_sesion,
+            DATE_FORMAT(session_date, '%Y-%m-%d') as fecha,
+            price as precio,
+            payment_method as metodo_pago
+        FROM sessions
+        WHERE patient_id = ?
+        ORDER BY session_date DESC
+    `;
+  
+  const [sessionsRows] = await db.execute(sessionsQuery, [id]);
+  
+  // Consulta para obtener datos detallados del paciente
+  const patientDataQuery = `
+        SELECT 
+            name as nombre,
+            dni,
+            DATE_FORMAT(birth_date, '%Y-%m-%d') as fecha_nacimiento,
+            status as estado,
+            email,
+            phone as telefono,
+            address as direccion,
+            emergency_contact_name as contacto_emergencia,
+            emergency_contact_phone as telefono_emergencia,
+            notes as notas
+        FROM patients
+        WHERE id = ?
+    `;
+  
+  const [patientDataRows] = await db.execute(patientDataQuery, [id]);
+  
+  // Consulta para obtener sesiones extendidas para PatientSessions
+  const patientSessionsQuery = `
+        SELECT 
+            s.id,
+            DATE_FORMAT(s.session_date, '%Y-%m-%d') as fecha,
+            c.name as clinica,
+            s.type as tipo,
+            s.status as estado,
+            s.price as precio,
+            s.payment_method as tipo_pago,
+            s.notes as notas
+        FROM sessions s
+        LEFT JOIN clinics c ON s.clinic_id = c.id
+        WHERE s.patient_id = ?
+        ORDER BY s.session_date DESC
+    `;
+  
+  const [patientSessionsRows] = await db.execute(patientSessionsQuery, [id]);
+  
+  const patientResumeData = patientRows[0];
+  patientResumeData.PatientResumeSessions = sessionsRows;
+  
+  return {
+    PatientResume: patientResumeData,
+    PatientData: patientDataRows[0] || {},
+    PatientSessions: patientSessionsRows
+  };
+};
+
 module.exports = {
   getPatients,
+  getPatientById,
 };
