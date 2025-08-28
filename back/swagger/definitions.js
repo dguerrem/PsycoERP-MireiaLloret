@@ -493,12 +493,29 @@ const definitions = {
             example: [],
           },
           PatientBonus: {
-            type: "array",
-            items: {},
-            description: "Bonos del paciente (vacío por ahora)",
-            example: [],
+            oneOf: [
+              { $ref: "#/components/schemas/PatientBonusesData" },
+              { type: "object" }
+            ],
+            description: "Bonuses del paciente con KPIs y detalles",
           },
         },
+      },
+    },
+  },
+
+  PatientBonusesData: {
+    type: "object",
+    properties: {
+      kpis: {
+        $ref: "#/components/schemas/PatientBonusKpis",
+      },
+      bonuses: {
+        type: "array",
+        items: {
+          $ref: "#/components/schemas/PatientBonusDetail",
+        },
+        description: "Lista detallada de bonuses del paciente",
       },
     },
   },
