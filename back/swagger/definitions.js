@@ -771,6 +771,191 @@ const definitions = {
     },
   },
 
+  BonusHistoryInfo: {
+    type: "object",
+    properties: {
+      id: {
+        type: "integer",
+        format: "int64",
+        description: "ID único del bonus",
+        example: 1,
+      },
+      patient_id: {
+        type: "integer",
+        format: "int64",
+        description: "ID del paciente",
+        example: 1,
+      },
+      total_sessions: {
+        type: "integer",
+        description: "Número total de sesiones incluidas",
+        example: 10,
+      },
+      used_sessions: {
+        type: "integer",
+        description: "Sesiones ya utilizadas",
+        example: 3,
+      },
+      remaining_sessions: {
+        type: "integer",
+        description: "Sesiones restantes",
+        example: 7,
+      },
+      progress_percentage: {
+        type: "number",
+        format: "decimal",
+        description: "Porcentaje de progreso del bonus",
+        example: 30.00,
+      },
+      price_per_session: {
+        type: "number",
+        format: "decimal",
+        description: "Precio por sesión",
+        example: 50.00,
+      },
+      total_price: {
+        type: "number",
+        format: "decimal",
+        description: "Precio total del bonus",
+        example: 500.00,
+      },
+      status: {
+        type: "string",
+        enum: ["active", "consumed", "expired"],
+        description: "Estado del bonus",
+        example: "active",
+      },
+      purchase_date: {
+        type: "string",
+        format: "date",
+        description: "Fecha de compra (YYYY-MM-DD)",
+        example: "2024-01-15",
+      },
+      expiry_date: {
+        type: "string",
+        format: "date",
+        description: "Fecha de expiración (YYYY-MM-DD)",
+        example: "2025-01-15",
+      },
+      notes: {
+        type: "string",
+        nullable: true,
+        description: "Notas del bonus",
+        example: "Bonus promocional",
+      },
+      created_at: {
+        type: "string",
+        format: "date-time",
+        description: "Fecha de creación",
+        example: "2024-01-15 10:30:00",
+      },
+    },
+  },
+
+  BonusUsageHistoryItem: {
+    type: "object",
+    properties: {
+      id: {
+        type: "integer",
+        format: "int64",
+        description: "ID único del registro de uso",
+        example: 1,
+      },
+      session_id: {
+        type: "integer",
+        format: "int64",
+        nullable: true,
+        description: "ID de la sesión asociada",
+        example: 25,
+      },
+      used_date: {
+        type: "string",
+        format: "date",
+        description: "Fecha de uso (YYYY-MM-DD)",
+        example: "2024-02-01",
+      },
+      sessions_consumed: {
+        type: "integer",
+        description: "Número de sesiones consumidas",
+        example: 1,
+      },
+      session_status: {
+        type: "string",
+        description: "Estado de la sesión",
+        example: "completed",
+      },
+      notes: {
+        type: "string",
+        nullable: true,
+        description: "Notas del uso",
+        example: "Sesión completada exitosamente",
+      },
+      created_by: {
+        type: "string",
+        nullable: true,
+        description: "Usuario que registró el uso",
+        example: "admin",
+      },
+    },
+  },
+
+  BonusHistoryResponse: {
+    type: "object",
+    properties: {
+      success: {
+        type: "boolean",
+        example: true,
+      },
+      data: {
+        type: "object",
+        properties: {
+          used_sessions: {
+            type: "integer",
+            description: "Sesiones ya utilizadas",
+            example: 3,
+          },
+          remaining_sessions: {
+            type: "integer",
+            description: "Sesiones restantes",
+            example: 7,
+          },
+          progress_percentage: {
+            type: "number",
+            format: "decimal",
+            description: "Porcentaje de progreso del bonus",
+            example: 30.00,
+          },
+          sessions_history: {
+            type: "array",
+            items: {
+              type: "object",
+              properties: {
+                used_date: {
+                  type: "string",
+                  format: "date",
+                  description: "Fecha de realización (YYYY-MM-DD)",
+                  example: "2024-02-01",
+                },
+                session_id: {
+                  type: "integer",
+                  format: "int64",
+                  nullable: true,
+                  description: "ID de la sesión",
+                  example: 25,
+                },
+                session_status: {
+                  type: "string",
+                  description: "Estado de la sesión",
+                  example: "completed",
+                },
+              },
+            },
+            description: "Historial de sesiones realizadas ordenado por fecha descendente",
+          },
+        },
+      },
+    },
+  },
 
   ErrorResponse: {
     type: "object",

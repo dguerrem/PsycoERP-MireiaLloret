@@ -97,6 +97,70 @@ const getBonusesByPatientId = async (patientId) => {
   };
 };
 
+// Obtener historial completo de un bono por ID
+const getBonusHistoryById = async (bonusId) => {
+  // Consulta principal del bono con KPIs calculados
+  const bonusQuery = `
+    SELECT 
+      b.id,
+      b.patient_id,
+      b.total_sessions,
+      b.price_per_session,
+      b.total_price,
+      b.used_sessions,
+      (b.total_sessions - b.used_sessions) as remaining_sessions,
+      ROUND((b.used_sessions / b.total_sessions) * 100, 2) as progress_percentage,
+      b.status,
+      DATE_FORMAT(b.purchase_date, '%Y-%m-%d') as purchase_date,
+      DATE_FORMAT(b.expiry_date, '%Y-%m-%d') as expiry_date,
+      b.notes,
+      DATE_FORMAT(b.created_at, '%Y-%m-%d %H:%i:%s') as created_at
+    FROM bonuses b
+    WHERE b.id = ?
+  `;
+
+  // Consulta del historial de uso
+  const historyQuery = `
+    SELECT 
+      h.id,
+      h.session_id,
+      DATE_FORMAT(h.used_date, '%Y-%m-%d') as used_date,
+      h.sessions_consumed,
+      h.notes,
+      h.created_by,
+      s.status as session_status
+    FROM bonus_usage_history h
+    LEFT JOIN sessions s ON h.session_id = s.id
+    WHERE h.bonus_id = ?
+    ORDER BY h.used_date DESC, h.created_at DESC
+  `;
+
+  try {
+    const [bonusRows] = await db.execute(bonusQuery, [bonusId]);
+    
+    if (bonusRows.length === 0) {
+      return null;
+    }
+
+    const [historyRows] = await db.execute(historyQuery, [bonusId]);
+
+    const bonus = bonusRows[0];
+    
+    return {
+      used_sessions: bonus.used_sessions,
+      remaining_sessions: bonus.remaining_sessions,
+      progress_percentage: bonus.progress_percentage,
+      sessions_history: historyRows.map(row => ({
+        used_date: row.used_date,
+        session_id: row.session_id,
+        session_status: row.session_status || 'N/A'
+      }))
+    };
+  } catch (error) {
+    throw error;
+  }
+};
+
 // Crear un nuevo bonus
 const createBonus = async (bonusData) => {
   // Calcular fecha de expiración (1 año desde la compra por defecto)
@@ -135,5 +199,6 @@ const createBonus = async (bonusData) => {
 module.exports = {
   getBonuses,
   getBonusesByPatientId,
+  getBonusHistoryById,
   createBonus,
 };

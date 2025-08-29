@@ -166,6 +166,66 @@ const bonusesPaths = {
       },
     },
   },
+  "/api/bonuses/{id}/history": {
+    get: {
+      tags: ["Bonuses"],
+      summary: "Obtener historial completo de un bonus",
+      description: "Obtiene información detallada de un bonus específico incluyendo sesiones utilizadas, sesiones restantes, progreso y historial de uso",
+      parameters: [
+        {
+          name: "id",
+          in: "path",
+          required: true,
+          schema: {
+            type: "integer",
+          },
+          description: "ID del bonus",
+        },
+      ],
+      responses: {
+        200: {
+          description: "Historial del bonus obtenido exitosamente",
+          content: {
+            "application/json": {
+              schema: {
+                $ref: "#/components/schemas/BonusHistoryResponse",
+              },
+            },
+          },
+        },
+        400: {
+          description: "ID del bonus inválido o no proporcionado",
+          content: {
+            "application/json": {
+              schema: {
+                $ref: "#/components/schemas/ErrorResponse",
+              },
+            },
+          },
+        },
+        404: {
+          description: "Bonus no encontrado",
+          content: {
+            "application/json": {
+              schema: {
+                $ref: "#/components/schemas/ErrorResponse",
+              },
+            },
+          },
+        },
+        500: {
+          description: "Error interno del servidor",
+          content: {
+            "application/json": {
+              schema: {
+                $ref: "#/components/schemas/ErrorResponse",
+              },
+            },
+          },
+        },
+      },
+    },
+  },
 };
 
 module.exports = bonusesPaths;

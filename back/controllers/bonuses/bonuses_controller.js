@@ -1,4 +1,4 @@
-const { getBonuses, getBonusesByPatientId, createBonus } = require("../../models/bonuses/bonuses_model");
+const { getBonuses, getBonusesByPatientId, getBonusHistoryById, createBonus } = require("../../models/bonuses/bonuses_model");
 
 const obtenerBonuses = async (req, res) => {
   try {
@@ -52,6 +52,39 @@ const obtenerBonusesPorPaciente = async (req, res) => {
     res.status(500).json({
       success: false,
       error: "Error al obtener los bonuses del paciente",
+    });
+  }
+};
+
+const obtenerHistorialBonus = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    if (!id) {
+      return res.status(400).json({
+        success: false,
+        error: "ID del bonus es requerido",
+      });
+    }
+
+    const bonusHistory = await getBonusHistoryById(id);
+
+    if (!bonusHistory) {
+      return res.status(404).json({
+        success: false,
+        error: "Bonus no encontrado",
+      });
+    }
+
+    res.json({
+      success: true,
+      data: bonusHistory,
+    });
+  } catch (err) {
+    console.error("Error al obtener historial del bonus:", err.message);
+    res.status(500).json({
+      success: false,
+      error: "Error al obtener el historial del bonus",
     });
   }
 };
@@ -118,5 +151,6 @@ const crearBonus = async (req, res) => {
 module.exports = {
   obtenerBonuses,
   obtenerBonusesPorPaciente,
+  obtenerHistorialBonus,
   crearBonus,
 };
