@@ -13,7 +13,6 @@ const getBonuses = async (filters = {}) => {
             status,
             DATE_FORMAT(purchase_date, '%Y-%m-%d') as purchase_date,
             DATE_FORMAT(expiry_date, '%Y-%m-%d') as expiry_date,
-            notes,
             DATE_FORMAT(created_at,'%Y-%m-%d') as created_at,
             updated_at
         FROM bonuses
@@ -63,7 +62,7 @@ const getBonusesByPatientId = async (patientId) => {
         FROM bonuses
         WHERE patient_id = ?
     `;
-  
+
   const [kpisRows] = await db.execute(kpisQuery, [patientId]);
   const kpis = kpisRows[0];
 
@@ -83,7 +82,7 @@ const getBonusesByPatientId = async (patientId) => {
         WHERE patient_id = ?
         ORDER BY purchase_date DESC
     `;
-  
+
   const [bonusesRows] = await db.execute(bonusesQuery, [patientId]);
 
   return {
@@ -91,9 +90,9 @@ const getBonusesByPatientId = async (patientId) => {
       total_bonos: parseInt(kpis.total_bonos) || 0,
       total_activos: parseInt(kpis.total_activos) || 0,
       total_consumidos: parseInt(kpis.total_consumidos) || 0,
-      total_expirados: parseInt(kpis.total_expirados) || 0
+      total_expirados: parseInt(kpis.total_expirados) || 0,
     },
-    bonuses: bonusesRows
+    bonuses: bonusesRows,
   };
 };
 
@@ -113,7 +112,6 @@ const getBonusHistoryById = async (bonusId) => {
       b.status,
       DATE_FORMAT(b.purchase_date, '%Y-%m-%d') as purchase_date,
       DATE_FORMAT(b.expiry_date, '%Y-%m-%d') as expiry_date,
-      b.notes,
       DATE_FORMAT(b.created_at, '%Y-%m-%d %H:%i:%s') as created_at
     FROM bonuses b
     WHERE b.id = ?
@@ -123,21 +121,15 @@ const getBonusHistoryById = async (bonusId) => {
   const historyQuery = `
     SELECT 
       h.id,
-      h.session_id,
-      DATE_FORMAT(h.used_date, '%Y-%m-%d') as used_date,
-      h.sessions_consumed,
-      h.notes,
-      h.created_by,
-      s.status as session_status
+      DATE_FORMAT(h.used_date, '%Y-%m-%d') as used_date
     FROM bonus_usage_history h
-    LEFT JOIN sessions s ON h.session_id = s.id
     WHERE h.bonus_id = ?
     ORDER BY h.used_date DESC, h.created_at DESC
   `;
 
   try {
     const [bonusRows] = await db.execute(bonusQuery, [bonusId]);
-    
+
     if (bonusRows.length === 0) {
       return null;
     }
@@ -145,19 +137,91 @@ const getBonusHistoryById = async (bonusId) => {
     const [historyRows] = await db.execute(historyQuery, [bonusId]);
 
     const bonus = bonusRows[0];
-    
+
     return {
       used_sessions: bonus.used_sessions,
       remaining_sessions: bonus.remaining_sessions,
       progress_percentage: bonus.progress_percentage,
-      sessions_history: historyRows.map(row => ({
+      sessions_history: historyRows.map((row) => ({
         used_date: row.used_date,
-        session_id: row.session_id,
-        session_status: row.session_status || 'N/A'
-      }))
+        session_id: row.session_id
+      })),
     };
   } catch (error) {
     throw error;
+  }
+};
+
+// Registrar uso de una sesión del bonus
+const useBonusSession = async (bonusId) => {
+  const connection = await db.getConnection();
+
+  try {
+    await connection.beginTransaction();
+
+    // Verificar que el bonus existe y está activo
+    const [bonusRows] = await connection.execute(
+      "SELECT id, used_sessions, total_sessions, status FROM bonuses WHERE id = ?",
+      [bonusId]
+    );
+
+    if (bonusRows.length === 0) {
+      throw new Error("Bonus no encontrado");
+    }
+
+    const bonus = bonusRows[0];
+
+    if (bonus.status !== "active") {
+      throw new Error("El bonus no está activo");
+    }
+
+    if (bonus.used_sessions >= bonus.total_sessions) {
+      throw new Error("El bonus ya ha consumido todas las sesiones");
+    }
+
+    // Obtener fecha actual
+    const today = new Date();
+    const usedDate = today.toISOString().split("T")[0]; // Formato YYYY-MM-DD
+
+    // Insertar registro en el historial de uso
+    const [historyResult] = await connection.execute(
+      `
+      INSERT INTO bonus_usage_history (
+        bonus_id,
+        used_date
+      ) VALUES (?, ?)
+    `,
+      [bonusId, usedDate]
+    );
+
+    // Actualizar el contador de sesiones usadas en el bonus
+    const newUsedSessions = bonus.used_sessions + 1;
+    const newStatus =
+      newUsedSessions >= bonus.total_sessions ? "consumed" : "active";
+
+    await connection.execute(
+      `
+      UPDATE bonuses 
+      SET used_sessions = ?, status = ?, updated_at = CURRENT_TIMESTAMP 
+      WHERE id = ?
+    `,
+      [newUsedSessions, newStatus, bonusId]
+    );
+
+    await connection.commit();
+
+    return {
+      id: historyResult.insertId,
+      bonus_id: bonusId,
+      new_used_sessions: newUsedSessions,
+      new_status: newStatus,
+      remaining_sessions: bonus.total_sessions - newUsedSessions,
+    };
+  } catch (error) {
+    await connection.rollback();
+    throw error;
+  } finally {
+    connection.release();
   }
 };
 
@@ -180,18 +244,18 @@ const createBonus = async (bonusData) => {
             expiry_date
         ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
     `;
-  
+
   const params = [
     bonusData.patient_id,
     bonusData.total_sessions,
     bonusData.price_per_session,
     bonusData.total_price,
     0, // used_sessions siempre empieza en 0
-    'active', // status siempre active para nuevos bonuses
-    purchaseDate.toISOString().split('T')[0], // fecha actual en formato YYYY-MM-DD
-    expiryDate.toISOString().split('T')[0] // fecha de expiración en formato YYYY-MM-DD
+    "active", // status siempre active para nuevos bonuses
+    purchaseDate.toISOString().split("T")[0], // fecha actual en formato YYYY-MM-DD
+    expiryDate.toISOString().split("T")[0], // fecha de expiración en formato YYYY-MM-DD
   ];
-  
+
   const [result] = await db.execute(query, params);
   return result.insertId;
 };
@@ -200,5 +264,6 @@ module.exports = {
   getBonuses,
   getBonusesByPatientId,
   getBonusHistoryById,
+  useBonusSession,
   createBonus,
 };

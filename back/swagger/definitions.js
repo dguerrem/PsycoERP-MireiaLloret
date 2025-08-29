@@ -874,16 +874,6 @@ const definitions = {
         description: "Fecha de uso (YYYY-MM-DD)",
         example: "2024-02-01",
       },
-      sessions_consumed: {
-        type: "integer",
-        description: "Número de sesiones consumidas",
-        example: 1,
-      },
-      session_status: {
-        type: "string",
-        description: "Estado de la sesión",
-        example: "completed",
-      },
       notes: {
         type: "string",
         nullable: true,
@@ -942,15 +932,58 @@ const definitions = {
                   nullable: true,
                   description: "ID de la sesión",
                   example: 25,
-                },
-                session_status: {
-                  type: "string",
-                  description: "Estado de la sesión",
-                  example: "completed",
-                },
+                }
               },
             },
             description: "Historial de sesiones realizadas ordenado por fecha descendente",
+          },
+        },
+      },
+    },
+  },
+
+
+  UseBonusSessionResponse: {
+    type: "object",
+    properties: {
+      success: {
+        type: "boolean",
+        example: true,
+      },
+      message: {
+        type: "string",
+        example: "Sesión registrada exitosamente",
+      },
+      data: {
+        type: "object",
+        properties: {
+          history_id: {
+            type: "integer",
+            format: "int64",
+            description: "ID del registro de historial creado",
+            example: 15,
+          },
+          bonus_id: {
+            type: "integer",
+            format: "int64",
+            description: "ID del bonus",
+            example: 5,
+          },
+          new_used_sessions: {
+            type: "integer",
+            description: "Nuevo número de sesiones utilizadas",
+            example: 4,
+          },
+          remaining_sessions: {
+            type: "integer",
+            description: "Sesiones restantes",
+            example: 6,
+          },
+          new_status: {
+            type: "string",
+            enum: ["active", "consumed", "expired"],
+            description: "Nuevo estado del bonus",
+            example: "active",
           },
         },
       },

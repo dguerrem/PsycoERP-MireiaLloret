@@ -1,4 +1,4 @@
-const { getBonuses, getBonusesByPatientId, getBonusHistoryById, createBonus } = require("../../models/bonuses/bonuses_model");
+const { getBonuses, getBonusesByPatientId, getBonusHistoryById, useBonusSession, createBonus } = require("../../models/bonuses/bonuses_model");
 
 const obtenerBonuses = async (req, res) => {
   try {
@@ -89,6 +89,54 @@ const obtenerHistorialBonus = async (req, res) => {
   }
 };
 
+const registrarSesionBonus = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    if (!id) {
+      return res.status(400).json({
+        success: false,
+        error: "ID del bonus es requerido",
+      });
+    }
+
+    const result = await useBonusSession(id);
+
+    res.status(201).json({
+      success: true,
+      message: "Sesión registrada exitosamente",
+      data: {
+        history_id: result.id,
+        bonus_id: result.bonus_id,
+        new_used_sessions: result.new_used_sessions,
+        remaining_sessions: result.remaining_sessions,
+        new_status: result.new_status
+      },
+    });
+  } catch (err) {
+    console.error("Error al registrar sesión del bonus:", err.message);
+    
+    if (err.message === 'Bonus no encontrado') {
+      return res.status(404).json({
+        success: false,
+        error: "Bonus no encontrado",
+      });
+    }
+    
+    if (err.message === 'El bonus no está activo' || err.message === 'El bonus ya ha consumido todas las sesiones') {
+      return res.status(400).json({
+        success: false,
+        error: err.message,
+      });
+    }
+
+    res.status(500).json({
+      success: false,
+      error: "Error al registrar la sesión del bonus",
+    });
+  }
+};
+
 const crearBonus = async (req, res) => {
   try {
     const {
@@ -152,5 +200,6 @@ module.exports = {
   obtenerBonuses,
   obtenerBonusesPorPaciente,
   obtenerHistorialBonus,
+  registrarSesionBonus,
   crearBonus,
 };

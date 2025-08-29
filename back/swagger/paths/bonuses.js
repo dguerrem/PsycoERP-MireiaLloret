@@ -226,6 +226,66 @@ const bonusesPaths = {
       },
     },
   },
+  "/api/bonuses/{id}/use-session": {
+    post: {
+      tags: ["Bonuses"],
+      summary: "Registrar uso de una sesión del bonus",
+      description: "Registra el uso de una sesión de un bonus específico. La fecha se genera automáticamente con la fecha actual.",
+      parameters: [
+        {
+          name: "id",
+          in: "path",
+          required: true,
+          schema: {
+            type: "integer",
+          },
+          description: "ID del bonus",
+        },
+      ],
+      responses: {
+        201: {
+          description: "Sesión registrada exitosamente",
+          content: {
+            "application/json": {
+              schema: {
+                $ref: "#/components/schemas/UseBonusSessionResponse",
+              },
+            },
+          },
+        },
+        400: {
+          description: "Bonus no disponible para uso",
+          content: {
+            "application/json": {
+              schema: {
+                $ref: "#/components/schemas/ErrorResponse",
+              },
+            },
+          },
+        },
+        404: {
+          description: "Bonus no encontrado",
+          content: {
+            "application/json": {
+              schema: {
+                $ref: "#/components/schemas/ErrorResponse",
+              },
+            },
+          },
+        },
+        500: {
+          description: "Error interno del servidor",
+          content: {
+            "application/json": {
+              schema: {
+                $ref: "#/components/schemas/ErrorResponse",
+              },
+            },
+          },
+        },
+      },
+    },
+  },
 };
 
 module.exports = bonusesPaths;
