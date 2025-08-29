@@ -19,6 +19,7 @@ src/
 │  │   ├─ pacientes/
 │  │   ├─ sesiones/
 │  │   └─ facturacion/
+│  │   └─ configuration/
 │  ├─ app-routing.ts
 │  └─ app.component.ts
 ├─ assets/
