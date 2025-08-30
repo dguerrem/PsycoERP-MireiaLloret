@@ -1,4 +1,4 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, inject, signal, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Session } from '../../shared/models/session.model';
 import { CLINIC_CONFIGS, ClinicConfig } from '../../shared/models/clinic-config.model';
@@ -11,18 +11,19 @@ import { CalendarService } from './services/calendar.service';
   standalone: true,
   imports: [CommonModule, SessionPopupComponent, NewSessionDialogComponent],
   templateUrl: './calendar.component.html',
-  styleUrl: './calendar.component.scss'
+  styleUrl: './calendar.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class CalendarComponent {
-  private calendarioService = inject(CalendarService);
+  private calendarService = inject(CalendarService);
 
-  readonly currentDate = this.calendarioService.currentDate;
-  readonly currentView = this.calendarioService.currentView;
-  readonly selectedSession = this.calendarioService.selectedSession;
-  readonly sessions = this.calendarioService.sessions;
-  readonly weekDates = this.calendarioService.weekDates;
-  readonly monthDates = this.calendarioService.monthDates;
-  readonly sessionsForCurrentPeriod = this.calendarioService.sessionsForCurrentPeriod;
+  readonly currentDate = this.calendarService.currentDate;
+  readonly currentView = this.calendarService.currentView;
+  readonly selectedSession = this.calendarService.selectedSession;
+  readonly sessions = this.calendarService.sessions;
+  readonly weekDates = this.calendarService.weekDates;
+  readonly monthDates = this.calendarService.monthDates;
+  readonly sessionsForCurrentPeriod = this.calendarService.sessionsForCurrentPeriod;
 
   readonly showSessionPopup = signal(false);
   readonly showNewSessionDialog = signal(false);
@@ -39,24 +40,39 @@ export class CalendarComponent {
     return `${hour.toString().padStart(2, '0')}:00`;
   });
 
+  /**
+   * Cambia la vista del calendario entre semana y mes
+   */
   setView(view: 'week' | 'month'): void {
-    this.calendarioService.setCurrentView(view);
+    this.calendarService.setCurrentView(view);
   }
 
+  /**
+   * Navega al período anterior (semana o mes)
+   */
   navigatePrevious(): void {
-    this.calendarioService.navigatePrevious();
+    this.calendarService.navigatePrevious();
   }
 
+  /**
+   * Navega al período siguiente (semana o mes)
+   */
   navigateNext(): void {
-    this.calendarioService.navigateNext();
+    this.calendarService.navigateNext();
   }
 
+  /**
+   * Navega a la fecha actual
+   */
   navigateToToday(): void {
-    this.calendarioService.navigateToToday();
+    this.calendarService.navigateToToday();
   }
 
+  /**
+   * Maneja el clic en una sesión para mostrar el popup
+   */
   onSessionClick(session: Session): void {
-    this.calendarioService.setSelectedSession(session);
+    this.calendarService.setSelectedSession(session);
     this.showSessionPopup.set(true);
   }
 
@@ -66,15 +82,18 @@ export class CalendarComponent {
 
   onCloseSessionPopup(): void {
     this.showSessionPopup.set(false);
-    this.calendarioService.setSelectedSession(null);
+    this.calendarService.setSelectedSession(null);
   }
 
   onCloseNewSessionDialog(): void {
     this.showNewSessionDialog.set(false);
   }
 
+  /**
+   * Maneja la creación de una nueva sesión
+   */
   onSessionCreated(session: Omit<Session, 'id' | 'created_at' | 'updated_at'>): void {
-    this.calendarioService.addSession(session);
+    this.calendarService.addSession(session);
     this.showNewSessionDialog.set(false);
   }
 
@@ -83,7 +102,7 @@ export class CalendarComponent {
   }
 
   getSessionsForDate(date: Date): Session[] {
-    return this.calendarioService.getSessionsForDate(date);
+    return this.calendarService.getSessionsForDate(date);
   }
 
   getSessionsForDateAndHour(date: Date, hour: string): Session[] {
