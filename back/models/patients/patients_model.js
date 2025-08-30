@@ -198,12 +198,26 @@ const getPatientById = async (id) => {
   
   const [bonusesRows] = await db.execute(bonusesQuery, [id]);
 
+  // Consulta para obtener notas clínicas del paciente
+  const clinicalNotesQuery = `
+        SELECT 
+            title as titulo,
+            content as contenido,
+            DATE_FORMAT(date, '%Y-%m-%d %H:%i:%s') as fecha
+        FROM clinical_notes
+        WHERE patient_id = ?
+        ORDER BY date DESC
+    `;
+  
+  const [clinicalNotesRows] = await db.execute(clinicalNotesQuery, [id]);
+
   const patientResumeData = patientRows[0];
   patientResumeData.PatientResumeSessions = sessionsRows;
   
   return {
     PatientResume: patientResumeData,
     PatientData: patientDataRows[0] || {},
+    PatientMedicalRecord: clinicalNotesRows,
     PatientSessions: patientSessionsRows,
     PatientBonus: {
       kpis: {

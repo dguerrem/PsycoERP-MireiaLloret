@@ -475,9 +475,10 @@ const definitions = {
           },
           PatientMedicalRecord: {
             type: "array", 
-            items: {},
-            description: "Historial médico del paciente (vacío por ahora)",
-            example: [],
+            items: {
+              $ref: "#/components/schemas/ClinicalNote",
+            },
+            description: "Historial de notas clínicas del paciente",
           },
           PatientSessions: {
             type: "array",
@@ -986,6 +987,28 @@ const definitions = {
             example: "active",
           },
         },
+      },
+    },
+  },
+
+  ClinicalNote: {
+    type: "object",
+    properties: {
+      titulo: {
+        type: "string",
+        description: "Título de la nota clínica",
+        example: "Sesión inicial de evaluación",
+      },
+      contenido: {
+        type: "string",
+        description: "Contenido completo de la nota clínica",
+        example: "El paciente se muestra colaborativo durante la primera sesión. Se observa ansiedad leve relacionada con el trabajo.",
+      },
+      fecha: {
+        type: "string",
+        format: "date-time",
+        description: "Fecha y hora de la nota clínica (YYYY-MM-DD HH:mm:ss)",
+        example: "2024-12-15 14:30:00",
       },
     },
   },
