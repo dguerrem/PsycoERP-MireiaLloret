@@ -1,0 +1,278 @@
+<!-- Modal Backdrop -->
+<div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50" 
+     (click)="onBackdropClick($event)">
+  
+  <!-- Modal Content -->
+  <div class="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto" 
+       (click)="$event.stopPropagation()">
+    
+    <!-- Header -->
+    <div class="border-b border-gray-200 p-6">
+      <div class="flex items-center justify-between">
+        <div>
+          <h2 class="text-2xl font-bold text-gray-900">Nueva Sesión</h2>
+          <p class="text-sm text-gray-500 mt-1">Programa una nueva sesión con el paciente</p>
+        </div>
+        <button 
+          (click)="onClose()"
+          class="text-gray-400 hover:text-gray-600 transition-colors">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- Form Content -->
+    <form (ngSubmit)="onSubmit()" class="p-6">
+      
+      <!-- Error Message -->
+      @if (error()) {
+        <div class="mb-4 p-4 bg-red-50 border border-red-200 rounded-md">
+          <p class="text-sm text-red-600">{{ error() }}</p>
+        </div>
+      }
+
+      <!-- Patient Selection -->
+      <div class="mb-6">
+        <label for="patient" class="block text-sm font-medium text-gray-700 mb-2">
+          Paciente *
+        </label>
+        <select 
+          id="patient"
+          [(ngModel)]="formData().patient_id"
+          (ngModelChange)="updatePatientId($event)"
+          name="patient_id"
+          class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+          required>
+          <option value="">Selecciona un paciente</option>
+          @for (patient of patients; track patient.id) {
+            <option [value]="patient.id">{{ patient.name }}</option>
+          }
+        </select>
+      </div>
+
+      <!-- Clinic Selection -->
+      <div class="mb-6">
+        <label for="clinic" class="block text-sm font-medium text-gray-700 mb-2">
+          Clínica *
+        </label>
+        <select 
+          id="clinic"
+          [(ngModel)]="formData().clinic_id"
+          (ngModelChange)="updateClinicId($event)"
+          name="clinic_id"
+          class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+          required>
+          <option value="">Selecciona una clínica</option>
+          @for (clinic of clinicConfigs; track clinic.id) {
+            <option [value]="clinic.id">{{ clinic.name }}</option>
+          }
+        </select>
+      </div>
+
+      <!-- Date and Time -->
+      <div class="mb-6">
+        <h3 class="text-lg font-medium text-gray-900 mb-3">Fecha y Hora</h3>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          
+          <!-- Date -->
+          <div>
+            <label for="date" class="block text-sm font-medium text-gray-700 mb-2">
+              Fecha *
+            </label>
+            <input 
+              type="date"
+              id="date"
+              [(ngModel)]="formData().session_date"
+              (ngModelChange)="updateSessionDate($event)"
+              name="session_date"
+              class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+              required>
+          </div>
+
+          <!-- Start Time -->
+          <div>
+            <label for="start-time" class="block text-sm font-medium text-gray-700 mb-2">
+              Hora de inicio *
+            </label>
+            <input 
+              type="time"
+              id="start-time"
+              [(ngModel)]="formData().start_time"
+              (ngModelChange)="updateStartTime($event)"
+              name="start_time"
+              class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+              required>
+          </div>
+
+          <!-- End Time -->
+          <div>
+            <label for="end-time" class="block text-sm font-medium text-gray-700 mb-2">
+              Hora de fin *
+            </label>
+            <input 
+              type="time"
+              id="end-time"
+              [(ngModel)]="formData().end_time"
+              (ngModelChange)="updateEndTime($event)"
+              name="end_time"
+              class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+              required>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Session Details -->
+      <div class="mb-6">
+        <h3 class="text-lg font-medium text-gray-900 mb-3">Detalles de la Sesión</h3>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          
+          <!-- Session Type -->
+          <div>
+            <label for="type" class="block text-sm font-medium text-gray-700 mb-2">
+              Tipo de Sesión *
+            </label>
+            <select 
+              id="type"
+              [(ngModel)]="formData().type"
+              (ngModelChange)="updateSessionType($event)"
+              name="type"
+              class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+              required>
+              @for (type of sessionTypes; track type) {
+                <option [value]="type">{{ type }}</option>
+              }
+            </select>
+          </div>
+
+          <!-- Mode -->
+          <div>
+            <label for="mode" class="block text-sm font-medium text-gray-700 mb-2">
+              Modalidad *
+            </label>
+            <select 
+              id="mode"
+              [(ngModel)]="formData().mode"
+              (ngModelChange)="updateMode($event)"
+              name="mode"
+              class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+              required>
+              @for (mode of sessionModes; track mode) {
+                <option [value]="mode">{{ mode }}</option>
+              }
+            </select>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Payment Information -->
+      <div class="mb-6">
+        <h3 class="text-lg font-medium text-gray-900 mb-3">Información de Pago</h3>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          
+          <!-- Price -->
+          <div>
+            <label for="price" class="block text-sm font-medium text-gray-700 mb-2">
+              Precio (€) *
+            </label>
+            <input 
+              type="number"
+              id="price"
+              [(ngModel)]="formData().price"
+              (ngModelChange)="updatePrice($event)"
+              name="price"
+              step="0.01"
+              min="0"
+              placeholder="0.00"
+              class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+              required>
+          </div>
+
+          <!-- Payment Method -->
+          <div>
+            <label for="payment-method" class="block text-sm font-medium text-gray-700 mb-2">
+              Método de Pago
+            </label>
+            <select 
+              id="payment-method"
+              [(ngModel)]="formData().payment_method"
+              (ngModelChange)="updatePaymentMethod($event)"
+              name="payment_method"
+              class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+              @for (method of paymentMethods; track method) {
+                <option [value]="method">{{ getPaymentMethodText(method) }}</option>
+              }
+            </select>
+          </div>
+
+          <!-- Payment Status -->
+          <div>
+            <label for="payment-status" class="block text-sm font-medium text-gray-700 mb-2">
+              Estado del Pago
+            </label>
+            <select 
+              id="payment-status"
+              [(ngModel)]="formData().payment_status"
+              (ngModelChange)="updatePaymentStatus($event)"
+              name="payment_status"
+              class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+              @for (status of paymentStatuses; track status) {
+                <option [value]="status">{{ getPaymentStatusText(status) }}</option>
+              }
+            </select>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Notes -->
+      <div class="mb-6">
+        <label for="notes" class="block text-sm font-medium text-gray-700 mb-2">
+          Notas (Opcional)
+        </label>
+        <textarea 
+          id="notes"
+          [(ngModel)]="formData().notes"
+          (ngModelChange)="updateNotes($event)"
+          name="notes"
+          rows="3"
+          placeholder="Notas adicionales sobre la sesión..."
+          class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 resize-none">
+        </textarea>
+      </div>
+
+    </form>
+
+    <!-- Footer -->
+    <div class="border-t border-gray-200 p-6 bg-gray-50 rounded-b-lg">
+      <div class="flex justify-end gap-3">
+        <button 
+          type="button"
+          (click)="onClose()"
+          [disabled]="isLoading()"
+          class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+          Cancelar
+        </button>
+        <button 
+          type="submit"
+          (click)="onSubmit()"
+          [disabled]="isLoading()"
+          class="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center">
+          @if (isLoading()) {
+            <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            Creando...
+          } @else {
+            Crear Sesión
+          }
+        </button>
+      </div>
+    </div>
+
+  </div>
+</div>
