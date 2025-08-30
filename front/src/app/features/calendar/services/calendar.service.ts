@@ -4,7 +4,7 @@ import { Session } from '../../../shared/models/session.model';
 @Injectable({
   providedIn: 'root'
 })
-export class CalendarioService {
+export class CalendarService {
   private _currentDate = signal(new Date());
   private _currentView = signal<'week' | 'month'>('week');
   private _selectedSession = signal<Session | null>(null);
@@ -138,31 +138,31 @@ export class CalendarioService {
     const current = this._currentDate();
     const firstDay = new Date(current.getFullYear(), current.getMonth(), 1);
     const lastDay = new Date(current.getFullYear(), current.getMonth() + 1, 0);
-    
+
     const startDate = new Date(firstDay);
     const startDay = firstDay.getDay();
     startDate.setDate(firstDay.getDate() - (startDay === 0 ? 6 : startDay - 1));
-    
+
     const dates = [];
     const current_date = new Date(startDate);
-    
+
     for (let i = 0; i < 42; i++) {
       dates.push(new Date(current_date));
       current_date.setDate(current_date.getDate() + 1);
     }
-    
+
     return dates;
   });
 
   readonly sessionsForCurrentPeriod = computed(() => {
     const sessions = this._sessions();
     const view = this._currentView();
-    
+
     if (view === 'week') {
       const weekDates = this.weekDates();
       const startDate = weekDates[0];
       const endDate = weekDates[6];
-      
+
       return sessions.filter(session => {
         const sessionDate = new Date(session.session_date);
         return sessionDate >= startDate && sessionDate <= endDate;
@@ -171,7 +171,7 @@ export class CalendarioService {
       const monthDates = this.monthDates();
       const startDate = monthDates[0];
       const endDate = monthDates[41];
-      
+
       return sessions.filter(session => {
         const sessionDate = new Date(session.session_date);
         return sessionDate >= startDate && sessionDate <= endDate;
@@ -198,7 +198,7 @@ export class CalendarioService {
   navigatePrevious(): void {
     const current = this._currentDate();
     const view = this._currentView();
-    
+
     if (view === 'week') {
       const newDate = new Date(current);
       newDate.setDate(current.getDate() - 7);
@@ -213,7 +213,7 @@ export class CalendarioService {
   navigateNext(): void {
     const current = this._currentDate();
     const view = this._currentView();
-    
+
     if (view === 'week') {
       const newDate = new Date(current);
       newDate.setDate(current.getDate() + 7);
@@ -240,14 +240,14 @@ export class CalendarioService {
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString()
     };
-    
+
     this._sessions.update(sessions => [...sessions, newSession]);
   }
 
   updateSession(id: number, updates: Partial<Session>): void {
-    this._sessions.update(sessions => 
-      sessions.map(session => 
-        session.id === id 
+    this._sessions.update(sessions =>
+      sessions.map(session =>
+        session.id === id
           ? { ...session, ...updates, updated_at: new Date().toISOString() }
           : session
       )

@@ -50,11 +50,11 @@ export const routes: Routes = [
         },
       },
       {
-        path: 'calendario',
+        path: 'calendar',
         canActivate: [authGuard],
         loadComponent: () =>
-          import('./features/calendario/calendario.component').then(
-            (m) => m.CalendarioComponent
+          import('./features/calendar/calendar.component').then(
+            (m) => m.CalendarComponent
           ),
         data: {
           menu: {
