@@ -43,7 +43,7 @@ export const CLINIC_CONFIGS: ClinicConfig[] = [
     borderColor: "border-pink-500"
   },
    {
-    id: 5,
+    id: 6,
     name: "Privado",
     color: "text-white",
     backgroundColor: "bg-yellow-500",
