@@ -1,7 +1,7 @@
 import { Component, Output, EventEmitter, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Session } from '../../models/session.model';
+import { SessionData } from '../../models/session.model';
 import { CLINIC_CONFIGS, ClinicConfig } from '../../models/clinic-config.model';
 
 @Component({
@@ -12,7 +12,7 @@ import { CLINIC_CONFIGS, ClinicConfig } from '../../models/clinic-config.model';
 })
 export class NewSessionDialogComponent {
   @Output() close = new EventEmitter<void>();
-  @Output() sessionCreated = new EventEmitter<Omit<Session, 'id' | 'created_at' | 'updated_at'>>();
+  @Output() sessionDataCreated = new EventEmitter<Omit<SessionData['SessionDetailData'], 'session_id' | 'created_at' | 'updated_at'>>();
 
   readonly clinicConfigs = CLINIC_CONFIGS;
   readonly isLoading = signal(false);
@@ -27,22 +27,25 @@ export class NewSessionDialogComponent {
     'Consulta de Seguimiento'
   ];
 
-  readonly sessionModes: Session['mode'][] = ['Presencial', 'Online'];
-  readonly paymentMethods: Session['payment_method'][] = ['cash', 'card', 'transfer', 'bizum'];
-  readonly paymentStatuses: Session['payment_status'][] = ['pending', 'paid', 'partial'];
+  readonly sessionModes: ('Online' | 'Presencial')[] = ['Presencial', 'Online'];
+  readonly paymentMethods: ('cash' | 'card' | 'transfer' | 'bizum')[] = ['cash', 'card', 'transfer', 'bizum'];
+  readonly paymentStatuses: ('pending' | 'paid' | 'partial')[] = ['pending', 'paid', 'partial'];
 
   readonly formData = signal({
     patient_id: '',
+    patient_name: '',
     clinic_id: '',
     session_date: '',
     start_time: '',
     end_time: '',
-    mode: 'Presencial' as Session['mode'],
+    mode: 'Presencial' as 'Online' | 'Presencial',
     type: 'Terapia Individual',
-    status: 'scheduled' as Session['status'],
     price: '',
-    payment_method: 'cash' as Session['payment_method'],
-    payment_status: 'pending' as Session['payment_status'],
+    payment_method: 'cash' as 'cash' | 'card' | 'transfer' | 'bizum',
+    payment_status: 'pending' as 'pending' | 'paid' | 'partial',
+    completed: false,
+    cancelled: false,
+    no_show: false,
     notes: ''
   });
 
@@ -73,6 +76,17 @@ export class NewSessionDialogComponent {
 
   onClose(): void {
     this.close.emit();
+  }
+
+  onPatientChange(): void {
+    const formData = this.formData();
+    if (formData.patient_id) {
+      const patient = this.patients.find(p => p.id === parseInt(formData.patient_id));
+      this.formData.update(data => ({
+        ...data,
+        patient_name: patient ? patient.name : ''
+      }));
+    }
   }
 
   onStartTimeChange(): void {
@@ -119,22 +133,31 @@ export class NewSessionDialogComponent {
 
     // Simulate API call
     setTimeout(() => {
-      const sessionData: Omit<Session, 'id' | 'created_at' | 'updated_at'> = {
-        patient_id: parseInt(formData.patient_id),
-        clinic_id: parseInt(formData.clinic_id),
-        session_date: new Date(formData.session_date).toISOString(),
+      const sessionData: Omit<SessionData['SessionDetailData'], 'session_id' | 'created_at' | 'updated_at'> = {
+        session_date: formData.session_date,
         start_time: formData.start_time + ':00',
         end_time: formData.end_time + ':00',
-        mode: formData.mode,
         type: formData.type,
-        status: formData.status,
-        price: parseFloat(formData.price).toFixed(2),
+        mode: formData.mode,
+        price: price,
         payment_method: formData.payment_method,
         payment_status: formData.payment_status,
-        notes: formData.notes || undefined
+        completed: formData.completed,
+        cancelled: formData.cancelled,
+        no_show: formData.no_show,
+        notes: formData.notes || undefined,
+        PatientData: {
+          id: parseInt(formData.patient_id),
+          name: formData.patient_name || this.getPatientName(parseInt(formData.patient_id))
+        },
+        ClinicDetailData: {
+          clinic_id: parseInt(formData.clinic_id),
+          clinic_name: this.getClinicName(parseInt(formData.clinic_id))
+        },
+        MedicalRecordData: []
       };
 
-      this.sessionCreated.emit(sessionData);
+      this.sessionDataCreated.emit(sessionData);
       this.isLoading.set(false);
     }, 1000);
   }
@@ -144,7 +167,12 @@ export class NewSessionDialogComponent {
     return patient ? patient.name : `Paciente ${patientId}`;
   }
 
-  getPaymentMethodText(method: Session['payment_method']): string {
+  getClinicName(clinicId: number): string {
+    const clinic = this.clinicConfigs.find(c => c.id === clinicId);
+    return clinic ? clinic.name : `Clínica ${clinicId}`;
+  }
+
+  getPaymentMethodText(method: 'cash' | 'card' | 'transfer' | 'bizum'): string {
     const paymentMethodTexts = {
       cash: 'Efectivo',
       card: 'Tarjeta',
@@ -154,7 +182,7 @@ export class NewSessionDialogComponent {
     return paymentMethodTexts[method] || method;
   }
 
-  getPaymentStatusText(status: Session['payment_status']): string {
+  getPaymentStatusText(status: 'pending' | 'paid' | 'partial'): string {
     const paymentStatusTexts = {
       pending: 'Pendiente',
       paid: 'Pagado',
@@ -165,6 +193,7 @@ export class NewSessionDialogComponent {
 
   updatePatientId(value: string): void {
     this.formData.update(data => ({ ...data, patient_id: value }));
+    this.onPatientChange();
   }
 
   updateClinicId(value: string): void {
@@ -188,7 +217,7 @@ export class NewSessionDialogComponent {
     this.formData.update(data => ({ ...data, type: value }));
   }
 
-  updateMode(value: Session['mode']): void {
+  updateMode(value: 'Online' | 'Presencial'): void {
     this.formData.update(data => ({ ...data, mode: value }));
   }
 
@@ -196,12 +225,16 @@ export class NewSessionDialogComponent {
     this.formData.update(data => ({ ...data, price: value }));
   }
 
-  updatePaymentMethod(value: Session['payment_method']): void {
+  updatePaymentMethod(value: 'cash' | 'card' | 'transfer' | 'bizum'): void {
     this.formData.update(data => ({ ...data, payment_method: value }));
   }
 
-  updatePaymentStatus(value: Session['payment_status']): void {
+  updatePaymentStatus(value: 'pending' | 'paid' | 'partial'): void {
     this.formData.update(data => ({ ...data, payment_status: value }));
+  }
+
+  updateCompleted(value: boolean): void {
+    this.formData.update(data => ({ ...data, completed: value }));
   }
 
   updateNotes(value: string): void {

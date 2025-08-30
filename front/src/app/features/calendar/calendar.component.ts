@@ -1,6 +1,6 @@
 import { Component, inject, signal, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Session } from '../../shared/models/session.model';
+import { SessionData, SessionUtils } from '../../shared/models/session.model';
 import { CLINIC_CONFIGS, ClinicConfig } from '../../shared/models/clinic-config.model';
 import { SessionPopupComponent } from '../../shared/components/session-popup/session-popup.component';
 import { NewSessionDialogComponent } from '../../shared/components/new-session-dialog/new-session-dialog.component';
@@ -19,11 +19,11 @@ export class CalendarComponent {
 
   readonly currentDate = this.calendarService.currentDate;
   readonly currentView = this.calendarService.currentView;
-  readonly selectedSession = this.calendarService.selectedSession;
-  readonly sessions = this.calendarService.sessions;
+  readonly selectedSessionData = this.calendarService.selectedSessionData;
+  readonly sessionData = this.calendarService.sessionData;
   readonly weekDates = this.calendarService.weekDates;
   readonly monthDates = this.calendarService.monthDates;
-  readonly sessionsForCurrentPeriod = this.calendarService.sessionsForCurrentPeriod;
+  readonly sessionDataForCurrentPeriod = this.calendarService.sessionDataForCurrentPeriod;
 
   readonly showSessionPopup = signal(false);
   readonly showNewSessionDialog = signal(false);
@@ -40,39 +40,24 @@ export class CalendarComponent {
     return `${hour.toString().padStart(2, '0')}:00`;
   });
 
-  /**
-   * Cambia la vista del calendario entre semana y mes
-   */
   setView(view: 'week' | 'month'): void {
     this.calendarService.setCurrentView(view);
   }
 
-  /**
-   * Navega al período anterior (semana o mes)
-   */
   navigatePrevious(): void {
     this.calendarService.navigatePrevious();
   }
 
-  /**
-   * Navega al período siguiente (semana o mes)
-   */
   navigateNext(): void {
     this.calendarService.navigateNext();
   }
 
-  /**
-   * Navega a la fecha actual
-   */
   navigateToToday(): void {
     this.calendarService.navigateToToday();
   }
 
-  /**
-   * Maneja el clic en una sesión para mostrar el popup
-   */
-  onSessionClick(session: Session): void {
-    this.calendarService.setSelectedSession(session);
+  onSessionClick(sessionData: SessionData): void {
+    this.calendarService.setSelectedSessionData(sessionData);
     this.showSessionPopup.set(true);
   }
 
@@ -82,18 +67,15 @@ export class CalendarComponent {
 
   onCloseSessionPopup(): void {
     this.showSessionPopup.set(false);
-    this.calendarService.setSelectedSession(null);
+    this.calendarService.setSelectedSessionData(null);
   }
 
   onCloseNewSessionDialog(): void {
     this.showNewSessionDialog.set(false);
   }
 
-  /**
-   * Maneja la creación de una nueva sesión
-   */
-  onSessionCreated(session: Omit<Session, 'id' | 'created_at' | 'updated_at'>): void {
-    this.calendarService.addSession(session);
+  onSessionDataCreated(sessionData: Omit<SessionData['SessionDetailData'], 'session_id' | 'created_at' | 'updated_at'>): void {
+    this.calendarService.addSessionData(sessionData);
     this.showNewSessionDialog.set(false);
   }
 
@@ -101,16 +83,28 @@ export class CalendarComponent {
     return this.clinicConfigs.find(config => config.id === clinicId) || this.clinicConfigs[0];
   }
 
-  getSessionsForDate(date: Date): Session[] {
-    return this.calendarService.getSessionsForDate(date);
+  getClinicConfigFromSessionData(sessionData: SessionData): ClinicConfig {
+    return this.getClinicConfig(sessionData.SessionDetailData.ClinicDetailData.clinic_id);
   }
 
-  getSessionsForDateAndHour(date: Date, hour: string): Session[] {
-    const sessions = this.getSessionsForDate(date);
-    return sessions.filter(session => {
-      const sessionHour = session.start_time.substring(0, 5);
+  getSessionDataForDate(date: Date): SessionData[] {
+    return this.calendarService.getSessionDataForDate(date);
+  }
+
+  getSessionDataForDateAndHour(date: Date, hour: string): SessionData[] {
+    const sessions = this.getSessionDataForDate(date);
+    return sessions.filter(data => {
+      const sessionHour = data.SessionDetailData.start_time.substring(0, 5);
       return sessionHour === hour;
     });
+  }
+
+  getPatientNameFromSessionData(sessionData: SessionData): string {
+    return sessionData.SessionDetailData.PatientData.name;
+  }
+
+  getClinicNameFromSessionData(sessionData: SessionData): string {
+    return sessionData.SessionDetailData.ClinicDetailData.clinic_name;
   }
 
   formatDate(date: Date): string {
@@ -144,39 +138,23 @@ export class CalendarComponent {
     return date.getMonth() === current.getMonth();
   }
 
-  getPatientName(patientId: number): string {
-    const patientNames: { [key: number]: string } = {
-      101: 'Ana García',
-      102: 'Carlos López',
-      103: 'María Rodríguez',
-      104: 'Juan Martínez',
-      105: 'Laura Sánchez',
-      106: 'Pedro González'
-    };
-    return patientNames[patientId] || `Paciente ${patientId}`;
-  }
-
   formatTime(time: string): string {
     return time.substring(0, 5);
   }
 
-  getSessionStatusBadgeClass(status: Session['status']): string {
-    const statusClasses = {
-      scheduled: 'bg-blue-100 text-blue-800',
-      completed: 'bg-green-100 text-green-800',
-      cancelled: 'bg-red-100 text-red-800',
-      no_show: 'bg-gray-100 text-gray-800'
-    };
-    return statusClasses[status] || statusClasses.scheduled;
+  getSessionStatusBadgeClass(sessionData: SessionData): string {
+    return SessionUtils.getStatusBadgeClass(sessionData);
   }
 
-  getSessionStatusText(status: Session['status']): string {
-    const statusTexts = {
-      scheduled: 'Programada',
-      completed: 'Completada',
-      cancelled: 'Cancelada',
-      no_show: 'No asistió'
-    };
-    return statusTexts[status] || status;
+  getSessionStatusText(sessionData: SessionData): string {
+    return SessionUtils.getStatusText(sessionData);
+  }
+
+  formatPrice(price: number): string {
+    return SessionUtils.formatPrice(price);
+  }
+
+  formatPaymentMethod(method: string): string {
+    return SessionUtils.formatPaymentMethod(method);
   }
 }

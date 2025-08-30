@@ -11,7 +11,7 @@
       <div class="flex items-center justify-between">
         <div>
           <h2 class="text-2xl font-bold text-gray-900">Detalles de la Sesión</h2>
-          <p class="text-sm text-gray-500 mt-1">ID: #{{ session.id }}</p>
+          <p class="text-sm text-gray-500 mt-1">ID: #{{ sessionData.SessionDetailData.session_id }}</p>
         </div>
         <button 
           (click)="onClose()"
@@ -30,8 +30,8 @@
       <div class="mb-6">
         <h3 class="text-lg font-semibold text-gray-900 mb-3">Información del Paciente</h3>
         <div class="bg-gray-50 rounded-lg p-4">
-          <p class="text-lg font-medium text-gray-900">{{ getPatientName(session.patient_id) }}</p>
-          <p class="text-sm text-gray-600">ID: {{ session.patient_id }}</p>
+          <p class="text-lg font-medium text-gray-900">{{ getPatientName() }}</p>
+          <p class="text-sm text-gray-600">ID: {{ sessionData.SessionDetailData.PatientData.id }}</p>
         </div>
       </div>
 
@@ -43,31 +43,31 @@
           <!-- Date and Time -->
           <div class="bg-gray-50 rounded-lg p-4">
             <h4 class="font-medium text-gray-900 mb-2">Fecha y Hora</h4>
-            <p class="text-sm text-gray-600 mb-1">{{ formatDate(session.session_date) }}</p>
-            <p class="text-sm text-gray-600">{{ formatTime(session.start_time) }} - {{ formatTime(session.end_time) }}</p>
+            <p class="text-sm text-gray-600 mb-1">{{ formatDate(sessionData.SessionDetailData.session_date) }}</p>
+            <p class="text-sm text-gray-600">{{ formatTime(sessionData.SessionDetailData.start_time) }} - {{ formatTime(sessionData.SessionDetailData.end_time) }}</p>
           </div>
 
           <!-- Clinic -->
           <div class="bg-gray-50 rounded-lg p-4">
             <h4 class="font-medium text-gray-900 mb-2">Clínica</h4>
             <div class="flex items-center gap-2">
-              <div [class]="getClinicConfig(session.clinic_id).backgroundColor + ' ' + getClinicConfig(session.clinic_id).borderColor" 
+              <div [class]="getClinicConfigFromSessionData().backgroundColor + ' ' + getClinicConfigFromSessionData().borderColor" 
                    class="w-4 h-4 rounded border"></div>
-              <span class="text-sm text-gray-600">{{ getClinicConfig(session.clinic_id).name }}</span>
+              <span class="text-sm text-gray-600">{{ getClinicName() }}</span>
             </div>
           </div>
 
           <!-- Session Type -->
           <div class="bg-gray-50 rounded-lg p-4">
             <h4 class="font-medium text-gray-900 mb-2">Tipo de Sesión</h4>
-            <p class="text-sm text-gray-600">{{ session.type }}</p>
+            <p class="text-sm text-gray-600">{{ sessionData.SessionDetailData.type }}</p>
           </div>
 
           <!-- Mode -->
           <div class="bg-gray-50 rounded-lg p-4">
             <h4 class="font-medium text-gray-900 mb-2">Modalidad</h4>
             <div class="flex items-center gap-2">
-              @if (session.mode === 'Online') {
+              @if (sessionData.SessionDetailData.mode === 'Online') {
                 <svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
                 </svg>
@@ -77,7 +77,7 @@
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
                 </svg>
               }
-              <span class="text-sm text-gray-600">{{ session.mode }}</span>
+              <span class="text-sm text-gray-600">{{ sessionData.SessionDetailData.mode }}</span>
             </div>
           </div>
 
@@ -88,11 +88,11 @@
       <div class="mb-6">
         <h3 class="text-lg font-semibold text-gray-900 mb-3">Estado</h3>
         <div class="flex items-center gap-2">
-          <span [class]="getStatusBadgeClass(session.status)" 
+          <span [class]="getStatusBadgeClass()" 
                 class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium">
-            {{ getStatusText(session.status) }}
+            {{ getStatusText() }}
           </span>
-          @if (session.status === 'completed') {
+          @if (sessionData.SessionDetailData.completed) {
             <div class="w-2 h-2 bg-green-500 rounded-full"></div>
           }
         </div>
@@ -106,21 +106,21 @@
           <!-- Price -->
           <div class="bg-gray-50 rounded-lg p-4">
             <h4 class="font-medium text-gray-900 mb-2">Precio</h4>
-            <p class="text-lg font-semibold text-gray-900">{{ session.price }}€</p>
+            <p class="text-lg font-semibold text-gray-900">{{ formatPrice() }}</p>
           </div>
 
           <!-- Payment Method -->
           <div class="bg-gray-50 rounded-lg p-4">
             <h4 class="font-medium text-gray-900 mb-2">Método de Pago</h4>
-            <p class="text-sm text-gray-600">{{ getPaymentMethodText(session.payment_method) }}</p>
+            <p class="text-sm text-gray-600">{{ getPaymentMethodText() }}</p>
           </div>
 
           <!-- Payment Status -->
           <div class="bg-gray-50 rounded-lg p-4">
             <h4 class="font-medium text-gray-900 mb-2">Estado del Pago</h4>
-            <span [class]="getPaymentStatusBadgeClass(session.payment_status)" 
+            <span [class]="getPaymentStatusBadgeClass()" 
                   class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium">
-              {{ getPaymentStatusText(session.payment_status) }}
+              {{ getPaymentStatusText() }}
             </span>
           </div>
 
@@ -128,11 +128,31 @@
       </div>
 
       <!-- Notes -->
-      @if (session.notes) {
+      @if (hasNotes()) {
         <div class="mb-6">
           <h3 class="text-lg font-semibold text-gray-900 mb-3">Notas</h3>
           <div class="bg-gray-50 rounded-lg p-4">
-            <p class="text-sm text-gray-600">{{ session.notes }}</p>
+            <p class="text-sm text-gray-600">{{ sessionData.SessionDetailData.notes }}</p>
+          </div>
+        </div>
+      }
+
+      <!-- Medical Records -->
+      @if (hasMedicalRecords()) {
+        <div class="mb-6">
+          <h3 class="text-lg font-semibold text-gray-900 mb-3">Registros Médicos</h3>
+          <div class="space-y-4">
+            @for (record of getMedicalRecords(); track record.date) {
+              <div class="bg-blue-50 rounded-lg p-4 border border-blue-200">
+                <div class="flex justify-between items-start mb-2">
+                  <h4 class="font-medium text-blue-900">{{ record.title }}</h4>
+                  <span class="text-xs text-blue-600 bg-blue-100 px-2 py-1 rounded-full">
+                    {{ formatMedicalRecordDate(record.date) }}
+                  </span>
+                </div>
+                <p class="text-sm text-blue-800 leading-relaxed">{{ record.content }}</p>
+              </div>
+            }
           </div>
         </div>
       }
@@ -145,13 +165,13 @@
           <!-- Created At -->
           <div class="bg-gray-50 rounded-lg p-4">
             <h4 class="font-medium text-gray-900 mb-2">Creado</h4>
-            <p class="text-sm text-gray-600">{{ formatDate(session.created_at) }}</p>
+            <p class="text-sm text-gray-600">{{ formatDate(sessionData.SessionDetailData.created_at) }}</p>
           </div>
 
           <!-- Updated At -->
           <div class="bg-gray-50 rounded-lg p-4">
             <h4 class="font-medium text-gray-900 mb-2">Actualizado</h4>
-            <p class="text-sm text-gray-600">{{ formatDate(session.updated_at) }}</p>
+            <p class="text-sm text-gray-600">{{ formatDate(sessionData.SessionDetailData.updated_at) }}</p>
           </div>
 
         </div>

@@ -1,5 +1,5 @@
 import { Injectable, signal, computed } from '@angular/core';
-import { Session } from '../../../shared/models/session.model';
+import { SessionData, SessionResponse } from '../../../shared/models/session.model';
 
 @Injectable({
   providedIn: 'root'
@@ -7,116 +7,206 @@ import { Session } from '../../../shared/models/session.model';
 export class CalendarService {
   private _currentDate = signal(new Date());
   private _currentView = signal<'week' | 'month'>('week');
-  private _selectedSession = signal<Session | null>(null);
-  private _sessions = signal<Session[]>([
+  private _selectedSessionData = signal<SessionData | null>(null);
+  private _sessionData = signal<SessionData[]>([
     {
-      id: 1,
-      patient_id: 101,
-      clinic_id: 1,
-      session_date: "2025-08-30T00:00:00.000Z",
-      start_time: "09:00:00",
-      end_time: "10:00:00",
-      mode: "Presencial",
-      type: "Terapia Individual",
-      status: "scheduled",
-      price: "60.00",
-      payment_method: "card",
-      payment_status: "paid",
-      notes: "Primera sesión del mes",
-      created_at: "2025-08-25T10:00:00.000Z",
-      updated_at: "2025-08-25T10:00:00.000Z"
+      SessionDetailData: {
+        session_id: 1,
+        session_date: "2025-08-30",
+        start_time: "09:00:00",
+        end_time: "10:00:00",
+        type: "Terapia Individual",
+        mode: "Presencial",
+        price: 60,
+        payment_method: "card",
+        payment_status: "paid",
+        completed: false,
+        cancelled: false,
+        no_show: false,
+        notes: "Primera sesión del mes",
+        created_at: "2025-08-25T10:00:00.000Z",
+        updated_at: "2025-08-25T10:00:00.000Z",
+        PatientData: {
+          id: 101,
+          name: "Ana García"
+        },
+        ClinicDetailData: {
+          clinic_id: 1,
+          clinic_name: "Clínica Norte"
+        },
+        MedicalRecordData: [
+          {
+            title: "Evaluación inicial",
+            content: "Paciente muestra buena disposición para el tratamiento",
+            date: "2025-08-30 09:30:00"
+          }
+        ]
+      }
     },
     {
-      id: 2,
-      patient_id: 102,
-      clinic_id: 2,
-      session_date: "2025-08-30T00:00:00.000Z",
-      start_time: "11:00:00",
-      end_time: "12:00:00",
-      mode: "Online",
-      type: "Terapia de Pareja",
-      status: "completed",
-      price: "80.00",
-      payment_method: "transfer",
-      payment_status: "paid",
-      notes: "Sesión completada con éxito",
-      created_at: "2025-08-25T11:00:00.000Z",
-      updated_at: "2025-08-30T12:00:00.000Z"
+      SessionDetailData: {
+        session_id: 2,
+        session_date: "2025-08-30",
+        start_time: "11:00:00",
+        end_time: "12:00:00",
+        type: "Terapia de Pareja",
+        mode: "Online",
+        price: 80,
+        payment_method: "transfer",
+        payment_status: "paid",
+        completed: true,
+        cancelled: false,
+        no_show: false,
+        notes: "Sesión completada con éxito",
+        created_at: "2025-08-25T11:00:00.000Z",
+        updated_at: "2025-08-30T12:00:00.000Z",
+        PatientData: {
+          id: 102,
+          name: "Carlos López"
+        },
+        ClinicDetailData: {
+          clinic_id: 2,
+          clinic_name: "Clínica Sur"
+        },
+        MedicalRecordData: [
+          {
+            title: "Seguimiento de pareja",
+            content: "Se observan mejoras en la comunicación",
+            date: "2025-08-30 11:45:00"
+          }
+        ]
+      }
     },
     {
-      id: 3,
-      patient_id: 103,
-      clinic_id: 3,
-      session_date: "2025-08-31T00:00:00.000Z",
-      start_time: "15:00:00",
-      end_time: "16:00:00",
-      mode: "Presencial",
-      type: "Terapia Individual",
-      status: "scheduled",
-      price: "65.00",
-      payment_method: "cash",
-      payment_status: "pending",
-      notes: "Paciente nuevo",
-      created_at: "2025-08-26T14:00:00.000Z",
-      updated_at: "2025-08-26T14:00:00.000Z"
+      SessionDetailData: {
+        session_id: 3,
+        session_date: "2025-08-31",
+        start_time: "15:00:00",
+        end_time: "16:00:00",
+        type: "Terapia Individual",
+        mode: "Presencial",
+        price: 65,
+        payment_method: "cash",
+        payment_status: "pending",
+        completed: false,
+        cancelled: false,
+        no_show: false,
+        notes: "Paciente nuevo",
+        created_at: "2025-08-26T14:00:00.000Z",
+        updated_at: "2025-08-26T14:00:00.000Z",
+        PatientData: {
+          id: 103,
+          name: "María Rodríguez"
+        },
+        ClinicDetailData: {
+          clinic_id: 3,
+          clinic_name: "Clínica Centro"
+        },
+        MedicalRecordData: []
+      }
     },
     {
-      id: 4,
-      patient_id: 104,
-      clinic_id: 4,
-      session_date: "2025-09-01T00:00:00.000Z",
-      start_time: "10:30:00",
-      end_time: "11:30:00",
-      mode: "Online",
-      type: "Terapia Familiar",
-      status: "cancelled",
-      price: "90.00",
-      payment_method: "card",
-      payment_status: "pending",
-      notes: "Cancelada por el paciente",
-      created_at: "2025-08-27T09:00:00.000Z",
-      updated_at: "2025-08-28T16:30:00.000Z"
+      SessionDetailData: {
+        session_id: 4,
+        session_date: "2025-09-01",
+        start_time: "10:30:00",
+        end_time: "11:30:00",
+        type: "Terapia Familiar",
+        mode: "Online",
+        price: 90,
+        payment_method: "card",
+        payment_status: "pending",
+        completed: false,
+        cancelled: true,
+        no_show: false,
+        notes: "Cancelada por el paciente",
+        created_at: "2025-08-27T09:00:00.000Z",
+        updated_at: "2025-08-28T16:30:00.000Z",
+        PatientData: {
+          id: 104,
+          name: "Juan Martínez"
+        },
+        ClinicDetailData: {
+          clinic_id: 4,
+          clinic_name: "Clínica Este"
+        },
+        MedicalRecordData: []
+      }
     },
     {
-      id: 5,
-      patient_id: 105,
-      clinic_id: 5,
-      session_date: "2025-09-02T00:00:00.000Z",
-      start_time: "16:00:00",
-      end_time: "17:00:00",
-      mode: "Presencial",
-      type: "Terapia Individual",
-      status: "scheduled",
-      price: "70.00",
-      payment_method: "bizum",
-      payment_status: "paid",
-      notes: "Sesión de seguimiento",
-      created_at: "2025-08-28T13:00:00.000Z",
-      updated_at: "2025-08-28T13:00:00.000Z"
+      SessionDetailData: {
+        session_id: 5,
+        session_date: "2025-09-02",
+        start_time: "16:00:00",
+        end_time: "17:00:00",
+        type: "Terapia Individual",
+        mode: "Presencial",
+        price: 70,
+        payment_method: "bizum",
+        payment_status: "paid",
+        completed: false,
+        cancelled: false,
+        no_show: false,
+        notes: "Sesión de seguimiento",
+        created_at: "2025-08-28T13:00:00.000Z",
+        updated_at: "2025-08-28T13:00:00.000Z",
+        PatientData: {
+          id: 105,
+          name: "Laura Sánchez"
+        },
+        ClinicDetailData: {
+          clinic_id: 5,
+          clinic_name: "Clínica Oeste"
+        },
+        MedicalRecordData: [
+          {
+            title: "Sesión de seguimiento",
+            content: "Progreso satisfactorio en el tratamiento",
+            date: "2025-09-02 16:30:00"
+          }
+        ]
+      }
     },
     {
-      id: 6,
-      patient_id: 106,
-      clinic_id: 1,
-      session_date: "2025-09-03T00:00:00.000Z",
-      start_time: "14:00:00",
-      end_time: "15:00:00",
-      mode: "Online",
-      type: "Terapia Individual",
-      status: "completed",
-      price: "60.00",
-      payment_method: "card",
-      payment_status: "paid",
-      notes: "Excelente progreso",
-      created_at: "2025-08-29T10:00:00.000Z",
-      updated_at: "2025-09-03T15:00:00.000Z"
+      SessionDetailData: {
+        session_id: 6,
+        session_date: "2025-09-03",
+        start_time: "14:00:00",
+        end_time: "15:00:00",
+        type: "Terapia Individual",
+        mode: "Online",
+        price: 60,
+        payment_method: "card",
+        payment_status: "paid",
+        completed: true,
+        cancelled: false,
+        no_show: false,
+        notes: "Excelente progreso",
+        created_at: "2025-08-29T10:00:00.000Z",
+        updated_at: "2025-09-03T15:00:00.000Z",
+        PatientData: {
+          id: 106,
+          name: "Pedro González"
+        },
+        ClinicDetailData: {
+          clinic_id: 1,
+          clinic_name: "Clínica Norte"
+        },
+        MedicalRecordData: [
+          {
+            title: "Evaluación de progreso",
+            content: "El paciente muestra una evolución muy positiva",
+            date: "2025-09-03 14:30:00"
+          }
+        ]
+      }
     }
   ]);
 
   readonly currentDate = this._currentDate.asReadonly();
   readonly currentView = this._currentView.asReadonly();
-  readonly selectedSession = this._selectedSession.asReadonly();
-  readonly sessions = this._sessions.asReadonly();
+  readonly selectedSessionData = this._selectedSessionData.asReadonly();
+  readonly sessionData = this._sessionData.asReadonly();
 
   readonly weekDates = computed(() => {
     const current = this._currentDate();
@@ -154,8 +244,8 @@ export class CalendarService {
     return dates;
   });
 
-  readonly sessionsForCurrentPeriod = computed(() => {
-    const sessions = this._sessions();
+  readonly sessionDataForCurrentPeriod = computed(() => {
+    const sessionData = this._sessionData();
     const view = this._currentView();
 
     if (view === 'week') {
@@ -163,8 +253,8 @@ export class CalendarService {
       const startDate = weekDates[0];
       const endDate = weekDates[6];
 
-      return sessions.filter(session => {
-        const sessionDate = new Date(session.session_date);
+      return sessionData.filter(data => {
+        const sessionDate = new Date(data.SessionDetailData.session_date);
         return sessionDate >= startDate && sessionDate <= endDate;
       });
     } else {
@@ -172,8 +262,8 @@ export class CalendarService {
       const startDate = monthDates[0];
       const endDate = monthDates[41];
 
-      return sessions.filter(session => {
-        const sessionDate = new Date(session.session_date);
+      return sessionData.filter(data => {
+        const sessionDate = new Date(data.SessionDetailData.session_date);
         return sessionDate >= startDate && sessionDate <= endDate;
       });
     }
@@ -187,8 +277,8 @@ export class CalendarService {
     this._currentView.set(view);
   }
 
-  setSelectedSession(session: Session | null): void {
-    this._selectedSession.set(session);
+  setSelectedSessionData(sessionData: SessionData | null): void {
+    this._selectedSessionData.set(sessionData);
   }
 
   navigateToToday(): void {
@@ -225,36 +315,51 @@ export class CalendarService {
     }
   }
 
-  getSessionsForDate(date: Date): Session[] {
+  getSessionDataForDate(date: Date): SessionData[] {
     const dateString = date.toISOString().split('T')[0];
-    return this._sessions().filter(session => {
-      const sessionDate = new Date(session.session_date).toISOString().split('T')[0];
-      return sessionDate === dateString;
+    return this._sessionData().filter(data => {
+      return data.SessionDetailData.session_date === dateString;
     });
   }
 
-  addSession(session: Omit<Session, 'id' | 'created_at' | 'updated_at'>): void {
-    const newSession: Session = {
-      ...session,
-      id: Math.max(...this._sessions().map(s => s.id)) + 1,
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString()
-    };
-
-    this._sessions.update(sessions => [...sessions, newSession]);
+  getSessionDataById(sessionId: number): SessionData | null {
+    return this._sessionData().find(data => 
+      data.SessionDetailData.session_id === sessionId
+    ) || null;
   }
 
-  updateSession(id: number, updates: Partial<Session>): void {
-    this._sessions.update(sessions =>
-      sessions.map(session =>
-        session.id === id
-          ? { ...session, ...updates, updated_at: new Date().toISOString() }
-          : session
+  addSessionData(sessionData: Omit<SessionData['SessionDetailData'], 'session_id' | 'created_at' | 'updated_at'>): void {
+    const newSessionData: SessionData = {
+      SessionDetailData: {
+        ...sessionData,
+        session_id: Math.max(...this._sessionData().map(s => s.SessionDetailData.session_id)) + 1,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      }
+    };
+
+    this._sessionData.update(data => [...data, newSessionData]);
+  }
+
+  updateSessionData(sessionId: number, updates: Partial<SessionData['SessionDetailData']>): void {
+    this._sessionData.update(data =>
+      data.map(sessionData =>
+        sessionData.SessionDetailData.session_id === sessionId
+          ? {
+              SessionDetailData: {
+                ...sessionData.SessionDetailData,
+                ...updates,
+                updated_at: new Date().toISOString()
+              }
+            }
+          : sessionData
       )
     );
   }
 
-  deleteSession(id: number): void {
-    this._sessions.update(sessions => sessions.filter(session => session.id !== id));
+  deleteSessionData(sessionId: number): void {
+    this._sessionData.update(data => 
+      data.filter(sessionData => sessionData.SessionDetailData.session_id !== sessionId)
+    );
   }
 }

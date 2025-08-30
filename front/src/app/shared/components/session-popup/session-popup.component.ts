@@ -1,6 +1,6 @@
 import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Session } from '../../models/session.model';
+import { SessionData, SessionUtils } from '../../models/session.model';
 import { CLINIC_CONFIGS, ClinicConfig } from '../../models/clinic-config.model';
 
 @Component({
@@ -10,7 +10,7 @@ import { CLINIC_CONFIGS, ClinicConfig } from '../../models/clinic-config.model';
   templateUrl: './session-popup.component.html'
 })
 export class SessionPopupComponent {
-  @Input({ required: true }) session!: Session;
+  @Input({ required: true }) sessionData!: SessionData;
   @Output() close = new EventEmitter<void>();
 
   readonly clinicConfigs = CLINIC_CONFIGS;
@@ -29,16 +29,16 @@ export class SessionPopupComponent {
     return this.clinicConfigs.find(config => config.id === clinicId) || this.clinicConfigs[0];
   }
 
-  getPatientName(patientId: number): string {
-    const patientNames: { [key: number]: string } = {
-      101: 'Ana García',
-      102: 'Carlos López',
-      103: 'María Rodríguez',
-      104: 'Juan Martínez',
-      105: 'Laura Sánchez',
-      106: 'Pedro González'
-    };
-    return patientNames[patientId] || `Paciente ${patientId}`;
+  getClinicConfigFromSessionData(): ClinicConfig {
+    return this.getClinicConfig(this.sessionData.SessionDetailData.ClinicDetailData.clinic_id);
+  }
+
+  getPatientName(): string {
+    return this.sessionData.SessionDetailData.PatientData.name;
+  }
+
+  getClinicName(): string {
+    return this.sessionData.SessionDetailData.ClinicDetailData.clinic_name;
   }
 
   formatDate(dateString: string): string {
@@ -55,51 +55,56 @@ export class SessionPopupComponent {
     return time.substring(0, 5);
   }
 
-  getStatusText(status: Session['status']): string {
-    const statusTexts = {
-      scheduled: 'Programada',
-      completed: 'Completada',
-      cancelled: 'Cancelada',
-      no_show: 'No asistió'
-    };
-    return statusTexts[status] || status;
+  getStatusText(): string {
+    return SessionUtils.getStatusText(this.sessionData);
   }
 
-  getStatusBadgeClass(status: Session['status']): string {
-    const statusClasses = {
-      scheduled: 'bg-blue-100 text-blue-800',
-      completed: 'bg-green-100 text-green-800',
-      cancelled: 'bg-red-100 text-red-800',
-      no_show: 'bg-gray-100 text-gray-800'
-    };
-    return statusClasses[status] || statusClasses.scheduled;
+  getStatusBadgeClass(): string {
+    return SessionUtils.getStatusBadgeClass(this.sessionData);
   }
 
-  getPaymentStatusText(status: Session['payment_status']): string {
-    const paymentStatusTexts = {
-      pending: 'Pendiente',
-      paid: 'Pagado',
-      partial: 'Parcial'
-    };
-    return paymentStatusTexts[status] || status;
+  getPaymentStatusText(): string {
+    return SessionUtils.formatPaymentStatus(this.sessionData.SessionDetailData.payment_status);
   }
 
-  getPaymentStatusBadgeClass(status: Session['payment_status']): string {
+  getPaymentStatusBadgeClass(): string {
+    const status = this.sessionData.SessionDetailData.payment_status;
     const paymentStatusClasses = {
       pending: 'bg-yellow-100 text-yellow-800',
       paid: 'bg-green-100 text-green-800',
       partial: 'bg-orange-100 text-orange-800'
     };
-    return paymentStatusClasses[status] || paymentStatusClasses.pending;
+    return paymentStatusClasses[status as keyof typeof paymentStatusClasses] || paymentStatusClasses.pending;
   }
 
-  getPaymentMethodText(method: Session['payment_method']): string {
-    const paymentMethodTexts = {
-      cash: 'Efectivo',
-      card: 'Tarjeta',
-      transfer: 'Transferencia',
-      bizum: 'Bizum'
-    };
-    return paymentMethodTexts[method] || method;
+  getPaymentMethodText(): string {
+    return SessionUtils.formatPaymentMethod(this.sessionData.SessionDetailData.payment_method);
+  }
+
+  formatPrice(): string {
+    return SessionUtils.formatPrice(this.sessionData.SessionDetailData.price);
+  }
+
+  getMedicalRecords(): Array<{title: string, content: string, date: string}> {
+    return this.sessionData.SessionDetailData.MedicalRecordData || [];
+  }
+
+  formatMedicalRecordDate(dateString: string): string {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('es-ES', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  }
+
+  hasNotes(): boolean {
+    return !!this.sessionData.SessionDetailData.notes;
+  }
+
+  hasMedicalRecords(): boolean {
+    return this.getMedicalRecords().length > 0;
   }
 }
