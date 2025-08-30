@@ -475,9 +475,10 @@ const definitions = {
           },
           PatientMedicalRecord: {
             type: "array", 
-            items: {},
-            description: "Historial médico del paciente (vacío por ahora)",
-            example: [],
+            items: {
+              $ref: "#/components/schemas/ClinicalNote",
+            },
+            description: "Historial de notas clínicas del paciente",
           },
           PatientSessions: {
             type: "array",
@@ -493,12 +494,521 @@ const definitions = {
             example: [],
           },
           PatientBonus: {
-            type: "array",
-            items: {},
-            description: "Bonos del paciente (vacío por ahora)",
-            example: [],
+            oneOf: [
+              { $ref: "#/components/schemas/PatientBonusesData" },
+              { type: "object" }
+            ],
+            description: "Bonuses del paciente con KPIs y detalles",
           },
         },
+      },
+    },
+  },
+
+  PatientBonusesData: {
+    type: "object",
+    properties: {
+      kpis: {
+        $ref: "#/components/schemas/PatientBonusKpis",
+      },
+      bonuses: {
+        type: "array",
+        items: {
+          $ref: "#/components/schemas/PatientBonusDetail",
+        },
+        description: "Lista detallada de bonuses del paciente",
+      },
+    },
+  },
+
+  Bonus: {
+    type: "object",
+    properties: {
+      id: {
+        type: "integer",
+        format: "int64",
+        description: "ID único del bonus",
+        example: 1,
+      },
+      patient_id: {
+        type: "integer",
+        format: "int64",
+        description: "ID del paciente",
+        example: 1,
+      },
+      total_sessions: {
+        type: "integer",
+        description: "Número total de sesiones incluidas en el bonus",
+        example: 10,
+      },
+      price_per_session: {
+        type: "number",
+        format: "decimal",
+        description: "Precio por sesión",
+        example: 50.00,
+      },
+      total_price: {
+        type: "number",
+        format: "decimal",
+        description: "Precio total del bonus",
+        example: 500.00,
+      },
+      used_sessions: {
+        type: "integer",
+        description: "Número de sesiones utilizadas",
+        example: 3,
+      },
+      status: {
+        type: "string",
+        enum: ["active", "consumed", "expired"],
+        description: "Estado del bonus",
+        example: "active",
+      },
+      purchase_date: {
+        type: "string",
+        format: "date",
+        description: "Fecha de compra del bonus (YYYY-MM-DD)",
+        example: "2024-01-15",
+      },
+      expiry_date: {
+        type: "string",
+        format: "date",
+        description: "Fecha de expiración del bonus (YYYY-MM-DD)",
+        example: "2024-12-31",
+      },
+      notes: {
+        type: "string",
+        nullable: true,
+        description: "Notas adicionales",
+        example: "Bonus adquirido con descuento especial",
+      },
+      created_at: {
+        type: "string",
+        format: "date",
+        description: "Fecha de creación",
+        example: "2024-01-15",
+      },
+      updated_at: {
+        type: "string",
+        format: "date-time",
+        description: "Fecha de última actualización",
+        example: "2024-01-20T14:45:00Z",
+      },
+    },
+  },
+
+  BonusesResponse: {
+    type: "object",
+    properties: {
+      success: {
+        type: "boolean",
+        example: true,
+      },
+      total: {
+        type: "integer",
+        example: 3,
+      },
+      data: {
+        type: "array",
+        items: {
+          $ref: "#/components/schemas/Bonus",
+        },
+      },
+    },
+  },
+
+  PatientBonusKpis: {
+    type: "object",
+    properties: {
+      total_bonos: {
+        type: "integer",
+        description: "Total de bonuses del paciente",
+        example: 5,
+      },
+      total_activos: {
+        type: "integer", 
+        description: "Total de bonuses activos",
+        example: 2,
+      },
+      total_consumidos: {
+        type: "integer",
+        description: "Total de bonuses consumidos",
+        example: 2,
+      },
+      total_expirados: {
+        type: "integer",
+        description: "Total de bonuses expirados",
+        example: 1,
+      },
+    },
+  },
+
+  PatientBonusDetail: {
+    type: "object",
+    properties: {
+      idBono: {
+        type: "integer",
+        format: "int64",
+        description: "ID único del bonus",
+        example: 1,
+      },
+      sesiones_totales: {
+        type: "integer",
+        description: "Número total de sesiones incluidas",
+        example: 10,
+      },
+      euros_por_sesion: {
+        type: "number",
+        format: "decimal",
+        description: "Precio por sesión en euros",
+        example: 50.00,
+      },
+      precio_total: {
+        type: "number",
+        format: "decimal",
+        description: "Precio total del bonus",
+        example: 500.00,
+      },
+      fecha_compra: {
+        type: "string",
+        format: "date",
+        description: "Fecha de compra del bonus (YYYY-MM-DD)",
+        example: "2024-01-15",
+      },
+      fecha_expiracion: {
+        type: "string",
+        format: "date",
+        description: "Fecha de expiración del bonus (YYYY-MM-DD)",
+        example: "2024-12-31",
+      },
+      sesiones_restantes: {
+        type: "integer",
+        description: "Sesiones restantes por usar",
+        example: 7,
+      },
+      sesiones_utilizadas: {
+        type: "integer",
+        description: "Sesiones ya utilizadas",
+        example: 3,
+      },
+      estado_bono: {
+        type: "string",
+        enum: ["active", "consumed", "expired"],
+        description: "Estado actual del bonus",
+        example: "active",
+      },
+    },
+  },
+
+  PatientBonusesResponse: {
+    type: "object",
+    properties: {
+      success: {
+        type: "boolean",
+        example: true,
+      },
+      data: {
+        type: "object",
+        properties: {
+          kpis: {
+            $ref: "#/components/schemas/PatientBonusKpis",
+          },
+          bonuses: {
+            type: "array",
+            items: {
+              $ref: "#/components/schemas/PatientBonusDetail",
+            },
+            description: "Lista detallada de bonuses del paciente",
+          },
+        },
+      },
+    },
+  },
+
+  CreateBonusRequest: {
+    type: "object",
+    required: ["patient_id", "total_sessions", "price_per_session", "total_price"],
+    properties: {
+      patient_id: {
+        type: "integer",
+        format: "int64",
+        description: "ID del paciente",
+        example: 1,
+      },
+      total_sessions: {
+        type: "integer",
+        description: "Número total de sesiones incluidas en el bonus",
+        example: 10,
+      },
+      price_per_session: {
+        type: "number",
+        format: "decimal",
+        description: "Precio por sesión en euros",
+        example: 50.00,
+      },
+      total_price: {
+        type: "number",
+        format: "decimal",
+        description: "Precio total del bonus",
+        example: 500.00,
+      },
+    },
+  },
+
+  CreateBonusResponse: {
+    type: "object",
+    properties: {
+      success: {
+        type: "boolean",
+        example: true,
+      },
+      message: {
+        type: "string",
+        example: "Bonus creado exitosamente",
+      },
+      data: {
+        $ref: "#/components/schemas/PatientBonusDetail",
+      },
+    },
+  },
+
+  BonusHistoryInfo: {
+    type: "object",
+    properties: {
+      id: {
+        type: "integer",
+        format: "int64",
+        description: "ID único del bonus",
+        example: 1,
+      },
+      patient_id: {
+        type: "integer",
+        format: "int64",
+        description: "ID del paciente",
+        example: 1,
+      },
+      total_sessions: {
+        type: "integer",
+        description: "Número total de sesiones incluidas",
+        example: 10,
+      },
+      used_sessions: {
+        type: "integer",
+        description: "Sesiones ya utilizadas",
+        example: 3,
+      },
+      remaining_sessions: {
+        type: "integer",
+        description: "Sesiones restantes",
+        example: 7,
+      },
+      progress_percentage: {
+        type: "number",
+        format: "decimal",
+        description: "Porcentaje de progreso del bonus",
+        example: 30.00,
+      },
+      price_per_session: {
+        type: "number",
+        format: "decimal",
+        description: "Precio por sesión",
+        example: 50.00,
+      },
+      total_price: {
+        type: "number",
+        format: "decimal",
+        description: "Precio total del bonus",
+        example: 500.00,
+      },
+      status: {
+        type: "string",
+        enum: ["active", "consumed", "expired"],
+        description: "Estado del bonus",
+        example: "active",
+      },
+      purchase_date: {
+        type: "string",
+        format: "date",
+        description: "Fecha de compra (YYYY-MM-DD)",
+        example: "2024-01-15",
+      },
+      expiry_date: {
+        type: "string",
+        format: "date",
+        description: "Fecha de expiración (YYYY-MM-DD)",
+        example: "2025-01-15",
+      },
+      notes: {
+        type: "string",
+        nullable: true,
+        description: "Notas del bonus",
+        example: "Bonus promocional",
+      },
+      created_at: {
+        type: "string",
+        format: "date-time",
+        description: "Fecha de creación",
+        example: "2024-01-15 10:30:00",
+      },
+    },
+  },
+
+  BonusUsageHistoryItem: {
+    type: "object",
+    properties: {
+      id: {
+        type: "integer",
+        format: "int64",
+        description: "ID único del registro de uso",
+        example: 1,
+      },
+      session_id: {
+        type: "integer",
+        format: "int64",
+        nullable: true,
+        description: "ID de la sesión asociada",
+        example: 25,
+      },
+      used_date: {
+        type: "string",
+        format: "date",
+        description: "Fecha de uso (YYYY-MM-DD)",
+        example: "2024-02-01",
+      },
+      notes: {
+        type: "string",
+        nullable: true,
+        description: "Notas del uso",
+        example: "Sesión completada exitosamente",
+      },
+      created_by: {
+        type: "string",
+        nullable: true,
+        description: "Usuario que registró el uso",
+        example: "admin",
+      },
+    },
+  },
+
+  BonusHistoryResponse: {
+    type: "object",
+    properties: {
+      success: {
+        type: "boolean",
+        example: true,
+      },
+      data: {
+        type: "object",
+        properties: {
+          used_sessions: {
+            type: "integer",
+            description: "Sesiones ya utilizadas",
+            example: 3,
+          },
+          remaining_sessions: {
+            type: "integer",
+            description: "Sesiones restantes",
+            example: 7,
+          },
+          progress_percentage: {
+            type: "number",
+            format: "decimal",
+            description: "Porcentaje de progreso del bonus",
+            example: 30.00,
+          },
+          sessions_history: {
+            type: "array",
+            items: {
+              type: "object",
+              properties: {
+                used_date: {
+                  type: "string",
+                  format: "date",
+                  description: "Fecha de realización (YYYY-MM-DD)",
+                  example: "2024-02-01",
+                },
+                session_id: {
+                  type: "integer",
+                  format: "int64",
+                  nullable: true,
+                  description: "ID de la sesión",
+                  example: 25,
+                }
+              },
+            },
+            description: "Historial de sesiones realizadas ordenado por fecha descendente",
+          },
+        },
+      },
+    },
+  },
+
+
+  UseBonusSessionResponse: {
+    type: "object",
+    properties: {
+      success: {
+        type: "boolean",
+        example: true,
+      },
+      message: {
+        type: "string",
+        example: "Sesión registrada exitosamente",
+      },
+      data: {
+        type: "object",
+        properties: {
+          history_id: {
+            type: "integer",
+            format: "int64",
+            description: "ID del registro de historial creado",
+            example: 15,
+          },
+          bonus_id: {
+            type: "integer",
+            format: "int64",
+            description: "ID del bonus",
+            example: 5,
+          },
+          new_used_sessions: {
+            type: "integer",
+            description: "Nuevo número de sesiones utilizadas",
+            example: 4,
+          },
+          remaining_sessions: {
+            type: "integer",
+            description: "Sesiones restantes",
+            example: 6,
+          },
+          new_status: {
+            type: "string",
+            enum: ["active", "consumed", "expired"],
+            description: "Nuevo estado del bonus",
+            example: "active",
+          },
+        },
+      },
+    },
+  },
+
+  ClinicalNote: {
+    type: "object",
+    properties: {
+      titulo: {
+        type: "string",
+        description: "Título de la nota clínica",
+        example: "Sesión inicial de evaluación",
+      },
+      contenido: {
+        type: "string",
+        description: "Contenido completo de la nota clínica",
+        example: "El paciente se muestra colaborativo durante la primera sesión. Se observa ansiedad leve relacionada con el trabajo.",
+      },
+      fecha: {
+        type: "string",
+        format: "date-time",
+        description: "Fecha y hora de la nota clínica (YYYY-MM-DD HH:mm:ss)",
+        example: "2024-12-15 14:30:00",
       },
     },
   },
