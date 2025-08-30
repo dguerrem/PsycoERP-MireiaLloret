@@ -87,6 +87,11 @@ const definitions = {
         format: "date-time",
         description: "Fecha de última actualización",
       },
+      patient_name: {
+        type: "string",
+        description: "Nombre del paciente",
+        example: "Juan Pérez García",
+      },
     },
   },
 
@@ -112,8 +117,142 @@ const definitions = {
       data: {
         type: "array",
         items: {
-          $ref: "#/components/schemas/Session",
+          $ref: "#/components/schemas/SessionDetailResponse",
         },
+      },
+    },
+  },
+
+  SessionDetailResponse: {
+    type: "object",
+    properties: {
+      SessionDetailData: {
+        $ref: "#/components/schemas/SessionData",
+      },
+    },
+  },
+
+  SessionPatientData: {
+    type: "object",
+    properties: {
+      id: {
+        type: "integer",
+        format: "int64",
+        description: "ID del paciente",
+        example: 1,
+      },
+      name: {
+        type: "string",
+        description: "Nombre completo del paciente",
+        example: "Juan Pérez García",
+      },
+    },
+  },
+
+  SessionData: {
+    type: "object",
+    properties: {
+      session_id: {
+        type: "integer",
+        format: "int64",
+        description: "ID único de la sesión",
+        example: 1,
+      },
+      session_date: {
+        type: "string",
+        format: "date",
+        description: "Fecha de la sesión (YYYY-MM-DD)",
+        example: "2024-12-15",
+      },
+      start_time: {
+        type: "string",
+        format: "time",
+        description: "Hora de inicio (HH:MM:SS)",
+        example: "09:00:00",
+      },
+      end_time: {
+        type: "string",
+        format: "time",
+        description: "Hora de finalización (HH:MM:SS)",
+        example: "10:00:00",
+      },
+      type: {
+        type: "string",
+        description: "Tipo de sesión",
+        example: "Terapia Individual",
+      },
+      price: {
+        type: "number",
+        format: "decimal",
+        description: "Precio de la sesión",
+        example: 60.0,
+      },
+      payment_method: {
+        type: "string",
+        enum: ["cash", "card", "transfer", "insurance"],
+        description: "Método de pago",
+        example: "card",
+      },
+      completed: {
+        type: "boolean",
+        description: "Si la sesión está completada o no",
+        example: true,
+      },
+      notes: {
+        type: "string",
+        description: "Notas de la sesión",
+        example: "Primera sesión del paciente",
+      },
+      PatientData: {
+        $ref: "#/components/schemas/SessionPatientData",
+      },
+      ClinicDetailData: {
+        $ref: "#/components/schemas/ClinicData",
+      },
+      MedicalRecordData: {
+        type: "array",
+        items: {
+          $ref: "#/components/schemas/MedicalRecord",
+        },
+      },
+    },
+  },
+
+  ClinicData: {
+    type: "object",
+    properties: {
+      clinic_id: {
+        type: "integer",
+        format: "int64",
+        description: "ID de la clínica",
+        example: 1,
+      },
+      clinic_name: {
+        type: "string",
+        description: "Nombre de la clínica",
+        example: "Clínica Psicológica Centro",
+      },
+    },
+  },
+
+  MedicalRecord: {
+    type: "object",
+    properties: {
+      title: {
+        type: "string",
+        description: "Título de la nota clínica",
+        example: "Sesión inicial de evaluación",
+      },
+      content: {
+        type: "string",
+        description: "Contenido completo de la nota clínica",
+        example: "El paciente se muestra colaborativo durante la primera sesión. Se observa ansiedad leve relacionada con el trabajo.",
+      },
+      date: {
+        type: "string",
+        format: "date-time",
+        description: "Fecha y hora de la nota clínica (YYYY-MM-DD HH:mm:ss)",
+        example: "2024-12-15 14:30:00",
       },
     },
   },
