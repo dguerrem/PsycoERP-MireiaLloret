@@ -18,6 +18,14 @@ export class NewSessionDialogComponent {
   readonly isLoading = signal(false);
   readonly error = signal<string | null>(null);
 
+  readonly dropdownStates = signal({
+    patient: false,
+    clinic: false,
+    type: false,
+    payment: false,
+    modality: false
+  });
+
   readonly sessionTypes = [
     'Terapia Individual',
     'Terapia de Pareja',
@@ -239,5 +247,65 @@ export class NewSessionDialogComponent {
 
   updateNotes(value: string): void {
     this.formData.update(data => ({ ...data, notes: value }));
+  }
+
+  toggleDropdown(dropdown: 'patient' | 'clinic' | 'type' | 'payment' | 'modality'): void {
+    this.dropdownStates.update(states => ({
+      patient: false,
+      clinic: false,
+      type: false,
+      payment: false,
+      modality: false,
+      [dropdown]: !states[dropdown]
+    }));
+  }
+
+  selectOption(dropdown: 'patient' | 'clinic' | 'type' | 'payment' | 'modality', value: string): void {
+    this.dropdownStates.update(states => ({ ...states, [dropdown]: false }));
+    
+    switch (dropdown) {
+      case 'patient':
+        this.updatePatientId(value);
+        break;
+      case 'clinic':
+        this.updateClinicId(value);
+        break;
+      case 'type':
+        this.updateSessionType(value);
+        break;
+      case 'payment':
+        this.updatePaymentMethod(value as any);
+        break;
+      case 'modality':
+        this.updateMode(value as any);
+        break;
+    }
+  }
+
+  getDisplayValue(dropdown: 'patient' | 'clinic' | 'type' | 'payment' | 'modality'): string {
+    const formData = this.formData();
+    
+    switch (dropdown) {
+      case 'patient':
+        if (formData.patient_id) {
+          const patient = this.patients.find(p => p.id === parseInt(formData.patient_id));
+          return patient ? patient.name : 'Seleccionar paciente';
+        }
+        return 'Seleccionar paciente';
+      case 'clinic':
+        if (formData.clinic_id) {
+          const clinic = this.clinicConfigs.find(c => c.id === parseInt(formData.clinic_id));
+          return clinic ? clinic.name : 'Seleccionar clínica';
+        }
+        return 'Seleccionar clínica';
+      case 'type':
+        return formData.type || 'Seleccionar tipo';
+      case 'payment':
+        return formData.payment_method ? this.getPaymentMethodText(formData.payment_method) : 'Seleccionar método';
+      case 'modality':
+        return formData.mode || 'Seleccionar modalidad';
+      default:
+        return '';
+    }
   }
 }
