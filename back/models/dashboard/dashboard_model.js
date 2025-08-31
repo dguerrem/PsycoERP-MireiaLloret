@@ -185,9 +185,21 @@ const getDashboardKPIs = async () => {
 
     // ===== 5. TOMORROW SESSIONS DATA =====
     
-    // Fecha de mañana
+    // Calcular el próximo día laborable
     const tomorrow = new Date(now);
-    tomorrow.setDate(tomorrow.getDate() + 1);
+    const currentDayOfWeek = now.getDay(); // 0=Domingo, 1=Lunes, ..., 6=Sábado
+    
+    if (currentDayOfWeek === 5) {
+      // Si es viernes (5), saltar al lunes (+3 días)
+      tomorrow.setDate(tomorrow.getDate() + 3);
+    } else if (currentDayOfWeek === 6) {
+      // Si es sábado (6), saltar al lunes (+2 días)
+      tomorrow.setDate(tomorrow.getDate() + 2);
+    } else {
+      // Cualquier otro día, simplemente +1 día
+      tomorrow.setDate(tomorrow.getDate() + 1);
+    }
+    
     const tomorrowDate = tomorrow.toISOString().split('T')[0];
 
     const tomorrowSessionsQuery = `

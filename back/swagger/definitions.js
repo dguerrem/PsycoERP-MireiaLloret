@@ -384,7 +384,7 @@ const definitions = {
         items: {
           $ref: "#/components/schemas/SessionItem",
         },
-        description: "Todas las sesiones programadas para mañana",
+        description: "Todas las sesiones programadas para el próximo día laborable (si es viernes, muestra las del lunes)",
       },
     },
   },
@@ -1344,7 +1344,7 @@ const definitions = {
     items: {
       $ref: "#/components/schemas/SessionItem",
     },
-    description: "Lista de todas las sesiones programadas para mañana",
+    description: "Lista de sesiones del próximo día laborable (viernes→lunes, sábado→lunes, otros→día siguiente)",
   },
 
   UseBonusSessionResponse: {
