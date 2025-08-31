@@ -29,7 +29,7 @@
         <li>
           <button
             (click)="onModuleChange(item.path)"
-            class="flex items-center gap-3 px-3 py-2.5 mx-1 text-left transition-all duration-200 font-medium w-full rounded-2xl"
+            class="flex items-center gap-3 px-3 py-2.5 mx-1 text-left transition-all duration-200 font-medium w-full rounded-lg"
             [class.bg-pink-500]="activeModule === item.path"
             [class.text-white]="activeModule === item.path"
             [class.text-gray-700]="activeModule !== item.path"

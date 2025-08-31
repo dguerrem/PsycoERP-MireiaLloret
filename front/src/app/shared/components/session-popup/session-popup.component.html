@@ -1,0 +1,428 @@
+<!-- Modal Backdrop -->
+<div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50"
+  (click)="onBackdropClick($event)">
+
+  <!-- Modal Card - Exact match to React -->
+  <div
+    class="bg-card text-card-foreground flex flex-col gap-6 rounded-xl border py-6 shadow-sm w-full max-w-4xl max-h-[90vh] overflow-hidden"
+    (click)="$event.stopPropagation()">
+
+    <!-- Card Header - Exact match to React -->
+    <div
+      class="@container/card-header auto-rows-min grid-rows-[auto_auto] gap-1.5 px-6 has-data-[slot=card-action]:grid-cols-[1fr_auto] [.border-b]:pb-6 flex flex-row items-center justify-between space-y-0 pb-4">
+      <div>
+        <div class="text-xl font-black font-montserrat">Sesión #{{ sessionData.SessionDetailData.session_id }} con {{
+          getPatientName() }}</div>
+        <div class="flex items-center gap-4 mt-2">
+          <!-- Clinic Badge -->
+          <span
+            class="inline-flex items-center justify-center rounded-md border px-2 py-0.5 text-xs font-medium w-fit whitespace-nowrap shrink-0 gap-1 focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive transition-[color,box-shadow] overflow-hidden border-transparent text-white"
+            [style.background-color]="getClinicColorHex()">
+            {{ getClinicName() }}
+          </span>
+          <!-- Session Type Badge -->
+          <span
+            class="inline-flex items-center justify-center rounded-md border px-2 py-0.5 text-xs font-medium w-fit whitespace-nowrap shrink-0 gap-1 focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive transition-[color,box-shadow] overflow-hidden text-foreground">
+            {{ getSessionTypeShort() }}
+          </span>
+          <!-- Status Badge -->
+          <span
+            class="inline-flex items-center justify-center rounded-md border px-2 py-0.5 text-xs font-medium w-fit whitespace-nowrap shrink-0 gap-1 focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive transition-[color,box-shadow] overflow-hidden border-transparent bg-primary text-primary-foreground">
+            {{ getStatusText() }}
+          </span>
+        </div>
+      </div>
+      <div class="flex gap-2">
+        <button (click)="onClose()"
+          class="inline-flex items-center justify-center whitespace-nowrap text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive h-8 rounded-md gap-1.5 px-3 has-[>svg]:px-2.5"
+          onmouseover="this.style.backgroundColor='#0891b2'; this.style.color='white'"
+          onmouseout="this.style.backgroundColor=''; this.style.color=''">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+            class="lucide lucide-x h-4 w-4">
+            <path d="M18 6 6 18"></path>
+            <path d="m6 6 12 12"></path>
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- Card Content with Tabs -->
+    <div class="px-6 overflow-y-auto max-h-[calc(90vh-120px)]">
+      <div class="flex flex-col gap-2">
+        <!-- Tabs List -->
+        <div
+          class="bg-muted text-muted-foreground h-9 items-center justify-center rounded-lg p-[3px] grid w-full grid-cols-2">
+          <button type="button" (click)="setActiveTab('info')"
+            [class]="activeTab() === 'info' ? 'data-[state=active]:bg-background dark:data-[state=active]:text-foreground focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:outline-ring dark:data-[state=active]:border-input dark:data-[state=active]:bg-input/30 text-foreground dark:text-muted-foreground inline-flex h-[calc(100%-1px)] flex-1 items-center justify-center gap-1.5 rounded-md border border-transparent px-2 py-1 text-sm font-medium whitespace-nowrap transition-[color,box-shadow] focus-visible:ring-[3px] focus-visible:outline-1 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:shadow-sm bg-background text-foreground shadow-sm' : 'text-foreground dark:text-muted-foreground inline-flex h-[calc(100%-1px)] flex-1 items-center justify-center gap-1.5 rounded-md border border-transparent px-2 py-1 text-sm font-medium whitespace-nowrap transition-[color,box-shadow] focus-visible:ring-[3px] focus-visible:outline-1 disabled:pointer-events-none disabled:opacity-50'"
+            class="[&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4">
+            Información
+          </button>
+          <button type="button" (click)="setActiveTab('clinical')"
+            [class]="activeTab() === 'clinical' ? 'data-[state=active]:bg-background dark:data-[state=active]:text-foreground focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:outline-ring dark:data-[state=active]:border-input dark:data-[state=active]:bg-input/30 text-foreground dark:text-muted-foreground inline-flex h-[calc(100%-1px)] flex-1 items-center justify-center gap-1.5 rounded-md border border-transparent px-2 py-1 text-sm font-medium whitespace-nowrap transition-[color,box-shadow] focus-visible:ring-[3px] focus-visible:outline-1 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:shadow-sm bg-background text-foreground shadow-sm' : 'text-foreground dark:text-muted-foreground inline-flex h-[calc(100%-1px)] flex-1 items-center justify-center gap-1.5 rounded-md border border-transparent px-2 py-1 text-sm font-medium whitespace-nowrap transition-[color,box-shadow] focus-visible:ring-[3px] focus-visible:outline-1 disabled:pointer-events-none disabled:opacity-50'"
+            class="[&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4">
+            Historia Clínica
+          </button>
+        </div>
+
+        <!-- Information Tab Content -->
+        @if (activeTab() === 'info') {
+        <div class="flex-1 outline-none space-y-6 mt-6">
+          <div class="grid grid-cols-2 gap-6">
+            <!-- Left Column -->
+            <div class="space-y-4">
+              <!-- Patient -->
+              <div>
+                <label
+                  class="flex items-center gap-2 text-sm leading-none font-medium select-none group-data-[disabled=true]:pointer-events-none group-data-[disabled=true]:opacity-50 peer-disabled:cursor-not-allowed peer-disabled:opacity-50"
+                  for="patient">Paciente</label>
+                <input
+                  class="file:text-foreground placeholder:text-muted-foreground selection:bg-primary selection:text-primary-foreground dark:bg-input/30 border-input flex h-9 w-full min-w-0 rounded-md border bg-transparent px-3 py-1 text-base shadow-xs transition-[color,box-shadow] outline-none file:inline-flex file:h-7 file:border-0 file:bg-transparent file:text-sm file:font-medium disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive"
+                  id="patient" [value]="getPatientName()">
+              </div>
+
+              <!-- Date -->
+              <div>
+                <label
+                  class="flex items-center gap-2 text-sm leading-none font-medium select-none group-data-[disabled=true]:pointer-events-none group-data-[disabled=true]:opacity-50 peer-disabled:cursor-not-allowed peer-disabled:opacity-50"
+                  for="date">Fecha</label>
+                <input
+                  class="file:text-foreground placeholder:text-muted-foreground selection:bg-primary selection:text-primary-foreground dark:bg-input/30 border-input flex h-9 w-full min-w-0 rounded-md border bg-transparent px-3 py-1 text-base shadow-xs transition-[color,box-shadow] outline-none file:inline-flex file:h-7 file:border-0 file:bg-transparent file:text-sm file:font-medium disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive"
+                  id="date" type="date" [value]="sessionData.SessionDetailData.session_date">
+              </div>
+
+              <!-- Start and End Time -->
+              <div class="grid grid-cols-2 gap-4">
+                <div>
+                  <label
+                    class="flex items-center gap-2 text-sm leading-none font-medium select-none group-data-[disabled=true]:pointer-events-none group-data-[disabled=true]:opacity-50 peer-disabled:cursor-not-allowed peer-disabled:opacity-50"
+                    for="startTime">Hora Inicio</label>
+                  <input
+                    class="file:text-foreground placeholder:text-muted-foreground selection:bg-primary selection:text-primary-foreground dark:bg-input/30 border-input flex h-9 w-full min-w-0 rounded-md border bg-transparent px-3 py-1 text-base shadow-xs transition-[color,box-shadow] outline-none file:inline-flex file:h-7 file:border-0 file:bg-transparent file:text-sm file:font-medium disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive"
+                    id="startTime" type="time" [value]="formatTimeForInput(sessionData.SessionDetailData.start_time)">
+                </div>
+                <div>
+                  <label
+                    class="flex items-center gap-2 text-sm leading-none font-medium select-none group-data-[disabled=true]:pointer-events-none group-data-[disabled=true]:opacity-50 peer-disabled:cursor-not-allowed peer-disabled:opacity-50"
+                    for="endTime">Hora Fin</label>
+                  <input
+                    class="file:text-foreground placeholder:text-muted-foreground selection:bg-primary selection:text-primary-foreground dark:bg-input/30 border-input flex h-9 w-full min-w-0 rounded-md border bg-transparent px-3 py-1 text-base shadow-xs transition-[color,box-shadow] outline-none file:inline-flex file:h-7 file:border-0 file:bg-transparent file:text-sm file:font-medium disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive"
+                    id="endTime" type="time" [value]="formatTimeForInput(sessionData.SessionDetailData.end_time)">
+                </div>
+              </div>
+
+              <!-- Completed Checkbox -->
+              <div class="flex items-center space-x-2">
+                <button type="button" role="checkbox" (click)="toggleCompleted()"
+                  [attr.aria-checked]="sessionData.SessionDetailData.completed"
+                  [attr.data-state]="sessionData.SessionDetailData.completed ? 'checked' : 'unchecked'"
+                  class="peer border-input dark:bg-input/30 data-[state=checked]:bg-primary data-[state=checked]:text-primary-foreground dark:data-[state=checked]:bg-primary data-[state=checked]:border-primary focus-visible:border-ring focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive size-4 shrink-0 rounded-[4px] border shadow-xs transition-shadow outline-none focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-50 flex items-center justify-center"
+                  id="completed" [style.background-color]="sessionData.SessionDetailData.completed ? '#0891b2' : ''">
+                  @if (sessionData.SessionDetailData.completed) {
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                    class="lucide lucide-check text-white size-3">
+                    <path d="m9 12 2 2 4-4"></path>
+                  </svg>
+                  }
+                </button>
+                <label
+                  class="flex items-center gap-2 select-none group-data-[disabled=true]:pointer-events-none group-data-[disabled=true]:opacity-50 peer-disabled:cursor-not-allowed peer-disabled:opacity-50 text-sm font-medium"
+                  for="completed">Sesión completada</label>
+              </div>
+            </div>
+
+            <!-- Right Column -->
+            <div class="space-y-4">
+              <!-- Clinic -->
+              <div class="relative">
+                <label
+                  class="flex items-center gap-2 text-sm leading-none font-medium select-none group-data-[disabled=true]:pointer-events-none group-data-[disabled=true]:opacity-50 peer-disabled:cursor-not-allowed peer-disabled:opacity-50"
+                  for="clinic">Clínica</label>
+                <button type="button" (click)="toggleDropdown('clinic')"
+                  class="border-input data-[placeholder]:text-muted-foreground [&_svg:not([class*='text-'])]:text-muted-foreground focus-visible:border-ring focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:bg-input/30 dark:hover:bg-input/50 flex w-full items-center justify-between gap-2 rounded-md border bg-transparent px-3 py-2 text-sm whitespace-nowrap shadow-xs transition-[color,box-shadow] outline-none focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-50 h-9 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4">
+                  <span style="pointer-events: none;">
+                    <div class="flex items-center gap-2">
+                      <div class="w-3 h-3 rounded-full" [style.background-color]="getClinicColorHex()"></div>
+                      {{ getClinicName() }}
+                    </div>
+                  </span>
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                    class="lucide lucide-chevron-down size-4 opacity-50" aria-hidden="true">
+                    <path d="m6 9 6 6 6-6"></path>
+                  </svg>
+                </button>
+
+                <!-- Clinic Dropdown -->
+                @if (dropdownStates().clinic) {
+                <div
+                  class="absolute top-full left-0 right-0 z-50 mt-1 bg-white border border-input rounded-md shadow-lg">
+                  @for (clinic of clinicConfigs; track clinic.id) {
+                  <button type="button" (click)="updateClinic(clinic.id)"
+                    class="w-full flex items-center gap-2 px-3 py-2 text-sm hover:bg-accent hover:text-accent-foreground first:rounded-t-md last:rounded-b-md">
+                    <div class="w-3 h-3 rounded-full"
+                      [style.background-color]="clinic.backgroundColor === 'bg-blue-500' ? '#3b82f6' : clinic.backgroundColor === 'bg-green-500' ? '#10b981' : clinic.backgroundColor === 'bg-red-500' ? '#ef4444' : '#6366f1'">
+                    </div>
+                    {{ clinic.name }}
+                  </button>
+                  }
+                </div>
+                }
+              </div>
+
+              <!-- Session Type -->
+              <div class="relative">
+                <label
+                  class="flex items-center gap-2 text-sm leading-none font-medium select-none group-data-[disabled=true]:pointer-events-none group-data-[disabled=true]:opacity-50 peer-disabled:cursor-not-allowed peer-disabled:opacity-50"
+                  for="type">Tipo de Sesión</label>
+                <button type="button" (click)="toggleDropdown('sessionType')"
+                  class="border-input data-[placeholder]:text-muted-foreground [&_svg:not([class*='text-'])]:text-muted-foreground focus-visible:border-ring focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:bg-input/30 dark:hover:bg-input/50 flex w-full items-center justify-between gap-2 rounded-md border bg-transparent px-3 py-2 text-sm whitespace-nowrap shadow-xs transition-[color,box-shadow] outline-none focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-50 h-9 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4">
+                  <span style="pointer-events: none;">{{ sessionData.SessionDetailData.type }}</span>
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                    class="lucide lucide-chevron-down size-4 opacity-50" aria-hidden="true">
+                    <path d="m6 9 6 6 6-6"></path>
+                  </svg>
+                </button>
+
+                <!-- Session Type Dropdown -->
+                @if (dropdownStates().sessionType) {
+                <div
+                  class="absolute top-full left-0 right-0 z-50 mt-1 bg-white border border-input rounded-md shadow-lg">
+                  @for (type of sessionTypes; track type) {
+                  <button type="button" (click)="updateSessionType(type)"
+                    class="w-full text-left px-3 py-2 text-sm hover:bg-accent hover:text-accent-foreground first:rounded-t-md last:rounded-b-md">
+                    {{ type }}
+                  </button>
+                  }
+                </div>
+                }
+              </div>
+
+              <!-- Price and Payment -->
+              <div class="grid grid-cols-2 gap-4">
+                <div>
+                  <label
+                    class="flex items-center gap-2 text-sm leading-none font-medium select-none group-data-[disabled=true]:pointer-events-none group-data-[disabled=true]:opacity-50 peer-disabled:cursor-not-allowed peer-disabled:opacity-50"
+                    for="price">Precio (€)</label>
+                  <input
+                    class="file:text-foreground placeholder:text-muted-foreground selection:bg-primary selection:text-primary-foreground dark:bg-input/30 border-input flex h-9 w-full min-w-0 rounded-md border bg-transparent px-3 py-1 text-base shadow-xs transition-[color,box-shadow] outline-none file:inline-flex file:h-7 file:border-0 file:bg-transparent file:text-sm file:font-medium disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive"
+                    id="price" type="number" [value]="sessionData.SessionDetailData.price">
+                </div>
+                <div class="relative">
+                  <label
+                    class="flex items-center gap-2 text-sm leading-none font-medium select-none group-data-[disabled=true]:pointer-events-none group-data-[disabled=true]:opacity-50 peer-disabled:cursor-not-allowed peer-disabled:opacity-50"
+                    for="payment">Método de Pago</label>
+                  <button type="button" (click)="toggleDropdown('paymentMethod')"
+                    class="border-input data-[placeholder]:text-muted-foreground [&_svg:not([class*='text-'])]:text-muted-foreground focus-visible:border-ring focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:bg-input/30 dark:hover:bg-input/50 flex w-full items-center justify-between gap-2 rounded-md border bg-transparent px-3 py-2 text-sm whitespace-nowrap shadow-xs transition-[color,box-shadow] outline-none focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-50 h-9 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4">
+                    <span style="pointer-events: none;">{{ getPaymentMethodText() }}</span>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                      stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                      class="lucide lucide-chevron-down size-4 opacity-50" aria-hidden="true">
+                      <path d="m6 9 6 6 6-6"></path>
+                    </svg>
+                  </button>
+
+                  <!-- Payment Method Dropdown -->
+                  @if (dropdownStates().paymentMethod) {
+                  <div
+                    class="absolute top-full left-0 right-0 z-50 mt-1 bg-white border border-input rounded-md shadow-lg">
+                    @for (method of paymentMethods; track method.value) {
+                    <button type="button" (click)="updatePaymentMethod(method.value)"
+                      class="w-full text-left px-3 py-2 text-sm hover:bg-accent hover:text-accent-foreground first:rounded-t-md last:rounded-b-md">
+                      {{ method.label }}
+                    </button>
+                    }
+                  </div>
+                  }
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Notes -->
+          <div>
+            <label
+              class="flex items-center gap-2 text-sm leading-none font-medium select-none group-data-[disabled=true]:pointer-events-none group-data-[disabled=true]:opacity-50 peer-disabled:cursor-not-allowed peer-disabled:opacity-50"
+              for="notes">Notas</label>
+            <textarea
+              class="border-input placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:bg-input/30 flex field-sizing-content min-h-16 w-full rounded-md border bg-transparent px-3 py-2 text-base shadow-xs transition-[color,box-shadow] outline-none focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
+              id="notes" placeholder="Notas adicionales sobre la sesión..."
+              rows="4">{{ sessionData.SessionDetailData.notes || '' }}</textarea>
+          </div>
+
+          <!-- Buttons -->
+          <div class="flex justify-end gap-4 pt-4">
+            <button (click)="onClose()"
+              class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive border bg-background shadow-xs dark:bg-input/30 dark:border-input h-9 px-4 py-2 has-[>svg]:px-3"
+              onmouseover="this.style.backgroundColor='#0891b2'; this.style.color='white'"
+              onmouseout="this.style.backgroundColor=''; this.style.color=''">
+              Cancelar
+            </button>
+            <button
+              class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive bg-primary text-primary-foreground shadow-xs hover:bg-primary/90 h-9 px-4 py-2 has-[>svg]:px-3">
+              Guardar Cambios
+            </button>
+          </div>
+        </div>
+        }
+
+        <!-- Clinical History Tab Content -->
+        @if (activeTab() === 'clinical') {
+        <div class="flex-1 outline-none mt-6">
+          <div class="space-y-4">
+            <div class="flex items-center justify-between">
+              <h3 class="text-lg font-semibold">Historia Clínica</h3>
+              <button (click)="startAddingNewNote()"
+                class="inline-flex items-center justify-center whitespace-nowrap text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive bg-primary text-primary-foreground shadow-xs hover:bg-primary/90 h-8 rounded-md gap-1.5 px-3 has-[>svg]:px-2.5">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                  stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                  class="lucide lucide-plus h-4 w-4 mr-2">
+                  <path d="M5 12h14"></path>
+                  <path d="M12 5v14"></path>
+                </svg>
+                Nueva Nota
+              </button>
+            </div>
+
+            <!-- New Note Form -->
+            @if (isAddingNewNote() && editingNote()) {
+            <div class="bg-card text-card-foreground flex flex-col gap-6 rounded-xl border shadow-sm p-4">
+              <div class="space-y-4">
+                <div>
+                  <label
+                    class="flex items-center gap-2 text-sm leading-none font-medium select-none group-data-[disabled=true]:pointer-events-none group-data-[disabled=true]:opacity-50 peer-disabled:cursor-not-allowed peer-disabled:opacity-50"
+                    for="note-title">Título de la nota</label>
+                  <input
+                    class="file:text-foreground placeholder:text-muted-foreground selection:bg-primary selection:text-primary-foreground dark:bg-input/30 border-input flex h-9 w-full min-w-0 rounded-md border bg-transparent px-3 py-1 text-base shadow-xs transition-[color,box-shadow] outline-none file:inline-flex file:h-7 file:border-0 file:bg-transparent file:text-sm file:font-medium disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive"
+                    id="note-title" placeholder="Título de la nota..." [(ngModel)]="editingNote()!.title">
+                </div>
+                <div>
+                  <label
+                    class="flex items-center gap-2 text-sm leading-none font-medium select-none group-data-[disabled=true]:pointer-events-none group-data-[disabled=true]:opacity-50 peer-disabled:cursor-not-allowed peer-disabled:opacity-50"
+                    for="note-content">Contenido</label>
+                  <textarea
+                    class="border-input placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:bg-input/30 flex field-sizing-content min-h-16 w-full rounded-md border bg-transparent px-3 py-2 text-base shadow-xs transition-[color,box-shadow] outline-none focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
+                    id="note-content" placeholder="Escribe tus notas clínicas aquí..." rows="6"
+                    [(ngModel)]="editingNote()!.content"></textarea>
+                </div>
+                <div class="flex justify-end gap-2">
+                  <button (click)="cancelAddingNewNote()"
+                    class="inline-flex items-center justify-center whitespace-nowrap text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive border bg-background shadow-xs h-8 rounded-md gap-1.5 px-3 has-[>svg]:px-2.5 text-foreground dark:bg-input/30 dark:border-input"
+                    onmouseover="this.style.backgroundColor='#0891b2'; this.style.color='white'"
+                    onmouseout="this.style.backgroundColor=''; this.style.color=''">Cancelar</button>
+                  <button (click)="saveNewNote()"
+                    class="inline-flex items-center justify-center whitespace-nowrap text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive bg-primary text-primary-foreground shadow-xs hover:bg-primary/90 h-8 rounded-md gap-1.5 px-3 has-[>svg]:px-2.5">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                      stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                      class="lucide lucide-save h-4 w-4 mr-2">
+                      <path
+                        d="M15.2 3a2 2 0 0 1 1.4.6l3.8 3.8a2 2 0 0 1 .6 1.4V19a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z">
+                      </path>
+                      <path d="M17 21v-7a1 1 0 0 0-1-1H8a1 1 0 0 0-1 1v7"></path>
+                      <path d="M7 3v4a1 1 0 0 0 1 1h7"></path>
+                    </svg>
+                    Guardar
+                  </button>
+                </div>
+              </div>
+            </div>
+            }
+
+            @if (hasMedicalRecords()) {
+            <div class="space-y-4">
+              @for (record of getMedicalRecords(); track $index) {
+              <!-- Edit Note Form -->
+              @if (editingNote() && editingNote()?.id === $index.toString() && !isAddingNewNote()) {
+              <div class="bg-card text-card-foreground flex flex-col gap-6 rounded-xl border shadow-sm p-4">
+                <div class="space-y-4">
+                  <div>
+                    <label
+                      class="flex items-center gap-2 text-sm leading-none font-medium select-none group-data-[disabled=true]:pointer-events-none group-data-[disabled=true]:opacity-50 peer-disabled:cursor-not-allowed peer-disabled:opacity-50"
+                      for="note-title">Título de la nota</label>
+                    <input
+                      class="file:text-foreground placeholder:text-muted-foreground selection:bg-primary selection:text-primary-foreground dark:bg-input/30 border-input flex h-9 w-full min-w-0 rounded-md border bg-transparent px-3 py-1 text-base shadow-xs transition-[color,box-shadow] outline-none file:inline-flex file:h-7 file:border-0 file:bg-transparent file:text-sm file:font-medium disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive"
+                      id="note-title" placeholder="Título de la nota..." [(ngModel)]="editingNote()!.title">
+                  </div>
+                  <div>
+                    <label
+                      class="flex items-center gap-2 text-sm leading-none font-medium select-none group-data-[disabled=true]:pointer-events-none group-data-[disabled=true]:opacity-50 peer-disabled:cursor-not-allowed peer-disabled:opacity-50"
+                      for="note-content">Contenido</label>
+                    <textarea
+                      class="border-input placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:bg-input/30 flex field-sizing-content min-h-16 w-full rounded-md border bg-transparent px-3 py-2 text-base shadow-xs transition-[color,box-shadow] outline-none focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
+                      id="note-content" placeholder="Escribe tus notas clínicas aquí..." rows="6"
+                      [(ngModel)]="editingNote()!.content"></textarea>
+                  </div>
+                  <div class="flex justify-end gap-2">
+                    <button (click)="cancelEditingNote()"
+                      class="inline-flex items-center justify-center whitespace-nowrap text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive border bg-background shadow-xs h-8 rounded-md gap-1.5 px-3 has-[>svg]:px-2.5 text-foreground dark:bg-input/30 dark:border-input"
+                      onmouseover="this.style.backgroundColor='#0891b2'; this.style.color='white'"
+                      onmouseout="this.style.backgroundColor=''; this.style.color=''">Cancelar</button>
+                    <button (click)="saveEditedNote()"
+                      class="inline-flex items-center justify-center whitespace-nowrap text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive bg-primary text-primary-foreground shadow-xs hover:bg-primary/90 h-8 rounded-md gap-1.5 px-3 has-[>svg]:px-2.5">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                        class="lucide lucide-save h-4 w-4 mr-2">
+                        <path
+                          d="M15.2 3a2 2 0 0 1 1.4.6l3.8 3.8a2 2 0 0 1 .6 1.4V19a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z">
+                        </path>
+                        <path d="M17 21v-7a1 1 0 0 0-1-1H8a1 1 0 0 0-1 1v7"></path>
+                        <path d="M7 3v4a1 1 0 0 0 1 1h7"></path>
+                      </svg>
+                      Guardar
+                    </button>
+                  </div>
+                </div>
+              </div>
+              } @else {
+              <!-- Display Note -->
+              <div class="bg-card text-card-foreground flex flex-col gap-6 rounded-xl border shadow-sm p-4">
+                <div>
+                  <div class="flex items-center justify-between mb-3">
+                    <div>
+                      <h4 class="font-semibold text-lg">{{ record.title }}</h4>
+                      <p class="text-sm text-muted-foreground">{{ formatMedicalRecordDate(record.date) }}</p>
+                    </div>
+                    <button (click)="startEditingNote(record, $index)"
+                      class="inline-flex items-center justify-center whitespace-nowrap text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive h-8 rounded-md gap-1.5 px-3 has-[>svg]:px-2.5"
+                      onmouseover="this.style.backgroundColor='#0891b2'; this.style.color='white'"
+                      onmouseout="this.style.backgroundColor=''; this.style.color=''">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                        class="lucide lucide-pen-line h-4 w-4">
+                        <path d="M12 20h9"></path>
+                        <path
+                          d="M16.376 3.622a1 1 0 0 1 3.002 3.002L7.368 18.635a2 2 0 0 1-.855.506l-2.872.838a .5.5 0 0 1-.62-.62l.838-2.872a2 2 0 0 1 .506-.854z">
+                        </path>
+                      </svg>
+                    </button>
+                  </div>
+                  <div class="prose prose-sm max-w-none">
+                    <p class="whitespace-pre-wrap">{{ record.content }}</p>
+                  </div>
+                </div>
+              </div>
+              }
+              }
+            </div>
+            } @else {
+            <div class="text-center py-8">
+              <div class="text-gray-400 mb-2">
+                <svg class="w-12 h-12 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+              </div>
+              <h3 class="text-lg font-medium text-gray-900 mb-1">No hay registros médicos</h3>
+              <p class="text-gray-500">Esta sesión no tiene registros médicos asociados.</p>
+            </div>
+            }
+          </div>
+        </div>
+        }
+      </div>
+    </div>
+
+  </div>
+</div>
