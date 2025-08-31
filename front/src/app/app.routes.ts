@@ -37,10 +37,6 @@ export const routes: Routes = [
       {
         path: 'patient',
         canActivate: [authGuard],
-        loadComponent: () =>
-          import('./features/patient/patient.component').then(
-            (m) => m.PatientComponent
-          ),
         data: {
           menu: {
             label: 'Pacientes',
@@ -48,6 +44,29 @@ export const routes: Routes = [
             order: 3,
           },
         },
+        children: [
+          {
+            path: '',
+            loadComponent: () =>
+              import('./features/patient/patient.component').then(
+                (m) => m.PatientComponent
+              ),
+          },
+          {
+            path: ':id',
+            loadComponent: () =>
+              import('./features/patient/patient-detail/patient-detail.component').then(
+                (m) => m.PatientDetailComponent
+              ),
+          },
+          {
+            path: 'nuevo',
+            loadComponent: () =>
+              import('./features/patient/patient-detail/patient-detail.component').then(
+                (m) => m.PatientDetailComponent
+              ),
+          },
+        ],
       },
       {
         path: 'calendar',

@@ -1,1 +1,114 @@
-<p>patient works!</p>
+<div class="p-4 sm:p-6 h-screen overflow-hidden">
+  <div class="w-full h-full flex flex-col max-h-full">
+    <!-- Header -->
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4 sm:mb-6">
+      <div>
+        <h1 class="text-2xl sm:text-3xl font-black font-montserrat text-gray-900">Pacientes</h1>
+        <p class="text-sm sm:text-base text-gray-600 mt-1 sm:mt-2">
+          Gestión de fichas y datos de pacientes
+        </p>
+      </div>
+
+      <div class="flex items-center gap-4">
+        <button
+          (click)="onFiltersClick()"
+          class="border border-gray-300 bg-white hover:text-white inline-flex items-center justify-center rounded-xl px-3 py-2 text-sm font-medium transition-all"
+          onmouseover="this.style.backgroundColor='#0891b2'; this.style.borderColor='#0891b2'"
+          onmouseout="this.style.backgroundColor=''; this.style.borderColor='#d1d5db'">
+          <svg class="h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>
+          </svg>
+          Filtros
+        </button>
+        <button
+          (click)="onNewPatientClick()"
+          style="background-color: #0891b2"
+          class="hover:opacity-90 w-full sm:w-auto inline-flex items-center justify-center px-4 py-2 text-white rounded-md transition-opacity font-medium">
+          <svg class="h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+          </svg>
+          Nuevo Paciente
+        </button>
+      </div>
+  </div>
+
+    <!-- Search and Filters -->
+    <div class="flex items-center gap-4 mb-4 sm:mb-6">
+    <div class="relative flex-1 max-w-md">
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-search absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground">
+        <circle cx="11" cy="11" r="8"></circle>
+        <path d="m21 21-4.3-4.3"></path>
+      </svg>
+      <input (input)="onSearchChange($event)"
+             [value]="searchTerm()"
+             class="file:text-foreground placeholder:text-muted-foreground selection:bg-primary selection:text-primary-foreground dark:bg-input/30 border-input flex h-9 w-full min-w-0 rounded-md border bg-transparent px-3 py-1 text-base shadow-xs transition-[color,box-shadow] outline-none file:inline-flex file:h-7 file:border-0 file:bg-transparent file:text-sm file:font-medium disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive pl-10" 
+             placeholder="Buscar por nombre, DNI o email...">
+    </div>
+
+    <select (change)="onStatusFilterChange($event)"
+            [value]="statusFilter()"
+            class="px-3 py-2 border border-border rounded-md bg-background">
+      <option value="all">Todos los estados</option>
+      <option value="active">Activos</option>
+      <option value="inactive">Inactivos</option>
+      <option value="discharged">Alta</option>
+      <option value="on-hold">En Pausa</option>
+    </select>
+  </div>
+
+    <!-- Patients Grid -->
+    <div class="flex-1 overflow-y-auto min-h-0">
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      @for (patient of filteredPatients(); track patient.id) {
+        <div class="bg-card text-card-foreground flex flex-col gap-6 rounded-xl border py-6 shadow-sm cursor-pointer hover:shadow-md transition-shadow"
+             (click)="onPatientClick(patient)">
+          <!-- Card Header -->
+          <div class="@container/card-header grid auto-rows-min grid-rows-[auto_auto] items-start gap-1.5 px-6 has-data-[slot=card-action]:grid-cols-[1fr_auto] [.border-b]:pb-6 pb-3">
+            <div class="flex items-start justify-between">
+              <div>
+                <div class="text-lg font-semibold">{{ patient.name }}</div>
+                <p class="text-sm text-muted-foreground mt-1">DNI: {{ patient.dni }}</p>
+              </div>
+              <span class="inline-flex items-center justify-center rounded-md border px-2 py-0.5 text-xs font-medium w-fit whitespace-nowrap shrink-0 [&>svg]:size-3 gap-1 [&>svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive transition-[color,box-shadow] overflow-hidden border-transparent [a&]:hover:bg-primary/90"
+                    [class]="getStatusColor(patient.status)">
+                {{ getStatusLabel(patient.status) }}
+              </span>
+            </div>
+          </div>
+          
+          <!-- Card Content -->
+          <div class="px-6">
+            <div class="space-y-2">
+              <div class="flex items-center justify-between text-sm">
+                <span class="text-muted-foreground">Email:</span>
+                <span class="truncate ml-2">{{ patient.email }}</span>
+              </div>
+              <div class="flex items-center justify-between text-sm">
+                <span class="text-muted-foreground">Teléfono:</span>
+                <span>{{ patient.phone }}</span>
+              </div>
+              <div class="flex items-center justify-between text-sm">
+                <span class="text-muted-foreground">Tipo:</span>
+                <span class="capitalize">{{ capitalizeSessionType(patient.session_type) }}</span>
+              </div>
+              <div class="flex items-center justify-between text-sm">
+                <span class="text-muted-foreground">Desde:</span>
+                <span>{{ formatDate(patient.created_at) }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      }
+      </div>
+
+      <!-- Empty State -->
+      @if (filteredPatients().length === 0) {
+        <div class="text-center py-12">
+          <p class="text-muted-foreground">
+            No se encontraron pacientes que coincidan con los criterios de búsqueda.
+          </p>
+        </div>
+      }
+  </div>
+  </div>
+</div>
