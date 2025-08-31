@@ -1,11 +1,19 @@
-import { Component, Input, Output, EventEmitter, signal, ChangeDetectionStrategy } from '@angular/core';
+import {
+  Component,
+  Input,
+  Output,
+  EventEmitter,
+  signal,
+  ChangeDetectionStrategy,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { SessionData, SessionUtils } from '../../models/session.model';
 import { CLINIC_CONFIGS, ClinicConfig } from '../../models/clinic-config.model';
 
 /**
  * Session popup component displaying session details with tabs
- * 
+ *
  * Features:
  * - Tabbed interface (Information/Clinical History)
  * - Read-only form fields matching React UI
@@ -15,9 +23,9 @@ import { CLINIC_CONFIGS, ClinicConfig } from '../../models/clinic-config.model';
 @Component({
   selector: 'app-session-popup',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, FormsModule],
   templateUrl: './session-popup.component.html',
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class SessionPopupComponent {
   @Input({ required: true }) sessionData!: SessionData;
@@ -28,8 +36,32 @@ export class SessionPopupComponent {
   readonly dropdownStates = signal({
     clinic: false,
     sessionType: false,
-    paymentMethod: false
+    paymentMethod: false,
   });
+  readonly editingNote = signal<{
+    id?: string;
+    title: string;
+    content: string;
+    isEditing: boolean;
+  } | null>(null);
+  readonly isAddingNewNote = signal(false);
+
+  // Session types and payment methods for dropdowns
+  readonly sessionTypes = [
+    'Terapia Individual',
+    'Terapia de Pareja',
+    'Terapia Familiar',
+    'Terapia Grupal',
+    'Evaluación Psicológica',
+    'Consulta de Seguimiento',
+  ];
+
+  readonly paymentMethods = [
+    { value: 'cash' as const, label: 'Efectivo' },
+    { value: 'card' as const, label: 'Tarjeta' },
+    { value: 'transfer' as const, label: 'Transferencia' },
+    { value: 'bizum' as const, label: 'Bizum' },
+  ];
 
   /**
    * Handles backdrop click to close modal
@@ -51,14 +83,19 @@ export class SessionPopupComponent {
    * Gets clinic config by ID
    */
   getClinicConfig(clinicId: number): ClinicConfig {
-    return this.clinicConfigs.find(config => config.id === clinicId) || this.clinicConfigs[0];
+    return (
+      this.clinicConfigs.find((config) => config.id === clinicId) ||
+      this.clinicConfigs[0]
+    );
   }
 
   /**
    * Gets clinic config from session data
    */
   getClinicConfigFromSessionData(): ClinicConfig {
-    return this.getClinicConfig(this.sessionData.SessionDetailData.ClinicDetailData.clinic_id);
+    return this.getClinicConfig(
+      this.sessionData.SessionDetailData.ClinicDetailData.clinic_id
+    );
   }
 
   /**
@@ -80,11 +117,11 @@ export class SessionPopupComponent {
    */
   formatDate(dateString: string): string {
     const date = new Date(dateString);
-    return date.toLocaleDateString('es-ES', { 
-      weekday: 'long', 
-      year: 'numeric', 
-      month: 'long', 
-      day: 'numeric' 
+    return date.toLocaleDateString('es-ES', {
+      weekday: 'long',
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
     });
   }
 
@@ -122,7 +159,9 @@ export class SessionPopupComponent {
    * Gets payment status text
    */
   getPaymentStatusText(): string {
-    return SessionUtils.formatPaymentStatus(this.sessionData.SessionDetailData.payment_status);
+    return SessionUtils.formatPaymentStatus(
+      this.sessionData.SessionDetailData.payment_status
+    );
   }
 
   /**
@@ -133,16 +172,21 @@ export class SessionPopupComponent {
     const paymentStatusClasses = {
       pending: 'bg-yellow-100 text-yellow-800',
       paid: 'bg-green-100 text-green-800',
-      partial: 'bg-orange-100 text-orange-800'
+      partial: 'bg-orange-100 text-orange-800',
     };
-    return paymentStatusClasses[status as keyof typeof paymentStatusClasses] || paymentStatusClasses.pending;
+    return (
+      paymentStatusClasses[status as keyof typeof paymentStatusClasses] ||
+      paymentStatusClasses.pending
+    );
   }
 
   /**
    * Gets payment method text
    */
   getPaymentMethodText(): string {
-    return SessionUtils.formatPaymentMethod(this.sessionData.SessionDetailData.payment_method);
+    return SessionUtils.formatPaymentMethod(
+      this.sessionData.SessionDetailData.payment_method
+    );
   }
 
   /**
@@ -155,7 +199,7 @@ export class SessionPopupComponent {
   /**
    * Gets medical records from session data
    */
-  getMedicalRecords(): Array<{title: string, content: string, date: string}> {
+  getMedicalRecords(): Array<{ title: string; content: string; date: string }> {
     return this.sessionData.SessionDetailData.MedicalRecordData || [];
   }
 
@@ -169,7 +213,7 @@ export class SessionPopupComponent {
       month: 'long',
       day: 'numeric',
       hour: '2-digit',
-      minute: '2-digit'
+      minute: '2-digit',
     });
   }
 
@@ -205,7 +249,7 @@ export class SessionPopupComponent {
       'Terapia Familiar': 'familiar',
       'Terapia Grupal': 'grupal',
       'Evaluación Psicológica': 'evaluación',
-      'Consulta de Seguimiento': 'seguimiento'
+      'Consulta de Seguimiento': 'seguimiento',
     };
     return shortTypes[type] || type.toLowerCase();
   }
@@ -226,7 +270,7 @@ export class SessionPopupComponent {
    */
   getClinicColorHex(): string {
     const bgClass = this.getClinicConfigFromSessionData().backgroundColor;
-    
+
     // Map Tailwind bg classes to hex colors
     const colorMap: { [key: string]: string } = {
       'bg-blue-500': '#3b82f6',
@@ -238,9 +282,9 @@ export class SessionPopupComponent {
       'bg-indigo-500': '#6366f1',
       'bg-orange-500': '#f97316',
       'bg-cyan-500': '#06b6d4',
-      'bg-teal-500': '#14b8a6'
+      'bg-teal-500': '#14b8a6',
     };
-    
+
     return colorMap[bgClass] || '#6366f1'; // Default to indigo if not found
   }
 
@@ -251,7 +295,7 @@ export class SessionPopupComponent {
     const current = this.dropdownStates();
     this.dropdownStates.set({
       ...current,
-      [dropdown]: !current[dropdown]
+      [dropdown]: !current[dropdown],
     });
   }
 
@@ -259,6 +303,116 @@ export class SessionPopupComponent {
    * Toggles completed checkbox
    */
   toggleCompleted(): void {
-    this.sessionData.SessionDetailData.completed = !this.sessionData.SessionDetailData.completed;
+    this.sessionData.SessionDetailData.completed =
+      !this.sessionData.SessionDetailData.completed;
+  }
+
+  /**
+   * Updates session clinic
+   */
+  updateClinic(clinicId: number): void {
+    this.sessionData.SessionDetailData.ClinicDetailData.clinic_id = clinicId;
+    const clinic = this.getClinicConfig(clinicId);
+    this.sessionData.SessionDetailData.ClinicDetailData.clinic_name =
+      clinic.name;
+    this.toggleDropdown('clinic');
+  }
+
+  /**
+   * Updates session type
+   */
+  updateSessionType(type: string): void {
+    this.sessionData.SessionDetailData.type = type;
+    this.toggleDropdown('sessionType');
+  }
+
+  /**
+   * Updates payment method
+   */
+  updatePaymentMethod(method: 'cash' | 'card' | 'transfer' | 'bizum'): void {
+    this.sessionData.SessionDetailData.payment_method = method;
+    this.toggleDropdown('paymentMethod');
+  }
+
+  /**
+   * Starts editing a note
+   */
+  startEditingNote(
+    record: { title: string; content: string; date: string },
+    index: number
+  ): void {
+    this.editingNote.set({
+      id: `${index}`,
+      title: record.title,
+      content: record.content,
+      isEditing: true,
+    });
+  }
+
+  /**
+   * Cancels note editing
+   */
+  cancelEditingNote(): void {
+    this.editingNote.set(null);
+  }
+
+  /**
+   * Saves edited note
+   */
+  saveEditedNote(): void {
+    const note = this.editingNote();
+    if (!note) return;
+
+    // Update the medical record in session data
+    const records = this.getMedicalRecords();
+    const index = parseInt(note.id || '0');
+    if (records[index]) {
+      records[index].title = note.title;
+      records[index].content = note.content;
+    }
+
+    this.editingNote.set(null);
+  }
+
+  /**
+   * Starts adding a new note
+   */
+  startAddingNewNote(): void {
+    this.isAddingNewNote.set(true);
+    this.editingNote.set({
+      title: 'Nueva nota',
+      content: '',
+      isEditing: true,
+    });
+  }
+
+  /**
+   * Cancels adding new note
+   */
+  cancelAddingNewNote(): void {
+    this.isAddingNewNote.set(false);
+    this.editingNote.set(null);
+  }
+
+  /**
+   * Saves new note
+   */
+  saveNewNote(): void {
+    const note = this.editingNote();
+    if (!note || !note.title.trim() || !note.content.trim()) return;
+
+    // Add new record to session data
+    if (!this.sessionData.SessionDetailData.MedicalRecordData) {
+      this.sessionData.SessionDetailData.MedicalRecordData = [];
+    }
+
+    this.sessionData.SessionDetailData.MedicalRecordData.push({
+      title: note.title,
+      content: note.content,
+      date: new Date().toISOString(),
+    });
+
+    this.isAddingNewNote.set(false);
+    this.editingNote.set(null);
   }
 }
