@@ -5,6 +5,7 @@ const definitions = require("./definitions");
 const sessionsPaths = require("./paths/sessions");
 const patientsPaths = require("./paths/patients");
 const bonusesPaths = require("./paths/bonuses");
+const dashboardPaths = require("./paths/dashboard");
 
 const swaggerDefinition = {
   openapi: "3.0.0",
@@ -30,6 +31,7 @@ const swaggerDefinition = {
     ...sessionsPaths,
     ...patientsPaths,
     ...bonusesPaths,
+    ...dashboardPaths,
   },
   tags: [
     {
@@ -43,6 +45,10 @@ const swaggerDefinition = {
     {
       name: "Bonuses",
       description: "Gestión de bonuses de pacientes",
+    },
+    {
+      name: "Dashboard",
+      description: "KPIs y métricas del dashboard",
     },
   ],
 };

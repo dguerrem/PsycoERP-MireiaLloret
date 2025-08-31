@@ -1152,6 +1152,28 @@ const definitions = {
     },
   },
 
+  DashboardKPIsResponse: {
+    type: "object",
+    properties: {
+      success: {
+        type: "boolean",
+        example: true,
+      },
+      total: {
+        type: "integer",
+        description: "Número total de registros retornados",
+        example: 15,
+      },
+      data: {
+        type: "array",
+        items: {
+          $ref: "#/components/schemas/Patient",
+        },
+        description: "Lista de pacientes (provisional para KPIs del dashboard)",
+      },
+    },
+  },
+
   ErrorResponse: {
     type: "object",
     properties: {
