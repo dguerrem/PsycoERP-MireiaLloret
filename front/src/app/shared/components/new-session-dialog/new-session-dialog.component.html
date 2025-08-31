@@ -20,8 +20,8 @@
       </button>
     </div>
 
-    <!-- Form Content - Exact match to React -->
-    <form (ngSubmit)="onSubmit()" class="p-6 space-y-6">
+    <!-- Form Content - Reactive Forms -->
+    <form [formGroup]="sessionForm" (ngSubmit)="onSubmit()" class="p-6 space-y-6">
       
       <!-- Error Message -->
       @if (error()) {
@@ -55,7 +55,6 @@
                 <div 
                   (click)="selectOption('patient', patient.id.toString())"
                   class="px-3 py-2 cursor-pointer text-sm transition-colors hover:text-white"
-                  style="hover:background-color: #0891b2"
                   onmouseover="this.style.backgroundColor='#0891b2'; this.style.color='white'"
                   onmouseout="this.style.backgroundColor=''; this.style.color=''">
                   {{ patient.name }}
@@ -82,11 +81,8 @@
           <input 
             type="date"
             id="date"
-            [(ngModel)]="formData().session_date"
-            (ngModelChange)="updateSessionDate($event)"
-            name="session_date"
-            class="flex h-10 w-full rounded-md border-2 border-gray-300 bg-white px-3 py-2 text-sm shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-gray-500 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 disabled:cursor-not-allowed disabled:opacity-50"
-            required>
+            formControlName="session_date"
+            class="flex h-10 w-full rounded-md border-2 border-gray-300 bg-white px-3 py-2 text-sm shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-gray-500 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 disabled:cursor-not-allowed disabled:opacity-50">
         </div>
 
         <!-- Time -->
@@ -101,11 +97,9 @@
           <input 
             type="time"
             id="time"
-            [(ngModel)]="formData().start_time"
-            (ngModelChange)="updateStartTime($event)"
-            name="start_time"
-            class="flex h-10 w-full rounded-md border-2 border-gray-300 bg-white px-3 py-2 text-sm shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-gray-500 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 disabled:cursor-not-allowed disabled:opacity-50"
-            required>
+            formControlName="start_time"
+            (change)="onStartTimeChange()"
+            class="flex h-10 w-full rounded-md border-2 border-gray-300 bg-white px-3 py-2 text-sm shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-gray-500 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 disabled:cursor-not-allowed disabled:opacity-50">
         </div>
       </div>
 
@@ -192,13 +186,10 @@
           <input 
             type="number"
             id="price"
-            [(ngModel)]="formData().price"
-            (ngModelChange)="updatePrice($event)"
-            name="price"
+            formControlName="price"
             step="0.01"
             placeholder="0.00"
-            class="flex h-10 w-full rounded-md border-2 border-gray-300 bg-white px-3 py-2 text-sm shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-gray-500 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 disabled:cursor-not-allowed disabled:opacity-50"
-            required>
+            class="flex h-10 w-full rounded-md border-2 border-gray-300 bg-white px-3 py-2 text-sm shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-gray-500 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 disabled:cursor-not-allowed disabled:opacity-50">
         </div>
 
         <!-- Payment Method -->
@@ -271,9 +262,7 @@
         </label>
         <textarea 
           id="notes"
-          [(ngModel)]="formData().notes"
-          (ngModelChange)="updateNotes($event)"
-          name="notes"
+          formControlName="notes"
           placeholder="Notas adicionales sobre la cita..."
           rows="3"
           class="flex min-h-16 w-full rounded-md border-2 border-gray-300 bg-white px-3 py-2 text-sm shadow-sm transition-colors placeholder:text-gray-500 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 disabled:cursor-not-allowed disabled:opacity-50">
@@ -286,7 +275,9 @@
           type="button"
           (click)="onClose()"
           [disabled]="isLoading()"
-          class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive border bg-background shadow-xs hover:bg-accent hover:text-accent-foreground dark:bg-input/30 dark:border-input dark:hover:bg-input/50 h-9 px-4 py-2 has-[>svg]:px-3">
+          class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 border bg-white border-gray-300 hover:text-white shadow-sm h-9 px-4 py-2"
+          onmouseover="this.style.backgroundColor='#0891b2'; this.style.borderColor='#0891b2'"
+          onmouseout="this.style.backgroundColor=''; this.style.borderColor='#d1d5db'">
           Cancelar
         </button>
         <button 

@@ -37,7 +37,17 @@ export class CalendarService {
         MedicalRecordData: [
           {
             title: "Evaluación inicial",
-            content: "Paciente muestra buena disposición para el tratamiento",
+            content: "Paciente presenta síntomas de ansiedad generalizada. Se observa tensión muscular y dificultad para relajarse. Refiere preocupaciones constantes sobre el trabajo y la familia.",
+            date: "2025-08-15 09:30:00"
+          },
+          {
+            title: "Sesión de seguimiento",
+            content: "Mejora notable en técnicas de respiración. Paciente reporta menor frecuencia de episodios de ansiedad. Continuar con ejercicios de mindfulness.",
+            date: "2025-08-22 09:30:00"
+          },
+          {
+            title: "Evaluación de progreso",
+            content: "El paciente demuestra aplicación consistente de las técnicas aprendidas. Se observa reducción significativa en los niveles de ansiedad reportados. Ha logrado implementar rutinas de autocuidado efectivas.",
             date: "2025-08-30 09:30:00"
           }
         ]

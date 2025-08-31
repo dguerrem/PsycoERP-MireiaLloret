@@ -1,46 +1,83 @@
-import { Component, Input, Output, EventEmitter } from '@angular/core';
+import { Component, Input, Output, EventEmitter, signal, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { SessionData, SessionUtils } from '../../models/session.model';
 import { CLINIC_CONFIGS, ClinicConfig } from '../../models/clinic-config.model';
 
+/**
+ * Session popup component displaying session details with tabs
+ * 
+ * Features:
+ * - Tabbed interface (Information/Clinical History)
+ * - Read-only form fields matching React UI
+ * - Medical records display
+ * - Responsive design with exact React styling
+ */
 @Component({
   selector: 'app-session-popup',
   standalone: true,
   imports: [CommonModule],
-  templateUrl: './session-popup.component.html'
+  templateUrl: './session-popup.component.html',
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class SessionPopupComponent {
   @Input({ required: true }) sessionData!: SessionData;
   @Output() close = new EventEmitter<void>();
 
   readonly clinicConfigs = CLINIC_CONFIGS;
+  readonly activeTab = signal<'info' | 'clinical'>('info');
+  readonly dropdownStates = signal({
+    clinic: false,
+    sessionType: false,
+    paymentMethod: false
+  });
 
+  /**
+   * Handles backdrop click to close modal
+   */
   onBackdropClick(event: Event): void {
     if (event.target === event.currentTarget) {
       this.onClose();
     }
   }
 
+  /**
+   * Emits close event to parent component
+   */
   onClose(): void {
     this.close.emit();
   }
 
+  /**
+   * Gets clinic config by ID
+   */
   getClinicConfig(clinicId: number): ClinicConfig {
     return this.clinicConfigs.find(config => config.id === clinicId) || this.clinicConfigs[0];
   }
 
+  /**
+   * Gets clinic config from session data
+   */
   getClinicConfigFromSessionData(): ClinicConfig {
     return this.getClinicConfig(this.sessionData.SessionDetailData.ClinicDetailData.clinic_id);
   }
 
+  /**
+   * Gets patient name from session data
+   */
   getPatientName(): string {
     return this.sessionData.SessionDetailData.PatientData.name;
   }
 
+  /**
+   * Gets clinic name from session data
+   */
   getClinicName(): string {
     return this.sessionData.SessionDetailData.ClinicDetailData.clinic_name;
   }
 
+  /**
+   * Formats date for display
+   */
   formatDate(dateString: string): string {
     const date = new Date(dateString);
     return date.toLocaleDateString('es-ES', { 
@@ -51,22 +88,46 @@ export class SessionPopupComponent {
     });
   }
 
+  /**
+   * Formats time for display
+   */
   formatTime(time: string): string {
     return time.substring(0, 5);
   }
 
+  /**
+   * Gets status text for display
+   */
   getStatusText(): string {
-    return SessionUtils.getStatusText(this.sessionData);
+    if (this.sessionData.SessionDetailData.cancelled) {
+      return 'Cancelada';
+    }
+    if (this.sessionData.SessionDetailData.no_show) {
+      return 'No Asistió';
+    }
+    if (this.sessionData.SessionDetailData.completed) {
+      return 'Completada';
+    }
+    return 'Programada';
   }
 
+  /**
+   * Gets status badge CSS classes
+   */
   getStatusBadgeClass(): string {
     return SessionUtils.getStatusBadgeClass(this.sessionData);
   }
 
+  /**
+   * Gets payment status text
+   */
   getPaymentStatusText(): string {
     return SessionUtils.formatPaymentStatus(this.sessionData.SessionDetailData.payment_status);
   }
 
+  /**
+   * Gets payment status badge CSS classes
+   */
   getPaymentStatusBadgeClass(): string {
     const status = this.sessionData.SessionDetailData.payment_status;
     const paymentStatusClasses = {
@@ -77,18 +138,30 @@ export class SessionPopupComponent {
     return paymentStatusClasses[status as keyof typeof paymentStatusClasses] || paymentStatusClasses.pending;
   }
 
+  /**
+   * Gets payment method text
+   */
   getPaymentMethodText(): string {
     return SessionUtils.formatPaymentMethod(this.sessionData.SessionDetailData.payment_method);
   }
 
+  /**
+   * Formats price for display
+   */
   formatPrice(): string {
     return SessionUtils.formatPrice(this.sessionData.SessionDetailData.price);
   }
 
+  /**
+   * Gets medical records from session data
+   */
   getMedicalRecords(): Array<{title: string, content: string, date: string}> {
     return this.sessionData.SessionDetailData.MedicalRecordData || [];
   }
 
+  /**
+   * Formats medical record date
+   */
   formatMedicalRecordDate(dateString: string): string {
     const date = new Date(dateString);
     return date.toLocaleDateString('es-ES', {
@@ -100,11 +173,92 @@ export class SessionPopupComponent {
     });
   }
 
+  /**
+   * Checks if session has notes
+   */
   hasNotes(): boolean {
     return !!this.sessionData.SessionDetailData.notes;
   }
 
+  /**
+   * Checks if session has medical records
+   */
   hasMedicalRecords(): boolean {
     return this.getMedicalRecords().length > 0;
+  }
+
+  /**
+   * Sets the active tab
+   */
+  setActiveTab(tab: 'info' | 'clinical'): void {
+    this.activeTab.set(tab);
+  }
+
+  /**
+   * Gets short version of session type for badge
+   */
+  getSessionTypeShort(): string {
+    const type = this.sessionData.SessionDetailData.type;
+    const shortTypes: { [key: string]: string } = {
+      'Terapia Individual': 'individual',
+      'Terapia de Pareja': 'pareja',
+      'Terapia Familiar': 'familiar',
+      'Terapia Grupal': 'grupal',
+      'Evaluación Psicológica': 'evaluación',
+      'Consulta de Seguimiento': 'seguimiento'
+    };
+    return shortTypes[type] || type.toLowerCase();
+  }
+
+  /**
+   * Formats time for input fields (HH:MM format)
+   */
+  formatTimeForInput(time: string): string {
+    // If time already in HH:MM:SS format, convert to HH:MM
+    if (time.includes(':')) {
+      return time.substring(0, 5);
+    }
+    return time;
+  }
+
+  /**
+   * Gets clinic background color as hex value
+   */
+  getClinicColorHex(): string {
+    const bgClass = this.getClinicConfigFromSessionData().backgroundColor;
+    
+    // Map Tailwind bg classes to hex colors
+    const colorMap: { [key: string]: string } = {
+      'bg-blue-500': '#3b82f6',
+      'bg-green-500': '#10b981',
+      'bg-red-500': '#ef4444',
+      'bg-yellow-500': '#eab308',
+      'bg-purple-500': '#a855f7',
+      'bg-pink-500': '#ec4899',
+      'bg-indigo-500': '#6366f1',
+      'bg-orange-500': '#f97316',
+      'bg-cyan-500': '#06b6d4',
+      'bg-teal-500': '#14b8a6'
+    };
+    
+    return colorMap[bgClass] || '#6366f1'; // Default to indigo if not found
+  }
+
+  /**
+   * Toggles dropdown state
+   */
+  toggleDropdown(dropdown: 'clinic' | 'sessionType' | 'paymentMethod'): void {
+    const current = this.dropdownStates();
+    this.dropdownStates.set({
+      ...current,
+      [dropdown]: !current[dropdown]
+    });
+  }
+
+  /**
+   * Toggles completed checkbox
+   */
+  toggleCompleted(): void {
+    this.sessionData.SessionDetailData.completed = !this.sessionData.SessionDetailData.completed;
   }
 }

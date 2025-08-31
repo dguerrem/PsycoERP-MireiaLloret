@@ -1,23 +1,47 @@
-import { Component, Output, EventEmitter, signal } from '@angular/core';
+import { Component, Output, EventEmitter, signal, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
+import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { SessionData } from '../../models/session.model';
 import { CLINIC_CONFIGS, ClinicConfig } from '../../models/clinic-config.model';
 
+/**
+ * Modal dialog component for creating new session appointments
+ * 
+ * Features:
+ * - Reactive forms with validation
+ * - Custom dropdowns matching React UI
+ * - Real-time form updates with signals
+ * - Responsive design with Tailwind CSS
+ * 
+ * @example
+ * ```html
+ * <app-new-session-dialog 
+ *   (close)="onCloseDialog()"
+ *   (sessionDataCreated)="onSessionCreated($event)">
+ * </app-new-session-dialog>
+ * ```
+ */
 @Component({
   selector: 'app-new-session-dialog',
   standalone: true,
-  imports: [CommonModule, FormsModule],
-  templateUrl: './new-session-dialog.component.html'
+  imports: [CommonModule, ReactiveFormsModule],
+  templateUrl: './new-session-dialog.component.html',
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class NewSessionDialogComponent {
   @Output() close = new EventEmitter<void>();
   @Output() sessionDataCreated = new EventEmitter<Omit<SessionData['SessionDetailData'], 'session_id' | 'created_at' | 'updated_at'>>();
 
+  /** Clinic configurations for dropdown options */
   readonly clinicConfigs = CLINIC_CONFIGS;
+  
+  /** Loading state signal */
   readonly isLoading = signal(false);
+  
+  /** Error message signal */
   readonly error = signal<string | null>(null);
 
+  /** Dropdown states for custom select components */
   readonly dropdownStates = signal({
     patient: false,
     clinic: false,
@@ -26,6 +50,7 @@ export class NewSessionDialogComponent {
     modality: false
   });
 
+  /** Available session types */
   readonly sessionTypes = [
     'Terapia Individual',
     'Terapia de Pareja',
@@ -35,28 +60,16 @@ export class NewSessionDialogComponent {
     'Consulta de Seguimiento'
   ];
 
+  /** Available session modes */
   readonly sessionModes: ('Online' | 'Presencial')[] = ['Presencial', 'Online'];
+  
+  /** Available payment methods */
   readonly paymentMethods: ('cash' | 'card' | 'transfer' | 'bizum')[] = ['cash', 'card', 'transfer', 'bizum'];
+  
+  /** Available payment statuses */
   readonly paymentStatuses: ('pending' | 'paid' | 'partial')[] = ['pending', 'paid', 'partial'];
 
-  readonly formData = signal({
-    patient_id: '',
-    patient_name: '',
-    clinic_id: '',
-    session_date: '',
-    start_time: '',
-    end_time: '',
-    mode: 'Presencial' as 'Online' | 'Presencial',
-    type: 'Terapia Individual',
-    price: '',
-    payment_method: 'cash' as 'cash' | 'card' | 'transfer' | 'bizum',
-    payment_status: 'pending' as 'pending' | 'paid' | 'partial',
-    completed: false,
-    cancelled: false,
-    no_show: false,
-    notes: ''
-  });
-
+  /** Mock patient data */
   readonly patients = [
     { id: 101, name: 'Ana García' },
     { id: 102, name: 'Carlos López' },
@@ -66,74 +79,98 @@ export class NewSessionDialogComponent {
     { id: 106, name: 'Pedro González' }
   ];
 
-  constructor() {
+  /** Reactive form for session data */
+  sessionForm: FormGroup;
+
+  constructor(private fb: FormBuilder) {
     // Set default date to today
     const today = new Date();
     const formattedDate = today.toISOString().split('T')[0];
-    this.formData.update(data => ({
-      ...data,
-      session_date: formattedDate
-    }));
+    
+    // Initialize reactive form
+    this.sessionForm = this.fb.group({
+      patient_id: ['', Validators.required],
+      patient_name: [''],
+      clinic_id: ['', Validators.required],
+      session_date: [formattedDate, Validators.required],
+      start_time: ['', Validators.required],
+      end_time: ['', Validators.required],
+      mode: ['Presencial', Validators.required],
+      type: ['Terapia Individual', Validators.required],
+      price: ['', [Validators.required, Validators.min(0.01)]],
+      payment_method: ['cash', Validators.required],
+      payment_status: ['pending', Validators.required],
+      completed: [false],
+      cancelled: [false],
+      no_show: [false],
+      notes: ['']
+    });
   }
 
+  /**
+   * Handles backdrop click to close modal
+   */
   onBackdropClick(event: Event): void {
     if (event.target === event.currentTarget) {
       this.onClose();
     }
   }
 
+  /**
+   * Emits close event to parent component
+   */
   onClose(): void {
     this.close.emit();
   }
 
+  /**
+   * Updates patient name when patient selection changes
+   */
   onPatientChange(): void {
-    const formData = this.formData();
-    if (formData.patient_id) {
-      const patient = this.patients.find(p => p.id === parseInt(formData.patient_id));
-      this.formData.update(data => ({
-        ...data,
+    const patientId = this.sessionForm.get('patient_id')?.value;
+    if (patientId) {
+      const patient = this.patients.find(p => p.id === parseInt(patientId));
+      this.sessionForm.patchValue({
         patient_name: patient ? patient.name : ''
-      }));
+      });
     }
   }
 
+  /**
+   * Automatically sets end time to 1 hour after start time
+   */
   onStartTimeChange(): void {
-    const formData = this.formData();
-    if (formData.start_time) {
-      // Automatically set end time to 1 hour later
-      const [hours, minutes] = formData.start_time.split(':').map(Number);
+    const startTime = this.sessionForm.get('start_time')?.value;
+    if (startTime) {
+      const [hours, minutes] = startTime.split(':').map(Number);
       const endDate = new Date();
       endDate.setHours(hours + 1, minutes, 0);
       const endTime = endDate.toTimeString().slice(0, 5);
       
-      this.formData.update(data => ({
-        ...data,
+      this.sessionForm.patchValue({
         end_time: endTime
-      }));
+      });
     }
   }
 
+  /**
+   * Handles form submission with validation
+   */
   onSubmit(): void {
-    const formData = this.formData();
     this.error.set(null);
 
-    // Validation
-    if (!formData.patient_id || !formData.clinic_id || !formData.session_date || 
-        !formData.start_time || !formData.end_time || !formData.price) {
+    // Check form validity
+    if (this.sessionForm.invalid) {
+      this.sessionForm.markAllAsTouched();
       this.error.set('Por favor, completa todos los campos obligatorios.');
       return;
     }
 
+    const formData = this.sessionForm.value;
+
     // Validate time
     if (formData.start_time >= formData.end_time) {
       this.error.set('La hora de inicio debe ser anterior a la hora de fin.');
-      return;
-    }
-
-    // Validate price
-    const price = parseFloat(formData.price);
-    if (isNaN(price) || price <= 0) {
-      this.error.set('Por favor, introduce un precio válido.');
       return;
     }
 
@@ -147,7 +184,7 @@ export class NewSessionDialogComponent {
         end_time: formData.end_time + ':00',
         type: formData.type,
         mode: formData.mode,
-        price: price,
+        price: parseFloat(formData.price),
         payment_method: formData.payment_method,
         payment_status: formData.payment_status,
         completed: formData.completed,
@@ -170,16 +207,25 @@ export class NewSessionDialogComponent {
     }, 1000);
   }
 
+  /**
+   * Gets patient name by ID
+   */
   getPatientName(patientId: number): string {
     const patient = this.patients.find(p => p.id === patientId);
     return patient ? patient.name : `Paciente ${patientId}`;
   }
 
+  /**
+   * Gets clinic name by ID
+   */
   getClinicName(clinicId: number): string {
     const clinic = this.clinicConfigs.find(c => c.id === clinicId);
     return clinic ? clinic.name : `Clínica ${clinicId}`;
   }
 
+  /**
+   * Converts payment method code to display text
+   */
   getPaymentMethodText(method: 'cash' | 'card' | 'transfer' | 'bizum'): string {
     const paymentMethodTexts = {
       cash: 'Efectivo',
@@ -190,6 +236,9 @@ export class NewSessionDialogComponent {
     return paymentMethodTexts[method] || method;
   }
 
+  /**
+   * Converts payment status code to display text
+   */
   getPaymentStatusText(status: 'pending' | 'paid' | 'partial'): string {
     const paymentStatusTexts = {
       pending: 'Pendiente',
@@ -199,54 +248,55 @@ export class NewSessionDialogComponent {
     return paymentStatusTexts[status] || status;
   }
 
+  // Form update methods for reactive forms
   updatePatientId(value: string): void {
-    this.formData.update(data => ({ ...data, patient_id: value }));
+    this.sessionForm.patchValue({ patient_id: value });
     this.onPatientChange();
   }
 
   updateClinicId(value: string): void {
-    this.formData.update(data => ({ ...data, clinic_id: value }));
+    this.sessionForm.patchValue({ clinic_id: value });
   }
 
   updateSessionDate(value: string): void {
-    this.formData.update(data => ({ ...data, session_date: value }));
+    this.sessionForm.patchValue({ session_date: value });
   }
 
   updateStartTime(value: string): void {
-    this.formData.update(data => ({ ...data, start_time: value }));
+    this.sessionForm.patchValue({ start_time: value });
     this.onStartTimeChange();
   }
 
   updateEndTime(value: string): void {
-    this.formData.update(data => ({ ...data, end_time: value }));
+    this.sessionForm.patchValue({ end_time: value });
   }
 
   updateSessionType(value: string): void {
-    this.formData.update(data => ({ ...data, type: value }));
+    this.sessionForm.patchValue({ type: value });
   }
 
   updateMode(value: 'Online' | 'Presencial'): void {
-    this.formData.update(data => ({ ...data, mode: value }));
+    this.sessionForm.patchValue({ mode: value });
   }
 
   updatePrice(value: string): void {
-    this.formData.update(data => ({ ...data, price: value }));
+    this.sessionForm.patchValue({ price: value });
   }
 
   updatePaymentMethod(value: 'cash' | 'card' | 'transfer' | 'bizum'): void {
-    this.formData.update(data => ({ ...data, payment_method: value }));
+    this.sessionForm.patchValue({ payment_method: value });
   }
 
   updatePaymentStatus(value: 'pending' | 'paid' | 'partial'): void {
-    this.formData.update(data => ({ ...data, payment_status: value }));
+    this.sessionForm.patchValue({ payment_status: value });
   }
 
   updateCompleted(value: boolean): void {
-    this.formData.update(data => ({ ...data, completed: value }));
+    this.sessionForm.patchValue({ completed: value });
   }
 
   updateNotes(value: string): void {
-    this.formData.update(data => ({ ...data, notes: value }));
+    this.sessionForm.patchValue({ notes: value });
   }
 
   toggleDropdown(dropdown: 'patient' | 'clinic' | 'type' | 'payment' | 'modality'): void {
@@ -282,28 +332,34 @@ export class NewSessionDialogComponent {
     }
   }
 
+  /**
+   * Gets display value for dropdown based on current form state
+   */
   getDisplayValue(dropdown: 'patient' | 'clinic' | 'type' | 'payment' | 'modality'): string {
-    const formData = this.formData();
+    const form = this.sessionForm;
     
     switch (dropdown) {
       case 'patient':
-        if (formData.patient_id) {
-          const patient = this.patients.find(p => p.id === parseInt(formData.patient_id));
+        const patientId = form.get('patient_id')?.value;
+        if (patientId) {
+          const patient = this.patients.find(p => p.id === parseInt(patientId));
           return patient ? patient.name : 'Seleccionar paciente';
         }
         return 'Seleccionar paciente';
       case 'clinic':
-        if (formData.clinic_id) {
-          const clinic = this.clinicConfigs.find(c => c.id === parseInt(formData.clinic_id));
+        const clinicId = form.get('clinic_id')?.value;
+        if (clinicId) {
+          const clinic = this.clinicConfigs.find(c => c.id === parseInt(clinicId));
           return clinic ? clinic.name : 'Seleccionar clínica';
         }
         return 'Seleccionar clínica';
       case 'type':
-        return formData.type || 'Seleccionar tipo';
+        return form.get('type')?.value || 'Seleccionar tipo';
       case 'payment':
-        return formData.payment_method ? this.getPaymentMethodText(formData.payment_method) : 'Seleccionar método';
+        const paymentMethod = form.get('payment_method')?.value;
+        return paymentMethod ? this.getPaymentMethodText(paymentMethod) : 'Seleccionar método';
       case 'modality':
-        return formData.mode || 'Seleccionar modalidad';
+        return form.get('mode')?.value || 'Seleccionar modalidad';
       default:
         return '';
     }
