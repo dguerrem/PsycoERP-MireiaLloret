@@ -352,6 +352,43 @@ const definitions = {
     },
   },
 
+  DashboardData: {
+    type: "object",
+    properties: {
+      RapidKPIData: {
+        $ref: "#/components/schemas/RapidKPIData",
+      },
+      SessionsByClinicData: {
+        type: "array",
+        items: {
+          $ref: "#/components/schemas/SessionsByClinicItem",
+        },
+        description: "Datos de sesiones agrupadas por clínica",
+      },
+      MonthlyRevenueData: {
+        type: "array",
+        items: {
+          $ref: "#/components/schemas/MonthlyRevenueItem",
+        },
+        description: "Datos de ingresos por mes",
+      },
+      TodayUpcomingSessionsData: {
+        type: "array",
+        items: {
+          $ref: "#/components/schemas/SessionItem",
+        },
+        description: "Sesiones pendientes de hoy (posteriores a la hora actual)",
+      },
+      TomorrowSessionsData: {
+        type: "array",
+        items: {
+          $ref: "#/components/schemas/SessionItem",
+        },
+        description: "Todas las sesiones programadas para mañana",
+      },
+    },
+  },
+
   DashboardKPIsResponse: {
     type: "object",
     properties: {
@@ -360,7 +397,7 @@ const definitions = {
         example: true,
       },
       data: {
-        $ref: "#/components/schemas/RapidKPIData",
+        $ref: "#/components/schemas/DashboardData",
       },
     },
   },
@@ -408,6 +445,33 @@ const definitions = {
         format: "date-time",
         description: "Fecha y hora de la nota clínica (YYYY-MM-DD HH:mm:ss)",
         example: "2024-12-15 14:30:00",
+      },
+    },
+  },
+
+  MonthlyRevenueItem: {
+    type: "object",
+    properties: {
+      year: {
+        type: "integer",
+        description: "Año",
+        example: 2024,
+      },
+      month: {
+        type: "integer",
+        description: "Mes (1-12)",
+        example: 8,
+      },
+      month_name: {
+        type: "string",
+        description: "Nombre del mes en español",
+        example: "agosto",
+      },
+      revenue: {
+        type: "number",
+        format: "decimal",
+        description: "Ingresos del mes",
+        example: 3750.00,
       },
     },
   },
@@ -1139,6 +1203,51 @@ const definitions = {
     },
   },
 
+  SessionDetail: {
+    type: "object",
+    properties: {
+      session_id: {
+        type: "integer",
+        format: "int64",
+        description: "ID único de la sesión",
+        example: 15,
+      },
+      session_date: {
+        type: "string",
+        format: "date",
+        description: "Fecha de la sesión (YYYY-MM-DD)",
+        example: "2024-08-15",
+      },
+    },
+  },
+
+  SessionItem: {
+    type: "object",
+    properties: {
+      start_time: {
+        type: "string",
+        format: "time",
+        description: "Hora de inicio de la sesión (HH:MM:SS)",
+        example: "14:30:00",
+      },
+      patient_name: {
+        type: "string",
+        description: "Nombre completo del paciente",
+        example: "Juan Pérez García",
+      },
+      session_type: {
+        type: "string",
+        description: "Modalidad de la sesión (online o presencial)",
+        example: "Presencial",
+      },
+      clinic_name: {
+        type: "string",
+        description: "Nombre de la clínica",
+        example: "Clínica Psicológica Centro",
+      },
+    },
+  },
+
   SessionDetailResponse: {
     type: "object",
     properties: {
@@ -1191,6 +1300,51 @@ const definitions = {
         },
       },
     },
+  },
+
+  SessionsByClinicItem: {
+    type: "object",
+    properties: {
+      clinic_id: {
+        type: "integer",
+        format: "int64",
+        description: "ID de la clínica",
+        example: 1,
+      },
+      clinic_name: {
+        type: "string",
+        description: "Nombre de la clínica",
+        example: "Clínica Psicológica Centro",
+      },
+      total_sessions: {
+        type: "integer",
+        description: "Total de sesiones en esta clínica",
+        example: 45,
+      },
+      sessions: {
+        type: "array",
+        items: {
+          $ref: "#/components/schemas/SessionDetail",
+        },
+        description: "Detalle de todas las sesiones de esta clínica (para filtros por año en frontend)",
+      },
+    },
+  },
+
+  TodayUpcomingSessionsData: {
+    type: "array",
+    items: {
+      $ref: "#/components/schemas/SessionItem",
+    },
+    description: "Lista de sesiones pendientes de hoy (posteriores a la hora actual)",
+  },
+
+  TomorrowSessionsData: {
+    type: "array",
+    items: {
+      $ref: "#/components/schemas/SessionItem",
+    },
+    description: "Lista de todas las sesiones programadas para mañana",
   },
 
   UseBonusSessionResponse: {

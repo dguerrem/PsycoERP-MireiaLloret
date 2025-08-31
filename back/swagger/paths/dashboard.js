@@ -2,11 +2,11 @@ const dashboardPaths = {
   "/api/dashboard/kpis": {
     get: {
       tags: ["Dashboard"],
-      summary: "Obtener KPIs rápidos del dashboard",
-      description: "Obtiene los KPIs principales del dashboard incluyendo: sesiones del mes actual vs anterior, ingresos del mes vs anterior, pacientes activos, nuevos pacientes del mes, próximas citas de hoy y hora de la siguiente cita",
+      summary: "Obtener datos completos del dashboard",
+      description: "Obtiene todos los datos necesarios para el dashboard incluyendo: 1) RapidKPIData: KPIs rápidos (sesiones, ingresos, pacientes, citas), 2) SessionsByClinicData: sesiones agrupadas por clínica para gráfico circular con filtros por año, 3) MonthlyRevenueData: ingresos por mes para gráfico de líneas de los últimos 12 meses",
       responses: {
         200: {
-          description: "KPIs obtenidos exitosamente",
+          description: "Datos del dashboard obtenidos exitosamente",
           content: {
             "application/json": {
               schema: {

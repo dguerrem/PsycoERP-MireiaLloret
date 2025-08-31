@@ -16,7 +16,9 @@ const getDashboardKPIs = async () => {
     const today = now.toISOString().split('T')[0];
     const currentTime = now.toTimeString().split(' ')[0];
 
-    // 1. Sesiones del mes actual
+    // ===== 1. RAPID KPI DATA =====
+    
+    // Sesiones del mes actual
     const sessionesEsteMesQuery = `
       SELECT COUNT(*) as count, COALESCE(SUM(price), 0) as ingresos
       FROM sessions
@@ -25,7 +27,7 @@ const getDashboardKPIs = async () => {
     `;
     const [sessionesEsteMes] = await db.execute(sessionesEsteMesQuery, [currentYear, currentMonth]);
 
-    // 2. Sesiones del mes anterior
+    // Sesiones del mes anterior
     const sessionesMesAnteriorQuery = `
       SELECT COUNT(*) as count, COALESCE(SUM(price), 0) as ingresos
       FROM sessions
@@ -34,7 +36,7 @@ const getDashboardKPIs = async () => {
     `;
     const [sessionesMesAnterior] = await db.execute(sessionesMesAnteriorQuery, [previousYear, previousMonth]);
 
-    // 3. Pacientes activos
+    // Pacientes activos
     const pacientesActivosQuery = `
       SELECT COUNT(*) as count
       FROM patients
@@ -42,7 +44,7 @@ const getDashboardKPIs = async () => {
     `;
     const [pacientesActivos] = await db.execute(pacientesActivosQuery);
 
-    // 4. Pacientes nuevos este mes
+    // Pacientes nuevos este mes
     const pacientesNuevosMesQuery = `
       SELECT COUNT(*) as count
       FROM patients
@@ -50,7 +52,7 @@ const getDashboardKPIs = async () => {
     `;
     const [pacientesNuevosMes] = await db.execute(pacientesNuevosMesQuery, [currentYear, currentMonth]);
 
-    // 5. Próximas citas hoy
+    // Próximas citas hoy
     const proximasCitasHoyQuery = `
       SELECT COUNT(*) as count
       FROM sessions
@@ -58,7 +60,7 @@ const getDashboardKPIs = async () => {
     `;
     const [proximasCitasHoy] = await db.execute(proximasCitasHoyQuery, [today]);
 
-    // 6. Siguiente cita de hoy
+    // Siguiente cita de hoy
     const siguienteCitaQuery = `
       SELECT start_time
       FROM sessions
@@ -81,10 +83,9 @@ const getDashboardKPIs = async () => {
       ? ((ingresosActual - ingresosAnterior) / ingresosAnterior) * 100 
       : (ingresosActual > 0 ? 100 : 0);
 
-    // Construir respuesta
     const rapidKPIData = {
       sesiones_mes: sesionesActual,
-      sesiones_variacion: Math.round(sesionesVariacion * 100) / 100, // Redondear a 2 decimales
+      sesiones_variacion: Math.round(sesionesVariacion * 100) / 100,
       ingresos_mes: ingresosActual,
       ingresos_variacion: Math.round(ingresosVariacion * 100) / 100,
       pacientes_activos: pacientesActivos[0].count,
@@ -93,7 +94,133 @@ const getDashboardKPIs = async () => {
       siguiente_cita_hora: siguienteCita.length > 0 ? siguienteCita[0].start_time : null
     };
 
-    return rapidKPIData;
+    // ===== 2. SESSIONS BY CLINIC DATA =====
+    
+    const sessionsByClinicQuery = `
+      SELECT 
+        c.id as clinic_id,
+        c.name as clinic_name,
+        COUNT(s.id) as total_sessions,
+        GROUP_CONCAT(
+          CONCAT(s.id, ':', DATE_FORMAT(s.session_date, '%Y-%m-%d'))
+          SEPARATOR '|'
+        ) as sessions_details
+      FROM clinics c
+      LEFT JOIN sessions s ON c.id = s.clinic_id 
+        AND s.status IN ('completed', 'scheduled')
+      GROUP BY c.id, c.name
+      ORDER BY total_sessions DESC
+    `;
+    const [sessionsByClinic] = await db.execute(sessionsByClinicQuery);
+
+    // Procesar datos de sesiones por clínica
+    const sessionsByClinicData = sessionsByClinic.map(clinic => {
+      const sessions = [];
+      if (clinic.sessions_details) {
+        const sessionsList = clinic.sessions_details.split('|');
+        sessionsList.forEach(sessionStr => {
+          const [sessionId, sessionDate] = sessionStr.split(':');
+          sessions.push({
+            session_id: parseInt(sessionId),
+            session_date: sessionDate
+          });
+        });
+      }
+
+      return {
+        clinic_id: clinic.clinic_id,
+        clinic_name: clinic.clinic_name,
+        total_sessions: clinic.total_sessions,
+        sessions: sessions
+      };
+    });
+
+    // ===== 3. MONTHLY REVENUE DATA =====
+    
+    // Obtener los últimos 12 meses
+    const monthlyRevenueQuery = `
+      SELECT 
+        YEAR(session_date) as year,
+        MONTH(session_date) as month,
+        COALESCE(SUM(price), 0) as revenue
+      FROM sessions
+      WHERE session_date >= DATE_SUB(CURDATE(), INTERVAL 12 MONTH)
+        AND status IN ('completed', 'scheduled')
+      GROUP BY YEAR(session_date), MONTH(session_date)
+      ORDER BY YEAR(session_date), MONTH(session_date)
+    `;
+    const [monthlyRevenue] = await db.execute(monthlyRevenueQuery);
+
+    const monthlyRevenueData = monthlyRevenue.map(month => ({
+      year: month.year,
+      month: month.month,
+      month_name: new Date(month.year, month.month - 1, 1).toLocaleString('es-ES', { month: 'long' }),
+      revenue: parseFloat(month.revenue)
+    }));
+
+    // ===== 4. TODAY UPCOMING SESSIONS DATA =====
+    
+    const todayUpcomingSessionsQuery = `
+      SELECT 
+        s.start_time,
+        p.name as patient_name,
+        s.mode as session_type,
+        c.name as clinic_name
+      FROM sessions s
+      INNER JOIN patients p ON s.patient_id = p.id
+      INNER JOIN clinics c ON s.clinic_id = c.id
+      WHERE s.session_date = ? 
+        AND s.status = 'scheduled'
+        AND s.start_time > ?
+      ORDER BY s.start_time ASC
+    `;
+    const [todayUpcomingSessions] = await db.execute(todayUpcomingSessionsQuery, [today, currentTime]);
+
+    const todayUpcomingSessionsData = todayUpcomingSessions.map(session => ({
+      start_time: session.start_time,
+      patient_name: session.patient_name,
+      session_type: session.session_type,
+      clinic_name: session.clinic_name
+    }));
+
+    // ===== 5. TOMORROW SESSIONS DATA =====
+    
+    // Fecha de mañana
+    const tomorrow = new Date(now);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    const tomorrowDate = tomorrow.toISOString().split('T')[0];
+
+    const tomorrowSessionsQuery = `
+      SELECT 
+        s.start_time,
+        p.name as patient_name,
+        s.mode as session_type,
+        c.name as clinic_name
+      FROM sessions s
+      INNER JOIN patients p ON s.patient_id = p.id
+      INNER JOIN clinics c ON s.clinic_id = c.id
+      WHERE s.session_date = ? 
+        AND s.status = 'scheduled'
+      ORDER BY s.start_time ASC
+    `;
+    const [tomorrowSessions] = await db.execute(tomorrowSessionsQuery, [tomorrowDate]);
+
+    const tomorrowSessionsData = tomorrowSessions.map(session => ({
+      start_time: session.start_time,
+      patient_name: session.patient_name,
+      session_type: session.session_type,
+      clinic_name: session.clinic_name
+    }));
+
+    // ===== RESPUESTA FINAL =====
+    
+    return {
+      RapidKPIData: rapidKPIData,
+      SessionsByClinicData: sessionsByClinicData,
+      MonthlyRevenueData: monthlyRevenueData,
+      TodayUpcomingSessionsData: todayUpcomingSessionsData,
+      TomorrowSessionsData: tomorrowSessionsData
+    };
 
   } catch (error) {
     console.error('Error al obtener KPIs del dashboard:', error);
