@@ -1,11 +1,11 @@
 const definitions = {
-  Session: {
+  Bonus: {
     type: "object",
     properties: {
       id: {
         type: "integer",
         format: "int64",
-        description: "ID único de la sesión",
+        description: "ID único del bonus",
         example: 1,
       },
       patient_id: {
@@ -14,88 +14,68 @@ const definitions = {
         description: "ID del paciente",
         example: 1,
       },
-      clinic_id: {
+      total_sessions: {
         type: "integer",
-        format: "int64",
-        description: "ID de la clínica",
-        example: 1,
+        description: "Número total de sesiones incluidas en el bonus",
+        example: 10,
       },
-      session_date: {
-        type: "string",
-        format: "date",
-        description: "Fecha de la sesión (YYYY-MM-DD)",
-        example: "2024-12-15",
+      price_per_session: {
+        type: "number",
+        format: "decimal",
+        description: "Precio por sesión",
+        example: 50.00,
       },
-      start_time: {
-        type: "string",
-        format: "time",
-        description: "Hora de inicio (HH:MM:SS)",
-        example: "09:00:00",
+      total_price: {
+        type: "number",
+        format: "decimal",
+        description: "Precio total del bonus",
+        example: 500.00,
       },
-      end_time: {
-        type: "string",
-        format: "time",
-        description: "Hora de finalización (HH:MM:SS)",
-        example: "10:00:00",
-      },
-      mode: {
-        type: "string",
-        description: "Modalidad de la sesión",
-        example: "Presencial",
-      },
-      type: {
-        type: "string",
-        description: "Tipo de terapia",
-        example: "Terapia Individual",
+      used_sessions: {
+        type: "integer",
+        description: "Número de sesiones utilizadas",
+        example: 3,
       },
       status: {
         type: "string",
-        enum: ["scheduled", "completed", "cancelled", "no-show"],
-        description: "Estado de la sesión",
-        example: "scheduled",
+        enum: ["active", "consumed", "expired"],
+        description: "Estado del bonus",
+        example: "active",
       },
-      price: {
-        type: "number",
-        format: "decimal",
-        description: "Precio de la sesión",
-        example: 60.0,
-      },
-      payment_method: {
+      purchase_date: {
         type: "string",
-        enum: ["cash", "card", "transfer", "insurance"],
-        description: "Método de pago",
-        example: "card",
+        format: "date",
+        description: "Fecha de compra del bonus (YYYY-MM-DD)",
+        example: "2024-01-15",
       },
-      payment_status: {
+      expiry_date: {
         type: "string",
-        enum: ["pending", "paid", "partially_paid"],
-        description: "Estado del pago",
-        example: "pending",
+        format: "date",
+        description: "Fecha de expiración del bonus (YYYY-MM-DD)",
+        example: "2024-12-31",
       },
       notes: {
         type: "string",
+        nullable: true,
         description: "Notas adicionales",
-        example: "Primera sesión del paciente",
+        example: "Bonus adquirido con descuento especial",
       },
       created_at: {
         type: "string",
-        format: "date-time",
+        format: "date",
         description: "Fecha de creación",
+        example: "2024-01-15",
       },
       updated_at: {
         type: "string",
         format: "date-time",
         description: "Fecha de última actualización",
-      },
-      patient_name: {
-        type: "string",
-        description: "Nombre del paciente",
-        example: "Juan Pérez García",
+        example: "2024-01-20T14:45:00Z",
       },
     },
   },
 
-  SessionsResponse: {
+  BonusesResponse: {
     type: "object",
     properties: {
       success: {
@@ -106,114 +86,182 @@ const definitions = {
         type: "integer",
         example: 3,
       },
-      filters_applied: {
-        type: "object",
-        nullable: true,
-        example: {
-          patient_id: "1",
-          status: "completed",
-        },
-      },
       data: {
         type: "array",
         items: {
-          $ref: "#/components/schemas/SessionDetailResponse",
+          $ref: "#/components/schemas/Bonus",
         },
       },
     },
   },
 
-  SessionDetailResponse: {
-    type: "object",
-    properties: {
-      SessionDetailData: {
-        $ref: "#/components/schemas/SessionData",
-      },
-    },
-  },
-
-  SessionPatientData: {
+  BonusHistoryInfo: {
     type: "object",
     properties: {
       id: {
         type: "integer",
         format: "int64",
+        description: "ID único del bonus",
+        example: 1,
+      },
+      patient_id: {
+        type: "integer",
+        format: "int64",
         description: "ID del paciente",
         example: 1,
       },
-      name: {
+      total_sessions: {
+        type: "integer",
+        description: "Número total de sesiones incluidas",
+        example: 10,
+      },
+      used_sessions: {
+        type: "integer",
+        description: "Sesiones ya utilizadas",
+        example: 3,
+      },
+      remaining_sessions: {
+        type: "integer",
+        description: "Sesiones restantes",
+        example: 7,
+      },
+      progress_percentage: {
+        type: "number",
+        format: "decimal",
+        description: "Porcentaje de progreso del bonus",
+        example: 30.00,
+      },
+      price_per_session: {
+        type: "number",
+        format: "decimal",
+        description: "Precio por sesión",
+        example: 50.00,
+      },
+      total_price: {
+        type: "number",
+        format: "decimal",
+        description: "Precio total del bonus",
+        example: 500.00,
+      },
+      status: {
         type: "string",
-        description: "Nombre completo del paciente",
-        example: "Juan Pérez García",
+        enum: ["active", "consumed", "expired"],
+        description: "Estado del bonus",
+        example: "active",
+      },
+      purchase_date: {
+        type: "string",
+        format: "date",
+        description: "Fecha de compra (YYYY-MM-DD)",
+        example: "2024-01-15",
+      },
+      expiry_date: {
+        type: "string",
+        format: "date",
+        description: "Fecha de expiración (YYYY-MM-DD)",
+        example: "2025-01-15",
+      },
+      notes: {
+        type: "string",
+        nullable: true,
+        description: "Notas del bonus",
+        example: "Bonus promocional",
+      },
+      created_at: {
+        type: "string",
+        format: "date-time",
+        description: "Fecha de creación",
+        example: "2024-01-15 10:30:00",
       },
     },
   },
 
-  SessionData: {
+  BonusHistoryResponse: {
     type: "object",
     properties: {
+      success: {
+        type: "boolean",
+        example: true,
+      },
+      data: {
+        type: "object",
+        properties: {
+          used_sessions: {
+            type: "integer",
+            description: "Sesiones ya utilizadas",
+            example: 3,
+          },
+          remaining_sessions: {
+            type: "integer",
+            description: "Sesiones restantes",
+            example: 7,
+          },
+          progress_percentage: {
+            type: "number",
+            format: "decimal",
+            description: "Porcentaje de progreso del bonus",
+            example: 30.00,
+          },
+          sessions_history: {
+            type: "array",
+            items: {
+              type: "object",
+              properties: {
+                used_date: {
+                  type: "string",
+                  format: "date",
+                  description: "Fecha de realización (YYYY-MM-DD)",
+                  example: "2024-02-01",
+                },
+                session_id: {
+                  type: "integer",
+                  format: "int64",
+                  nullable: true,
+                  description: "ID de la sesión",
+                  example: 25,
+                }
+              },
+            },
+            description: "Historial de sesiones realizadas ordenado por fecha descendente",
+          },
+        },
+      },
+    },
+  },
+
+  BonusUsageHistoryItem: {
+    type: "object",
+    properties: {
+      id: {
+        type: "integer",
+        format: "int64",
+        description: "ID único del registro de uso",
+        example: 1,
+      },
       session_id: {
         type: "integer",
         format: "int64",
-        description: "ID único de la sesión",
-        example: 1,
+        nullable: true,
+        description: "ID de la sesión asociada",
+        example: 25,
       },
-      session_date: {
+      used_date: {
         type: "string",
         format: "date",
-        description: "Fecha de la sesión (YYYY-MM-DD)",
-        example: "2024-12-15",
-      },
-      start_time: {
-        type: "string",
-        format: "time",
-        description: "Hora de inicio (HH:MM:SS)",
-        example: "09:00:00",
-      },
-      end_time: {
-        type: "string",
-        format: "time",
-        description: "Hora de finalización (HH:MM:SS)",
-        example: "10:00:00",
-      },
-      type: {
-        type: "string",
-        description: "Tipo de sesión",
-        example: "Terapia Individual",
-      },
-      price: {
-        type: "number",
-        format: "decimal",
-        description: "Precio de la sesión",
-        example: 60.0,
-      },
-      payment_method: {
-        type: "string",
-        enum: ["cash", "card", "transfer", "insurance"],
-        description: "Método de pago",
-        example: "card",
-      },
-      completed: {
-        type: "boolean",
-        description: "Si la sesión está completada o no",
-        example: true,
+        description: "Fecha de uso (YYYY-MM-DD)",
+        example: "2024-02-01",
       },
       notes: {
         type: "string",
-        description: "Notas de la sesión",
-        example: "Primera sesión del paciente",
+        nullable: true,
+        description: "Notas del uso",
+        example: "Sesión completada exitosamente",
       },
-      PatientData: {
-        $ref: "#/components/schemas/SessionPatientData",
-      },
-      ClinicDetailData: {
-        $ref: "#/components/schemas/ClinicData",
-      },
-      MedicalRecordData: {
-        type: "array",
-        items: {
-          $ref: "#/components/schemas/MedicalRecord",
-        },
+      created_by: {
+        type: "string",
+        nullable: true,
+        description: "Usuario que registró el uso",
+        example: "admin",
       },
     },
   },
@@ -231,6 +279,122 @@ const definitions = {
         type: "string",
         description: "Nombre de la clínica",
         example: "Clínica Psicológica Centro",
+      },
+    },
+  },
+
+  ClinicalNote: {
+    type: "object",
+    properties: {
+      titulo: {
+        type: "string",
+        description: "Título de la nota clínica",
+        example: "Sesión inicial de evaluación",
+      },
+      contenido: {
+        type: "string",
+        description: "Contenido completo de la nota clínica",
+        example: "El paciente se muestra colaborativo durante la primera sesión. Se observa ansiedad leve relacionada con el trabajo.",
+      },
+      fecha: {
+        type: "string",
+        format: "date-time",
+        description: "Fecha y hora de la nota clínica (YYYY-MM-DD HH:mm:ss)",
+        example: "2024-12-15 14:30:00",
+      },
+    },
+  },
+
+  CreateBonusRequest: {
+    type: "object",
+    required: ["patient_id", "total_sessions", "price_per_session", "total_price"],
+    properties: {
+      patient_id: {
+        type: "integer",
+        format: "int64",
+        description: "ID del paciente",
+        example: 1,
+      },
+      total_sessions: {
+        type: "integer",
+        description: "Número total de sesiones incluidas en el bonus",
+        example: 10,
+      },
+      price_per_session: {
+        type: "number",
+        format: "decimal",
+        description: "Precio por sesión en euros",
+        example: 50.00,
+      },
+      total_price: {
+        type: "number",
+        format: "decimal",
+        description: "Precio total del bonus",
+        example: 500.00,
+      },
+    },
+  },
+
+  CreateBonusResponse: {
+    type: "object",
+    properties: {
+      success: {
+        type: "boolean",
+        example: true,
+      },
+      message: {
+        type: "string",
+        example: "Bonus creado exitosamente",
+      },
+      data: {
+        $ref: "#/components/schemas/PatientBonusDetail",
+      },
+    },
+  },
+
+  DashboardKPIsResponse: {
+    type: "object",
+    properties: {
+      success: {
+        type: "boolean",
+        example: true,
+      },
+      total: {
+        type: "integer",
+        description: "Número total de registros retornados",
+        example: 15,
+      },
+      data: {
+        type: "array",
+        items: {
+          $ref: "#/components/schemas/Patient",
+        },
+        description: "Lista de pacientes (provisional para KPIs del dashboard)",
+      },
+    },
+  },
+
+  ErrorResponse: {
+    type: "object",
+    properties: {
+      success: {
+        type: "boolean",
+        example: false,
+      },
+      error: {
+        type: "string",
+        example: "ID de paciente debe ser un número",
+      },
+      field: {
+        type: "string",
+        example: "patient_id",
+      },
+      allowed_values: {
+        type: "array",
+        items: {
+          type: "string",
+        },
+        example: ["scheduled", "completed", "cancelled", "no-show"],
       },
     },
   },
@@ -381,93 +545,126 @@ const definitions = {
     },
   },
 
-  PatientsResponse: {
+  PatientBonusDetail: {
+    type: "object",
+    properties: {
+      idBono: {
+        type: "integer",
+        format: "int64",
+        description: "ID único del bonus",
+        example: 1,
+      },
+      sesiones_totales: {
+        type: "integer",
+        description: "Número total de sesiones incluidas",
+        example: 10,
+      },
+      euros_por_sesion: {
+        type: "number",
+        format: "decimal",
+        description: "Precio por sesión en euros",
+        example: 50.00,
+      },
+      precio_total: {
+        type: "number",
+        format: "decimal",
+        description: "Precio total del bonus",
+        example: 500.00,
+      },
+      fecha_compra: {
+        type: "string",
+        format: "date",
+        description: "Fecha de compra del bonus (YYYY-MM-DD)",
+        example: "2024-01-15",
+      },
+      fecha_expiracion: {
+        type: "string",
+        format: "date",
+        description: "Fecha de expiración del bonus (YYYY-MM-DD)",
+        example: "2024-12-31",
+      },
+      sesiones_restantes: {
+        type: "integer",
+        description: "Sesiones restantes por usar",
+        example: 7,
+      },
+      sesiones_utilizadas: {
+        type: "integer",
+        description: "Sesiones ya utilizadas",
+        example: 3,
+      },
+      estado_bono: {
+        type: "string",
+        enum: ["active", "consumed", "expired"],
+        description: "Estado actual del bonus",
+        example: "active",
+      },
+    },
+  },
+
+  PatientBonusesData: {
+    type: "object",
+    properties: {
+      kpis: {
+        $ref: "#/components/schemas/PatientBonusKpis",
+      },
+      bonuses: {
+        type: "array",
+        items: {
+          $ref: "#/components/schemas/PatientBonusDetail",
+        },
+        description: "Lista detallada de bonuses del paciente",
+      },
+    },
+  },
+
+  PatientBonusesResponse: {
     type: "object",
     properties: {
       success: {
         type: "boolean",
         example: true,
       },
-      total: {
+      data: {
+        type: "object",
+        properties: {
+          kpis: {
+            $ref: "#/components/schemas/PatientBonusKpis",
+          },
+          bonuses: {
+            type: "array",
+            items: {
+              $ref: "#/components/schemas/PatientBonusDetail",
+            },
+            description: "Lista detallada de bonuses del paciente",
+          },
+        },
+      },
+    },
+  },
+
+  PatientBonusKpis: {
+    type: "object",
+    properties: {
+      total_bonos: {
         type: "integer",
+        description: "Total de bonuses del paciente",
         example: 5,
       },
-      data: {
-        type: "array",
-        items: {
-          $ref: "#/components/schemas/Patient",
-        },
+      total_activos: {
+        type: "integer", 
+        description: "Total de bonuses activos",
+        example: 2,
       },
-    },
-  },
-
-  PatientResumeSession: {
-    type: "object",
-    properties: {
-      idsesion: {
+      total_consumidos: {
         type: "integer",
-        format: "int64",
-        description: "ID único de la sesión",
-        example: 1,
+        description: "Total de bonuses consumidos",
+        example: 2,
       },
-      tipo_sesion: {
-        type: "string",
-        description: "Tipo de sesión",
-        example: "Terapia Individual",
-      },
-      fecha: {
-        type: "string",
-        format: "date",
-        description: "Fecha de la sesión (YYYY-MM-DD)",
-        example: "2024-12-15",
-      },
-      precio: {
-        type: "number",
-        format: "decimal",
-        description: "Precio de la sesión",
-        example: 60.0,
-      },
-      metodo_pago: {
-        type: "string",
-        enum: ["cash", "card", "transfer", "insurance"],
-        description: "Método de pago",
-        example: "card",
-      },
-    },
-  },
-
-  PatientResume: {
-    type: "object",
-    properties: {
-      id: {
+      total_expirados: {
         type: "integer",
-        format: "int64",
-        description: "ID único del paciente",
+        description: "Total de bonuses expirados",
         example: 1,
-      },
-      email: {
-        type: "string",
-        format: "email",
-        description: "Email del paciente",
-        example: "juan.perez@email.com",
-      },
-      phone: {
-        type: "string",
-        description: "Teléfono del paciente",
-        example: "+34 666 123 456",
-      },
-      tipo: {
-        type: "string",
-        enum: ["individual", "group", "family", "couples"],
-        description: "Tipo de sesión preferida",
-        example: "individual",
-      },
-      PatientResumeSessions: {
-        type: "array",
-        items: {
-          $ref: "#/components/schemas/PatientResumeSession",
-        },
-        description: "Historial de sesiones del paciente",
       },
     },
   },
@@ -536,59 +733,6 @@ const definitions = {
     },
   },
 
-  PatientSession: {
-    type: "object",
-    properties: {
-      id: {
-        type: "integer",
-        format: "int64",
-        description: "ID único de la sesión",
-        example: 1,
-      },
-      fecha: {
-        type: "string",
-        format: "date",
-        description: "Fecha de la sesión (YYYY-MM-DD)",
-        example: "2024-12-15",
-      },
-      clinica: {
-        type: "string",
-        nullable: true,
-        description: "Nombre de la clínica",
-        example: "Clínica Psicológica Centro",
-      },
-      tipo: {
-        type: "string",
-        description: "Tipo de sesión",
-        example: "Terapia Individual",
-      },
-      estado: {
-        type: "string",
-        enum: ["scheduled", "completed", "cancelled", "no-show"],
-        description: "Estado de la sesión",
-        example: "completed",
-      },
-      precio: {
-        type: "number",
-        format: "decimal",
-        description: "Precio de la sesión",
-        example: 60.0,
-      },
-      tipo_pago: {
-        type: "string",
-        enum: ["cash", "card", "transfer", "insurance"],
-        description: "Método de pago",
-        example: "card",
-      },
-      notas: {
-        type: "string",
-        nullable: true,
-        description: "Notas de la sesión",
-        example: "Sesión muy productiva, buen progreso del paciente",
-      },
-    },
-  },
-
   PatientDetailResponse: {
     type: "object",
     properties: {
@@ -644,29 +788,157 @@ const definitions = {
     },
   },
 
-  PatientBonusesData: {
-    type: "object",
-    properties: {
-      kpis: {
-        $ref: "#/components/schemas/PatientBonusKpis",
-      },
-      bonuses: {
-        type: "array",
-        items: {
-          $ref: "#/components/schemas/PatientBonusDetail",
-        },
-        description: "Lista detallada de bonuses del paciente",
-      },
-    },
-  },
-
-  Bonus: {
+  PatientResume: {
     type: "object",
     properties: {
       id: {
         type: "integer",
         format: "int64",
-        description: "ID único del bonus",
+        description: "ID único del paciente",
+        example: 1,
+      },
+      email: {
+        type: "string",
+        format: "email",
+        description: "Email del paciente",
+        example: "juan.perez@email.com",
+      },
+      phone: {
+        type: "string",
+        description: "Teléfono del paciente",
+        example: "+34 666 123 456",
+      },
+      tipo: {
+        type: "string",
+        enum: ["individual", "group", "family", "couples"],
+        description: "Tipo de sesión preferida",
+        example: "individual",
+      },
+      PatientResumeSessions: {
+        type: "array",
+        items: {
+          $ref: "#/components/schemas/PatientResumeSession",
+        },
+        description: "Historial de sesiones del paciente",
+      },
+    },
+  },
+
+  PatientResumeSession: {
+    type: "object",
+    properties: {
+      idsesion: {
+        type: "integer",
+        format: "int64",
+        description: "ID único de la sesión",
+        example: 1,
+      },
+      tipo_sesion: {
+        type: "string",
+        description: "Tipo de sesión",
+        example: "Terapia Individual",
+      },
+      fecha: {
+        type: "string",
+        format: "date",
+        description: "Fecha de la sesión (YYYY-MM-DD)",
+        example: "2024-12-15",
+      },
+      precio: {
+        type: "number",
+        format: "decimal",
+        description: "Precio de la sesión",
+        example: 60.0,
+      },
+      metodo_pago: {
+        type: "string",
+        enum: ["cash", "card", "transfer", "insurance"],
+        description: "Método de pago",
+        example: "card",
+      },
+    },
+  },
+
+  PatientsResponse: {
+    type: "object",
+    properties: {
+      success: {
+        type: "boolean",
+        example: true,
+      },
+      total: {
+        type: "integer",
+        example: 5,
+      },
+      data: {
+        type: "array",
+        items: {
+          $ref: "#/components/schemas/Patient",
+        },
+      },
+    },
+  },
+
+  PatientSession: {
+    type: "object",
+    properties: {
+      id: {
+        type: "integer",
+        format: "int64",
+        description: "ID único de la sesión",
+        example: 1,
+      },
+      fecha: {
+        type: "string",
+        format: "date",
+        description: "Fecha de la sesión (YYYY-MM-DD)",
+        example: "2024-12-15",
+      },
+      clinica: {
+        type: "string",
+        nullable: true,
+        description: "Nombre de la clínica",
+        example: "Clínica Psicológica Centro",
+      },
+      tipo: {
+        type: "string",
+        description: "Tipo de sesión",
+        example: "Terapia Individual",
+      },
+      estado: {
+        type: "string",
+        enum: ["scheduled", "completed", "cancelled", "no-show"],
+        description: "Estado de la sesión",
+        example: "completed",
+      },
+      precio: {
+        type: "number",
+        format: "decimal",
+        description: "Precio de la sesión",
+        example: 60.0,
+      },
+      tipo_pago: {
+        type: "string",
+        enum: ["cash", "card", "transfer", "insurance"],
+        description: "Método de pago",
+        example: "card",
+      },
+      notas: {
+        type: "string",
+        nullable: true,
+        description: "Notas de la sesión",
+        example: "Sesión muy productiva, buen progreso del paciente",
+      },
+    },
+  },
+
+  Session: {
+    type: "object",
+    properties: {
+      id: {
+        type: "integer",
+        format: "int64",
+        description: "ID único de la sesión",
         example: 1,
       },
       patient_id: {
@@ -675,68 +947,183 @@ const definitions = {
         description: "ID del paciente",
         example: 1,
       },
-      total_sessions: {
+      clinic_id: {
         type: "integer",
-        description: "Número total de sesiones incluidas en el bonus",
-        example: 10,
+        format: "int64",
+        description: "ID de la clínica",
+        example: 1,
       },
-      price_per_session: {
-        type: "number",
-        format: "decimal",
-        description: "Precio por sesión",
-        example: 50.00,
+      session_date: {
+        type: "string",
+        format: "date",
+        description: "Fecha de la sesión (YYYY-MM-DD)",
+        example: "2024-12-15",
       },
-      total_price: {
-        type: "number",
-        format: "decimal",
-        description: "Precio total del bonus",
-        example: 500.00,
+      start_time: {
+        type: "string",
+        format: "time",
+        description: "Hora de inicio (HH:MM:SS)",
+        example: "09:00:00",
       },
-      used_sessions: {
-        type: "integer",
-        description: "Número de sesiones utilizadas",
-        example: 3,
+      end_time: {
+        type: "string",
+        format: "time",
+        description: "Hora de finalización (HH:MM:SS)",
+        example: "10:00:00",
+      },
+      mode: {
+        type: "string",
+        description: "Modalidad de la sesión",
+        example: "Presencial",
+      },
+      type: {
+        type: "string",
+        description: "Tipo de terapia",
+        example: "Terapia Individual",
       },
       status: {
         type: "string",
-        enum: ["active", "consumed", "expired"],
-        description: "Estado del bonus",
-        example: "active",
+        enum: ["scheduled", "completed", "cancelled", "no-show"],
+        description: "Estado de la sesión",
+        example: "scheduled",
       },
-      purchase_date: {
-        type: "string",
-        format: "date",
-        description: "Fecha de compra del bonus (YYYY-MM-DD)",
-        example: "2024-01-15",
+      price: {
+        type: "number",
+        format: "decimal",
+        description: "Precio de la sesión",
+        example: 60.0,
       },
-      expiry_date: {
+      payment_method: {
         type: "string",
-        format: "date",
-        description: "Fecha de expiración del bonus (YYYY-MM-DD)",
-        example: "2024-12-31",
+        enum: ["cash", "card", "transfer", "insurance"],
+        description: "Método de pago",
+        example: "card",
+      },
+      payment_status: {
+        type: "string",
+        enum: ["pending", "paid", "partially_paid"],
+        description: "Estado del pago",
+        example: "pending",
       },
       notes: {
         type: "string",
-        nullable: true,
         description: "Notas adicionales",
-        example: "Bonus adquirido con descuento especial",
+        example: "Primera sesión del paciente",
       },
       created_at: {
         type: "string",
-        format: "date",
+        format: "date-time",
         description: "Fecha de creación",
-        example: "2024-01-15",
       },
       updated_at: {
         type: "string",
         format: "date-time",
         description: "Fecha de última actualización",
-        example: "2024-01-20T14:45:00Z",
+      },
+      patient_name: {
+        type: "string",
+        description: "Nombre del paciente",
+        example: "Juan Pérez García",
       },
     },
   },
 
-  BonusesResponse: {
+  SessionData: {
+    type: "object",
+    properties: {
+      session_id: {
+        type: "integer",
+        format: "int64",
+        description: "ID único de la sesión",
+        example: 1,
+      },
+      session_date: {
+        type: "string",
+        format: "date",
+        description: "Fecha de la sesión (YYYY-MM-DD)",
+        example: "2024-12-15",
+      },
+      start_time: {
+        type: "string",
+        format: "time",
+        description: "Hora de inicio (HH:MM:SS)",
+        example: "09:00:00",
+      },
+      end_time: {
+        type: "string",
+        format: "time",
+        description: "Hora de finalización (HH:MM:SS)",
+        example: "10:00:00",
+      },
+      type: {
+        type: "string",
+        description: "Tipo de sesión",
+        example: "Terapia Individual",
+      },
+      price: {
+        type: "number",
+        format: "decimal",
+        description: "Precio de la sesión",
+        example: 60.0,
+      },
+      payment_method: {
+        type: "string",
+        enum: ["cash", "card", "transfer", "insurance"],
+        description: "Método de pago",
+        example: "card",
+      },
+      completed: {
+        type: "boolean",
+        description: "Si la sesión está completada o no",
+        example: true,
+      },
+      notes: {
+        type: "string",
+        description: "Notas de la sesión",
+        example: "Primera sesión del paciente",
+      },
+      PatientData: {
+        $ref: "#/components/schemas/SessionPatientData",
+      },
+      ClinicDetailData: {
+        $ref: "#/components/schemas/ClinicData",
+      },
+      MedicalRecordData: {
+        type: "array",
+        items: {
+          $ref: "#/components/schemas/MedicalRecord",
+        },
+      },
+    },
+  },
+
+  SessionDetailResponse: {
+    type: "object",
+    properties: {
+      SessionDetailData: {
+        $ref: "#/components/schemas/SessionData",
+      },
+    },
+  },
+
+  SessionPatientData: {
+    type: "object",
+    properties: {
+      id: {
+        type: "integer",
+        format: "int64",
+        description: "ID del paciente",
+        example: 1,
+      },
+      name: {
+        type: "string",
+        description: "Nombre completo del paciente",
+        example: "Juan Pérez García",
+      },
+    },
+  },
+
+  SessionsResponse: {
     type: "object",
     properties: {
       success: {
@@ -747,341 +1134,22 @@ const definitions = {
         type: "integer",
         example: 3,
       },
+      filters_applied: {
+        type: "object",
+        nullable: true,
+        example: {
+          patient_id: "1",
+          status: "completed",
+        },
+      },
       data: {
         type: "array",
         items: {
-          $ref: "#/components/schemas/Bonus",
+          $ref: "#/components/schemas/SessionDetailResponse",
         },
       },
     },
   },
-
-  PatientBonusKpis: {
-    type: "object",
-    properties: {
-      total_bonos: {
-        type: "integer",
-        description: "Total de bonuses del paciente",
-        example: 5,
-      },
-      total_activos: {
-        type: "integer", 
-        description: "Total de bonuses activos",
-        example: 2,
-      },
-      total_consumidos: {
-        type: "integer",
-        description: "Total de bonuses consumidos",
-        example: 2,
-      },
-      total_expirados: {
-        type: "integer",
-        description: "Total de bonuses expirados",
-        example: 1,
-      },
-    },
-  },
-
-  PatientBonusDetail: {
-    type: "object",
-    properties: {
-      idBono: {
-        type: "integer",
-        format: "int64",
-        description: "ID único del bonus",
-        example: 1,
-      },
-      sesiones_totales: {
-        type: "integer",
-        description: "Número total de sesiones incluidas",
-        example: 10,
-      },
-      euros_por_sesion: {
-        type: "number",
-        format: "decimal",
-        description: "Precio por sesión en euros",
-        example: 50.00,
-      },
-      precio_total: {
-        type: "number",
-        format: "decimal",
-        description: "Precio total del bonus",
-        example: 500.00,
-      },
-      fecha_compra: {
-        type: "string",
-        format: "date",
-        description: "Fecha de compra del bonus (YYYY-MM-DD)",
-        example: "2024-01-15",
-      },
-      fecha_expiracion: {
-        type: "string",
-        format: "date",
-        description: "Fecha de expiración del bonus (YYYY-MM-DD)",
-        example: "2024-12-31",
-      },
-      sesiones_restantes: {
-        type: "integer",
-        description: "Sesiones restantes por usar",
-        example: 7,
-      },
-      sesiones_utilizadas: {
-        type: "integer",
-        description: "Sesiones ya utilizadas",
-        example: 3,
-      },
-      estado_bono: {
-        type: "string",
-        enum: ["active", "consumed", "expired"],
-        description: "Estado actual del bonus",
-        example: "active",
-      },
-    },
-  },
-
-  PatientBonusesResponse: {
-    type: "object",
-    properties: {
-      success: {
-        type: "boolean",
-        example: true,
-      },
-      data: {
-        type: "object",
-        properties: {
-          kpis: {
-            $ref: "#/components/schemas/PatientBonusKpis",
-          },
-          bonuses: {
-            type: "array",
-            items: {
-              $ref: "#/components/schemas/PatientBonusDetail",
-            },
-            description: "Lista detallada de bonuses del paciente",
-          },
-        },
-      },
-    },
-  },
-
-  CreateBonusRequest: {
-    type: "object",
-    required: ["patient_id", "total_sessions", "price_per_session", "total_price"],
-    properties: {
-      patient_id: {
-        type: "integer",
-        format: "int64",
-        description: "ID del paciente",
-        example: 1,
-      },
-      total_sessions: {
-        type: "integer",
-        description: "Número total de sesiones incluidas en el bonus",
-        example: 10,
-      },
-      price_per_session: {
-        type: "number",
-        format: "decimal",
-        description: "Precio por sesión en euros",
-        example: 50.00,
-      },
-      total_price: {
-        type: "number",
-        format: "decimal",
-        description: "Precio total del bonus",
-        example: 500.00,
-      },
-    },
-  },
-
-  CreateBonusResponse: {
-    type: "object",
-    properties: {
-      success: {
-        type: "boolean",
-        example: true,
-      },
-      message: {
-        type: "string",
-        example: "Bonus creado exitosamente",
-      },
-      data: {
-        $ref: "#/components/schemas/PatientBonusDetail",
-      },
-    },
-  },
-
-  BonusHistoryInfo: {
-    type: "object",
-    properties: {
-      id: {
-        type: "integer",
-        format: "int64",
-        description: "ID único del bonus",
-        example: 1,
-      },
-      patient_id: {
-        type: "integer",
-        format: "int64",
-        description: "ID del paciente",
-        example: 1,
-      },
-      total_sessions: {
-        type: "integer",
-        description: "Número total de sesiones incluidas",
-        example: 10,
-      },
-      used_sessions: {
-        type: "integer",
-        description: "Sesiones ya utilizadas",
-        example: 3,
-      },
-      remaining_sessions: {
-        type: "integer",
-        description: "Sesiones restantes",
-        example: 7,
-      },
-      progress_percentage: {
-        type: "number",
-        format: "decimal",
-        description: "Porcentaje de progreso del bonus",
-        example: 30.00,
-      },
-      price_per_session: {
-        type: "number",
-        format: "decimal",
-        description: "Precio por sesión",
-        example: 50.00,
-      },
-      total_price: {
-        type: "number",
-        format: "decimal",
-        description: "Precio total del bonus",
-        example: 500.00,
-      },
-      status: {
-        type: "string",
-        enum: ["active", "consumed", "expired"],
-        description: "Estado del bonus",
-        example: "active",
-      },
-      purchase_date: {
-        type: "string",
-        format: "date",
-        description: "Fecha de compra (YYYY-MM-DD)",
-        example: "2024-01-15",
-      },
-      expiry_date: {
-        type: "string",
-        format: "date",
-        description: "Fecha de expiración (YYYY-MM-DD)",
-        example: "2025-01-15",
-      },
-      notes: {
-        type: "string",
-        nullable: true,
-        description: "Notas del bonus",
-        example: "Bonus promocional",
-      },
-      created_at: {
-        type: "string",
-        format: "date-time",
-        description: "Fecha de creación",
-        example: "2024-01-15 10:30:00",
-      },
-    },
-  },
-
-  BonusUsageHistoryItem: {
-    type: "object",
-    properties: {
-      id: {
-        type: "integer",
-        format: "int64",
-        description: "ID único del registro de uso",
-        example: 1,
-      },
-      session_id: {
-        type: "integer",
-        format: "int64",
-        nullable: true,
-        description: "ID de la sesión asociada",
-        example: 25,
-      },
-      used_date: {
-        type: "string",
-        format: "date",
-        description: "Fecha de uso (YYYY-MM-DD)",
-        example: "2024-02-01",
-      },
-      notes: {
-        type: "string",
-        nullable: true,
-        description: "Notas del uso",
-        example: "Sesión completada exitosamente",
-      },
-      created_by: {
-        type: "string",
-        nullable: true,
-        description: "Usuario que registró el uso",
-        example: "admin",
-      },
-    },
-  },
-
-  BonusHistoryResponse: {
-    type: "object",
-    properties: {
-      success: {
-        type: "boolean",
-        example: true,
-      },
-      data: {
-        type: "object",
-        properties: {
-          used_sessions: {
-            type: "integer",
-            description: "Sesiones ya utilizadas",
-            example: 3,
-          },
-          remaining_sessions: {
-            type: "integer",
-            description: "Sesiones restantes",
-            example: 7,
-          },
-          progress_percentage: {
-            type: "number",
-            format: "decimal",
-            description: "Porcentaje de progreso del bonus",
-            example: 30.00,
-          },
-          sessions_history: {
-            type: "array",
-            items: {
-              type: "object",
-              properties: {
-                used_date: {
-                  type: "string",
-                  format: "date",
-                  description: "Fecha de realización (YYYY-MM-DD)",
-                  example: "2024-02-01",
-                },
-                session_id: {
-                  type: "integer",
-                  format: "int64",
-                  nullable: true,
-                  description: "ID de la sesión",
-                  example: 25,
-                }
-              },
-            },
-            description: "Historial de sesiones realizadas ordenado por fecha descendente",
-          },
-        },
-      },
-    },
-  },
-
 
   UseBonusSessionResponse: {
     type: "object",
@@ -1126,75 +1194,6 @@ const definitions = {
             example: "active",
           },
         },
-      },
-    },
-  },
-
-  ClinicalNote: {
-    type: "object",
-    properties: {
-      titulo: {
-        type: "string",
-        description: "Título de la nota clínica",
-        example: "Sesión inicial de evaluación",
-      },
-      contenido: {
-        type: "string",
-        description: "Contenido completo de la nota clínica",
-        example: "El paciente se muestra colaborativo durante la primera sesión. Se observa ansiedad leve relacionada con el trabajo.",
-      },
-      fecha: {
-        type: "string",
-        format: "date-time",
-        description: "Fecha y hora de la nota clínica (YYYY-MM-DD HH:mm:ss)",
-        example: "2024-12-15 14:30:00",
-      },
-    },
-  },
-
-  DashboardKPIsResponse: {
-    type: "object",
-    properties: {
-      success: {
-        type: "boolean",
-        example: true,
-      },
-      total: {
-        type: "integer",
-        description: "Número total de registros retornados",
-        example: 15,
-      },
-      data: {
-        type: "array",
-        items: {
-          $ref: "#/components/schemas/Patient",
-        },
-        description: "Lista de pacientes (provisional para KPIs del dashboard)",
-      },
-    },
-  },
-
-  ErrorResponse: {
-    type: "object",
-    properties: {
-      success: {
-        type: "boolean",
-        example: false,
-      },
-      error: {
-        type: "string",
-        example: "ID de paciente debe ser un número",
-      },
-      field: {
-        type: "string",
-        example: "patient_id",
-      },
-      allowed_values: {
-        type: "array",
-        items: {
-          type: "string",
-        },
-        example: ["scheduled", "completed", "cancelled", "no-show"],
       },
     },
   },
