@@ -2,8 +2,8 @@ const dashboardPaths = {
   "/api/dashboard/kpis": {
     get: {
       tags: ["Dashboard"],
-      summary: "Obtener KPIs del dashboard",
-      description: "Obtiene todos los KPIs necesarios para el dashboard (provisional - retorna todos los pacientes)",
+      summary: "Obtener KPIs rápidos del dashboard",
+      description: "Obtiene los KPIs principales del dashboard incluyendo: sesiones del mes actual vs anterior, ingresos del mes vs anterior, pacientes activos, nuevos pacientes del mes, próximas citas de hoy y hora de la siguiente cita",
       responses: {
         200: {
           description: "KPIs obtenidos exitosamente",

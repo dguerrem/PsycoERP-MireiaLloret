@@ -4,12 +4,11 @@ const {
 
 const obtenerDashboardKPIs = async (req, res) => {
   try {
-    const kpis = await getDashboardKPIs();
+    const rapidKPIData = await getDashboardKPIs();
 
     res.json({
       success: true,
-      total: kpis.length,
-      data: kpis,
+      data: rapidKPIData,
     });
   } catch (err) {
     console.error("Error al obtener KPIs del dashboard:", err.message);

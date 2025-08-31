@@ -359,17 +359,8 @@ const definitions = {
         type: "boolean",
         example: true,
       },
-      total: {
-        type: "integer",
-        description: "Número total de registros retornados",
-        example: 15,
-      },
       data: {
-        type: "array",
-        items: {
-          $ref: "#/components/schemas/Patient",
-        },
-        description: "Lista de pacientes (provisional para KPIs del dashboard)",
+        $ref: "#/components/schemas/RapidKPIData",
       },
     },
   },
@@ -875,6 +866,57 @@ const definitions = {
         items: {
           $ref: "#/components/schemas/Patient",
         },
+      },
+    },
+  },
+
+  RapidKPIData: {
+    type: "object",
+    properties: {
+      sesiones_mes: {
+        type: "integer",
+        description: "Número de sesiones del mes actual",
+        example: 45,
+      },
+      sesiones_variacion: {
+        type: "number",
+        format: "decimal",
+        description: "Porcentaje de variación vs mes anterior (positivo o negativo)",
+        example: 12.5,
+      },
+      ingresos_mes: {
+        type: "number",
+        format: "decimal",
+        description: "Ingresos del mes actual en euros",
+        example: 2750.00,
+      },
+      ingresos_variacion: {
+        type: "number",
+        format: "decimal", 
+        description: "Porcentaje de variación de ingresos vs mes anterior",
+        example: -8.3,
+      },
+      pacientes_activos: {
+        type: "integer",
+        description: "Número de pacientes activos",
+        example: 28,
+      },
+      pacientes_nuevos_mes: {
+        type: "integer",
+        description: "Nuevos pacientes este mes",
+        example: 5,
+      },
+      proximas_citas_hoy: {
+        type: "integer",
+        description: "Número de citas programadas para hoy",
+        example: 6,
+      },
+      siguiente_cita_hora: {
+        type: "string",
+        format: "time",
+        nullable: true,
+        description: "Hora de la siguiente cita de hoy (HH:MM:SS) o null si no hay más",
+        example: "14:30:00",
       },
     },
   },
