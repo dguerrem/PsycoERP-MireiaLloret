@@ -280,23 +280,69 @@ const definitions = {
         description: "Nombre de la clínica",
         example: "Clínica Psicológica Centro",
       },
-      color_class: {
+      address: {
         type: "string",
         nullable: true,
-        description: "Clase CSS para el color de la clínica",
-        example: "bg-blue-500",
+        description: "Dirección de la clínica",
+        example: "Av. Principal 123, Ciudad",
       },
-      text_color_class: {
+      clinic_color: {
         type: "string",
         nullable: true,
-        description: "Clase CSS para el color del texto de la clínica",
-        example: "text-white",
+        description: "Color de la clínica en formato hexadecimal",
+        example: "#3B82F6",
       },
       created_at: {
         type: "string",
         format: "date",
         description: "Fecha de creación",
         example: "2024-01-15",
+      },
+      updated_at: {
+        type: "string",
+        format: "date",
+        description: "Fecha de última actualización",
+        example: "2024-01-15",
+      },
+    },
+  },
+
+  UpdateClinicRequest: {
+    type: "object",
+    properties: {
+      name: {
+        type: "string",
+        description: "Nombre de la clínica",
+        example: "Clínica Psicológica Centro Actualizada",
+      },
+      address: {
+        type: "string",
+        nullable: true,
+        description: "Dirección de la clínica",
+        example: "Av. Principal 456, Ciudad",
+      },
+      clinic_color: {
+        type: "string",
+        nullable: true,
+        description: "Color de la clínica en formato hexadecimal (#RRGGBB)",
+        pattern: "^#[0-9A-Fa-f]{6}$",
+        example: "#10B981",
+      },
+    },
+  },
+
+  SuccessResponse: {
+    type: "object",
+    properties: {
+      success: {
+        type: "boolean",
+        description: "Indica si la operación fue exitosa",
+        example: true,
+      },
+      message: {
+        type: "string",
+        description: "Mensaje de éxito",
+        example: "Operación completada exitosamente",
       },
     },
   },

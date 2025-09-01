@@ -29,6 +29,45 @@ const getClinics = async (filters = {}) => {
   return rows;
 };
 
+const updateClinic = async (id, data) => {
+  const { name, address, clinic_color } = data;
+  
+  const fields = [];
+  const params = [];
+  
+  if (name !== undefined) {
+    fields.push("name = ?");
+    params.push(name);
+  }
+  
+  if (address !== undefined) {
+    fields.push("address = ?");
+    params.push(address);
+  }
+  
+  if (clinic_color !== undefined) {
+    fields.push("clinic_color = ?");
+    params.push(clinic_color);
+  }
+  
+  if (fields.length === 0) {
+    throw new Error("No fields to update");
+  }
+  
+  params.push(id);
+  
+  const query = `UPDATE clinics SET ${fields.join(", ")} WHERE id = ?`;
+  
+  const [result] = await db.execute(query, params);
+  
+  if (result.affectedRows === 0) {
+    throw new Error("Clinic not found");
+  }
+  
+  return result;
+};
+
 module.exports = {
   getClinics,
+  updateClinic,
 };
