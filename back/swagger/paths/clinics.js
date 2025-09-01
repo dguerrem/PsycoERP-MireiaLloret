@@ -48,6 +48,53 @@ const clinicsPaths = {
         },
       },
     },
+    post: {
+      tags: ["Clinics"],
+      summary: "Crear nueva clínica",
+      description: "Crea una nueva clínica en el sistema",
+      requestBody: {
+        required: true,
+        content: {
+          "application/json": {
+            schema: {
+              $ref: "#/components/schemas/CreateClinicRequest",
+            },
+          },
+        },
+      },
+      responses: {
+        201: {
+          description: "Clínica creada exitosamente",
+          content: {
+            "application/json": {
+              schema: {
+                $ref: "#/components/schemas/CreateClinicResponse",
+              },
+            },
+          },
+        },
+        400: {
+          description: "Datos de entrada inválidos",
+          content: {
+            "application/json": {
+              schema: {
+                $ref: "#/components/schemas/ErrorResponse",
+              },
+            },
+          },
+        },
+        500: {
+          description: "Error interno del servidor",
+          content: {
+            "application/json": {
+              schema: {
+                $ref: "#/components/schemas/ErrorResponse",
+              },
+            },
+          },
+        },
+      },
+    },
   },
   "/api/clinics/{id}": {
     put: {

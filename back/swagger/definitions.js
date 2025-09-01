@@ -331,6 +331,71 @@ const definitions = {
     },
   },
 
+  CreateClinicRequest: {
+    type: "object",
+    required: ["name", "address", "clinic_color"],
+    properties: {
+      name: {
+        type: "string",
+        description: "Nombre de la clínica (requerido)",
+        example: "Clínica Psicológica Nueva",
+      },
+      address: {
+        type: "string",
+        description: "Dirección de la clínica (requerido)",
+        example: "Av. Nueva 789, Ciudad",
+      },
+      clinic_color: {
+        type: "string",
+        description: "Color de la clínica en formato hexadecimal (#RRGGBB) (requerido)",
+        pattern: "^#[0-9A-Fa-f]{6}$",
+        example: "#EF4444",
+      },
+    },
+  },
+
+  CreateClinicResponse: {
+    type: "object",
+    properties: {
+      success: {
+        type: "boolean",
+        description: "Indica si la operación fue exitosa",
+        example: true,
+      },
+      message: {
+        type: "string",
+        description: "Mensaje de éxito",
+        example: "Clínica creada exitosamente",
+      },
+      data: {
+        type: "object",
+        properties: {
+          id: {
+            type: "integer",
+            format: "int64",
+            description: "ID de la nueva clínica",
+            example: 5,
+          },
+          name: {
+            type: "string",
+            description: "Nombre de la clínica",
+            example: "Clínica Psicológica Nueva",
+          },
+          address: {
+            type: "string",
+            description: "Dirección de la clínica",
+            example: "Av. Nueva 789, Ciudad",
+          },
+          clinic_color: {
+            type: "string",
+            description: "Color de la clínica",
+            example: "#EF4444",
+          },
+        },
+      },
+    },
+  },
+
   SuccessResponse: {
     type: "object",
     properties: {

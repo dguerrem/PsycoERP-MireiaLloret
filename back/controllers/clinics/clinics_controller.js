@@ -111,8 +111,78 @@ const eliminarClinica = async (req, res) => {
   }
 };
 
+const crearClinica = async (req, res) => {
+  try {
+    const { name, address, clinic_color } = req.body;
+
+    if (!name || name.trim() === "") {
+      return res.status(400).json({
+        success: false,
+        error: "El nombre de la clínica es requerido",
+      });
+    }
+
+    if (!address || address.trim() === "") {
+      return res.status(400).json({
+        success: false,
+        error: "La dirección de la clínica es requerida",
+      });
+    }
+
+    if (!clinic_color || clinic_color.trim() === "") {
+      return res.status(400).json({
+        success: false,
+        error: "El color de la clínica es requerido",
+      });
+    }
+
+    const data = { 
+      name: name.trim(),
+      address: address.trim(),
+      clinic_color: clinic_color.trim()
+    };
+
+    const nuevaClinica = await createClinic(data);
+
+    res.status(201).json({
+      success: true,
+      message: "Clínica creada exitosamente",
+      data: nuevaClinica,
+    });
+  } catch (err) {
+    console.error("Error al crear clínica:", err.message);
+    
+    if (err.message === "Name is required") {
+      return res.status(400).json({
+        success: false,
+        error: "El nombre de la clínica es requerido",
+      });
+    }
+
+    if (err.message === "Address is required") {
+      return res.status(400).json({
+        success: false,
+        error: "La dirección de la clínica es requerida",
+      });
+    }
+
+    if (err.message === "Clinic color is required") {
+      return res.status(400).json({
+        success: false,
+        error: "El color de la clínica es requerido",
+      });
+    }
+
+    res.status(500).json({
+      success: false,
+      error: "Error al crear la clínica",
+    });
+  }
+};
+
 module.exports = {
   obtenerClinicas,
+  crearClinica,
   actualizarClinica,
   eliminarClinica,
 };

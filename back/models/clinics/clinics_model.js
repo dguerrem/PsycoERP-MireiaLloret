@@ -86,12 +86,20 @@ const createClinic = async (data) => {
     throw new Error("Name is required");
   }
   
+  if (!address) {
+    throw new Error("Address is required");
+  }
+  
+  if (!clinic_color) {
+    throw new Error("Clinic color is required");
+  }
+  
   const query = `
     INSERT INTO clinics (name, address, clinic_color)
     VALUES (?, ?, ?)
   `;
   
-  const [result] = await db.execute(query, [name, address || null, clinic_color || null]);
+  const [result] = await db.execute(query, [name, address, clinic_color]);
   
   return {
     id: result.insertId,
