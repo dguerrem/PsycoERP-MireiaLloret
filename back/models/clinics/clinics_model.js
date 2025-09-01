@@ -67,7 +67,41 @@ const updateClinic = async (id, data) => {
   return result;
 };
 
+const deleteClinic = async (id) => {
+  const query = "DELETE FROM clinics WHERE id = ?";
+  
+  const [result] = await db.execute(query, [id]);
+  
+  if (result.affectedRows === 0) {
+    throw new Error("Clinic not found");
+  }
+  
+  return result;
+};
+
+const createClinic = async (data) => {
+  const { name, address, clinic_color } = data;
+  
+  if (!name) {
+    throw new Error("Name is required");
+  }
+  
+  const query = `
+    INSERT INTO clinics (name, address, clinic_color)
+    VALUES (?, ?, ?)
+  `;
+  
+  const [result] = await db.execute(query, [name, address || null, clinic_color || null]);
+  
+  return {
+    id: result.insertId,
+    ...data,
+  };
+};
+
 module.exports = {
   getClinics,
+  createClinic,
   updateClinic,
+  deleteClinic,
 };

@@ -1,6 +1,8 @@
 const {
   getClinics,
+  createClinic,
   updateClinic,
+  deleteClinic,
 } = require("../../models/clinics/clinics_model");
 
 const obtenerClinicas = async (req, res) => {
@@ -75,7 +77,42 @@ const actualizarClinica = async (req, res) => {
   }
 };
 
+const eliminarClinica = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    if (!id || isNaN(id)) {
+      return res.status(400).json({
+        success: false,
+        error: "ID de clínica inválido",
+      });
+    }
+
+    await deleteClinic(id);
+
+    res.json({
+      success: true,
+      message: "Clínica eliminada exitosamente",
+    });
+  } catch (err) {
+    console.error("Error al eliminar clínica:", err.message);
+    
+    if (err.message === "Clinic not found") {
+      return res.status(404).json({
+        success: false,
+        error: "Clínica no encontrada",
+      });
+    }
+
+    res.status(500).json({
+      success: false,
+      error: "Error al eliminar la clínica",
+    });
+  }
+};
+
 module.exports = {
   obtenerClinicas,
   actualizarClinica,
+  eliminarClinica,
 };

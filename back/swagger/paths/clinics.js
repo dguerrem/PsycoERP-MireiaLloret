@@ -118,6 +118,64 @@ const clinicsPaths = {
         },
       },
     },
+    delete: {
+      tags: ["Clinics"],
+      summary: "Eliminar clínica",
+      description: "Elimina una clínica existente",
+      parameters: [
+        {
+          name: "id",
+          in: "path",
+          required: true,
+          schema: {
+            type: "integer",
+          },
+          description: "ID de la clínica a eliminar",
+        },
+      ],
+      responses: {
+        200: {
+          description: "Clínica eliminada exitosamente",
+          content: {
+            "application/json": {
+              schema: {
+                $ref: "#/components/schemas/SuccessResponse",
+              },
+            },
+          },
+        },
+        400: {
+          description: "ID de clínica inválido",
+          content: {
+            "application/json": {
+              schema: {
+                $ref: "#/components/schemas/ErrorResponse",
+              },
+            },
+          },
+        },
+        404: {
+          description: "Clínica no encontrada",
+          content: {
+            "application/json": {
+              schema: {
+                $ref: "#/components/schemas/ErrorResponse",
+              },
+            },
+          },
+        },
+        500: {
+          description: "Error interno del servidor",
+          content: {
+            "application/json": {
+              schema: {
+                $ref: "#/components/schemas/ErrorResponse",
+              },
+            },
+          },
+        },
+      },
+    },
   },
 };
 
