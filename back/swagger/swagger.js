@@ -5,6 +5,7 @@ const definitions = require("./definitions");
 const sessionsPaths = require("./paths/sessions");
 const patientsPaths = require("./paths/patients");
 const bonusesPaths = require("./paths/bonuses");
+const clinicsPaths = require("./paths/clinics");
 const dashboardPaths = require("./paths/dashboard");
 
 const swaggerDefinition = {
@@ -31,6 +32,7 @@ const swaggerDefinition = {
     ...sessionsPaths,
     ...patientsPaths,
     ...bonusesPaths,
+    ...clinicsPaths,
     ...dashboardPaths,
   },
   tags: [
@@ -45,6 +47,10 @@ const swaggerDefinition = {
     {
       name: "Bonuses",
       description: "Gestión de bonuses de pacientes",
+    },
+    {
+      name: "Clinics",
+      description: "Gestión de clínicas",
     },
     {
       name: "Dashboard",

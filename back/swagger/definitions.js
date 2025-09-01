@@ -266,6 +266,41 @@ const definitions = {
     },
   },
 
+  Clinic: {
+    type: "object",
+    properties: {
+      id: {
+        type: "integer",
+        format: "int64",
+        description: "ID único de la clínica",
+        example: 1,
+      },
+      name: {
+        type: "string",
+        description: "Nombre de la clínica",
+        example: "Clínica Psicológica Centro",
+      },
+      color_class: {
+        type: "string",
+        nullable: true,
+        description: "Clase CSS para el color de la clínica",
+        example: "bg-blue-500",
+      },
+      text_color_class: {
+        type: "string",
+        nullable: true,
+        description: "Clase CSS para el color del texto de la clínica",
+        example: "text-white",
+      },
+      created_at: {
+        type: "string",
+        format: "date",
+        description: "Fecha de creación",
+        example: "2024-01-15",
+      },
+    },
+  },
+
   ClinicData: {
     type: "object",
     properties: {
@@ -279,6 +314,26 @@ const definitions = {
         type: "string",
         description: "Nombre de la clínica",
         example: "Clínica Psicológica Centro",
+      },
+    },
+  },
+
+  ClinicsResponse: {
+    type: "object",
+    properties: {
+      success: {
+        type: "boolean",
+        example: true,
+      },
+      total: {
+        type: "integer",
+        example: 3,
+      },
+      data: {
+        type: "array",
+        items: {
+          $ref: "#/components/schemas/Clinic",
+        },
       },
     },
   },

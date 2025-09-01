@@ -15,6 +15,7 @@ const PORT = process.env.PORT || 3000;
 const sessionsRoutes = require("./routes/sessions/sessions_routes");
 const patientsRoutes = require("./routes/patients/patients_routes");
 const bonusesRoutes = require("./routes/bonuses/bonuses_routes");
+const clinicsRoutes = require("./routes/clinics/clinics_routes");
 const dashboardRoutes = require("./routes/dashboard/dashboard_routes");
 
 // Middlewares globales
@@ -38,6 +39,7 @@ app.get("/", (req, res) => {
       sessions: "/api/sessions",
       patients: "/api/patients",
       bonuses: "/api/bonuses",
+      clinics: "/api/clinics",
       dashboard: "/api/dashboard",
     },
   });
@@ -47,6 +49,7 @@ app.get("/", (req, res) => {
 app.use("/api/sessions", sessionsRoutes);
 app.use("/api/patients", patientsRoutes);
 app.use("/api/bonuses", bonusesRoutes);
+app.use("/api/clinics", clinicsRoutes);
 app.use("/api/dashboard", dashboardRoutes);
 
 // Iniciar servidor
