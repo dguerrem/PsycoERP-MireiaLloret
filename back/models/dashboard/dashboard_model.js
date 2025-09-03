@@ -313,6 +313,30 @@ const getDashboardKPIs = async () => {
       patient_count: item.patient_count
     }));
 
+    // ===== 10. SESSION RESULT DATA =====
+    
+    const sessionResultQuery = `
+      SELECT 
+        status as session_status,
+        COUNT(*) as session_count
+      FROM sessions
+      WHERE status IN ('completed', 'scheduled', 'cancelled', 'no-show')
+      GROUP BY status
+      ORDER BY 
+        CASE status
+          WHEN 'completed' THEN 1
+          WHEN 'scheduled' THEN 2
+          WHEN 'cancelled' THEN 3
+          WHEN 'no-show' THEN 4
+        END
+    `;
+    const [sessionResults] = await db.execute(sessionResultQuery);
+
+    const sessionResultData = sessionResults.map(item => ({
+      session_status: item.session_status,
+      session_count: item.session_count
+    }));
+
     // ===== RESPUESTA FINAL =====
     
     return {
@@ -321,6 +345,7 @@ const getDashboardKPIs = async () => {
       DistributionByModalityData: distributionByModalityData,
       MonthlyRevenueData: monthlyRevenueData,
       PaymentMethodsData: paymentMethodsData,
+      SessionResultData: sessionResultData,
       SessionsByClinicData: sessionsByClinicData,
       TodayUpcomingSessionsData: todayUpcomingSessionsData,
       TomorrowSessionsData: tomorrowSessionsData,

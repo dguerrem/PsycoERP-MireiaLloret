@@ -585,6 +585,13 @@ const definitions = {
         },
         description: "Distribución porcentual de métodos de pago utilizados",
       },
+      SessionResultData: {
+        type: "array",
+        items: {
+          $ref: "#/components/schemas/SessionResultItem",
+        },
+        description: "Distribución de sesiones por estado (completadas, planificadas, canceladas, no-show)",
+      },
       SessionsByClinicData: {
         type: "array",
         items: {
@@ -1515,6 +1522,23 @@ const definitions = {
         type: "string",
         description: "Nombre completo del paciente",
         example: "Juan Pérez García",
+      },
+    },
+  },
+
+  SessionResultItem: {
+    type: "object",
+    properties: {
+      session_status: {
+        type: "string",
+        enum: ["scheduled", "completed", "cancelled", "no-show"],
+        description: "Estado de la sesión",
+        example: "completed",
+      },
+      session_count: {
+        type: "integer",
+        description: "Número de sesiones con este estado",
+        example: 45,
       },
     },
   },
