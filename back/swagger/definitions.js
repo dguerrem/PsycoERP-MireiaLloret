@@ -482,6 +482,34 @@ const definitions = {
     },
   },
 
+  ClinicPerformanceItem: {
+    type: "object",
+    properties: {
+      clinic_name: {
+        type: "string",
+        description: "Nombre de la clínica",
+        example: "Clínica Psicológica Centro",
+      },
+      session_count: {
+        type: "integer",
+        description: "Número total de sesiones realizadas en esta clínica",
+        example: 45,
+      },
+      average_session_price: {
+        type: "number",
+        format: "decimal",
+        description: "Precio promedio por sesión en euros",
+        example: 62.50,
+      },
+      total_revenue: {
+        type: "number",
+        format: "decimal",
+        description: "Ingresos totales generados por esta clínica",
+        example: 2812.50,
+      },
+    },
+  },
+
   ClinicalNote: {
     type: "object",
     properties: {
@@ -563,6 +591,13 @@ const definitions = {
           $ref: "#/components/schemas/AgeDistributionItem",
         },
         description: "Distribución de pacientes activos por rangos de edad",
+      },
+      ClinicPerformanceData: {
+        type: "array",
+        items: {
+          $ref: "#/components/schemas/ClinicPerformanceItem",
+        },
+        description: "Rendimiento de cada clínica (sesiones, precio promedio, ingresos totales)",
       },
       DistributionByModalityData: {
         type: "array",

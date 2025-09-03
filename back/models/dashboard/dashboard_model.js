@@ -337,11 +337,35 @@ const getDashboardKPIs = async () => {
       session_count: item.session_count
     }));
 
+    // ===== 11. CLINIC PERFORMANCE DATA =====
+    
+    const clinicPerformanceQuery = `
+      SELECT 
+        c.name as clinic_name,
+        COUNT(s.id) as session_count,
+        COALESCE(AVG(s.price), 0) as average_session_price,
+        COALESCE(SUM(s.price), 0) as total_revenue
+      FROM clinics c
+      LEFT JOIN sessions s ON c.id = s.clinic_id 
+        AND s.status IN ('completed', 'scheduled')
+      GROUP BY c.id, c.name
+      ORDER BY total_revenue DESC
+    `;
+    const [clinicPerformance] = await db.execute(clinicPerformanceQuery);
+
+    const clinicPerformanceData = clinicPerformance.map(item => ({
+      clinic_name: item.clinic_name,
+      session_count: item.session_count,
+      average_session_price: Math.round(parseFloat(item.average_session_price) * 100) / 100,
+      total_revenue: parseFloat(item.total_revenue)
+    }));
+
     // ===== RESPUESTA FINAL =====
     
     return {
       RapidKPIData: rapidKPIData,
       AgeDistributionData: ageDistributionData,
+      ClinicPerformanceData: clinicPerformanceData,
       DistributionByModalityData: distributionByModalityData,
       MonthlyRevenueData: monthlyRevenueData,
       PaymentMethodsData: paymentMethodsData,
