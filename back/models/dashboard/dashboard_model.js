@@ -261,6 +261,27 @@ const getDashboardKPIs = async () => {
       percentage: Math.round(parseFloat(item.percentage) * 100) / 100
     }));
 
+    // ===== 8. WEEKLY SESSIONS DATA =====
+    
+    const weeklySessionsQuery = `
+      SELECT 
+        WEEK(session_date, 1) - WEEK(DATE_FORMAT(session_date, '%Y-%m-01'), 1) + 1 as week_number,
+        COUNT(*) as session_count,
+        CONCAT('Semana ', WEEK(session_date, 1) - WEEK(DATE_FORMAT(session_date, '%Y-%m-01'), 1) + 1) as week_label
+      FROM sessions s
+      WHERE YEAR(session_date) = ? AND MONTH(session_date) = ?
+        AND s.status IN ('completed', 'scheduled')
+      GROUP BY week_number
+      ORDER BY week_number ASC
+    `;
+    const [weeklySessions] = await db.execute(weeklySessionsQuery, [currentYear, currentMonth]);
+
+    const weeklySessionsData = weeklySessions.map(item => ({
+      week_number: item.week_number,
+      week_label: item.week_label,
+      session_count: item.session_count
+    }));
+
     // ===== RESPUESTA FINAL =====
     
     return {
@@ -270,7 +291,8 @@ const getDashboardKPIs = async () => {
       PaymentMethodsData: paymentMethodsData,
       SessionsByClinicData: sessionsByClinicData,
       TodayUpcomingSessionsData: todayUpcomingSessionsData,
-      TomorrowSessionsData: tomorrowSessionsData
+      TomorrowSessionsData: tomorrowSessionsData,
+      WeeklySessionsData: weeklySessionsData
     };
 
   } catch (error) {

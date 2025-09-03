@@ -582,6 +582,13 @@ const definitions = {
         },
         description: "Todas las sesiones programadas para el próximo día laborable (si es viernes, muestra las del lunes)",
       },
+      WeeklySessionsData: {
+        type: "array",
+        items: {
+          $ref: "#/components/schemas/WeeklySessionsItem",
+        },
+        description: "Sesiones por semana del mes actual para gráfico de barras",
+      },
     },
   },
 
@@ -1604,6 +1611,27 @@ const definitions = {
             example: "active",
           },
         },
+      },
+    },
+  },
+
+  WeeklySessionsItem: {
+    type: "object",
+    properties: {
+      week_number: {
+        type: "integer",
+        description: "Número de semana del mes (1-5)",
+        example: 2,
+      },
+      week_label: {
+        type: "string",
+        description: "Etiqueta descriptiva de la semana",
+        example: "Semana 2",
+      },
+      session_count: {
+        type: "integer",
+        description: "Número de sesiones realizadas en esta semana",
+        example: 15,
       },
     },
   },
