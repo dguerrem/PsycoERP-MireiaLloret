@@ -242,13 +242,33 @@ const getDashboardKPIs = async () => {
       session_count: item.session_count
     }));
 
+    // ===== 7. PAYMENT METHODS DATA =====
+    
+    const paymentMethodsQuery = `
+      SELECT 
+        s.payment_method,
+        COUNT(*) as method_count,
+        (COUNT(*) * 100.0 / (SELECT COUNT(*) FROM sessions WHERE status IN ('completed', 'scheduled'))) as percentage
+      FROM sessions s
+      WHERE s.status IN ('completed', 'scheduled')
+      GROUP BY s.payment_method
+      ORDER BY method_count DESC
+    `;
+    const [paymentMethods] = await db.execute(paymentMethodsQuery);
+
+    const paymentMethodsData = paymentMethods.map(item => ({
+      payment_method: item.payment_method,
+      percentage: Math.round(parseFloat(item.percentage) * 100) / 100
+    }));
+
     // ===== RESPUESTA FINAL =====
     
     return {
       RapidKPIData: rapidKPIData,
       DistributionByModalityData: distributionByModalityData,
-      SessionsByClinicData: sessionsByClinicData,
       MonthlyRevenueData: monthlyRevenueData,
+      PaymentMethodsData: paymentMethodsData,
+      SessionsByClinicData: sessionsByClinicData,
       TodayUpcomingSessionsData: todayUpcomingSessionsData,
       TomorrowSessionsData: tomorrowSessionsData
     };

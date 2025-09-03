@@ -547,19 +547,26 @@ const definitions = {
         },
         description: "Distribución de sesiones por modalidad (presencial/online)",
       },
-      SessionsByClinicData: {
-        type: "array",
-        items: {
-          $ref: "#/components/schemas/SessionsByClinicItem",
-        },
-        description: "Datos de sesiones agrupadas por clínica",
-      },
       MonthlyRevenueData: {
         type: "array",
         items: {
           $ref: "#/components/schemas/MonthlyRevenueItem",
         },
         description: "Datos de ingresos por mes",
+      },
+      PaymentMethodsData: {
+        type: "array",
+        items: {
+          $ref: "#/components/schemas/PaymentMethodsItem",
+        },
+        description: "Distribución porcentual de métodos de pago utilizados",
+      },
+      SessionsByClinicData: {
+        type: "array",
+        items: {
+          $ref: "#/components/schemas/SessionsByClinicItem",
+        },
+        description: "Datos de sesiones agrupadas por clínica",
       },
       TodayUpcomingSessionsData: {
         type: "array",
@@ -1119,6 +1126,24 @@ const definitions = {
         items: {
           $ref: "#/components/schemas/Patient",
         },
+      },
+    },
+  },
+
+  PaymentMethodsItem: {
+    type: "object",
+    properties: {
+      payment_method: {
+        type: "string",
+        enum: ["cash", "card", "transfer", "insurance"],
+        description: "Método de pago utilizado",
+        example: "cash",
+      },
+      percentage: {
+        type: "number",
+        format: "decimal",
+        description: "Porcentaje de uso de este método de pago",
+        example: 50.25,
       },
     },
   },
