@@ -396,6 +396,22 @@ const definitions = {
     },
   },
 
+  DistributionByModalityItem: {
+    type: "object",
+    properties: {
+      modality_type: {
+        type: "string",
+        description: "Tipo de modalidad de la sesión (presencial/online)",
+        example: "Presencial",
+      },
+      session_count: {
+        type: "integer",
+        description: "Número total de sesiones realizadas con esta modalidad",
+        example: 45,
+      },
+    },
+  },
+
   SuccessResponse: {
     type: "object",
     properties: {
@@ -523,6 +539,13 @@ const definitions = {
     properties: {
       RapidKPIData: {
         $ref: "#/components/schemas/RapidKPIData",
+      },
+      DistributionByModalityData: {
+        type: "array",
+        items: {
+          $ref: "#/components/schemas/DistributionByModalityItem",
+        },
+        description: "Distribución de sesiones por modalidad (presencial/online)",
       },
       SessionsByClinicData: {
         type: "array",

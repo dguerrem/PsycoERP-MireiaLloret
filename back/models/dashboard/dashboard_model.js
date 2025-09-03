@@ -224,10 +224,29 @@ const getDashboardKPIs = async () => {
       clinic_name: session.clinic_name
     }));
 
+    // ===== 6. DISTRIBUTION BY MODALITY DATA =====
+    
+    const distributionByModalityQuery = `
+      SELECT 
+        s.mode as session_modality,
+        COUNT(*) as session_count
+      FROM sessions s
+      WHERE s.status IN ('completed', 'scheduled')
+      GROUP BY s.mode
+      ORDER BY session_count DESC
+    `;
+    const [distributionByModality] = await db.execute(distributionByModalityQuery);
+
+    const distributionByModalityData = distributionByModality.map(item => ({
+      modality_type: item.session_modality,
+      session_count: item.session_count
+    }));
+
     // ===== RESPUESTA FINAL =====
     
     return {
       RapidKPIData: rapidKPIData,
+      DistributionByModalityData: distributionByModalityData,
       SessionsByClinicData: sessionsByClinicData,
       MonthlyRevenueData: monthlyRevenueData,
       TodayUpcomingSessionsData: todayUpcomingSessionsData,
