@@ -282,10 +282,42 @@ const getDashboardKPIs = async () => {
       session_count: item.session_count
     }));
 
+    // ===== 9. AGE DISTRIBUTION DATA =====
+    
+    const ageDistributionQuery = `
+      SELECT 
+        CASE 
+          WHEN TIMESTAMPDIFF(YEAR, birth_date, CURDATE()) BETWEEN 18 AND 25 THEN '18-25'
+          WHEN TIMESTAMPDIFF(YEAR, birth_date, CURDATE()) BETWEEN 26 AND 35 THEN '26-35'
+          WHEN TIMESTAMPDIFF(YEAR, birth_date, CURDATE()) BETWEEN 36 AND 45 THEN '36-45'
+          WHEN TIMESTAMPDIFF(YEAR, birth_date, CURDATE()) > 45 THEN '>45'
+          ELSE 'Sin datos'
+        END as age_range,
+        COUNT(*) as patient_count
+      FROM patients
+      WHERE status = 'active' AND birth_date IS NOT NULL
+      GROUP BY age_range
+      ORDER BY 
+        CASE age_range
+          WHEN '18-25' THEN 1
+          WHEN '26-35' THEN 2
+          WHEN '36-45' THEN 3
+          WHEN '>45' THEN 4
+          ELSE 5
+        END
+    `;
+    const [ageDistribution] = await db.execute(ageDistributionQuery);
+
+    const ageDistributionData = ageDistribution.map(item => ({
+      age_range: item.age_range,
+      patient_count: item.patient_count
+    }));
+
     // ===== RESPUESTA FINAL =====
     
     return {
       RapidKPIData: rapidKPIData,
+      AgeDistributionData: ageDistributionData,
       DistributionByModalityData: distributionByModalityData,
       MonthlyRevenueData: monthlyRevenueData,
       PaymentMethodsData: paymentMethodsData,

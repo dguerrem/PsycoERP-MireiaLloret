@@ -1,4 +1,21 @@
 const definitions = {
+  AgeDistributionItem: {
+    type: "object",
+    properties: {
+      age_range: {
+        type: "string",
+        description: "Rango de edad del grupo",
+        enum: ["18-25", "26-35", "36-45", ">45", "Sin datos"],
+        example: "26-35",
+      },
+      patient_count: {
+        type: "integer",
+        description: "Número de pacientes en este rango de edad",
+        example: 12,
+      },
+    },
+  },
+
   Bonus: {
     type: "object",
     properties: {
@@ -539,6 +556,13 @@ const definitions = {
     properties: {
       RapidKPIData: {
         $ref: "#/components/schemas/RapidKPIData",
+      },
+      AgeDistributionData: {
+        type: "array",
+        items: {
+          $ref: "#/components/schemas/AgeDistributionItem",
+        },
+        description: "Distribución de pacientes activos por rangos de edad",
       },
       DistributionByModalityData: {
         type: "array",
