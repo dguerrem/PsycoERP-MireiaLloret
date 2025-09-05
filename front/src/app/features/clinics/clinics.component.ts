@@ -1,9 +1,10 @@
-import { Component, inject, signal, ChangeDetectionStrategy } from '@angular/core';
+import { Component, inject, signal, computed, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ClinicsService } from './services/clinics.service';
 import { Clinic, ClinicFormData } from './models/clinic.model';
 import { ConfirmationModalComponent } from '../../shared/components/confirmation-modal/confirmation-modal.component';
+import { ClinicaFormComponent } from './clinica-form/clinica-form.component';
 
 @Component({
   selector: 'app-clinics',
@@ -13,7 +14,8 @@ import { ConfirmationModalComponent } from '../../shared/components/confirmation
   imports: [
     CommonModule,
     FormsModule,
-    ConfirmationModalComponent
+    ConfirmationModalComponent,
+    ClinicaFormComponent
   ]
 })
 export class ClinicsComponent {
@@ -22,78 +24,56 @@ export class ClinicsComponent {
   private clinicsService = inject(ClinicsService);
 
   // State signals
-  protected isNewClinicOpen = signal(false);
-  protected editingClinic = signal<Clinic | null>(null);
+  protected showCreateForm = signal(false);
+  protected editingClinica = signal<Clinic | null>(null);
   protected deletingClinic = signal<Clinic | null>(null);
-  protected formData = signal<ClinicFormData>({
-    name: '',
-    address: '',
-    clinic_color: '#3b82f6'
-  });
 
   // Computed signals
   protected clinicsList = this.clinicsService.all;
   protected isLoading = this.clinicsService.isLoading;
+  protected showForm = computed(() => this.showCreateForm() || this.editingClinica() !== null);
 
   /**
    * Abrir modal para crear nueva clínica
    */
-  protected openNewClinicModal(): void {
-    this.resetFormData();
-    this.isNewClinicOpen.set(true);
-  }
-
-  /**
-   * Cerrar modal de nueva clínica
-   */
-  protected closeNewClinicModal(): void {
-    this.isNewClinicOpen.set(false);
-    this.resetFormData();
-  }
-
-  /**
-   * Crear nueva clínica
-   */
-  protected handleCreateClinic(): void {
-    const data = this.formData();
-    if (data.name.trim() && data.address.trim()) {
-      this.clinicsService.createClinic(data);
-      this.closeNewClinicModal();
-    }
+  protected openCreateForm(): void {
+    this.editingClinica.set(null);
+    this.showCreateForm.set(true);
   }
 
   /**
    * Abrir modal para editar clínica
    */
-  protected handleEditClinic(clinic: Clinic): void {
-    this.editingClinic.set(clinic);
-    this.formData.set({
-      name: clinic.name,
-      address: clinic.address,
-      clinic_color: clinic.clinic_color
-    });
+  protected openEditForm(clinic: Clinic): void {
+    this.showCreateForm.set(false);
+    this.editingClinica.set(clinic);
   }
 
   /**
-   * Cerrar modal de edición
+   * Cerrar modal de formulario
    */
-  protected closeEditModal(): void {
-    this.editingClinic.set(null);
-    this.resetFormData();
+  protected closeForm(): void {
+    this.showCreateForm.set(false);
+    this.editingClinica.set(null);
   }
 
   /**
-   * Actualizar clínica
+   * Manejar guardado del formulario (crear/editar)
    */
-  protected handleUpdateClinic(): void {
-    const editing = this.editingClinic();
-    const data = this.formData();
+  protected handleSave(clinicData: Clinic | ClinicFormData): void {
+    const editing = this.editingClinica();
     
-    if (editing && data.name.trim() && data.address.trim()) {
-      this.clinicsService.updateClinic(editing.id, data);
-      this.closeEditModal();
+    if (editing) {
+      // Editar clínica existente
+      this.clinicsService.updateClinic(editing.id, clinicData as ClinicFormData);
+    } else {
+      // Crear nueva clínica
+      this.clinicsService.createClinic(clinicData as ClinicFormData);
     }
+    
+    this.closeForm();
   }
+
 
   /**
    * Abrir modal de confirmación de eliminación
@@ -120,12 +100,6 @@ export class ClinicsComponent {
     }
   }
 
-  /**
-   * Actualizar campo del formulario
-   */
-  protected updateFormField(field: keyof ClinicFormData, value: string): void {
-    this.formData.update(data => ({ ...data, [field]: value }));
-  }
 
   /**
    * Obtener ID de badge
@@ -134,16 +108,6 @@ export class ClinicsComponent {
     return this.clinicsService.getBadgeId(clinicId);
   }
 
-  /**
-   * Resetear datos del formulario
-   */
-  private resetFormData(): void {
-    this.formData.set({
-      name: '',
-      address: '',
-      clinic_color: '#3b82f6'
-    });
-  }
 
   /**
    * Track by function para ngFor
