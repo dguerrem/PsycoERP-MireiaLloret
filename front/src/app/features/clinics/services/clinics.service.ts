@@ -14,17 +14,11 @@ export class ClinicsService extends BaseCrudService<Clinic> {
     this.loadInitialData();
   }
 
-
   private clinics = signal<Clinic[]>([]);
-  private loading = signal(false);
 
   // Getters readonly
   get all() {
     return this.clinics.asReadonly();
-  }
-
-  get isLoading() {
-    return this.loading.asReadonly();
   }
 
   /**
@@ -38,16 +32,14 @@ export class ClinicsService extends BaseCrudService<Clinic> {
    * Crear una nueva clínica - Conecta con API real
    */
   createClinic(formData: ClinicFormData): void {
-    this.loading.set(true);
-
-    // Usar API real
+    // Usar API real - el loading se maneja automáticamente en BaseCrudService
     this.create(formData).subscribe({
       next: (newClinic) => {
         // Recargar todos los datos para asegurar consistencia
         this.loadClinics();
       },
       error: () => {
-        this.loading.set(false);
+        // Error handling manejado por errorInterceptor
       },
     });
   }
@@ -56,16 +48,14 @@ export class ClinicsService extends BaseCrudService<Clinic> {
    * Actualizar una clínica existente - Conecta con API real
    */
   updateClinic(clinicId: string, formData: ClinicFormData): void {
-    this.loading.set(true);
-
-    // Usar API real
+    // Usar API real - el loading se maneja automáticamente en BaseCrudService
     this.update(clinicId, formData).subscribe({
       next: (updatedClinic) => {
         // Recargar todos los datos para asegurar consistencia
         this.loadClinics();
       },
       error: () => {
-        this.loading.set(false);
+        // Error handling manejado por errorInterceptor
       },
     });
   }
@@ -74,16 +64,14 @@ export class ClinicsService extends BaseCrudService<Clinic> {
    * Eliminar una clínica - Conecta con API real
    */
   deleteClinic(clinicId: string): void {
-    this.loading.set(true);
-
-    // Usar API real
+    // Usar API real - el loading se maneja automáticamente en BaseCrudService
     this.delete(clinicId).subscribe({
       next: () => {
         // Recargar todos los datos para asegurar consistencia
         this.loadClinics();
       },
       error: () => {
-        this.loading.set(false);
+        // Error handling manejado por errorInterceptor
       },
     });
   }
@@ -92,23 +80,14 @@ export class ClinicsService extends BaseCrudService<Clinic> {
    * Cargar clínicas desde la API
    */
   loadClinics(): void {
-    this.loading.set(true);
-
+    // El loading se maneja automáticamente en BaseCrudService
     this.getAll().subscribe({
       next: (clinics) => {
         this.clinics.set(clinics);
-        this.loading.set(false);
       },
       error: () => {
-        this.loading.set(false);
+        // Error handling manejado por errorInterceptor
       },
     });
-  }
-
-  /**
-   * Obtener ID de badge para mostrar en la UI
-   */
-  getBadgeId(clinicId: string): string {
-    return clinicId.split('-')[1] || '';
   }
 }

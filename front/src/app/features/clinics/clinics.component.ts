@@ -37,7 +37,6 @@ export class ClinicsComponent {
 
   // Computed signals
   clinicsList = this.clinicsService.all;
-  isLoading = this.clinicsService.isLoading;
   showForm = computed(
     () => this.showCreateForm() || this.editingClinica() !== null
   );
