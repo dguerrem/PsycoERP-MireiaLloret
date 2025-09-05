@@ -5,6 +5,7 @@ import { ClinicsService } from './services/clinics.service';
 import { Clinic, ClinicFormData } from './models/clinic.model';
 import { ConfirmationModalComponent } from '../../shared/components/confirmation-modal/confirmation-modal.component';
 import { ClinicaFormComponent } from './clinica-form/clinica-form.component';
+import { SectionHeaderComponent } from '../../shared/components/section-header/section-header.component';
 
 @Component({
   selector: 'app-clinics',
@@ -15,7 +16,8 @@ import { ClinicaFormComponent } from './clinica-form/clinica-form.component';
     CommonModule,
     FormsModule,
     ConfirmationModalComponent,
-    ClinicaFormComponent
+    ClinicaFormComponent,
+    SectionHeaderComponent
   ]
 })
 export class ClinicsComponent {
