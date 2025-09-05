@@ -1,6 +1,4 @@
 import { Injectable, signal } from '@angular/core';
-import { of, delay } from 'rxjs';
-import { tap } from 'rxjs/operators';
 import { BaseCrudService } from '../../../core/services/base-crud.service';
 import { Clinic, ClinicFormData } from '../models/clinic.model';
 
@@ -16,35 +14,8 @@ export class ClinicsService extends BaseCrudService<Clinic> {
     this.loadInitialData();
   }
 
-  // Mock data inicial - matches original React data exactly
-  private mockClinics: Clinic[] = [
-    {
-      id: 'clinic-a',
-      name: 'Centro de Psicología San Rafael',
-      address: 'Calle Mayor 123, 28001 Madrid',
-      clinic_color: '#0891b2',
-    },
-    {
-      id: 'clinic-b',
-      name: 'Clínica Mental Health Plus',
-      address: 'Avenida de la Paz 456, 28002 Madrid',
-      clinic_color: '#ec4899',
-    },
-    {
-      id: 'clinic-c',
-      name: 'Instituto de Bienestar Emocional',
-      address: 'Plaza de España 789, 28008 Madrid',
-      clinic_color: '#6366f1',
-    },
-    {
-      id: 'clinic-d',
-      name: 'Consulta Privada Dr. Psicólogo',
-      address: 'Calle Serrano 321, 28006 Madrid',
-      clinic_color: '#be123c',
-    },
-  ];
 
-  private clinics = signal<Clinic[]>(this.mockClinics);
+  private clinics = signal<Clinic[]>([]);
   private loading = signal(false);
 
   // Getters readonly
@@ -57,10 +28,9 @@ export class ClinicsService extends BaseCrudService<Clinic> {
   }
 
   /**
-   * Cargar datos iniciales - Intenta API real, fallback a mock
+   * Cargar datos iniciales desde la API
    */
   private loadInitialData(): void {
-    // Intentar cargar desde API, si falla usar mock data
     this.loadClinics();
   }
 
@@ -130,8 +100,6 @@ export class ClinicsService extends BaseCrudService<Clinic> {
         this.loading.set(false);
       },
       error: () => {
-        // En caso de error, usar datos mock como fallback
-        this.clinics.set(this.mockClinics);
         this.loading.set(false);
       },
     });
