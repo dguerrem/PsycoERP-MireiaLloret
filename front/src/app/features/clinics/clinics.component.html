@@ -109,45 +109,45 @@
       <!-- Modal Content -->
       <div class="space-y-4">
         <div>
-          <label for="name" class="text-sm font-medium leading-none text-foreground peer-disabled:cursor-not-allowed peer-disabled:opacity-70 mb-2 block">
+          <label for="name" class="text-sm font-semibold leading-none text-gray-700 peer-disabled:cursor-not-allowed peer-disabled:opacity-70 mb-2 block">
             Nombre de la Clínica
           </label>
           <input
             id="name"
             type="text"
-            class="flex h-10 w-full rounded-md border border-border bg-muted/30 px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground hover:border-border focus:outline-none focus:ring-2 focus:ring-ring focus:bg-background focus:border-transparent disabled:cursor-not-allowed disabled:opacity-50 transition-colors"
+            class="flex h-10 w-full rounded-md border border-gray-300 bg-gray-50 px-3 py-2 text-sm text-gray-900 placeholder:text-gray-500 hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white focus:border-blue-500 disabled:cursor-not-allowed disabled:opacity-50 transition-colors"
             placeholder="Ej: Clínica San Rafael"
             [value]="formData().name"
             (input)="updateFormField('name', $any($event.target).value)">
         </div>
 
         <div>
-          <label for="address" class="text-sm font-medium leading-none text-foreground peer-disabled:cursor-not-allowed peer-disabled:opacity-70 mb-2 block">
+          <label for="address" class="text-sm font-semibold leading-none text-gray-700 peer-disabled:cursor-not-allowed peer-disabled:opacity-70 mb-2 block">
             Dirección
           </label>
           <input
             id="address"
             type="text"
-            class="flex h-10 w-full rounded-md border border-border bg-muted/30 px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground hover:border-border focus:outline-none focus:ring-2 focus:ring-ring focus:bg-background focus:border-transparent disabled:cursor-not-allowed disabled:opacity-50 transition-colors"
+            class="flex h-10 w-full rounded-md border border-gray-300 bg-gray-50 px-3 py-2 text-sm text-gray-900 placeholder:text-gray-500 hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white focus:border-blue-500 disabled:cursor-not-allowed disabled:opacity-50 transition-colors"
             placeholder="Ej: Calle Principal 123"
             [value]="formData().address"
             (input)="updateFormField('address', $any($event.target).value)">
         </div>
 
         <div>
-          <label for="color" class="text-sm font-medium leading-none text-foreground peer-disabled:cursor-not-allowed peer-disabled:opacity-70 mb-2 block">
+          <label for="color" class="text-sm font-semibold leading-none text-gray-700 peer-disabled:cursor-not-allowed peer-disabled:opacity-70 mb-2 block">
             Color Identificativo
           </label>
           <div class="flex items-center gap-2">
             <input
               id="color"
               type="color"
-              class="w-12 h-10 rounded border border-border bg-muted/30 cursor-pointer hover:border-border focus:outline-none focus:ring-2 focus:ring-ring"
+              class="w-12 h-10 rounded border border-gray-300 bg-gray-50 cursor-pointer hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
               [value]="formData().clinic_color"
               (input)="updateFormField('clinic_color', $any($event.target).value)">
             <input
               type="text"
-              class="flex h-10 w-full rounded-md border border-border bg-muted/30 px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground hover:border-border focus:outline-none focus:ring-2 focus:ring-ring focus:bg-background focus:border-transparent disabled:cursor-not-allowed disabled:opacity-50 transition-colors"
+              class="flex h-10 w-full rounded-md border border-gray-300 bg-gray-50 px-3 py-2 text-sm text-gray-900 placeholder:text-gray-500 hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white focus:border-blue-500 disabled:cursor-not-allowed disabled:opacity-50 transition-colors"
               placeholder="#3b82f6"
               [value]="formData().clinic_color"
               (input)="updateFormField('clinic_color', $any($event.target).value)">
@@ -189,43 +189,43 @@
       <!-- Modal Content -->
       <div class="space-y-4">
         <div>
-          <label for="edit-name" class="text-sm font-medium leading-none text-foreground peer-disabled:cursor-not-allowed peer-disabled:opacity-70 mb-2 block">
+          <label for="edit-name" class="text-sm font-semibold leading-none text-gray-700 peer-disabled:cursor-not-allowed peer-disabled:opacity-70 mb-2 block">
             Nombre de la Clínica
           </label>
           <input
             id="edit-name"
             type="text"
-            class="flex h-10 w-full rounded-md border border-border bg-muted/30 px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground hover:border-border focus:outline-none focus:ring-2 focus:ring-ring focus:bg-background focus:border-transparent disabled:cursor-not-allowed disabled:opacity-50 transition-colors"
+            class="flex h-10 w-full rounded-md border border-gray-300 bg-gray-50 px-3 py-2 text-sm text-gray-900 placeholder:text-gray-500 hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white focus:border-blue-500 disabled:cursor-not-allowed disabled:opacity-50 transition-colors"
             [value]="formData().name"
             (input)="updateFormField('name', $any($event.target).value)">
         </div>
 
         <div>
-          <label for="edit-address" class="text-sm font-medium leading-none text-foreground peer-disabled:cursor-not-allowed peer-disabled:opacity-70 mb-2 block">
+          <label for="edit-address" class="text-sm font-semibold leading-none text-gray-700 peer-disabled:cursor-not-allowed peer-disabled:opacity-70 mb-2 block">
             Dirección
           </label>
           <input
             id="edit-address"
             type="text"
-            class="flex h-10 w-full rounded-md border border-border bg-muted/30 px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground hover:border-border focus:outline-none focus:ring-2 focus:ring-ring focus:bg-background focus:border-transparent disabled:cursor-not-allowed disabled:opacity-50 transition-colors"
+            class="flex h-10 w-full rounded-md border border-gray-300 bg-gray-50 px-3 py-2 text-sm text-gray-900 placeholder:text-gray-500 hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white focus:border-blue-500 disabled:cursor-not-allowed disabled:opacity-50 transition-colors"
             [value]="formData().address"
             (input)="updateFormField('address', $any($event.target).value)">
         </div>
 
         <div>
-          <label for="edit-color" class="text-sm font-medium leading-none text-foreground peer-disabled:cursor-not-allowed peer-disabled:opacity-70 mb-2 block">
+          <label for="edit-color" class="text-sm font-semibold leading-none text-gray-700 peer-disabled:cursor-not-allowed peer-disabled:opacity-70 mb-2 block">
             Color Identificativo
           </label>
           <div class="flex items-center gap-2">
             <input
               id="edit-color"
               type="color"
-              class="w-12 h-10 rounded border border-border bg-muted/30 cursor-pointer hover:border-border focus:outline-none focus:ring-2 focus:ring-ring"
+              class="w-12 h-10 rounded border border-gray-300 bg-gray-50 cursor-pointer hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
               [value]="formData().clinic_color"
               (input)="updateFormField('clinic_color', $any($event.target).value)">
             <input
               type="text"
-              class="flex h-10 w-full rounded-md border border-border bg-muted/30 px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground hover:border-border focus:outline-none focus:ring-2 focus:ring-ring focus:bg-background focus:border-transparent disabled:cursor-not-allowed disabled:opacity-50 transition-colors"
+              class="flex h-10 w-full rounded-md border border-gray-300 bg-gray-50 px-3 py-2 text-sm text-gray-900 placeholder:text-gray-500 hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white focus:border-blue-500 disabled:cursor-not-allowed disabled:opacity-50 transition-colors"
               [value]="formData().clinic_color"
               (input)="updateFormField('clinic_color', $any($event.target).value)">
           </div>
