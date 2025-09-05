@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ClinicsService } from './services/clinics.service';
 import { Clinic, ClinicFormData } from './models/clinic.model';
+import { ConfirmationModalComponent } from '../../shared/components/confirmation-modal/confirmation-modal.component';
 
 @Component({
   selector: 'app-clinics',
@@ -11,7 +12,8 @@ import { Clinic, ClinicFormData } from './models/clinic.model';
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     CommonModule,
-    FormsModule
+    FormsModule,
+    ConfirmationModalComponent
   ]
 })
 export class ClinicsComponent {
