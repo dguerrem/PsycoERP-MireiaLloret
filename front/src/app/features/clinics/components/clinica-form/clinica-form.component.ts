@@ -1,7 +1,7 @@
 import { Component, EventEmitter, Input, Output, OnInit, OnChanges, SimpleChanges, ChangeDetectionStrategy } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
-import { Clinic } from '../models/clinic.model';
+import { Clinic } from '../../models/clinic.model';
 
 @Component({
   selector: 'app-clinica-form',
@@ -16,7 +16,7 @@ import { Clinic } from '../models/clinic.model';
 export class ClinicaFormComponent implements OnInit, OnChanges {
   @Input() isOpen: boolean = false;
   @Input() clinica: Clinic | null = null;
-  
+
   @Output() onSave = new EventEmitter<Clinic>();
   @Output() onCancel = new EventEmitter<void>();
 
@@ -87,7 +87,7 @@ export class ClinicaFormComponent implements OnInit, OnChanges {
   handleSubmit(): void {
     if (this.clinicaForm.valid) {
       const formData = this.clinicaForm.value;
-      
+
       if (this.isEditing && this.clinica) {
         const updatedClinic: Clinic = {
           ...this.clinica,

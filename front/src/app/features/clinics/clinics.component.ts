@@ -10,8 +10,9 @@ import { FormsModule } from '@angular/forms';
 import { ClinicsService } from './services/clinics.service';
 import { Clinic, ClinicFormData } from './models/clinic.model';
 import { ConfirmationModalComponent } from '../../shared/components/confirmation-modal/confirmation-modal.component';
-import { ClinicaFormComponent } from './clinica-form/clinica-form.component';
 import { SectionHeaderComponent } from '../../shared/components/section-header/section-header.component';
+import { ClinicsListComponent } from './components/clinics-list/clinics-list.component';
+import { ClinicaFormComponent } from './components/clinica-form/clinica-form.component';
 
 @Component({
   selector: 'app-clinics',
@@ -24,6 +25,7 @@ import { SectionHeaderComponent } from '../../shared/components/section-header/s
     ConfirmationModalComponent,
     ClinicaFormComponent,
     SectionHeaderComponent,
+    ClinicsListComponent,
   ],
 })
 export class ClinicsComponent {
