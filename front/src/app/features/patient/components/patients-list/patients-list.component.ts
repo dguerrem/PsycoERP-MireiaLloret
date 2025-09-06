@@ -1,0 +1,25 @@
+import {
+  Component,
+  Input,
+  Output,
+  EventEmitter,
+  ChangeDetectionStrategy,
+  TrackByFunction,
+} from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { Patient } from '../../../../shared/models/patient.model';
+import { PatientCardComponent } from '../patient-card/patient-card.component';
+
+@Component({
+  selector: 'app-patients-list',
+  standalone: true,
+  templateUrl: './patients-list.component.html',
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [CommonModule, PatientCardComponent],
+})
+export class PatientsListComponent {
+  @Input({ required: true }) patients!: Patient[];
+  @Input() trackByFn?: TrackByFunction<Patient>;
+
+  @Output() onPatientClick = new EventEmitter<Patient>();
+}

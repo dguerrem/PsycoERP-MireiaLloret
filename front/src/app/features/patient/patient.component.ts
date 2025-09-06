@@ -10,6 +10,8 @@ import { Router } from '@angular/router';
 
 import { Patient } from '../../shared/models/patient.model';
 import { PatientsService } from './services/patients.service';
+import { SectionHeaderComponent } from '../../shared/components/section-header/section-header.component';
+import { PatientsListComponent } from './components/patients-list/patients-list.component';
 
 /**
  * Patients module component - Exact replica of React PatientsModule
@@ -24,7 +26,7 @@ import { PatientsService } from './services/patients.service';
 @Component({
   selector: 'app-patient',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, SectionHeaderComponent, PatientsListComponent],
   templateUrl: './patient.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -102,5 +104,12 @@ export class PatientComponent {
    */
   capitalizeSessionType(sessionType: string): string {
     return this.patientsService.capitalizeSessionType(sessionType);
+  }
+
+  /**
+   * Track by function for patients list
+   */
+  trackByPatientId(index: number, patient: Patient): number {
+    return patient?.id || index;
   }
 }
