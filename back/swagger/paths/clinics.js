@@ -2,8 +2,8 @@ const clinicsPaths = {
   "/api/clinics": {
     get: {
       tags: ["Clinics"],
-      summary: "Obtener clínicas",
-      description: "Obtiene una lista de clínicas con filtros opcionales",
+      summary: "Obtener clínicas activas",
+      description: "Obtiene una lista de clínicas activas (is_active = true) con filtros opcionales",
       parameters: [
         {
           name: "name",
@@ -167,8 +167,8 @@ const clinicsPaths = {
     },
     delete: {
       tags: ["Clinics"],
-      summary: "Eliminar clínica",
-      description: "Elimina una clínica existente",
+      summary: "Eliminar clínica (soft delete)",
+      description: "Elimina lógicamente una clínica del sistema estableciendo is_active = false. La clínica permanece en la base de datos pero no aparece en consultas futuras.",
       parameters: [
         {
           name: "id",
@@ -177,7 +177,7 @@ const clinicsPaths = {
           schema: {
             type: "integer",
           },
-          description: "ID de la clínica a eliminar",
+          description: "ID único de la clínica a eliminar",
         },
       ],
       responses: {
@@ -186,13 +186,23 @@ const clinicsPaths = {
           content: {
             "application/json": {
               schema: {
-                $ref: "#/components/schemas/SuccessResponse",
+                type: "object",
+                properties: {
+                  success: {
+                    type: "boolean",
+                    example: true,
+                  },
+                  message: {
+                    type: "string",
+                    example: "Clínica eliminada correctamente",
+                  },
+                },
               },
             },
           },
         },
         400: {
-          description: "ID de clínica inválido",
+          description: "ID de clínica inválido o no proporcionado",
           content: {
             "application/json": {
               schema: {
@@ -202,7 +212,7 @@ const clinicsPaths = {
           },
         },
         404: {
-          description: "Clínica no encontrada",
+          description: "Clínica no encontrada o ya está eliminada",
           content: {
             "application/json": {
               schema: {

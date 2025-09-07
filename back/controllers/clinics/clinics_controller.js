@@ -88,22 +88,21 @@ const eliminarClinica = async (req, res) => {
       });
     }
 
-    await deleteClinic(id);
+    const eliminada = await deleteClinic(id);
 
-    res.json({
-      success: true,
-      message: "Clínica eliminada exitosamente",
-    });
-  } catch (err) {
-    console.error("Error al eliminar clínica:", err.message);
-    
-    if (err.message === "Clinic not found") {
+    if (!eliminada) {
       return res.status(404).json({
         success: false,
-        error: "Clínica no encontrada",
+        error: "Clínica no encontrada o ya está eliminada",
       });
     }
 
+    res.json({
+      success: true,
+      message: "Clínica eliminada correctamente",
+    });
+  } catch (err) {
+    console.error("Error al eliminar clínica:", err.message);
     res.status(500).json({
       success: false,
       error: "Error al eliminar la clínica",
