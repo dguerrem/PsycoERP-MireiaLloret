@@ -427,8 +427,8 @@ const sessionsPaths = {
     },
     delete: {
       tags: ["Sessions"],
-      summary: "Eliminar sesión",
-      description: "Elimina una sesión existente del sistema",
+      summary: "Eliminar sesión (Soft Delete)",
+      description: "Realiza una eliminación lógica de una sesión marcándola como inactiva. La sesión no será visible en futuras consultas pero se mantiene en la base de datos.",
       parameters: [
         {
           name: "id",
@@ -443,7 +443,7 @@ const sessionsPaths = {
       ],
       responses: {
         200: {
-          description: "Sesión eliminada exitosamente",
+          description: "Sesión eliminada exitosamente (soft delete)",
           content: {
             "application/json": {
               schema: {
@@ -462,8 +462,18 @@ const sessionsPaths = {
             },
           },
         },
+        400: {
+          description: "ID de sesión inválido",
+          content: {
+            "application/json": {
+              schema: {
+                $ref: "#/components/schemas/ErrorResponse",
+              },
+            },
+          },
+        },
         404: {
-          description: "Sesión no encontrada",
+          description: "Sesión no encontrada o ya está eliminada",
           content: {
             "application/json": {
               schema: {

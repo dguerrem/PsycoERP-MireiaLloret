@@ -218,14 +218,30 @@ const eliminarSesion = async (req, res) => {
   try {
     const { id } = req.params;
 
-    const sesionEliminada = await deleteSession(parseInt(id));
+    // Validar que el ID sea válido
+    if (!id || isNaN(parseInt(id))) {
+      return res.status(400).json({
+        success: false,
+        error: "ID de sesión inválido",
+      });
+    }
+
+    await deleteSession(parseInt(id));
 
     res.json({
       success: true,
       message: "Sesión eliminada exitosamente",
-      data: sesionEliminada,
     });
   } catch (err) {
+    console.error("Error al eliminar sesión:", err.message);
+    
+    if (err.message === "Sesión no encontrada o ya está eliminada") {
+      return res.status(404).json({
+        success: false,
+        error: "Sesión no encontrada o ya está eliminada",
+      });
+    }
+
     res.status(500).json({
       success: false,
       error: "Error al eliminar la sesión",

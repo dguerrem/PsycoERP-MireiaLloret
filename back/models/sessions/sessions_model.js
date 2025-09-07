@@ -11,8 +11,9 @@ const getSessions = async (filters = {}) => {
   let countQuery = `
         SELECT COUNT(*) as total
         FROM sessions s
-        LEFT JOIN patients p ON s.patient_id = p.id
-        LEFT JOIN clinics c ON s.clinic_id = c.id
+        LEFT JOIN patients p ON s.patient_id = p.id AND p.is_active = true
+        LEFT JOIN clinics c ON s.clinic_id = c.id AND c.is_active = true
+        WHERE s.is_active = true
     `;
 
   // Query principal para obtener datos
@@ -32,8 +33,9 @@ const getSessions = async (filters = {}) => {
             c.id AS clinic_id,
             c.name AS clinic_name
         FROM sessions s
-        LEFT JOIN patients p ON s.patient_id = p.id
-        LEFT JOIN clinics c ON s.clinic_id = c.id
+        LEFT JOIN patients p ON s.patient_id = p.id AND p.is_active = true
+        LEFT JOIN clinics c ON s.clinic_id = c.id AND c.is_active = true
+        WHERE s.is_active = true
     `;
   const params = [];
   const conditions = [];
@@ -86,9 +88,9 @@ const getSessions = async (filters = {}) => {
     }
   }
 
-  // Aplicar condiciones a ambas queries
+  // Aplicar condiciones adicionales a ambas queries
   if (conditions.length > 0) {
-    const conditionsStr = " WHERE " + conditions.join(" AND ");
+    const conditionsStr = " AND " + conditions.join(" AND ");
     countQuery += conditionsStr;
     dataQuery += conditionsStr;
   }
@@ -105,12 +107,13 @@ const getSessions = async (filters = {}) => {
   
   // Transformar datos a estructura organizada
   const transformedData = await Promise.all(rows.map(async (row) => {
-    // Obtener notas clínicas del paciente
+    // Obtener notas clínicas del paciente (solo si el paciente está activo)
     const [medicalRecords] = await db.execute(`
-      SELECT title, content, date 
-      FROM clinical_notes 
-      WHERE patient_id = ? 
-      ORDER BY date DESC
+      SELECT cn.title, cn.content, cn.date 
+      FROM clinical_notes cn
+      INNER JOIN patients p ON cn.patient_id = p.id
+      WHERE cn.patient_id = ? AND p.is_active = true
+      ORDER BY cn.date DESC
     `, [row.patient_id]);
 
     return {
@@ -231,7 +234,7 @@ const updateSession = async (sessionId, updateData) => {
   const query = `
     UPDATE sessions 
     SET ${setClause}
-    WHERE id = ?
+    WHERE id = ? AND is_active = true
   `;
 
   // Crear array de parámetros: valores + ID al final
@@ -241,27 +244,26 @@ const updateSession = async (sessionId, updateData) => {
 
   // Retornar la sesión actualizada
   const [updatedSession] = await db.execute(
-    "SELECT * FROM sessions WHERE id = ?",
+    "SELECT * FROM sessions WHERE id = ? AND is_active = true",
     [sessionId]
   );
 
   return updatedSession[0];
 };
 
-// Eliminar sesión
+// Eliminar sesión (soft delete)
 const deleteSession = async (sessionId) => {
-  // Primero obtener la sesión antes de eliminarla
-  const [sessionToDelete] = await db.execute(
-    "SELECT * FROM sessions WHERE id = ?",
+  // Realizar soft delete marcando is_active = false
+  const [result] = await db.execute(
+    "UPDATE sessions SET is_active = false WHERE id = ? AND is_active = true", 
     [sessionId]
   );
 
-  if (sessionToDelete.length === 0) {
-    throw new Error("Sesión no encontrada");
+  if (result.affectedRows === 0) {
+    throw new Error("Sesión no encontrada o ya está eliminada");
   }
 
-  // Eliminar la sesión
-  await db.execute("DELETE FROM sessions WHERE id = ?", [sessionId]);
+  return true;
 };
 
 module.exports = {
