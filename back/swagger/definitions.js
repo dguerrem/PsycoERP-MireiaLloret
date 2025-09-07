@@ -1632,17 +1632,8 @@ const definitions = {
         type: "boolean",
         example: true,
       },
-      total: {
-        type: "integer",
-        example: 3,
-      },
-      filters_applied: {
-        type: "object",
-        nullable: true,
-        example: {
-          patient_id: "1",
-          status: "completed",
-        },
+      pagination: {
+        $ref: "#/components/schemas/PaginationInfo",
       },
       data: {
         type: "array",

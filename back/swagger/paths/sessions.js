@@ -2,8 +2,8 @@ const sessionsPaths = {
   "/api/sessions": {
     get: {
       tags: ["Sessions"],
-      summary: "Obtener sesiones",
-      description: "Obtiene una lista de sesiones con filtros opcionales",
+      summary: "Obtener sesiones paginadas",
+      description: "Obtiene una lista paginada de sesiones con filtros opcionales. Devuelve hasta 100 registros por página (por defecto 10).",
       parameters: [
         {
           name: "patient_id",
@@ -87,10 +87,33 @@ const sessionsPaths = {
           },
           description: "Estado del pago",
         },
+        {
+          name: "page",
+          in: "query",
+          required: false,
+          schema: {
+            type: "integer",
+            minimum: 1,
+            default: 1,
+          },
+          description: "Número de página para la paginación",
+        },
+        {
+          name: "limit",
+          in: "query",
+          required: false,
+          schema: {
+            type: "integer",
+            minimum: 1,
+            maximum: 100,
+            default: 10,
+          },
+          description: "Número de registros por página (máximo 100)",
+        },
       ],
       responses: {
         200: {
-          description: "Lista de sesiones obtenida exitosamente",
+          description: "Lista paginada de sesiones obtenida exitosamente. Incluye información de paginación y datos de sesiones con detalles del paciente, clínica y notas médicas.",
           content: {
             "application/json": {
               schema: {
@@ -100,7 +123,7 @@ const sessionsPaths = {
           },
         },
         400: {
-          description: "Parámetros de entrada inválidos",
+          description: "Parámetros de entrada inválidos (página < 1 o límite fuera del rango 1-100)",
           content: {
             "application/json": {
               schema: {

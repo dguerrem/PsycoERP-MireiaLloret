@@ -1,8 +1,22 @@
 const { db } = require("../../config/db");
 
-// Obtener todas las sesiones con filtros opcionales
+// Obtener todas las sesiones con filtros opcionales y paginación
 const getSessions = async (filters = {}) => {
-  let query = `
+  // Extraer parámetros de paginación
+  const page = parseInt(filters.page) || 1;
+  const limit = parseInt(filters.limit) || 10;
+  const offset = (page - 1) * limit;
+
+  // Query base para contar registros totales
+  let countQuery = `
+        SELECT COUNT(*) as total
+        FROM sessions s
+        LEFT JOIN patients p ON s.patient_id = p.id
+        LEFT JOIN clinics c ON s.clinic_id = c.id
+    `;
+
+  // Query principal para obtener datos
+  let dataQuery = `
         SELECT 
             s.id AS session_id,
             s.session_date,
@@ -72,13 +86,22 @@ const getSessions = async (filters = {}) => {
     }
   }
 
+  // Aplicar condiciones a ambas queries
   if (conditions.length > 0) {
-    query += " WHERE " + conditions.join(" AND ");
+    const conditionsStr = " WHERE " + conditions.join(" AND ");
+    countQuery += conditionsStr;
+    dataQuery += conditionsStr;
   }
 
-  query += " ORDER BY s.session_date DESC, s.start_time DESC";
-
-  const [rows] = await db.execute(query, params);
+  // Agregar ordenamiento y paginación solo a la query de datos
+  dataQuery += " ORDER BY s.session_date DESC, s.start_time DESC";
+  dataQuery += " LIMIT ? OFFSET ?";
+  
+  // Ejecutar ambas queries
+  const [countResult] = await db.execute(countQuery, params);
+  const totalRecords = countResult[0].total;
+  
+  const [rows] = await db.execute(dataQuery, [...params, limit, offset]);
   
   // Transformar datos a estructura organizada
   const transformedData = await Promise.all(rows.map(async (row) => {
@@ -118,7 +141,24 @@ const getSessions = async (filters = {}) => {
     };
   }));
 
-  return transformedData;
+  // Calcular información de paginación
+  const totalPages = Math.ceil(totalRecords / limit);
+  const hasNextPage = page < totalPages;
+  const hasPrevPage = page > 1;
+  
+  return {
+    data: transformedData,
+    pagination: {
+      currentPage: page,
+      totalPages: totalPages,
+      totalRecords: totalRecords,
+      recordsPerPage: limit,
+      hasNextPage: hasNextPage,
+      hasPrevPage: hasPrevPage,
+      nextPage: hasNextPage ? page + 1 : null,
+      prevPage: hasPrevPage ? page - 1 : null
+    }
+  };
 };
 
 // Crear nueva sesión

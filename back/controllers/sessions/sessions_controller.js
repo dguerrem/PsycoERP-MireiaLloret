@@ -16,15 +16,40 @@ const obtenerSesiones = async (req, res) => {
       fecha_hasta,
       payment_status,
       payment_method,
+      page,
+      limit,
     } = req.query;
 
-    // Construir filtros directamente
+    // Validar parámetros de paginación
+    const pageNum = parseInt(page) || 1;
+    const limitNum = parseInt(limit) || 10;
+
+    // Validaciones de límites
+    if (pageNum < 1) {
+      return res.status(400).json({
+        success: false,
+        error: "El número de página debe ser mayor a 0",
+      });
+    }
+
+    if (limitNum < 1 || limitNum > 100) {
+      return res.status(400).json({
+        success: false,
+        error: "El límite debe estar entre 1 y 100 registros",
+      });
+    }
+
+    // Construir filtros incluyendo paginación
     const filters = {};
     if (patient_id) filters.patient_id = patient_id;
     if (status) filters.status = status;
     if (clinic_id) filters.clinic_id = clinic_id;
     if (payment_status) filters.payment_status = payment_status;
     if (payment_method) filters.payment_method = payment_method;
+
+    // Parámetros de paginación
+    filters.page = pageNum;
+    filters.limit = limitNum;
 
     // Lógica inteligente para fechas
     if (session_date) {
@@ -36,12 +61,12 @@ const obtenerSesiones = async (req, res) => {
       if (fecha_hasta) filters.fecha_hasta = fecha_hasta;
     }
 
-    const sesiones = await getSessions(filters);
+    const result = await getSessions(filters);
 
     res.json({
       success: true,
-      total: sesiones.length,
-      data: sesiones,
+      pagination: result.pagination,
+      data: result.data,
     });
   } catch (err) {
     console.error("Error al obtener sesiones:", err.message);
