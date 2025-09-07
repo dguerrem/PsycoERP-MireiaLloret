@@ -1,0 +1,26 @@
+<!-- Main container -->
+<div class="p-4 md:p-6 space-y-6">
+
+  <!-- Header section -->
+  <app-section-header title="Gestión de Clínicas" subtitle="Administra las clínicas registradas en la plataforma"
+    buttonText="Nueva Clínica" (onButtonClick)="openCreateForm()">
+  </app-section-header>
+
+  <!-- Clinics grid -->
+  <app-clinics-list [clinics]="clinicsList()" [trackByFn]="trackByClinicId" (onEdit)="openEditForm($event)"
+    (onDelete)="openDeleteModal($event)">
+  </app-clinics-list>
+
+</div>
+
+<!-- Clinic Form Modal -->
+<app-clinica-form [isOpen]="showForm()" [clinica]="editingClinica()" (onSave)="handleSave($event)"
+  (onCancel)="closeForm()">
+</app-clinica-form>
+
+<!-- Delete Confirmation Modal -->
+<app-confirmation-modal [isOpen]="deletingClinic() !== null" title="Confirmar Eliminación"
+  message="¿Estás seguro de que deseas eliminar la clínica " [itemName]="deletingClinic()?.name" confirmText="Eliminar"
+  cancelText="Cancelar" confirmButtonType="destructive" (onConfirm)="handleDeleteClinic()"
+  (onCancel)="closeDeleteModal()">
+</app-confirmation-modal>
