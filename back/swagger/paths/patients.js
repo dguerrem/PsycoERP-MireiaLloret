@@ -195,6 +195,75 @@ const patientsPaths = {
         },
       },
     },
+    delete: {
+      tags: ["Patients"],
+      summary: "Eliminar paciente (soft delete)",
+      description: "Elimina lógicamente un paciente del sistema estableciendo is_active = false. El paciente permanece en la base de datos pero no aparece en consultas futuras.",
+      parameters: [
+        {
+          name: "id",
+          in: "path",
+          required: true,
+          schema: {
+            type: "integer",
+            format: "int64",
+          },
+          description: "ID único del paciente a eliminar",
+        },
+      ],
+      responses: {
+        200: {
+          description: "Paciente eliminado exitosamente",
+          content: {
+            "application/json": {
+              schema: {
+                type: "object",
+                properties: {
+                  success: {
+                    type: "boolean",
+                    example: true,
+                  },
+                  message: {
+                    type: "string",
+                    example: "Paciente eliminado correctamente",
+                  },
+                },
+              },
+            },
+          },
+        },
+        400: {
+          description: "ID del paciente inválido o no proporcionado",
+          content: {
+            "application/json": {
+              schema: {
+                $ref: "#/components/schemas/ErrorResponse",
+              },
+            },
+          },
+        },
+        404: {
+          description: "Paciente no encontrado o ya está eliminado",
+          content: {
+            "application/json": {
+              schema: {
+                $ref: "#/components/schemas/ErrorResponse",
+              },
+            },
+          },
+        },
+        500: {
+          description: "Error interno del servidor",
+          content: {
+            "application/json": {
+              schema: {
+                $ref: "#/components/schemas/ErrorResponse",
+              },
+            },
+          },
+        },
+      },
+    },
   },
 };
 

@@ -114,6 +114,7 @@ const getDashboardKPIs = async () => {
         COUNT(CASE WHEN status = 'active' AND birth_date IS NOT NULL AND TIMESTAMPDIFF(YEAR, birth_date, CURDATE()) BETWEEN 36 AND 45 THEN 1 END) as age_36_45,
         COUNT(CASE WHEN status = 'active' AND birth_date IS NOT NULL AND TIMESTAMPDIFF(YEAR, birth_date, CURDATE()) > 45 THEN 1 END) as age_over_45
       FROM patients
+      WHERE is_active = true
     `;
     
     const [masterPatientsResult] = await db.execute(masterPatientsQuery, [currentYear, currentMonth]);
@@ -136,7 +137,7 @@ const getDashboardKPIs = async () => {
           ) THEN 'next_appointment'
         END as session_category
       FROM sessions s
-      INNER JOIN patients p ON s.patient_id = p.id
+      INNER JOIN patients p ON s.patient_id = p.id AND p.is_active = true
       INNER JOIN clinics c ON s.clinic_id = c.id
       WHERE ((s.session_date = ? AND s.status = 'scheduled' AND s.start_time > ?) 
              OR (s.session_date = ? AND s.status = 'scheduled'))

@@ -1,6 +1,7 @@
 const {
   getPatients,
   getPatientById,
+  deletePatient,
 } = require("../../models/patients/patients_model");
 
 const obtenerPacientes = async (req, res) => {
@@ -95,7 +96,41 @@ const obtenerPacientePorId = async (req, res) => {
   }
 };
 
+const eliminarPaciente = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    if (!id) {
+      return res.status(400).json({
+        success: false,
+        error: "ID del paciente es requerido",
+      });
+    }
+
+    const eliminado = await deletePatient(id);
+
+    if (!eliminado) {
+      return res.status(404).json({
+        success: false,
+        error: "Paciente no encontrado o ya está eliminado",
+      });
+    }
+
+    res.json({
+      success: true,
+      message: "Paciente eliminado correctamente",
+    });
+  } catch (err) {
+    console.error("Error al eliminar paciente:", err.message);
+    res.status(500).json({
+      success: false,
+      error: "Error al eliminar el paciente",
+    });
+  }
+};
+
 module.exports = {
   obtenerPacientes,
   obtenerPacientePorId,
+  eliminarPaciente,
 };

@@ -25,6 +25,7 @@ const getPatients = async (filters = {}) => {
             DATE_FORMAT(created_at,'%Y-%m-%d') as created_at,
             updated_at
         FROM patients
+        WHERE is_active = true
     `;
   const params = [];
   const conditions = [];
@@ -81,7 +82,7 @@ const getPatients = async (filters = {}) => {
   }
   
   if (conditions.length > 0) {
-    query += " WHERE " + conditions.join(" AND ");
+    query += " AND " + conditions.join(" AND ");
   }
 
   query += " ORDER BY created_at DESC";
@@ -101,7 +102,7 @@ const getPatientById = async (id) => {
             phone,
             session_type as tipo
         FROM patients
-        WHERE id = ?
+        WHERE id = ? AND is_active = true
     `;
   
   const [patientRows] = await db.execute(patientQuery, [id]);
@@ -141,7 +142,7 @@ const getPatientById = async (id) => {
             emergency_contact_phone as telefono_emergencia,
             notes as notas
         FROM patients
-        WHERE id = ?
+        WHERE id = ? AND is_active = true
     `;
   
   const [patientDataRows] = await db.execute(patientDataQuery, [id]);
@@ -231,7 +232,20 @@ const getPatientById = async (id) => {
   };
 };
 
+// Soft delete de un paciente (actualizar is_active = false)
+const deletePatient = async (id) => {
+  const query = `
+    UPDATE patients 
+    SET is_active = false, updated_at = CURRENT_TIMESTAMP 
+    WHERE id = ? AND is_active = true
+  `;
+  
+  const [result] = await db.execute(query, [id]);
+  return result.affectedRows > 0;
+};
+
 module.exports = {
   getPatients,
   getPatientById,
+  deletePatient,
 };
