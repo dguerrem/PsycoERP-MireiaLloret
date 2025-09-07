@@ -1190,15 +1190,62 @@ const definitions = {
         type: "boolean",
         example: true,
       },
-      total: {
-        type: "integer",
-        example: 5,
+      pagination: {
+        $ref: "#/components/schemas/PaginationInfo",
       },
       data: {
         type: "array",
         items: {
           $ref: "#/components/schemas/Patient",
         },
+      },
+    },
+  },
+
+  PaginationInfo: {
+    type: "object",
+    properties: {
+      currentPage: {
+        type: "integer",
+        description: "Página actual",
+        example: 1,
+      },
+      totalPages: {
+        type: "integer",
+        description: "Total de páginas disponibles",
+        example: 5,
+      },
+      totalRecords: {
+        type: "integer",
+        description: "Total de registros encontrados",
+        example: 47,
+      },
+      recordsPerPage: {
+        type: "integer",
+        description: "Registros por página",
+        example: 10,
+      },
+      hasNextPage: {
+        type: "boolean",
+        description: "Indica si hay una página siguiente",
+        example: true,
+      },
+      hasPrevPage: {
+        type: "boolean",
+        description: "Indica si hay una página anterior",
+        example: false,
+      },
+      nextPage: {
+        type: "integer",
+        nullable: true,
+        description: "Número de la página siguiente (null si no hay)",
+        example: 2,
+      },
+      prevPage: {
+        type: "integer",
+        nullable: true,
+        description: "Número de la página anterior (null si no hay)",
+        example: null,
       },
     },
   },

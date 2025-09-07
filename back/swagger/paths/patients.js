@@ -101,6 +101,29 @@ const patientsPaths = {
           },
           description: "Fecha de fin del rango para filtrar por fecha de creación (YYYY-MM-DD)",
         },
+        {
+          name: "page",
+          in: "query",
+          required: false,
+          schema: {
+            type: "integer",
+            minimum: 1,
+            default: 1,
+          },
+          description: "Número de página para la paginación (por defecto: 1)",
+        },
+        {
+          name: "limit",
+          in: "query",
+          required: false,
+          schema: {
+            type: "integer",
+            minimum: 1,
+            maximum: 100,
+            default: 10,
+          },
+          description: "Número de registros por página (por defecto: 10, máximo: 100)",
+        },
       ],
       responses: {
         200: {
@@ -114,7 +137,7 @@ const patientsPaths = {
           },
         },
         400: {
-          description: "Parámetros de entrada inválidos",
+          description: "Parámetros de entrada inválidos (página < 1, límite fuera del rango 1-100, etc.)",
           content: {
             "application/json": {
               schema: {

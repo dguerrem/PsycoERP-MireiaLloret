@@ -1,8 +1,21 @@
 const { db } = require("../../config/db");
 
-// Obtener todos los pacientes con filtros opcionales
+// Obtener todos los pacientes con filtros opcionales y paginación
 const getPatients = async (filters = {}) => {
-  let query = `
+  // Extraer parámetros de paginación
+  const page = parseInt(filters.page) || 1;
+  const limit = parseInt(filters.limit) || 10;
+  const offset = (page - 1) * limit;
+
+  // Query base para contar registros totales
+  let countQuery = `
+        SELECT COUNT(*) as total
+        FROM patients
+        WHERE is_active = true
+    `;
+
+  // Query principal para obtener datos
+  let dataQuery = `
         SELECT 
             id,
             name,
@@ -27,9 +40,11 @@ const getPatients = async (filters = {}) => {
         FROM patients
         WHERE is_active = true
     `;
+
   const params = [];
   const conditions = [];
 
+  // Aplicar filtros
   if (filters.name) {
     conditions.push("name LIKE ?");
     params.push(`%${filters.name}%`);
@@ -81,15 +96,41 @@ const getPatients = async (filters = {}) => {
     params.push(filters.fecha_hasta);
   }
   
+  // Aplicar condiciones a ambas queries
   if (conditions.length > 0) {
-    query += " AND " + conditions.join(" AND ");
+    const conditionsStr = " AND " + conditions.join(" AND ");
+    countQuery += conditionsStr;
+    dataQuery += conditionsStr;
   }
 
-  query += " ORDER BY created_at DESC";
-
+  // Agregar ordenamiento y paginación solo a la query de datos
+  dataQuery += " ORDER BY created_at DESC";
+  dataQuery += " LIMIT ? OFFSET ?";
   
-  const [rows] = await db.execute(query, params);
-  return rows;
+  // Ejecutar ambas queries
+  const [countResult] = await db.execute(countQuery, params);
+  const totalRecords = countResult[0].total;
+  
+  const [dataRows] = await db.execute(dataQuery, [...params, limit, offset]);
+  
+  // Calcular información de paginación
+  const totalPages = Math.ceil(totalRecords / limit);
+  const hasNextPage = page < totalPages;
+  const hasPrevPage = page > 1;
+  
+  return {
+    data: dataRows,
+    pagination: {
+      currentPage: page,
+      totalPages: totalPages,
+      totalRecords: totalRecords,
+      recordsPerPage: limit,
+      hasNextPage: hasNextPage,
+      hasPrevPage: hasPrevPage,
+      nextPage: hasNextPage ? page + 1 : null,
+      prevPage: hasPrevPage ? page - 1 : null
+    }
+  };
 };
 
 // Obtener un paciente por ID con información específica para PatientResume
