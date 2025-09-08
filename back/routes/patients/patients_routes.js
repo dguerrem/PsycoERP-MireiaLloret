@@ -4,10 +4,12 @@ const router = express.Router();
 const {
   obtenerPacientes,
   obtenerPacientePorId,
+  obtenerPacientesEliminados,
   eliminarPaciente,
 } = require("../../controllers/patients/patients_controller");
 
 router.get("/", obtenerPacientes);
+router.get("/deleted", obtenerPacientesEliminados);
 router.get("/:id", obtenerPacientePorId);
 router.delete("/:id", eliminarPaciente);
 
