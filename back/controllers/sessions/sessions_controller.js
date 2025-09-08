@@ -3,7 +3,10 @@ const {
   createSession,
   updateSession,
   deleteSession,
+  getSessionForWhatsApp,
 } = require("../../models/sessions/sessions_model");
+
+const { getRandomTemplate } = require("../../constants/whatsapp-templates");
 
 const obtenerSesiones = async (req, res) => {
   try {
@@ -234,7 +237,7 @@ const eliminarSesion = async (req, res) => {
     });
   } catch (err) {
     console.error("Error al eliminar sesión:", err.message);
-    
+
     if (err.message === "Sesión no encontrada o ya está eliminada") {
       return res.status(404).json({
         success: false,
@@ -249,9 +252,104 @@ const eliminarSesion = async (req, res) => {
   }
 };
 
+const obtenerEnlaceWhatsApp = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    // Validar que el ID sea válido
+    if (!id || isNaN(parseInt(id))) {
+      return res.status(400).json({
+        success: false,
+        error: "ID de sesión inválido",
+      });
+    }
+
+    // Obtener datos de la sesión con paciente
+    const sessionData = await getSessionForWhatsApp(parseInt(id));
+
+    if (!sessionData) {
+      return res.status(404).json({
+        success: false,
+        error: "Sesión no encontrada o paciente inactivo",
+      });
+    }
+
+    // Validar que la sesión esté programada
+    if (sessionData.status !== "scheduled") {
+      return res.status(400).json({
+        success: false,
+        error: "Solo se pueden generar enlaces para sesiones programadas",
+      });
+    }
+
+    // Validar que el paciente tenga teléfono
+    if (!sessionData.patient_phone) {
+      return res.status(400).json({
+        success: false,
+        error: "El paciente no tiene número de teléfono registrado",
+      });
+    }
+
+    // Limpiar número de teléfono (quitar espacios, guiones, etc.)
+    const cleanPhone = sessionData.patient_phone
+      .replace(/[\s\-\(\)]/g, "")
+      .replace(/^\+/, "");
+
+    // Validar formato de teléfono
+    if (!/^\d{9,15}$/.test(cleanPhone)) {
+      return res.status(400).json({
+        success: false,
+        error: "Número de teléfono inválido",
+      });
+    }
+
+    // Formatear fecha y hora
+    const sessionDate = new Date(sessionData.session_date);
+    const dateStr = sessionDate.toLocaleDateString("es-ES", {
+      weekday: "long",
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    });
+
+    // Obtener plantilla aleatoria y formatear mensaje
+    const randomTemplate = getRandomTemplate();
+    const message = randomTemplate.template(
+      sessionData.patient_name, 
+      dateStr, 
+      sessionData.start_time
+    );
+
+    // Generar URL de WhatsApp con mensaje codificado
+    const whatsappUrl = `whatsapp://send?phone=${cleanPhone}&text=${encodeURIComponent(message)}`;
+
+    res.json({
+      success: true,
+      data: {
+        session_id: sessionData.id,
+        patient_name: sessionData.patient_name,
+        session_date: sessionData.session_date,
+        start_time: sessionData.start_time,
+        phone: sessionData.patient_phone,
+        clean_phone: cleanPhone,
+        whatsapp_url: whatsappUrl,
+        message: message,
+        template_used: randomTemplate.id,
+      },
+    });
+  } catch (err) {
+    console.error("Error al generar enlace de WhatsApp:", err.message);
+    res.status(500).json({
+      success: false,
+      error: "Error al generar enlace de WhatsApp",
+    });
+  }
+};
+
 module.exports = {
   obtenerSesiones,
   crearSesion,
   actualizarSesion,
   eliminarSesion,
+  obtenerEnlaceWhatsApp,
 };

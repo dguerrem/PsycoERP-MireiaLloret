@@ -3,7 +3,8 @@
     "allow": [
       "Bash(dir:*)",
       "Bash(grep:*)",
-      "Bash(node:*)"
+      "Bash(node:*)",
+      "Bash(npm start)"
     ],
     "deny": [],
     "ask": []
