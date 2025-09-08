@@ -3,6 +3,7 @@ const {
   createSession,
   updateSession,
   deleteSession,
+  getSessionForWhatsApp,
 } = require("../../models/sessions/sessions_model");
 
 const obtenerSesiones = async (req, res) => {
@@ -249,9 +250,116 @@ const eliminarSesion = async (req, res) => {
   }
 };
 
+// Generar enlace de WhatsApp para recordatorio de cita
+const generarEnlaceWhatsApp = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    // Validar que el ID sea válido
+    if (!id || isNaN(parseInt(id))) {
+      return res.status(400).json({
+        success: false,
+        error: "ID de sesión inválido",
+      });
+    }
+
+    // Obtener datos de la sesión con paciente
+    const sessionData = await getSessionForWhatsApp(parseInt(id));
+
+    if (!sessionData) {
+      return res.status(404).json({
+        success: false,
+        error: "Sesión no encontrada",
+      });
+    }
+
+    // Validar que la sesión esté programada
+    if (sessionData.status === 'completed' || sessionData.status === 'cancelled') {
+      return res.status(400).json({
+        success: false,
+        error: "No se puede generar enlace para sesión completada o cancelada",
+      });
+    }
+
+    // Validar que el paciente tenga teléfono
+    if (!sessionData.patient_phone) {
+      return res.status(400).json({
+        success: false,
+        error: "El paciente no tiene número de teléfono registrado",
+      });
+    }
+
+    // Limpiar número de teléfono (quitar espacios, guiones, paréntesis)
+    const cleanPhone = sessionData.patient_phone.replace(/[\s\-\(\)]/g, '');
+
+    // Validar formato de teléfono básico
+    if (!/^\+?[0-9]{8,15}$/.test(cleanPhone)) {
+      return res.status(400).json({
+        success: false,
+        error: "Formato de teléfono inválido",
+      });
+    }
+
+    // Formatear mensaje de recordatorio
+    const message = formatReminderMessage(sessionData);
+
+    // Generar URL de WhatsApp
+    const encodedMessage = encodeURIComponent(message);
+    const whatsappUrl = `https://wa.me/${cleanPhone.replace(/^\+/, '')}?text=${encodedMessage}`;
+
+    res.json({
+      success: true,
+      data: {
+        session_id: sessionData.session_id,
+        patient_name: sessionData.patient_name,
+        session_date: sessionData.session_date,
+        start_time: sessionData.start_time,
+        phone: cleanPhone,
+        message: message,
+        whatsapp_url: whatsappUrl
+      }
+    });
+
+  } catch (err) {
+    console.error("Error al generar enlace WhatsApp:", err.message);
+    res.status(500).json({
+      success: false,
+      error: "Error interno del servidor",
+    });
+  }
+};
+
+// Formatear mensaje de recordatorio
+const formatReminderMessage = (sessionData) => {
+  const { patient_name, type, session_date, start_time, clinic_name } = sessionData;
+  
+  // Formatear fecha en español
+  const date = new Date(session_date);
+  const options = { 
+    weekday: 'long', 
+    year: 'numeric', 
+    month: 'long', 
+    day: 'numeric' 
+  };
+  const formattedDate = date.toLocaleDateString('es-ES', options);
+  
+  // Formatear tipo de sesión
+  const sessionTypes = {
+    'individual': 'individual',
+    'group': 'grupal',
+    'family': 'familiar',
+    'couples': 'de pareja'
+  };
+  
+  const sessionTypeText = sessionTypes[type] || type;
+  
+  return `Hola ${patient_name}, te recordamos tu cita de terapia ${sessionTypeText} el ${formattedDate} a las ${start_time}${clinic_name ? ` en ${clinic_name}` : ''}. ¡Te esperamos! 🌟`;
+};
+
 module.exports = {
   obtenerSesiones,
   crearSesion,
   actualizarSesion,
   eliminarSesion,
+  generarEnlaceWhatsApp,
 };

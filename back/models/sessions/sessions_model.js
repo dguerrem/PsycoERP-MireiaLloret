@@ -266,9 +266,42 @@ const deleteSession = async (sessionId) => {
   return true;
 };
 
+// Obtener sesión específica con datos del paciente para WhatsApp
+const getSessionForWhatsApp = async (sessionId) => {
+  const query = `
+    SELECT 
+      s.id AS session_id,
+      s.session_date,
+      s.start_time,
+      s.end_time,
+      s.type,
+      s.status,
+      s.notes,
+      p.id AS patient_id,
+      p.name AS patient_name,
+      p.phone AS patient_phone,
+      c.id AS clinic_id,
+      c.name AS clinic_name,
+      c.address AS clinic_address
+    FROM sessions s
+    INNER JOIN patients p ON s.patient_id = p.id AND p.is_active = true
+    LEFT JOIN clinics c ON s.clinic_id = c.id AND c.is_active = true
+    WHERE s.id = ? AND s.is_active = true
+  `;
+
+  const [rows] = await db.execute(query, [sessionId]);
+
+  if (rows.length === 0) {
+    return null;
+  }
+
+  return rows[0];
+};
+
 module.exports = {
   getSessions,
   createSession,
   updateSession,
   deleteSession,
+  getSessionForWhatsApp,
 };

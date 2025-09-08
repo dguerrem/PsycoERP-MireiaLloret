@@ -495,6 +495,142 @@ const sessionsPaths = {
       },
     },
   },
+  "/api/sessions/{id}/whatsapp-link": {
+    get: {
+      tags: ["Sessions"],
+      summary: "Generar enlace de WhatsApp para recordatorio de cita",
+      description: "Genera un enlace de WhatsApp con mensaje personalizado para enviar recordatorio de cita al paciente. Valida que la sesión exista, esté programada y que el paciente tenga teléfono registrado.",
+      parameters: [
+        {
+          name: "id",
+          in: "path",
+          required: true,
+          schema: {
+            type: "integer",
+            format: "int64",
+          },
+          description: "ID de la sesión para generar el enlace",
+        },
+      ],
+      responses: {
+        200: {
+          description: "Enlace de WhatsApp generado exitosamente",
+          content: {
+            "application/json": {
+              schema: {
+                type: "object",
+                properties: {
+                  success: {
+                    type: "boolean",
+                    example: true,
+                  },
+                  data: {
+                    type: "object",
+                    properties: {
+                      session_id: {
+                        type: "integer",
+                        description: "ID de la sesión",
+                        example: 123,
+                      },
+                      patient_name: {
+                        type: "string",
+                        description: "Nombre del paciente",
+                        example: "Juan Pérez",
+                      },
+                      session_date: {
+                        type: "string",
+                        format: "date",
+                        description: "Fecha de la sesión",
+                        example: "2024-01-15",
+                      },
+                      start_time: {
+                        type: "string",
+                        format: "time",
+                        description: "Hora de inicio de la sesión",
+                        example: "10:00:00",
+                      },
+                      phone: {
+                        type: "string",
+                        description: "Número de teléfono limpio del paciente",
+                        example: "+34612345678",
+                      },
+                      message: {
+                        type: "string",
+                        description: "Mensaje de recordatorio formateado",
+                        example: "Hola Juan Pérez, te recordamos tu cita de terapia individual el lunes, 15 de enero de 2024 a las 10:00:00 en Clínica Centro. ¡Te esperamos! 🌟",
+                      },
+                      whatsapp_url: {
+                        type: "string",
+                        format: "uri",
+                        description: "URL completa de WhatsApp con mensaje preformateado",
+                        example: "https://wa.me/34612345678?text=Hola%20Juan%20P%C3%A9rez%2C%20te%20recordamos%20tu%20cita...",
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+        400: {
+          description: "Datos inválidos: ID inválido, sesión completada/cancelada, formato de teléfono incorrecto o paciente sin teléfono",
+          content: {
+            "application/json": {
+              schema: {
+                type: "object",
+                properties: {
+                  success: {
+                    type: "boolean",
+                    example: false,
+                  },
+                  error: {
+                    type: "string",
+                    enum: [
+                      "ID de sesión inválido",
+                      "No se puede generar enlace para sesión completada o cancelada",
+                      "El paciente no tiene número de teléfono registrado",
+                      "Formato de teléfono inválido"
+                    ],
+                    example: "El paciente no tiene número de teléfono registrado",
+                  },
+                },
+              },
+            },
+          },
+        },
+        404: {
+          description: "Sesión no encontrada",
+          content: {
+            "application/json": {
+              schema: {
+                type: "object",
+                properties: {
+                  success: {
+                    type: "boolean",
+                    example: false,
+                  },
+                  error: {
+                    type: "string",
+                    example: "Sesión no encontrada",
+                  },
+                },
+              },
+            },
+          },
+        },
+        500: {
+          description: "Error interno del servidor",
+          content: {
+            "application/json": {
+              schema: {
+                $ref: "#/components/schemas/ErrorResponse",
+              },
+            },
+          },
+        },
+      },
+    },
+  },
 };
 
 module.exports = sessionsPaths;
