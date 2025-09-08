@@ -513,21 +513,76 @@ const definitions = {
   ClinicalNote: {
     type: "object",
     properties: {
-      titulo: {
+      id: {
+        type: "integer",
+        format: "int64",
+        description: "ID único de la nota clínica",
+        example: 1,
+      },
+      patient_id: {
+        type: "integer",
+        format: "int64",
+        description: "ID del paciente",
+        example: 123,
+      },
+      session_id: {
+        type: "integer",
+        format: "int64",
+        nullable: true,
+        description: "ID de la sesión asociada (opcional)",
+        example: 456,
+      },
+      title: {
         type: "string",
         description: "Título de la nota clínica",
         example: "Sesión inicial de evaluación",
       },
-      contenido: {
+      content: {
         type: "string",
         description: "Contenido completo de la nota clínica",
         example: "El paciente se muestra colaborativo durante la primera sesión. Se observa ansiedad leve relacionada con el trabajo.",
       },
-      fecha: {
+      date: {
         type: "string",
         format: "date-time",
         description: "Fecha y hora de la nota clínica (YYYY-MM-DD HH:mm:ss)",
         example: "2024-12-15 14:30:00",
+      },
+      created_at: {
+        type: "string",
+        format: "date-time",
+        description: "Fecha de creación",
+        example: "2024-12-15 14:30:00",
+      },
+      updated_at: {
+        type: "string",
+        format: "date-time",
+        description: "Fecha de última actualización",
+        example: "2024-12-15 14:30:00",
+      },
+      patient_name: {
+        type: "string",
+        description: "Nombre del paciente (incluido en consultas con JOIN)",
+        example: "Juan Pérez García",
+      },
+    },
+  },
+
+  ClinicalNotesResponse: {
+    type: "object",
+    properties: {
+      success: {
+        type: "boolean",
+        example: true,
+      },
+      pagination: {
+        $ref: "#/components/schemas/PaginationInfo",
+      },
+      data: {
+        type: "array",
+        items: {
+          $ref: "#/components/schemas/ClinicalNote",
+        },
       },
     },
   },

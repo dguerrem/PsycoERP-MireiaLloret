@@ -7,6 +7,7 @@ const patientsPaths = require("./paths/patients");
 const bonusesPaths = require("./paths/bonuses");
 const clinicsPaths = require("./paths/clinics");
 const dashboardPaths = require("./paths/dashboard");
+const clinicalNotesPaths = require("./paths/clinical_notes");
 
 const swaggerDefinition = {
   openapi: "3.0.0",
@@ -34,6 +35,7 @@ const swaggerDefinition = {
     ...bonusesPaths,
     ...clinicsPaths,
     ...dashboardPaths,
+    ...clinicalNotesPaths,
   },
   tags: [
     {
@@ -55,6 +57,10 @@ const swaggerDefinition = {
     {
       name: "Dashboard",
       description: "KPIs y métricas del dashboard",
+    },
+    {
+      name: "Clinical Notes",
+      description: "Gestión de notas clínicas e historial médico",
     },
   ],
 };

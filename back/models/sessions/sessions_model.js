@@ -109,11 +109,11 @@ const getSessions = async (filters = {}) => {
   const transformedData = await Promise.all(rows.map(async (row) => {
     // Obtener notas clínicas del paciente (solo si el paciente está activo)
     const [medicalRecords] = await db.execute(`
-      SELECT cn.title, cn.content, cn.date 
+      SELECT cn.title, cn.content, cn.created_at 
       FROM clinical_notes cn
       INNER JOIN patients p ON cn.patient_id = p.id
       WHERE cn.patient_id = ? AND p.is_active = true
-      ORDER BY cn.date DESC
+      ORDER BY cn.created_at DESC
     `, [row.patient_id]);
 
     return {
@@ -138,7 +138,7 @@ const getSessions = async (filters = {}) => {
         MedicalRecordData: medicalRecords.map(record => ({
           title: record.title,
           content: record.content,
-          date: record.date
+          date: record.created_at
         }))
       }
     };

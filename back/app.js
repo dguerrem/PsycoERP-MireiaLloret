@@ -17,6 +17,7 @@ const patientsRoutes = require("./routes/patients/patients_routes");
 const bonusesRoutes = require("./routes/bonuses/bonuses_routes");
 const clinicsRoutes = require("./routes/clinics/clinics_routes");
 const dashboardRoutes = require("./routes/dashboard/dashboard_routes");
+const clinicalNotesRoutes = require("./routes/clinical_notes/clinical_notes_routes");
 
 // Middlewares globales
 app.use(cors());
@@ -41,6 +42,7 @@ app.get("/", (req, res) => {
       bonuses: "/api/bonuses",
       clinics: "/api/clinics",
       dashboard: "/api/dashboard",
+      clinical_notes: "/api/clinical-notes",
     },
   });
 });
@@ -51,6 +53,7 @@ app.use("/api/patients", patientsRoutes);
 app.use("/api/bonuses", bonusesRoutes);
 app.use("/api/clinics", clinicsRoutes);
 app.use("/api/dashboard", dashboardRoutes);
+app.use("/api/clinical-notes", clinicalNotesRoutes);
 
 // Iniciar servidor
 app.listen(PORT, async () => {
