@@ -21,5 +21,6 @@ export class PatientsListComponent {
   @Input({ required: true }) patients!: Patient[];
   @Input() trackByFn?: TrackByFunction<Patient>;
 
-  @Output() onPatientClick = new EventEmitter<Patient>();
+  @Output() onEdit = new EventEmitter<Patient>();
+  @Output() onDelete = new EventEmitter<Patient>();
 }

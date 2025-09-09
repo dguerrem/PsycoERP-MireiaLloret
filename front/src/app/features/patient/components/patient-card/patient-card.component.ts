@@ -4,11 +4,9 @@ import {
   Output,
   EventEmitter,
   ChangeDetectionStrategy,
-  inject,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Patient } from '../../../../shared/models/patient.model';
-import { PatientsService } from '../../services/patients.service';
 
 @Component({
   selector: 'app-patient-card',
@@ -18,37 +16,69 @@ import { PatientsService } from '../../services/patients.service';
   imports: [CommonModule],
 })
 export class PatientCardComponent {
-  private patientsService = inject(PatientsService);
-
   @Input({ required: true }) patient!: Patient;
 
-  @Output() onPatientClick = new EventEmitter<Patient>();
+  @Output() onEdit = new EventEmitter<Patient>();
+  @Output() onDelete = new EventEmitter<Patient>();
 
   /**
    * Get status color for badge
    */
   getStatusColor(status: string): string {
-    return this.patientsService.getStatusColor(status);
+    switch (status) {
+      case 'active':
+        return 'bg-green-100 text-green-800';
+      case 'inactive':
+        return 'bg-gray-100 text-gray-800';
+      case 'discharged':
+        return 'bg-blue-100 text-blue-800';
+      case 'on-hold':
+        return 'bg-yellow-100 text-yellow-800';
+      default:
+        return 'bg-gray-100 text-gray-800';
+    }
   }
 
   /**
    * Get status label in Spanish
    */
   getStatusLabel(status: string): string {
-    return this.patientsService.getStatusLabel(status);
+    switch (status) {
+      case 'active':
+        return 'Activo';
+      case 'inactive':
+        return 'Inactivo';
+      case 'discharged':
+        return 'Alta';
+      case 'on-hold':
+        return 'En Pausa';
+      default:
+        return status;
+    }
   }
 
   /**
    * Format date for display
    */
   formatDate(dateString: string): string {
-    return this.patientsService.formatDate(dateString);
+    const date = new Date(dateString);
+    return date.toLocaleDateString('es-ES', {
+      day: 'numeric',
+      month: 'numeric',
+      year: 'numeric'
+    });
   }
 
   /**
    * Capitalize session type
    */
   capitalizeSessionType(sessionType: string): string {
-    return this.patientsService.capitalizeSessionType(sessionType);
+    const typeMap: { [key: string]: string } = {
+      'individual': 'Individual',
+      'couples': 'Pareja',
+      'family': 'Familiar',
+      'group': 'Grupo'
+    };
+    return typeMap[sessionType] || sessionType;
   }
 }

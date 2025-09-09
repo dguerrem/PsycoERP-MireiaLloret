@@ -1,113 +1,123 @@
 import {
   Component,
-  ChangeDetectionStrategy,
   inject,
   signal,
+  computed,
+  ChangeDetectionStrategy,
+  OnInit,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
-
 import { Patient } from '../../shared/models/patient.model';
 import { PatientsService } from './services/patients.service';
+import { ConfirmationModalComponent } from '../../shared/components/confirmation-modal/confirmation-modal.component';
 import { SectionHeaderComponent } from '../../shared/components/section-header/section-header.component';
 import { PatientsListComponent } from './components/patients-list/patients-list.component';
 
-/**
- * Patients module component - Exact replica of React PatientsModule
- * 
- * Features:
- * - Patient grid with cards
- * - Search functionality
- * - Status filtering
- * - Navigation to patient details
- * - Responsive design matching React component
- */
 @Component({
   selector: 'app-patient',
   standalone: true,
-  imports: [CommonModule, FormsModule, SectionHeaderComponent, PatientsListComponent],
   templateUrl: './patient.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [
+    CommonModule,
+    FormsModule,
+    ConfirmationModalComponent,
+    SectionHeaderComponent,
+    PatientsListComponent,
+  ],
 })
-export class PatientComponent {
+export class PatientComponent implements OnInit {
+  // Services
   private patientsService = inject(PatientsService);
-  private router = inject(Router);
 
-  // Expose service signals to template
-  readonly filteredPatients = this.patientsService.filteredPatients;
-  readonly searchTerm = this.patientsService.currentSearchTerm;
-  readonly statusFilter = this.patientsService.currentStatusFilter;
+  // State signals
+  showCreateForm = signal(false);
+  editingPatient = signal<Patient | null>(null);
+  deletingPatient = signal<Patient | null>(null);
 
-  /**
-   * Handle search input change
-   */
-  onSearchChange(event: Event): void {
-    const target = event.target as HTMLInputElement;
-    this.patientsService.setSearchTerm(target.value);
+  // Computed signals
+  patientsList = this.patientsService.all;
+  isLoading = this.patientsService.loading;
+  showForm = computed(
+    () => this.showCreateForm() || this.editingPatient() !== null
+  );
+
+  ngOnInit() {
+    // Data is loaded automatically by the service constructor
   }
 
   /**
-   * Handle status filter change
+   * Abrir modal para crear nuevo paciente
    */
-  onStatusFilterChange(event: Event): void {
-    const target = event.target as HTMLSelectElement;
-    this.patientsService.setStatusFilter(target.value);
+  openCreateForm(): void {
+    this.editingPatient.set(null);
+    this.showCreateForm.set(true);
   }
 
   /**
-   * Navigate to patient details
+   * Abrir modal para editar paciente
    */
-  onPatientClick(patient: Patient): void {
-    this.patientsService.selectPatient(patient);
-    this.router.navigate(['/patient', patient.id]);
+  openEditForm(patient: Patient): void {
+    this.showCreateForm.set(false);
+    this.editingPatient.set(patient);
   }
 
   /**
-   * Handle new patient button click
+   * Cerrar modal de formulario
    */
-  onNewPatientClick(): void {
-    this.router.navigate(['/patient', 'nuevo']);
+  closeForm(): void {
+    this.showCreateForm.set(false);
+    this.editingPatient.set(null);
   }
 
   /**
-   * Handle filters button click
+   * Manejar guardado del formulario (crear/editar)
    */
-  onFiltersClick(): void {
-    // TODO: Implement advanced filters modal
-    console.log('Filters clicked');
+  handleSave(patientData: Patient | Partial<Patient>): void {
+    const editing = this.editingPatient();
+
+    if (editing) {
+      // Editar paciente existente
+      this.patientsService.updatePatient(
+        editing.id,
+        patientData as Partial<Patient>
+      );
+    } else {
+      // Crear nuevo paciente
+      this.patientsService.createPatient(patientData as Partial<Patient>);
+    }
+
+    this.closeForm();
   }
 
   /**
-   * Get status color for badge
+   * Abrir modal de confirmación de eliminación
    */
-  getStatusColor(status: string): string {
-    return this.patientsService.getStatusColor(status);
+  openDeleteModal(patient: Patient): void {
+    this.deletingPatient.set(patient);
   }
 
   /**
-   * Get status label in Spanish
+   * Cerrar modal de eliminación
    */
-  getStatusLabel(status: string): string {
-    return this.patientsService.getStatusLabel(status);
+  closeDeleteModal(): void {
+    this.deletingPatient.set(null);
   }
 
   /**
-   * Format date for display
+   * Eliminar paciente
    */
-  formatDate(dateString: string): string {
-    return this.patientsService.formatDate(dateString);
+  handleDeletePatient(): void {
+    const deleting = this.deletingPatient();
+    if (deleting) {
+      this.patientsService.deletePatient(deleting.id);
+      this.closeDeleteModal();
+    }
   }
 
   /**
-   * Capitalize session type
-   */
-  capitalizeSessionType(sessionType: string): string {
-    return this.patientsService.capitalizeSessionType(sessionType);
-  }
-
-  /**
-   * Track by function for patients list
+   * Track by function para ngFor
    */
   trackByPatientId(index: number, patient: Patient): number {
     return patient?.id || index;

@@ -1,16 +1,24 @@
+<!-- Main container -->
 <div class="p-4 md:p-6 space-y-6">
 
-  <!-- Header -->
-  <app-section-header title="Pacientes" subtitle="Gestión de fichas y datos de pacientes" buttonText="Nuevo Paciente"
-    [showFiltersButton]="true" filtersButtonText="Filtros" (onButtonClick)="onNewPatientClick()"
-    (onFiltersClick)="onFiltersClick()">
+  <!-- Header section -->
+  <app-section-header title="Gestión de Pacientes" subtitle="Administra los pacientes registrados en la plataforma"
+    buttonText="Nuevo Paciente" (onButtonClick)="openCreateForm()">
   </app-section-header>
 
-
-  <!-- Patients Grid -->
-  <app-patients-list
-    [patients]="filteredPatients()"
-    [trackByFn]="trackByPatientId"
-    (onPatientClick)="onPatientClick($event)">
+  <!-- Patients grid -->
+  <app-patients-list [patients]="patientsList()" [trackByFn]="trackByPatientId" (onEdit)="openEditForm($event)"
+    (onDelete)="openDeleteModal($event)">
   </app-patients-list>
+
 </div>
+
+<!-- Patient Form Modal -->
+<!-- TODO: Add patient form component when available -->
+
+<!-- Delete Confirmation Modal -->
+<app-confirmation-modal [isOpen]="deletingPatient() !== null" title="Confirmar Eliminación"
+  message="¿Estás seguro de que deseas eliminar el paciente " [itemName]="deletingPatient()?.name" confirmText="Eliminar"
+  cancelText="Cancelar" confirmButtonType="destructive" (onConfirm)="handleDeletePatient()"
+  (onCancel)="closeDeleteModal()">
+</app-confirmation-modal>
