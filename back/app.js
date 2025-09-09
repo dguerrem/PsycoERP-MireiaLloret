@@ -12,6 +12,7 @@ const {
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+const authRoutes = require("./routes/auth/auth_routes");
 const sessionsRoutes = require("./routes/sessions/sessions_routes");
 const patientsRoutes = require("./routes/patients/patients_routes");
 const bonusesRoutes = require("./routes/bonuses/bonuses_routes");
@@ -37,6 +38,7 @@ app.get("/", (req, res) => {
     message: "🚀 API de Psicología funcionando correctamente",
     version: "1.0.0",
     endpoints: {
+      auth: "/api/auth",
       sessions: "/api/sessions",
       patients: "/api/patients",
       bonuses: "/api/bonuses",
@@ -48,6 +50,7 @@ app.get("/", (req, res) => {
 });
 
 // Importar y usar rutas
+app.use("/api/auth", authRoutes);
 app.use("/api/sessions", sessionsRoutes);
 app.use("/api/patients", patientsRoutes);
 app.use("/api/bonuses", bonusesRoutes);

@@ -1811,6 +1811,71 @@ const definitions = {
       },
     },
   },
+
+  LoginRequest: {
+    type: "object",
+    required: ["email", "password"],
+    properties: {
+      email: {
+        type: "string",
+        format: "email",
+        description: "Email del usuario",
+        example: "admin@psicologia.com",
+      },
+      password: {
+        type: "string",
+        description: "Contraseña del usuario",
+        example: "password123",
+      },
+    },
+  },
+
+  User: {
+    type: "object",
+    properties: {
+      id: {
+        type: "integer",
+        format: "int64",
+        description: "ID único del usuario",
+        example: 1,
+      },
+      email: {
+        type: "string",
+        format: "email",
+        description: "Email del usuario",
+        example: "admin@psicologia.com",
+      },
+      name: {
+        type: "string",
+        description: "Nombre del usuario",
+        example: "Admin Usuario",
+      },
+      last_login: {
+        type: "string",
+        format: "date-time",
+        nullable: true,
+        description: "Fecha del último login",
+        example: "2024-12-15T14:30:00Z",
+      },
+    },
+  },
+
+  LoginResponse: {
+    type: "object",
+    properties: {
+      success: {
+        type: "boolean",
+        example: true,
+      },
+      message: {
+        type: "string",
+        example: "Login exitoso",
+      },
+      data: {
+        $ref: "#/components/schemas/User",
+      },
+    },
+  },
 };
 
 module.exports = definitions;

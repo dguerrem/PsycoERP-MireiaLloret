@@ -2,6 +2,7 @@ const swaggerJsdoc = require("swagger-jsdoc");
 const swaggerUi = require("swagger-ui-express");
 
 const definitions = require("./definitions");
+const authPaths = require("./paths/auth");
 const sessionsPaths = require("./paths/sessions");
 const patientsPaths = require("./paths/patients");
 const bonusesPaths = require("./paths/bonuses");
@@ -30,6 +31,7 @@ const swaggerDefinition = {
     schemas: definitions,
   },
   paths: {
+    ...authPaths,
     ...sessionsPaths,
     ...patientsPaths,
     ...bonusesPaths,
@@ -38,6 +40,10 @@ const swaggerDefinition = {
     ...clinicalNotesPaths,
   },
   tags: [
+    {
+      name: "Auth",
+      description: "Autenticación de usuarios",
+    },
     {
       name: "Sessions",
       description: "Gestión de sesiones de terapia",
