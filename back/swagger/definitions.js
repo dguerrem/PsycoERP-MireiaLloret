@@ -513,21 +513,76 @@ const definitions = {
   ClinicalNote: {
     type: "object",
     properties: {
-      titulo: {
+      id: {
+        type: "integer",
+        format: "int64",
+        description: "ID único de la nota clínica",
+        example: 1,
+      },
+      patient_id: {
+        type: "integer",
+        format: "int64",
+        description: "ID del paciente",
+        example: 123,
+      },
+      session_id: {
+        type: "integer",
+        format: "int64",
+        nullable: true,
+        description: "ID de la sesión asociada (opcional)",
+        example: 456,
+      },
+      title: {
         type: "string",
         description: "Título de la nota clínica",
         example: "Sesión inicial de evaluación",
       },
-      contenido: {
+      content: {
         type: "string",
         description: "Contenido completo de la nota clínica",
         example: "El paciente se muestra colaborativo durante la primera sesión. Se observa ansiedad leve relacionada con el trabajo.",
       },
-      fecha: {
+      date: {
         type: "string",
         format: "date-time",
         description: "Fecha y hora de la nota clínica (YYYY-MM-DD HH:mm:ss)",
         example: "2024-12-15 14:30:00",
+      },
+      created_at: {
+        type: "string",
+        format: "date-time",
+        description: "Fecha de creación",
+        example: "2024-12-15 14:30:00",
+      },
+      updated_at: {
+        type: "string",
+        format: "date-time",
+        description: "Fecha de última actualización",
+        example: "2024-12-15 14:30:00",
+      },
+      patient_name: {
+        type: "string",
+        description: "Nombre del paciente (incluido en consultas con JOIN)",
+        example: "Juan Pérez García",
+      },
+    },
+  },
+
+  ClinicalNotesResponse: {
+    type: "object",
+    properties: {
+      success: {
+        type: "boolean",
+        example: true,
+      },
+      pagination: {
+        $ref: "#/components/schemas/PaginationInfo",
+      },
+      data: {
+        type: "array",
+        items: {
+          $ref: "#/components/schemas/ClinicalNote",
+        },
       },
     },
   },
@@ -1190,15 +1245,62 @@ const definitions = {
         type: "boolean",
         example: true,
       },
-      total: {
-        type: "integer",
-        example: 5,
+      pagination: {
+        $ref: "#/components/schemas/PaginationInfo",
       },
       data: {
         type: "array",
         items: {
           $ref: "#/components/schemas/Patient",
         },
+      },
+    },
+  },
+
+  PaginationInfo: {
+    type: "object",
+    properties: {
+      currentPage: {
+        type: "integer",
+        description: "Página actual",
+        example: 1,
+      },
+      totalPages: {
+        type: "integer",
+        description: "Total de páginas disponibles",
+        example: 5,
+      },
+      totalRecords: {
+        type: "integer",
+        description: "Total de registros encontrados",
+        example: 47,
+      },
+      recordsPerPage: {
+        type: "integer",
+        description: "Registros por página",
+        example: 10,
+      },
+      hasNextPage: {
+        type: "boolean",
+        description: "Indica si hay una página siguiente",
+        example: true,
+      },
+      hasPrevPage: {
+        type: "boolean",
+        description: "Indica si hay una página anterior",
+        example: false,
+      },
+      nextPage: {
+        type: "integer",
+        nullable: true,
+        description: "Número de la página siguiente (null si no hay)",
+        example: 2,
+      },
+      prevPage: {
+        type: "integer",
+        nullable: true,
+        description: "Número de la página anterior (null si no hay)",
+        example: null,
       },
     },
   },
@@ -1585,17 +1687,8 @@ const definitions = {
         type: "boolean",
         example: true,
       },
-      total: {
-        type: "integer",
-        example: 3,
-      },
-      filters_applied: {
-        type: "object",
-        nullable: true,
-        example: {
-          patient_id: "1",
-          status: "completed",
-        },
+      pagination: {
+        $ref: "#/components/schemas/PaginationInfo",
       },
       data: {
         type: "array",

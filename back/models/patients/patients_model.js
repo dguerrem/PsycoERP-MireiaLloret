@@ -1,8 +1,21 @@
 const { db } = require("../../config/db");
 
-// Obtener todos los pacientes con filtros opcionales
+// Obtener todos los pacientes con filtros opcionales y paginación
 const getPatients = async (filters = {}) => {
-  let query = `
+  // Extraer parámetros de paginación
+  const page = parseInt(filters.page) || 1;
+  const limit = parseInt(filters.limit) || 10;
+  const offset = (page - 1) * limit;
+
+  // Query base para contar registros totales
+  let countQuery = `
+        SELECT COUNT(*) as total
+        FROM patients
+        WHERE is_active = true
+    `;
+
+  // Query principal para obtener datos
+  let dataQuery = `
         SELECT 
             id,
             name,
@@ -25,10 +38,13 @@ const getPatients = async (filters = {}) => {
             DATE_FORMAT(created_at,'%Y-%m-%d') as created_at,
             updated_at
         FROM patients
+        WHERE is_active = true
     `;
+
   const params = [];
   const conditions = [];
 
+  // Aplicar filtros
   if (filters.name) {
     conditions.push("name LIKE ?");
     params.push(`%${filters.name}%`);
@@ -80,15 +96,41 @@ const getPatients = async (filters = {}) => {
     params.push(filters.fecha_hasta);
   }
   
+  // Aplicar condiciones a ambas queries
   if (conditions.length > 0) {
-    query += " WHERE " + conditions.join(" AND ");
+    const conditionsStr = " AND " + conditions.join(" AND ");
+    countQuery += conditionsStr;
+    dataQuery += conditionsStr;
   }
 
-  query += " ORDER BY created_at DESC";
-
+  // Agregar ordenamiento y paginación solo a la query de datos
+  dataQuery += " ORDER BY created_at DESC";
+  dataQuery += " LIMIT ? OFFSET ?";
   
-  const [rows] = await db.execute(query, params);
-  return rows;
+  // Ejecutar ambas queries
+  const [countResult] = await db.execute(countQuery, params);
+  const totalRecords = countResult[0].total;
+  
+  const [dataRows] = await db.execute(dataQuery, [...params, limit, offset]);
+  
+  // Calcular información de paginación
+  const totalPages = Math.ceil(totalRecords / limit);
+  const hasNextPage = page < totalPages;
+  const hasPrevPage = page > 1;
+  
+  return {
+    data: dataRows,
+    pagination: {
+      currentPage: page,
+      totalPages: totalPages,
+      totalRecords: totalRecords,
+      recordsPerPage: limit,
+      hasNextPage: hasNextPage,
+      hasPrevPage: hasPrevPage,
+      nextPage: hasNextPage ? page + 1 : null,
+      prevPage: hasPrevPage ? page - 1 : null
+    }
+  };
 };
 
 // Obtener un paciente por ID con información específica para PatientResume
@@ -101,7 +143,7 @@ const getPatientById = async (id) => {
             phone,
             session_type as tipo
         FROM patients
-        WHERE id = ?
+        WHERE id = ? AND is_active = true
     `;
   
   const [patientRows] = await db.execute(patientQuery, [id]);
@@ -141,7 +183,7 @@ const getPatientById = async (id) => {
             emergency_contact_phone as telefono_emergencia,
             notes as notas
         FROM patients
-        WHERE id = ?
+        WHERE id = ? AND is_active = true
     `;
   
   const [patientDataRows] = await db.execute(patientDataQuery, [id]);
@@ -231,7 +273,154 @@ const getPatientById = async (id) => {
   };
 };
 
+// Obtener pacientes eliminados (soft deleted) con filtros opcionales y paginación
+const getDeletedPatients = async (filters = {}) => {
+  // Extraer parámetros de paginación
+  const page = parseInt(filters.page) || 1;
+  const limit = parseInt(filters.limit) || 10;
+  const offset = (page - 1) * limit;
+
+  // Query base para contar registros totales
+  let countQuery = `
+        SELECT COUNT(*) as total
+        FROM patients
+        WHERE is_active = false
+    `;
+
+  // Query principal para obtener datos
+  let dataQuery = `
+        SELECT 
+            id,
+            name,
+            email,
+            phone,
+            dni,
+            status,
+            session_type,
+            address,
+            DATE_FORMAT(birth_date, '%Y-%m-%d') as birth_date,
+            emergency_contact_name,
+            emergency_contact_phone,
+            medical_history,
+            current_medication,
+            allergies,
+            referred_by,
+            insurance_provider,
+            insurance_number,
+            notes,
+            DATE_FORMAT(created_at,'%Y-%m-%d') as created_at,
+            updated_at
+        FROM patients
+        WHERE is_active = false
+    `;
+
+  const params = [];
+  const conditions = [];
+
+  // Aplicar filtros
+  if (filters.name) {
+    conditions.push("name LIKE ?");
+    params.push(`%${filters.name}%`);
+  }
+
+  if (filters.email) {
+    conditions.push("email LIKE ?");
+    params.push(`%${filters.email}%`);
+  }
+
+  if (filters.dni) {
+    conditions.push("dni = ?");
+    params.push(filters.dni);
+  }
+
+  if (filters.status) {
+    conditions.push("status = ?");
+    params.push(filters.status);
+  }
+
+  if (filters.session_type) {
+    conditions.push("session_type = ?");
+    params.push(filters.session_type);
+  }
+
+  if (filters.insurance_provider) {
+    conditions.push("insurance_provider LIKE ?");
+    params.push(`%${filters.insurance_provider}%`);
+  }
+
+  if (filters.referred_by) {
+    conditions.push("referred_by LIKE ?");
+    params.push(`%${filters.referred_by}%`);
+  }
+
+  if (filters.birth_date) {
+    conditions.push("birth_date = ?");
+    params.push(filters.birth_date);
+  }
+
+  // Lógica inteligente de fechas para created_at
+  if (filters.fecha_desde) {
+    conditions.push("created_at >= ?");
+    params.push(filters.fecha_desde);
+  }
+
+  if (filters.fecha_hasta) {
+    conditions.push("created_at <= ?");
+    params.push(filters.fecha_hasta);
+  }
+  
+  // Aplicar condiciones a ambas queries
+  if (conditions.length > 0) {
+    const conditionsStr = " AND " + conditions.join(" AND ");
+    countQuery += conditionsStr;
+    dataQuery += conditionsStr;
+  }
+
+  // Agregar ordenamiento y paginación solo a la query de datos
+  dataQuery += " ORDER BY updated_at DESC";
+  dataQuery += " LIMIT ? OFFSET ?";
+  
+  // Ejecutar ambas queries
+  const [countResult] = await db.execute(countQuery, params);
+  const totalRecords = countResult[0].total;
+  
+  const [dataRows] = await db.execute(dataQuery, [...params, limit, offset]);
+  
+  // Calcular información de paginación
+  const totalPages = Math.ceil(totalRecords / limit);
+  const hasNextPage = page < totalPages;
+  const hasPrevPage = page > 1;
+  
+  return {
+    data: dataRows,
+    pagination: {
+      currentPage: page,
+      totalPages: totalPages,
+      totalRecords: totalRecords,
+      recordsPerPage: limit,
+      hasNextPage: hasNextPage,
+      hasPrevPage: hasPrevPage,
+      nextPage: hasNextPage ? page + 1 : null,
+      prevPage: hasPrevPage ? page - 1 : null
+    }
+  };
+};
+
+// Soft delete de un paciente (actualizar is_active = false)
+const deletePatient = async (id) => {
+  const query = `
+    UPDATE patients 
+    SET is_active = false, updated_at = CURRENT_TIMESTAMP 
+    WHERE id = ? AND is_active = true
+  `;
+  
+  const [result] = await db.execute(query, [id]);
+  return result.affectedRows > 0;
+};
+
 module.exports = {
   getPatients,
   getPatientById,
+  getDeletedPatients,
+  deletePatient,
 };

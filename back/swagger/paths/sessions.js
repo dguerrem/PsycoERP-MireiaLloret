@@ -2,8 +2,8 @@ const sessionsPaths = {
   "/api/sessions": {
     get: {
       tags: ["Sessions"],
-      summary: "Obtener sesiones",
-      description: "Obtiene una lista de sesiones con filtros opcionales",
+      summary: "Obtener sesiones paginadas",
+      description: "Obtiene una lista paginada de sesiones con filtros opcionales. Devuelve hasta 100 registros por página (por defecto 10).",
       parameters: [
         {
           name: "patient_id",
@@ -87,10 +87,33 @@ const sessionsPaths = {
           },
           description: "Estado del pago",
         },
+        {
+          name: "page",
+          in: "query",
+          required: false,
+          schema: {
+            type: "integer",
+            minimum: 1,
+            default: 1,
+          },
+          description: "Número de página para la paginación",
+        },
+        {
+          name: "limit",
+          in: "query",
+          required: false,
+          schema: {
+            type: "integer",
+            minimum: 1,
+            maximum: 100,
+            default: 10,
+          },
+          description: "Número de registros por página (máximo 100)",
+        },
       ],
       responses: {
         200: {
-          description: "Lista de sesiones obtenida exitosamente",
+          description: "Lista paginada de sesiones obtenida exitosamente. Incluye información de paginación y datos de sesiones con detalles del paciente, clínica y notas médicas.",
           content: {
             "application/json": {
               schema: {
@@ -100,7 +123,7 @@ const sessionsPaths = {
           },
         },
         400: {
-          description: "Parámetros de entrada inválidos",
+          description: "Parámetros de entrada inválidos (página < 1 o límite fuera del rango 1-100)",
           content: {
             "application/json": {
               schema: {
@@ -404,8 +427,8 @@ const sessionsPaths = {
     },
     delete: {
       tags: ["Sessions"],
-      summary: "Eliminar sesión",
-      description: "Elimina una sesión existente del sistema",
+      summary: "Eliminar sesión (Soft Delete)",
+      description: "Realiza una eliminación lógica de una sesión marcándola como inactiva. La sesión no será visible en futuras consultas pero se mantiene en la base de datos.",
       parameters: [
         {
           name: "id",
@@ -420,7 +443,7 @@ const sessionsPaths = {
       ],
       responses: {
         200: {
-          description: "Sesión eliminada exitosamente",
+          description: "Sesión eliminada exitosamente (soft delete)",
           content: {
             "application/json": {
               schema: {
@@ -439,12 +462,176 @@ const sessionsPaths = {
             },
           },
         },
-        404: {
-          description: "Sesión no encontrada",
+        400: {
+          description: "ID de sesión inválido",
           content: {
             "application/json": {
               schema: {
                 $ref: "#/components/schemas/ErrorResponse",
+              },
+            },
+          },
+        },
+        404: {
+          description: "Sesión no encontrada o ya está eliminada",
+          content: {
+            "application/json": {
+              schema: {
+                $ref: "#/components/schemas/ErrorResponse",
+              },
+            },
+          },
+        },
+        500: {
+          description: "Error interno del servidor",
+          content: {
+            "application/json": {
+              schema: {
+                $ref: "#/components/schemas/ErrorResponse",
+              },
+            },
+          },
+        },
+      },
+    },
+  },
+  "/api/sessions/{id}/whatsapp-link": {
+    get: {
+      tags: ["Sessions"],
+      summary: "Generar enlace de WhatsApp para recordatorio de cita",
+      description: "Genera un enlace de WhatsApp con un mensaje de recordatorio para una sesión específica. Obtiene los datos de la sesión junto con la información del paciente y crea una URL de WhatsApp con el mensaje formateado.",
+      parameters: [
+        {
+          name: "id",
+          in: "path",
+          required: true,
+          schema: {
+            type: "integer",
+            format: "int64",
+          },
+          description: "ID de la sesión para generar el enlace de WhatsApp",
+        },
+      ],
+      responses: {
+        200: {
+          description: "Enlace de WhatsApp generado exitosamente",
+          content: {
+            "application/json": {
+              schema: {
+                type: "object",
+                properties: {
+                  success: {
+                    type: "boolean",
+                    example: true,
+                  },
+                  data: {
+                    type: "object",
+                    properties: {
+                      session_id: {
+                        type: "integer",
+                        example: 123,
+                        description: "ID de la sesión",
+                      },
+                      patient_name: {
+                        type: "string",
+                        example: "Juan Pérez",
+                        description: "Nombre del paciente",
+                      },
+                      session_date: {
+                        type: "string",
+                        format: "date",
+                        example: "2024-03-15",
+                        description: "Fecha de la sesión",
+                      },
+                      start_time: {
+                        type: "string",
+                        format: "time",
+                        example: "10:00:00",
+                        description: "Hora de inicio de la sesión",
+                      },
+                      phone: {
+                        type: "string",
+                        example: "+34 123 456 789",
+                        description: "Teléfono original del paciente",
+                      },
+                      clean_phone: {
+                        type: "string",
+                        example: "34123456789",
+                        description: "Teléfono limpio para WhatsApp (sin espacios ni caracteres especiales)",
+                      },
+                      whatsapp_url: {
+                        type: "string",
+                        format: "uri",
+                        example: "https://wa.me/34123456789?text=Hola%20Juan%20P%C3%A9rez...",
+                        description: "URL completa de WhatsApp con el mensaje codificado",
+                      },
+                      message: {
+                        type: "string",
+                        example: "Hola Juan Pérez,\n\nTe recordamos tu cita de psicología:\n📅 Fecha: viernes, 15 de marzo de 2024\n🕐 Hora: 10:00:00\n\n¡Te esperamos!",
+                        description: "Mensaje de recordatorio formateado",
+                      },
+                      template_used: {
+                        type: "string",
+                        example: "reminder_1",
+                        description: "ID de la plantilla utilizada para el mensaje",
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+        400: {
+          description: "ID de sesión inválido, sesión no está programada, o número de teléfono inválido",
+          content: {
+            "application/json": {
+              schema: {
+                $ref: "#/components/schemas/ErrorResponse",
+              },
+              examples: {
+                invalid_id: {
+                  summary: "ID inválido",
+                  value: {
+                    success: false,
+                    error: "ID de sesión inválido",
+                  },
+                },
+                not_scheduled: {
+                  summary: "Sesión no programada",
+                  value: {
+                    success: false,
+                    error: "Solo se pueden generar enlaces para sesiones programadas",
+                  },
+                },
+                no_phone: {
+                  summary: "Sin teléfono",
+                  value: {
+                    success: false,
+                    error: "El paciente no tiene número de teléfono registrado",
+                  },
+                },
+                invalid_phone: {
+                  summary: "Teléfono inválido",
+                  value: {
+                    success: false,
+                    error: "Número de teléfono inválido",
+                  },
+                },
+              },
+            },
+          },
+        },
+        404: {
+          description: "Sesión no encontrada o paciente inactivo",
+          content: {
+            "application/json": {
+              schema: {
+                $ref: "#/components/schemas/ErrorResponse",
+              },
+              example: {
+                success: false,
+                error: "Sesión no encontrada o paciente inactivo",
               },
             },
           },

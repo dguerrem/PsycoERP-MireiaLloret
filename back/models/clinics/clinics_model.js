@@ -10,6 +10,7 @@ const getClinics = async (filters = {}) => {
             DATE_FORMAT(created_at,'%Y-%m-%d') as created_at,
             DATE_FORMAT(updated_at,'%Y-%m-%d') as updated_at
         FROM clinics
+        WHERE is_active = true
     `;
   const params = [];
   const conditions = [];
@@ -20,7 +21,7 @@ const getClinics = async (filters = {}) => {
   }
 
   if (conditions.length > 0) {
-    query += " WHERE " + conditions.join(" AND ");
+    query += " AND " + conditions.join(" AND ");
   }
 
   query += " ORDER BY created_at DESC";
@@ -53,10 +54,10 @@ const updateClinic = async (id, data) => {
   if (fields.length === 0) {
     throw new Error("No fields to update");
   }
-  
+
   params.push(id);
   
-  const query = `UPDATE clinics SET ${fields.join(", ")} WHERE id = ?`;
+  const query = `UPDATE clinics SET ${fields.join(", ")} WHERE id = ? AND is_active = true`;
   
   const [result] = await db.execute(query, params);
   
@@ -67,16 +68,16 @@ const updateClinic = async (id, data) => {
   return result;
 };
 
+// Soft delete de una clínica (actualizar is_active = false)
 const deleteClinic = async (id) => {
-  const query = "DELETE FROM clinics WHERE id = ?";
+  const query = `
+    UPDATE clinics 
+    SET is_active = false
+    WHERE id = ? AND is_active = true
+  `;
   
   const [result] = await db.execute(query, [id]);
-  
-  if (result.affectedRows === 0) {
-    throw new Error("Clinic not found");
-  }
-  
-  return result;
+  return result.affectedRows > 0;
 };
 
 const createClinic = async (data) => {

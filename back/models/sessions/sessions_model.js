@@ -1,8 +1,23 @@
 const { db } = require("../../config/db");
 
-// Obtener todas las sesiones con filtros opcionales
+// Obtener todas las sesiones con filtros opcionales y paginación
 const getSessions = async (filters = {}) => {
-  let query = `
+  // Extraer parámetros de paginación
+  const page = parseInt(filters.page) || 1;
+  const limit = parseInt(filters.limit) || 10;
+  const offset = (page - 1) * limit;
+
+  // Query base para contar registros totales
+  let countQuery = `
+        SELECT COUNT(*) as total
+        FROM sessions s
+        LEFT JOIN patients p ON s.patient_id = p.id AND p.is_active = true
+        LEFT JOIN clinics c ON s.clinic_id = c.id AND c.is_active = true
+        WHERE s.is_active = true
+    `;
+
+  // Query principal para obtener datos
+  let dataQuery = `
         SELECT 
             s.id AS session_id,
             s.session_date,
@@ -18,8 +33,9 @@ const getSessions = async (filters = {}) => {
             c.id AS clinic_id,
             c.name AS clinic_name
         FROM sessions s
-        LEFT JOIN patients p ON s.patient_id = p.id
-        LEFT JOIN clinics c ON s.clinic_id = c.id
+        LEFT JOIN patients p ON s.patient_id = p.id AND p.is_active = true
+        LEFT JOIN clinics c ON s.clinic_id = c.id AND c.is_active = true
+        WHERE s.is_active = true
     `;
   const params = [];
   const conditions = [];
@@ -72,22 +88,32 @@ const getSessions = async (filters = {}) => {
     }
   }
 
+  // Aplicar condiciones adicionales a ambas queries
   if (conditions.length > 0) {
-    query += " WHERE " + conditions.join(" AND ");
+    const conditionsStr = " AND " + conditions.join(" AND ");
+    countQuery += conditionsStr;
+    dataQuery += conditionsStr;
   }
 
-  query += " ORDER BY s.session_date DESC, s.start_time DESC";
-
-  const [rows] = await db.execute(query, params);
+  // Agregar ordenamiento y paginación solo a la query de datos
+  dataQuery += " ORDER BY s.session_date DESC, s.start_time DESC";
+  dataQuery += " LIMIT ? OFFSET ?";
+  
+  // Ejecutar ambas queries
+  const [countResult] = await db.execute(countQuery, params);
+  const totalRecords = countResult[0].total;
+  
+  const [rows] = await db.execute(dataQuery, [...params, limit, offset]);
   
   // Transformar datos a estructura organizada
   const transformedData = await Promise.all(rows.map(async (row) => {
-    // Obtener notas clínicas del paciente
+    // Obtener notas clínicas del paciente (solo si el paciente está activo)
     const [medicalRecords] = await db.execute(`
-      SELECT title, content, date 
-      FROM clinical_notes 
-      WHERE patient_id = ? 
-      ORDER BY date DESC
+      SELECT cn.title, cn.content, cn.created_at 
+      FROM clinical_notes cn
+      INNER JOIN patients p ON cn.patient_id = p.id
+      WHERE cn.patient_id = ? AND p.is_active = true
+      ORDER BY cn.created_at DESC
     `, [row.patient_id]);
 
     return {
@@ -112,13 +138,30 @@ const getSessions = async (filters = {}) => {
         MedicalRecordData: medicalRecords.map(record => ({
           title: record.title,
           content: record.content,
-          date: record.date
+          date: record.created_at
         }))
       }
     };
   }));
 
-  return transformedData;
+  // Calcular información de paginación
+  const totalPages = Math.ceil(totalRecords / limit);
+  const hasNextPage = page < totalPages;
+  const hasPrevPage = page > 1;
+  
+  return {
+    data: transformedData,
+    pagination: {
+      currentPage: page,
+      totalPages: totalPages,
+      totalRecords: totalRecords,
+      recordsPerPage: limit,
+      hasNextPage: hasNextPage,
+      hasPrevPage: hasPrevPage,
+      nextPage: hasNextPage ? page + 1 : null,
+      prevPage: hasPrevPage ? page - 1 : null
+    }
+  };
 };
 
 // Crear nueva sesión
@@ -191,7 +234,7 @@ const updateSession = async (sessionId, updateData) => {
   const query = `
     UPDATE sessions 
     SET ${setClause}
-    WHERE id = ?
+    WHERE id = ? AND is_active = true
   `;
 
   // Crear array de parámetros: valores + ID al final
@@ -201,27 +244,50 @@ const updateSession = async (sessionId, updateData) => {
 
   // Retornar la sesión actualizada
   const [updatedSession] = await db.execute(
-    "SELECT * FROM sessions WHERE id = ?",
+    "SELECT * FROM sessions WHERE id = ? AND is_active = true",
     [sessionId]
   );
 
   return updatedSession[0];
 };
 
-// Eliminar sesión
+// Eliminar sesión (soft delete)
 const deleteSession = async (sessionId) => {
-  // Primero obtener la sesión antes de eliminarla
-  const [sessionToDelete] = await db.execute(
-    "SELECT * FROM sessions WHERE id = ?",
+  // Realizar soft delete marcando is_active = false
+  const [result] = await db.execute(
+    "UPDATE sessions SET is_active = false WHERE id = ? AND is_active = true", 
     [sessionId]
   );
 
-  if (sessionToDelete.length === 0) {
-    throw new Error("Sesión no encontrada");
+  if (result.affectedRows === 0) {
+    throw new Error("Sesión no encontrada o ya está eliminada");
   }
 
-  // Eliminar la sesión
-  await db.execute("DELETE FROM sessions WHERE id = ?", [sessionId]);
+  return true;
+};
+
+// Obtener datos de sesión con paciente para WhatsApp
+const getSessionForWhatsApp = async (sessionId) => {
+  const query = `
+    SELECT 
+      s.id,
+      s.session_date,
+      s.start_time,
+      s.status,
+      p.name as patient_name,
+      p.phone as patient_phone
+    FROM sessions s
+    INNER JOIN patients p ON s.patient_id = p.id AND p.is_active = true
+    WHERE s.id = ? AND s.is_active = true
+  `;
+  
+  const [rows] = await db.execute(query, [sessionId]);
+  
+  if (rows.length === 0) {
+    return null;
+  }
+  
+  return rows[0];
 };
 
 module.exports = {
@@ -229,4 +295,5 @@ module.exports = {
   createSession,
   updateSession,
   deleteSession,
+  getSessionForWhatsApp,
 };

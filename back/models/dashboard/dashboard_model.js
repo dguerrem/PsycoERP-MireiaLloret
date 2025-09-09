@@ -48,7 +48,7 @@ const getDashboardKPIs = async () => {
           MONTH(s.session_date) as month,
           WEEK(s.session_date, 1) - WEEK(DATE_FORMAT(s.session_date, '%Y-%m-01'), 1) + 1 as week_number
         FROM sessions s
-        INNER JOIN clinics c ON s.clinic_id = c.id
+        INNER JOIN clinics c ON s.clinic_id = c.id AND c.is_active = true
         WHERE s.status IN ('completed', 'scheduled', 'cancelled', 'no-show')
       )
       SELECT 
@@ -114,6 +114,7 @@ const getDashboardKPIs = async () => {
         COUNT(CASE WHEN status = 'active' AND birth_date IS NOT NULL AND TIMESTAMPDIFF(YEAR, birth_date, CURDATE()) BETWEEN 36 AND 45 THEN 1 END) as age_36_45,
         COUNT(CASE WHEN status = 'active' AND birth_date IS NOT NULL AND TIMESTAMPDIFF(YEAR, birth_date, CURDATE()) > 45 THEN 1 END) as age_over_45
       FROM patients
+      WHERE is_active = true
     `;
     
     const [masterPatientsResult] = await db.execute(masterPatientsQuery, [currentYear, currentMonth]);
@@ -136,8 +137,8 @@ const getDashboardKPIs = async () => {
           ) THEN 'next_appointment'
         END as session_category
       FROM sessions s
-      INNER JOIN patients p ON s.patient_id = p.id
-      INNER JOIN clinics c ON s.clinic_id = c.id
+      INNER JOIN patients p ON s.patient_id = p.id AND p.is_active = true
+      INNER JOIN clinics c ON s.clinic_id = c.id AND c.is_active = true
       WHERE ((s.session_date = ? AND s.status = 'scheduled' AND s.start_time > ?) 
              OR (s.session_date = ? AND s.status = 'scheduled'))
       ORDER BY s.session_date, s.start_time ASC
@@ -178,6 +179,7 @@ const getDashboardKPIs = async () => {
       FROM clinics c
       LEFT JOIN sessions s ON c.id = s.clinic_id 
         AND s.status IN ('completed', 'scheduled')
+      WHERE c.is_active = true
       GROUP BY c.id, c.name
       ORDER BY data_type, revenue DESC
     `;
@@ -199,6 +201,7 @@ const getDashboardKPIs = async () => {
       FROM clinics c
       LEFT JOIN sessions s ON c.id = s.clinic_id 
         AND s.status IN ('completed', 'scheduled')
+      WHERE c.is_active = true
       GROUP BY c.id, c.name
       ORDER BY total_sessions DESC
     `;
