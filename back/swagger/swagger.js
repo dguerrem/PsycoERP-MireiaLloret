@@ -29,7 +29,20 @@ const swaggerDefinition = {
   ],
   components: {
     schemas: definitions,
+    securitySchemes: {
+      bearerAuth: {
+        type: "http",
+        scheme: "bearer",
+        bearerFormat: "JWT",
+        description: "JWT token obtenido del endpoint de login",
+      },
+    },
   },
+  security: [
+    {
+      bearerAuth: [],
+    },
+  ],
   paths: {
     ...authPaths,
     ...sessionsPaths,

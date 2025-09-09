@@ -1872,7 +1872,36 @@ const definitions = {
         example: "Login exitoso",
       },
       data: {
-        $ref: "#/components/schemas/User",
+        type: "object",
+        properties: {
+          user: {
+            $ref: "#/components/schemas/User",
+          },
+          token: {
+            $ref: "#/components/schemas/JWTToken",
+          },
+        },
+      },
+    },
+  },
+
+  JWTToken: {
+    type: "object",
+    properties: {
+      access_token: {
+        type: "string",
+        description: "Token JWT de acceso",
+        example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+      },
+      token_type: {
+        type: "string",
+        description: "Tipo de token",
+        example: "Bearer",
+      },
+      expires_in: {
+        type: "string",
+        description: "Tiempo de expiración del token",
+        example: "24h",
       },
     },
   },

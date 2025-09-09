@@ -1,4 +1,5 @@
 const bcrypt = require("bcrypt");
+const { generateToken } = require("../../utils/jwt");
 const {
   getUserByEmail,
   updateLastLogin,
@@ -51,10 +52,26 @@ const loginUser = async (req, res) => {
     // Obtener la información actualizada del usuario
     const updatedUser = await getUserById(user.id);
 
+    // Generar JWT token
+    const tokenPayload = {
+      userId: updatedUser.id,
+      email: updatedUser.email,
+      name: updatedUser.name,
+    };
+
+    const token = generateToken(tokenPayload);
+
     res.status(200).json({
       success: true,
       message: "Login exitoso",
-      data: updatedUser,
+      data: {
+        user: updatedUser,
+        token: {
+          access_token: token,
+          token_type: "Bearer",
+          expires_in: "24h",
+        },
+      },
     });
   } catch (error) {
     console.error("Error en loginUser:", error.message);
