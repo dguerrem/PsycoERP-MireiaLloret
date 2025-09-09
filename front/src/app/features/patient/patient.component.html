@@ -11,6 +11,20 @@
     (onDelete)="openDeleteModal($event)">
   </app-patients-list>
 
+  <!-- Pagination -->
+  @if (paginationData()) {
+    <app-pagination 
+      [currentPage]="paginationData()!.currentPage"
+      [totalPages]="paginationData()!.totalPages"
+      [totalRecords]="paginationData()!.totalRecords"
+      [recordsPerPage]="paginationData()!.recordsPerPage"
+      [hasNextPage]="paginationData()!.hasNextPage"
+      [hasPrevPage]="paginationData()!.hasPrevPage"
+      (onPageChange)="onPageChange($event)"
+      (onPageSizeChange)="onPageSizeChange($event)">
+    </app-pagination>
+  }
+
 </div>
 
 <!-- Patient Form Modal -->

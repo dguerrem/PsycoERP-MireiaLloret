@@ -13,6 +13,7 @@ import { PatientsService } from './services/patients.service';
 import { ConfirmationModalComponent } from '../../shared/components/confirmation-modal/confirmation-modal.component';
 import { SectionHeaderComponent } from '../../shared/components/section-header/section-header.component';
 import { PatientsListComponent } from './components/patients-list/patients-list.component';
+import { PaginationComponent } from '../../shared/components/pagination/pagination.component';
 
 @Component({
   selector: 'app-patient',
@@ -25,6 +26,7 @@ import { PatientsListComponent } from './components/patients-list/patients-list.
     ConfirmationModalComponent,
     SectionHeaderComponent,
     PatientsListComponent,
+    PaginationComponent,
   ],
 })
 export class PatientComponent implements OnInit {
@@ -39,6 +41,7 @@ export class PatientComponent implements OnInit {
   // Computed signals
   patientsList = this.patientsService.all;
   isLoading = this.patientsService.loading;
+  paginationData = this.patientsService.pagination;
   showForm = computed(
     () => this.showCreateForm() || this.editingPatient() !== null
   );
@@ -114,6 +117,21 @@ export class PatientComponent implements OnInit {
       this.patientsService.deletePatient(deleting.id);
       this.closeDeleteModal();
     }
+  }
+
+  /**
+   * Manejar cambio de página
+   */
+  onPageChange(page: number): void {
+    const perPage = this.paginationData()?.recordsPerPage || 10;
+    this.patientsService.loadAndSetPatientsPaginated(page, perPage);
+  }
+
+  /**
+   * Manejar cambio de tamaño de página
+   */
+  onPageSizeChange(size: number): void {
+    this.patientsService.loadAndSetPatientsPaginated(1, size);
   }
 
   /**

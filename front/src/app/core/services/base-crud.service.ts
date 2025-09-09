@@ -1,9 +1,10 @@
 import { Injectable, inject } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { tap, map, finalize } from 'rxjs/operators';
 import { ToastService } from './toast.service';
 import { LoadingService } from './loading.service';
+import { PaginationResponse } from '../../shared/models/pagination.interface';
 import { environment } from '../../../environments/environment';
 
 export interface ApiListResponse<T> {
@@ -53,6 +54,23 @@ export abstract class BaseCrudService<T> {
       })
       .pipe(
         map((response: ApiListResponse<T>) => response.data),
+        finalize(() => this.loadingService.hide())
+      );
+  }
+
+  getAllPaginated(page = 1, per_page = 10): Observable<PaginationResponse<T>> {
+    const params = new HttpParams()
+      .set('page', page.toString())
+      .set('per_page', per_page.toString());
+    
+    this.loadingService.show();
+    
+    return this.http
+      .get<PaginationResponse<T>>(this.apiUrl, {
+        ...this.httpOptions,
+        params,
+      })
+      .pipe(
         finalize(() => this.loadingService.hide())
       );
   }
