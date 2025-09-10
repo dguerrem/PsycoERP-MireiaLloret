@@ -1,5 +1,6 @@
 import { Injectable, signal } from '@angular/core';
 import { Observable } from 'rxjs';
+import { HttpParams } from '@angular/common/http';
 import { BaseCrudService } from '../../../core/services/base-crud.service';
 import { Patient } from '../../../shared/models/patient.model';
 import { PaginationResponse } from '../../../shared/models/pagination.interface';
@@ -8,12 +9,13 @@ import { PaginationResponse } from '../../../shared/models/pagination.interface'
 export class PatientsService extends BaseCrudService<Patient> {
   constructor() {
     super('/patients', 'Paciente');
-    this.loadInitialData();
   }
 
   private patients = signal<Patient[]>([]);
   private isLoading = signal(false);
-  private paginationData = signal<PaginationResponse<Patient>['pagination'] | null>(null);
+  private paginationData = signal<
+    PaginationResponse<Patient>['pagination'] | null
+  >(null);
 
   // Getters readonly
   get all() {
@@ -32,7 +34,7 @@ export class PatientsService extends BaseCrudService<Patient> {
    * Cargar datos iniciales desde la API
    */
   private loadInitialData(): void {
-    this.loadAndSetPatientsPaginated();
+    this.loadAndSetActivePatientsPaginated();
   }
 
   /**
@@ -44,9 +46,12 @@ export class PatientsService extends BaseCrudService<Patient> {
         // Recargar la página actual después de crear
         const currentPagination = this.paginationData();
         if (currentPagination) {
-          this.loadAndSetPatientsPaginated(currentPagination.currentPage, currentPagination.recordsPerPage);
+          this.loadAndSetActivePatientsPaginated(
+            currentPagination.currentPage,
+            currentPagination.recordsPerPage
+          );
         } else {
-          this.loadAndSetPatientsPaginated();
+          this.loadAndSetActivePatientsPaginated();
         }
       },
       error: () => {
@@ -64,9 +69,12 @@ export class PatientsService extends BaseCrudService<Patient> {
         // Recargar la página actual después de actualizar
         const currentPagination = this.paginationData();
         if (currentPagination) {
-          this.loadAndSetPatientsPaginated(currentPagination.currentPage, currentPagination.recordsPerPage);
+          this.loadAndSetActivePatientsPaginated(
+            currentPagination.currentPage,
+            currentPagination.recordsPerPage
+          );
         } else {
-          this.loadAndSetPatientsPaginated();
+          this.loadAndSetActivePatientsPaginated();
         }
       },
       error: () => {
@@ -84,9 +92,12 @@ export class PatientsService extends BaseCrudService<Patient> {
         // Recargar la página actual después de eliminar
         const currentPagination = this.paginationData();
         if (currentPagination) {
-          this.loadAndSetPatientsPaginated(currentPagination.currentPage, currentPagination.recordsPerPage);
+          this.loadAndSetActivePatientsPaginated(
+            currentPagination.currentPage,
+            currentPagination.recordsPerPage
+          );
         } else {
-          this.loadAndSetPatientsPaginated();
+          this.loadAndSetActivePatientsPaginated();
         }
       },
       error: () => {
@@ -96,18 +107,51 @@ export class PatientsService extends BaseCrudService<Patient> {
   }
 
   /**
-   * Cargar pacientes paginados desde la API
+   * Cargar pacientes activos paginados desde la API
    */
-  loadPatientsPaginated(page = 1, per_page = 10): Observable<PaginationResponse<Patient>> {
-    this.isLoading.set(true);
+  loadActivePatientsPaginated(
+    page = 1,
+    per_page = 10
+  ): Observable<PaginationResponse<Patient>> {
     return this.getAllPaginated(page, per_page);
   }
 
   /**
-   * Cargar pacientes paginados y actualizar estado interno
+   * Cargar pacientes eliminados paginados desde la API
    */
-  loadAndSetPatientsPaginated(page = 1, per_page = 10): void {
-    this.loadPatientsPaginated(page, per_page).subscribe({
+  loadDeletedPatientsPaginated(
+    page = 1,
+    per_page = 10
+  ): Observable<PaginationResponse<Patient>> {
+    const params = new HttpParams()
+      .set('page', page.toString())
+      .set('limit', per_page.toString()); // El endpoint deleted usa 'limit' en lugar de 'per_page'
+
+    return this.http.get<PaginationResponse<Patient>>(
+      `${this.apiUrl}/deleted`,
+      {
+        ...this.httpOptions,
+        params,
+      }
+    );
+  }
+
+  /**
+   * Cargar pacientes paginados desde la API (mantener compatibilidad)
+   */
+  loadPatientsPaginated(
+    page = 1,
+    per_page = 10
+  ): Observable<PaginationResponse<Patient>> {
+    return this.loadActivePatientsPaginated(page, per_page);
+  }
+
+  /**
+   * Cargar pacientes activos paginados y actualizar estado interno
+   */
+  loadAndSetActivePatientsPaginated(page = 1, per_page = 10): void {
+    this.isLoading.set(true);
+    this.loadActivePatientsPaginated(page, per_page).subscribe({
       next: (response) => {
         this.patients.set(response.data);
         this.paginationData.set(response.pagination);
@@ -117,6 +161,30 @@ export class PatientsService extends BaseCrudService<Patient> {
         this.isLoading.set(false);
       },
     });
+  }
+
+  /**
+   * Cargar pacientes eliminados paginados y actualizar estado interno
+   */
+  loadAndSetDeletedPatientsPaginated(page = 1, per_page = 10): void {
+    this.isLoading.set(true);
+    this.loadDeletedPatientsPaginated(page, per_page).subscribe({
+      next: (response) => {
+        this.patients.set(response.data);
+        this.paginationData.set(response.pagination);
+        this.isLoading.set(false);
+      },
+      error: () => {
+        this.isLoading.set(false);
+      },
+    });
+  }
+
+  /**
+   * Cargar pacientes paginados y actualizar estado interno (mantener compatibilidad)
+   */
+  loadAndSetPatientsPaginated(page = 1, per_page = 10): void {
+    this.loadAndSetActivePatientsPaginated(page, per_page);
   }
 
   /**
@@ -139,7 +207,7 @@ export class PatientsService extends BaseCrudService<Patient> {
    * Get patient by ID - compatibility method for existing code
    */
   getPatientById(id: number): Patient | undefined {
-    return this.patients().find(patient => patient.id === id);
+    return this.patients().find((patient) => patient.id === id);
   }
 
   /**
@@ -157,5 +225,4 @@ export class PatientsService extends BaseCrudService<Patient> {
   addPatient(patient: Omit<Patient, 'id' | 'created_at' | 'updated_at'>): void {
     this.createPatient(patient);
   }
-
 }

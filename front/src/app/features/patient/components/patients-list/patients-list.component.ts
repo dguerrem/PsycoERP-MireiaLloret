@@ -20,6 +20,7 @@ import { PatientCardComponent } from '../patient-card/patient-card.component';
 export class PatientsListComponent {
   @Input({ required: true }) patients!: Patient[];
   @Input() trackByFn?: TrackByFunction<Patient>;
+  @Input() isDeletedView: boolean = false;
 
   @Output() onEdit = new EventEmitter<Patient>();
   @Output() onDelete = new EventEmitter<Patient>();

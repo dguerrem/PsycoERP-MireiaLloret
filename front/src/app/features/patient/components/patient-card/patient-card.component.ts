@@ -17,6 +17,7 @@ import { Patient } from '../../../../shared/models/patient.model';
 })
 export class PatientCardComponent {
   @Input({ required: true }) patient!: Patient;
+  @Input() isDeletedView: boolean = false;
 
   @Output() onEdit = new EventEmitter<Patient>();
   @Output() onDelete = new EventEmitter<Patient>();
