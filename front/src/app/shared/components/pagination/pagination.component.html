@@ -1,77 +1,87 @@
-<!-- Info de elementos -->
-@if (showInfo) {
-  <div class="text-sm text-muted-foreground mb-4">
-    Mostrando {{ getStartRecord() }}-{{ getEndRecord() }} de {{ totalRecords }} pacientes
-  </div>
-}
-
-<!-- Navegación de páginas -->
-<div class="flex flex-col sm:flex-row items-center justify-between gap-4">
+<div class="bg-white border-t px-4 py-4">
   
-  <!-- Selector de tamaño (izquierda en desktop) -->
-  @if (showPageSize) {
-    <div class="flex items-center gap-2">
-      <label class="text-sm text-muted-foreground">Mostrar:</label>
-      <select 
-        class="border border-border rounded px-2 py-1 text-sm bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary" 
-        (change)="onPageSizeChanged($event)">
-        <option value="10" [selected]="recordsPerPage === 10">10</option>
-        <option value="25" [selected]="recordsPerPage === 25">25</option>
-        <option value="50" [selected]="recordsPerPage === 50">50</option>
-        <option value="100" [selected]="recordsPerPage === 100">100</option>
-      </select>
-      <span class="text-sm text-muted-foreground">por página</span>
-    </div>
-  }
-  
-  <!-- Botones de navegación (derecha en desktop) -->
-  <div class="flex items-center gap-1">
-    <!-- Primera página -->
-    <button 
-      type="button"
-      class="px-3 py-1 text-sm border border-border rounded bg-background text-foreground hover:bg-muted transition-colors disabled:opacity-50 disabled:cursor-not-allowed" 
-      [disabled]="!hasPrevPage"
-      (click)="onPageChange.emit(1)">
-      Primera
-    </button>
+  <!-- Fila principal con mejor distribución -->
+  <div class="flex flex-col lg:flex-row items-center justify-between gap-4">
     
-    <!-- Anterior -->
-    <button 
-      type="button"
-      class="px-3 py-1 text-sm border border-border rounded bg-background text-foreground hover:bg-muted transition-colors disabled:opacity-50 disabled:cursor-not-allowed" 
-      [disabled]="!hasPrevPage"
-      (click)="onPageChange.emit(currentPage - 1)">
-      ‹
-    </button>
-    
-    <!-- Números de página (máximo 5 visibles) -->
-    @for (page of getVisiblePages(); track page) {
-      <button 
-        type="button"
-        [class]="page === currentPage ? 
-          'px-3 py-1 text-sm rounded bg-[#0891b2] text-white hover:bg-[#0891b2]/90 transition-colors' : 
-          'px-3 py-1 text-sm border border-border rounded bg-background text-foreground hover:bg-muted transition-colors'"
-        (click)="onPageChange.emit(page)">
-        {{ page }}
-      </button>
+    <!-- Info de registros (izquierda en desktop, arriba en móvil) -->
+    @if (showInfo) {
+      <div class="order-2 lg:order-1">
+        <p class="text-sm text-muted-foreground text-center lg:text-left">
+          Mostrando {{ getStartRecord() }}-{{ getEndRecord() }} de {{ totalRecords }} pacientes
+        </p>
+      </div>
     }
     
-    <!-- Siguiente -->
-    <button 
-      type="button"
-      class="px-3 py-1 text-sm border border-border rounded bg-background text-foreground hover:bg-muted transition-colors disabled:opacity-50 disabled:cursor-not-allowed" 
-      [disabled]="!hasNextPage"
-      (click)="onPageChange.emit(currentPage + 1)">
-      ›
-    </button>
+    <!-- Navegación de páginas (centrado) -->
+    <div class="order-1 lg:order-2">
+      <div class="flex items-center gap-1">
+        <!-- Primera página -->
+        <button 
+          type="button"
+          class="px-3 py-1 text-sm border border-border rounded bg-background text-foreground hover:bg-muted transition-colors disabled:opacity-50 disabled:cursor-not-allowed" 
+          [disabled]="!hasPrevPage"
+          (click)="onPageChange.emit(1)">
+          Primera
+        </button>
+        
+        <!-- Anterior -->
+        <button 
+          type="button"
+          class="px-3 py-1 text-sm border border-border rounded bg-background text-foreground hover:bg-muted transition-colors disabled:opacity-50 disabled:cursor-not-allowed" 
+          [disabled]="!hasPrevPage"
+          (click)="onPageChange.emit(currentPage - 1)">
+          ‹
+        </button>
+        
+        <!-- Números de página (máximo 5 visibles) -->
+        @for (page of getVisiblePages(); track page) {
+          <button 
+            type="button"
+            [class]="page === currentPage ? 
+              'px-3 py-1 text-sm rounded bg-[#0891b2] text-white hover:bg-[#0891b2]/90 transition-colors' : 
+              'px-3 py-1 text-sm border border-border rounded bg-background text-foreground hover:bg-muted transition-colors'"
+            (click)="onPageChange.emit(page)">
+            {{ page }}
+          </button>
+        }
+        
+        <!-- Siguiente -->
+        <button 
+          type="button"
+          class="px-3 py-1 text-sm border border-border rounded bg-background text-foreground hover:bg-muted transition-colors disabled:opacity-50 disabled:cursor-not-allowed" 
+          [disabled]="!hasNextPage"
+          (click)="onPageChange.emit(currentPage + 1)">
+          ›
+        </button>
+        
+        <!-- Última página -->
+        <button 
+          type="button"
+          class="px-3 py-1 text-sm border border-border rounded bg-background text-foreground hover:bg-muted transition-colors disabled:opacity-50 disabled:cursor-not-allowed" 
+          [disabled]="!hasNextPage"
+          (click)="onPageChange.emit(totalPages)">
+          Última
+        </button>
+      </div>
+    </div>
     
-    <!-- Última página -->
-    <button 
-      type="button"
-      class="px-3 py-1 text-sm border border-border rounded bg-background text-foreground hover:bg-muted transition-colors disabled:opacity-50 disabled:cursor-not-allowed" 
-      [disabled]="!hasNextPage"
-      (click)="onPageChange.emit(totalPages)">
-      Última
-    </button>
+    <!-- Selector de tamaño (derecha en desktop, abajo en móvil) -->
+    @if (showPageSize) {
+      <div class="order-3">
+        <div class="flex items-center gap-2">
+          <label class="text-sm text-muted-foreground">Mostrar:</label>
+          <select 
+            class="border border-border rounded px-2 py-1 text-sm bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary" 
+            (change)="onPageSizeChanged($event)">
+            <option value="10" [selected]="recordsPerPage === 10">10</option>
+            <option value="25" [selected]="recordsPerPage === 25">25</option>
+            <option value="50" [selected]="recordsPerPage === 50">50</option>
+            <option value="100" [selected]="recordsPerPage === 100">100</option>
+          </select>
+          <span class="text-sm text-muted-foreground">por página</span>
+        </div>
+      </div>
+    }
+    
   </div>
 </div>

@@ -1,30 +1,49 @@
-<!-- Main container -->
-<div class="p-4 md:p-6 space-y-6">
-
-  <!-- Header section -->
-  <app-section-header title="Gestión de Pacientes" subtitle="Administra los pacientes registrados en la plataforma"
-    buttonText="Nuevo Paciente" (onButtonClick)="openCreateForm()">
+<!-- Main container con layout sticky -->
+<div class="h-full flex flex-col max-h-full overflow-hidden p-4 md:p-6">
+  
+  <!-- Header section (fijo) -->
+  <app-section-header 
+    title="Gestión de Pacientes"
+    subtitle="Administra los pacientes registrados en la plataforma"
+    buttonText="Nuevo Paciente"
+    (onButtonClick)="openCreateForm()">
   </app-section-header>
-
-  <!-- Patients grid -->
-  <app-patients-list [patients]="patientsList()" [trackByFn]="trackByPatientId" (onEdit)="openEditForm($event)"
-    (onDelete)="openDeleteModal($event)">
-  </app-patients-list>
-
-  <!-- Pagination -->
-  @if (paginationData()) {
-    <app-pagination 
-      [currentPage]="paginationData()!.currentPage"
-      [totalPages]="paginationData()!.totalPages"
-      [totalRecords]="paginationData()!.totalRecords"
-      [recordsPerPage]="paginationData()!.recordsPerPage"
-      [hasNextPage]="paginationData()!.hasNextPage"
-      [hasPrevPage]="paginationData()!.hasPrevPage"
-      (onPageChange)="onPageChange($event)"
-      (onPageSizeChange)="onPageSizeChange($event)">
-    </app-pagination>
+  
+  <!-- Contenido scrollable -->
+  <div class="flex-1 overflow-y-auto min-h-0 mt-6">
+    @if (isLoading()) {
+      <div class="flex items-center justify-center h-full">
+        <div class="text-center">
+          <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+          <p class="text-muted-foreground">Cargando pacientes...</p>
+        </div>
+      </div>
+    } @else {
+      <app-patients-list 
+        [patients]="patientsList()"
+        [trackByFn]="trackByPatientId"
+        (onEdit)="openEditForm($event)"
+        (onDelete)="openDeleteModal($event)">
+      </app-patients-list>
+    }
+  </div>
+  
+  <!-- Paginación fija en el footer -->
+  @if (paginationData() && !isLoading()) {
+    <div class="flex-shrink-0 bg-background border-t px-4 py-4 mt-4">
+      <app-pagination
+        [currentPage]="paginationData()!.currentPage"
+        [totalPages]="paginationData()!.totalPages"
+        [totalRecords]="paginationData()!.totalRecords"
+        [recordsPerPage]="paginationData()!.recordsPerPage"
+        [hasNextPage]="paginationData()!.hasNextPage"
+        [hasPrevPage]="paginationData()!.hasPrevPage"
+        (onPageChange)="onPageChange($event)"
+        (onPageSizeChange)="onPageSizeChange($event)">
+      </app-pagination>
+    </div>
   }
-
+  
 </div>
 
 <!-- Patient Form Modal -->

@@ -1,4 +1,4 @@
-<div class="min-h-screen flex">
+<div class="h-screen flex overflow-hidden">
   <!-- Sidebar -->
   <app-sidebar
     [activeModule]="activeModule()"
@@ -16,9 +16,9 @@
   }
 
   <!-- Main Content Area -->
-  <div class="flex-1 flex flex-col lg:ml-0">
+  <div class="flex-1 flex flex-col lg:ml-0 overflow-hidden">
     <!-- Mobile Header with Hamburger -->
-    <header class="lg:hidden bg-white border-b border-gray-200 p-4">
+    <header class="lg:hidden bg-white border-b border-gray-200 p-4 flex-shrink-0">
       <div class="flex items-center justify-between">
         <button
           (click)="onSidebarToggle()"
@@ -33,7 +33,7 @@
     </header>
 
     <!-- Page Content -->
-    <main class="flex-1">
+    <main class="flex-1 overflow-hidden">
       <router-outlet />
     </main>
   </div>
