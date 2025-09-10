@@ -122,6 +122,79 @@ const deleteClinic = async (id) => {
   return result.affectedRows > 0;
 };
 
+// Obtener clínicas eliminadas (soft deleted) con filtros opcionales y paginación
+const getDeletedClinics = async (filters = {}) => {
+  // Extraer parámetros de paginación
+  const page = parseInt(filters.page) || 1;
+  const limit = parseInt(filters.limit) || 10;
+  const offset = (page - 1) * limit;
+
+  // Query base para contar registros totales
+  let countQuery = `
+        SELECT COUNT(*) as total
+        FROM clinics
+        WHERE is_active = false
+    `;
+
+  // Query principal para obtener datos
+  let dataQuery = `
+        SELECT 
+            id,
+            name,
+            address,
+            clinic_color,
+            DATE_FORMAT(created_at,'%Y-%m-%d') as created_at,
+            DATE_FORMAT(updated_at,'%Y-%m-%d') as updated_at
+        FROM clinics
+        WHERE is_active = false
+    `;
+
+  const params = [];
+  const conditions = [];
+
+  // Aplicar filtros
+  if (filters.name) {
+    conditions.push("name LIKE ?");
+    params.push(`%${filters.name}%`);
+  }
+
+  // Aplicar condiciones a ambas queries
+  if (conditions.length > 0) {
+    const conditionsStr = " AND " + conditions.join(" AND ");
+    countQuery += conditionsStr;
+    dataQuery += conditionsStr;
+  }
+
+  // Agregar ordenamiento y paginación solo a la query de datos
+  dataQuery += " ORDER BY updated_at DESC";
+  dataQuery += " LIMIT ? OFFSET ?";
+  
+  // Ejecutar ambas queries
+  const [countResult] = await db.execute(countQuery, params);
+  const totalRecords = countResult[0].total;
+  
+  const [dataRows] = await db.execute(dataQuery, [...params, limit, offset]);
+  
+  // Calcular información de paginación
+  const totalPages = Math.ceil(totalRecords / limit);
+  const hasNextPage = page < totalPages;
+  const hasPrevPage = page > 1;
+  
+  return {
+    data: dataRows,
+    pagination: {
+      currentPage: page,
+      totalPages: totalPages,
+      totalRecords: totalRecords,
+      recordsPerPage: limit,
+      hasNextPage: hasNextPage,
+      hasPrevPage: hasPrevPage,
+      nextPage: hasNextPage ? page + 1 : null,
+      prevPage: hasPrevPage ? page - 1 : null
+    }
+  };
+};
+
 const createClinic = async (data) => {
   const { name, address, clinic_color } = data;
   
@@ -152,6 +225,7 @@ const createClinic = async (data) => {
 
 module.exports = {
   getClinics,
+  getDeletedClinics,
   createClinic,
   updateClinic,
   deleteClinic,
