@@ -40,15 +40,14 @@ export class PatientComponent implements OnInit {
   showCreateForm = signal(false);
   editingPatient = signal<Patient | null>(null);
   deletingPatient = signal<Patient | null>(null);
+  restoringPatient = signal<Patient | null>(null);
   activeTab = signal<TabType>('active');
 
   // Separate state for each tab
   activePatients = signal<Patient[]>([]);
   deletedPatients = signal<Patient[]>([]);
   
-  // Separate loading states
-  activeLoading = signal(false);
-  deletedLoading = signal(false);
+  // Loading is handled globally by LoadingInterceptor - no local loading needed
   
   // Separate pagination states
   activePagination = signal<any>(null);
@@ -61,10 +60,6 @@ export class PatientComponent implements OnInit {
   // Computed signals based on active tab
   patientsList = computed(() => {
     return this.activeTab() === 'active' ? this.activePatients() : this.deletedPatients();
-  });
-  
-  isLoading = computed(() => {
-    return this.activeTab() === 'active' ? this.activeLoading() : this.deletedLoading();
   });
   
   paginationData = computed(() => {
@@ -89,16 +84,14 @@ export class PatientComponent implements OnInit {
    * Cargar pacientes activos
    */
   private loadActivePatients(page: number, perPage: number): void {
-    this.activeLoading.set(true);
     this.patientsService.loadActivePatientsPaginated(page, perPage).subscribe({
       next: (response) => {
         this.activePatients.set(response.data);
         this.activePagination.set(response.pagination);
         this.activePatientsCount.set(response.pagination?.totalRecords || 0);
-        this.activeLoading.set(false);
       },
       error: () => {
-        this.activeLoading.set(false);
+        // Error handling is managed by error interceptor
       },
     });
   }
@@ -107,16 +100,14 @@ export class PatientComponent implements OnInit {
    * Cargar pacientes eliminados
    */
   private loadDeletedPatients(page: number, perPage: number): void {
-    this.deletedLoading.set(true);
     this.patientsService.loadDeletedPatientsPaginated(page, perPage).subscribe({
       next: (response) => {
         this.deletedPatients.set(response.data);
         this.deletedPagination.set(response.pagination);
         this.deletedPatientsCount.set(response.pagination?.totalRecords || 0);
-        this.deletedLoading.set(false);
       },
       error: () => {
-        this.deletedLoading.set(false);
+        // Error handling is managed by error interceptor
       },
     });
   }
@@ -200,6 +191,38 @@ export class PatientComponent implements OnInit {
         }
       });
       this.closeDeleteModal();
+    }
+  }
+
+  /**
+   * Abrir modal de confirmación de restauración
+   */
+  openRestoreModal(patient: Patient): void {
+    this.restoringPatient.set(patient);
+  }
+
+  /**
+   * Cerrar modal de restauración
+   */
+  closeRestoreModal(): void {
+    this.restoringPatient.set(null);
+  }
+
+  /**
+   * Restaurar paciente (implementar según tu API)
+   */
+  handleRestorePatient(): void {
+    const restoring = this.restoringPatient();
+    if (restoring) {
+      // TODO: Implementar llamada al endpoint de restauración
+      // Por ahora simulo la llamada con un timeout
+      console.log('Restaurando paciente:', restoring);
+      
+      // Simular respuesta exitosa
+      setTimeout(() => {
+        this.reloadCurrentTab();
+        this.closeRestoreModal();
+      }, 500);
     }
   }
 

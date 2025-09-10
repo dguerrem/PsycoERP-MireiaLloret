@@ -4,7 +4,8 @@
       [patient]="patient"
       [isDeletedView]="isDeletedView"
       (onEdit)="onEdit.emit($event)"
-      (onDelete)="onDelete.emit($event)">
+      (onDelete)="onDelete.emit($event)"
+      (onRestore)="onRestore.emit($event)">
     </app-patient-card>
   }
 </div>

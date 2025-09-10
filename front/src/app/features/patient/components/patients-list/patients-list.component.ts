@@ -24,4 +24,5 @@ export class PatientsListComponent {
 
   @Output() onEdit = new EventEmitter<Patient>();
   @Output() onDelete = new EventEmitter<Patient>();
+  @Output() onRestore = new EventEmitter<Patient>();
 }
