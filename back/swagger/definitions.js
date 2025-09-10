@@ -99,9 +99,8 @@ const definitions = {
         type: "boolean",
         example: true,
       },
-      total: {
-        type: "integer",
-        example: 3,
+      pagination: {
+        $ref: "#/components/schemas/PaginationInfo",
       },
       data: {
         type: "array",
