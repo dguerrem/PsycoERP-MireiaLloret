@@ -126,7 +126,6 @@ const getSessions = async (filters = {}) => {
         status: row.status,
         price: row.price,
         payment_method: row.payment_method,
-        completed: row.status === 'finalizada',
         notes: row.notes,
         PatientData: {
           id: row.patient_id,

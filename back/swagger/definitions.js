@@ -1578,11 +1578,6 @@ const definitions = {
         description: "Método de pago",
         example: "card",
       },
-      completed: {
-        type: "boolean",
-        description: "Si la sesión está completada o no",
-        example: true,
-      },
       notes: {
         type: "string",
         description: "Notas de la sesión",
