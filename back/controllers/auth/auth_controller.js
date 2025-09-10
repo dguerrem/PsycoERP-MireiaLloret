@@ -73,12 +73,95 @@ const loginUser = async (req, res) => {
         token: {
           access_token: token,
           token_type: "Bearer",
-          expires_in: "24h",
+          expires_in: "7d",
         },
       },
     });
   } catch (error) {
     console.error("Error en loginUser:", error.message);
+    res.status(500).json({
+      success: false,
+      message: "Error interno del servidor",
+    });
+  }
+};
+
+const refreshToken = async (req, res) => {
+  try {
+    const authHeader = req.headers.authorization;
+    const token = authHeader && authHeader.split(" ")[1];
+
+    if (!token) {
+      return res.status(401).json({
+        success: false,
+        message: "Token requerido para renovación",
+      });
+    }
+
+    // Verificar token actual (incluso si está expirado)
+    const { verifyToken } = require("../../utils/jwt");
+    let decoded;
+    
+    try {
+      decoded = verifyToken(token);
+    } catch (error) {
+      // Si el token está expirado, intentamos decodificarlo sin verificar
+      if (error.message === "Token expirado") {
+        const jwt = require("jsonwebtoken");
+        decoded = jwt.decode(token);
+        
+        if (!decoded) {
+          return res.status(401).json({
+            success: false,
+            message: "Token inválido para renovación",
+          });
+        }
+      } else {
+        return res.status(401).json({
+          success: false,
+          message: "Token inválido para renovación",
+        });
+      }
+    }
+
+    // Verificar que el usuario existe y está activo
+    const { getUserById } = require("../../models/auth/auth_model");
+    const user = await getUserById(decoded.userId);
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "Usuario no encontrado",
+      });
+    }
+
+    if (!user.is_active) {
+      return res.status(401).json({
+        success: false,
+        message: "Cuenta desactivada",
+      });
+    }
+
+    // Generar nuevo token
+    const tokenPayload = {
+      userId: user.id,
+      email: user.email,
+      name: user.name,
+    };
+
+    const newToken = generateToken(tokenPayload);
+
+    res.status(200).json({
+      success: true,
+      message: "Token renovado exitosamente",
+      data: {
+        access_token: newToken,
+        token_type: "Bearer",
+        expires_in: "7d",
+      },
+    });
+  } catch (error) {
+    console.error("Error en refreshToken:", error.message);
     res.status(500).json({
       success: false,
       message: "Error interno del servidor",
@@ -123,5 +206,6 @@ const hashPassword = async (req, res) => {
 
 module.exports = {
   loginUser,
+  refreshToken,
   hashPassword,
 };

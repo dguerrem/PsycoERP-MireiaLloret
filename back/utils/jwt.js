@@ -1,7 +1,7 @@
 const jwt = require("jsonwebtoken");
 
-const JWT_SECRET = process.env.JWT_SECRET || "psychology_erp_secret_key_2024";
-const JWT_EXPIRATION = process.env.JWT_EXPIRATION || "24h";
+const JWT_SECRET = process.env.JWT_SECRET;
+const JWT_EXPIRATION = process.env.JWT_EXPIRATION;
 
 const generateToken = (payload) => {
   try {
