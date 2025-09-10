@@ -3,7 +3,6 @@ const { generateToken } = require("../../utils/jwt");
 const {
   getUserByEmail,
   updateLastLogin,
-  getUserById,
 } = require("../../models/auth/auth_model");
 
 const loginUser = async (req, res) => {
@@ -49,23 +48,28 @@ const loginUser = async (req, res) => {
     // Actualizar la fecha de último login
     await updateLastLogin(user.id);
 
-    // Obtener la información actualizada del usuario
-    const updatedUser = await getUserById(user.id);
-
-    // Generar JWT token
+    // Generar JWT token usando los datos ya obtenidos
     const tokenPayload = {
-      userId: updatedUser.id,
-      email: updatedUser.email,
-      name: updatedUser.name,
+      userId: user.id,
+      email: user.email,
+      name: user.name,
     };
 
     const token = generateToken(tokenPayload);
+
+    // Preparar datos del usuario para la respuesta (sin password_hash)
+    const userResponse = {
+      id: user.id,
+      email: user.email,
+      name: user.name,
+      last_login: new Date().toISOString(), // Timestamp actual ya que acabamos de actualizar
+    };
 
     res.status(200).json({
       success: true,
       message: "Login exitoso",
       data: {
-        user: updatedUser,
+        user: userResponse,
         token: {
           access_token: token,
           token_type: "Bearer",
