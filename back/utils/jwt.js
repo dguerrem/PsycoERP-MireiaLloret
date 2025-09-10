@@ -7,8 +7,6 @@ const generateToken = (payload) => {
   try {
     return jwt.sign(payload, JWT_SECRET, {
       expiresIn: JWT_EXPIRATION,
-      issuer: "psychology-erp",
-      audience: "psychology-erp-users",
     });
   } catch (error) {
     throw new Error(`Error al generar token: ${error.message}`);
@@ -17,10 +15,7 @@ const generateToken = (payload) => {
 
 const verifyToken = (token) => {
   try {
-    return jwt.verify(token, JWT_SECRET, {
-      issuer: "psychology-erp",
-      audience: "psychology-erp-users",
-    });
+    return jwt.verify(token, JWT_SECRET);
   } catch (error) {
     if (error.name === "TokenExpiredError") {
       throw new Error("Token expirado");

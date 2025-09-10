@@ -12,6 +12,7 @@ const {
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+const { authenticateToken } = require("./middlewares/auth");
 const authRoutes = require("./routes/auth/auth_routes");
 const sessionsRoutes = require("./routes/sessions/sessions_routes");
 const patientsRoutes = require("./routes/patients/patients_routes");
@@ -49,8 +50,13 @@ app.get("/", (req, res) => {
   });
 });
 
-// Importar y usar rutas
+// Rutas públicas (sin autenticación)
 app.use("/api/auth", authRoutes);
+
+// Middleware global de autenticación para todas las rutas protegidas
+app.use(authenticateToken);
+
+// Rutas protegidas (requieren autenticación)
 app.use("/api/sessions", sessionsRoutes);
 app.use("/api/patients", patientsRoutes);
 app.use("/api/bonuses", bonusesRoutes);

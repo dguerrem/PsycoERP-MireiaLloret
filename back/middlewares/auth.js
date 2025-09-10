@@ -60,34 +60,6 @@ const authenticateToken = async (req, res, next) => {
   }
 };
 
-const optionalAuth = async (req, res, next) => {
-  try {
-    const authHeader = req.headers.authorization;
-    const token = authHeader && authHeader.split(" ")[1];
-
-    if (!token) {
-      req.user = null;
-      return next();
-    }
-
-    const decoded = verifyToken(token);
-    const user = await getUserById(decoded.userId);
-
-    req.user = user ? {
-      id: user.id,
-      email: user.email,
-      name: user.name,
-    } : null;
-
-    next();
-  } catch (error) {
-    // En auth opcional, ignoramos errores de token y continuamos sin usuario
-    req.user = null;
-    next();
-  }
-};
-
 module.exports = {
   authenticateToken,
-  optionalAuth,
 };
