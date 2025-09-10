@@ -9,17 +9,22 @@ const obtenerClinicas = async (req, res) => {
   try {
     const {
       name,
+      page,
+      limit,
     } = req.query;
 
+    // Construir filtros incluyendo paginación
     const filters = {};
     if (name) filters.name = name;
+    if (page) filters.page = page;
+    if (limit) filters.limit = limit;
 
-    const clinicas = await getClinics(filters);
+    const result = await getClinics(filters);
 
     res.json({
       success: true,
-      total: clinicas.length,
-      data: clinicas,
+      pagination: result.pagination,
+      data: result.data,
     });
   } catch (err) {
     console.error("Error al obtener clínicas:", err.message);

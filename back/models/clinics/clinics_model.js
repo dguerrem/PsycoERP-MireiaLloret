@@ -1,7 +1,20 @@
 const { db } = require("../../config/db");
 
 const getClinics = async (filters = {}) => {
-  let query = `
+  // Extraer parámetros de paginación
+  const page = parseInt(filters.page) || 1;
+  const limit = parseInt(filters.limit) || 10;
+  const offset = (page - 1) * limit;
+
+  // Query base para contar registros totales
+  let countQuery = `
+        SELECT COUNT(*) as total
+        FROM clinics
+        WHERE is_active = true
+    `;
+
+  // Query principal para obtener datos
+  let dataQuery = `
         SELECT 
             id,
             name,
@@ -12,22 +25,51 @@ const getClinics = async (filters = {}) => {
         FROM clinics
         WHERE is_active = true
     `;
+
   const params = [];
   const conditions = [];
 
+  // Aplicar filtros
   if (filters.name) {
     conditions.push("name LIKE ?");
     params.push(`%${filters.name}%`);
   }
 
+  // Aplicar condiciones a ambas queries
   if (conditions.length > 0) {
-    query += " AND " + conditions.join(" AND ");
+    const conditionsStr = " AND " + conditions.join(" AND ");
+    countQuery += conditionsStr;
+    dataQuery += conditionsStr;
   }
 
-  query += " ORDER BY created_at DESC";
-
-  const [rows] = await db.execute(query, params);
-  return rows;
+  // Agregar ordenamiento y paginación solo a la query de datos
+  dataQuery += " ORDER BY created_at DESC";
+  dataQuery += " LIMIT ? OFFSET ?";
+  
+  // Ejecutar ambas queries
+  const [countResult] = await db.execute(countQuery, params);
+  const totalRecords = countResult[0].total;
+  
+  const [dataRows] = await db.execute(dataQuery, [...params, limit, offset]);
+  
+  // Calcular información de paginación
+  const totalPages = Math.ceil(totalRecords / limit);
+  const hasNextPage = page < totalPages;
+  const hasPrevPage = page > 1;
+  
+  return {
+    data: dataRows,
+    pagination: {
+      currentPage: page,
+      totalPages: totalPages,
+      totalRecords: totalRecords,
+      recordsPerPage: limit,
+      hasNextPage: hasNextPage,
+      hasPrevPage: hasPrevPage,
+      nextPage: hasNextPage ? page + 1 : null,
+      prevPage: hasPrevPage ? page - 1 : null
+    }
+  };
 };
 
 const updateClinic = async (id, data) => {

@@ -14,6 +14,29 @@ const clinicsPaths = {
           },
           description: "Nombre de la clínica (búsqueda parcial)",
         },
+        {
+          name: "page",
+          in: "query",
+          required: false,
+          schema: {
+            type: "integer",
+            minimum: 1,
+            default: 1,
+          },
+          description: "Número de página (por defecto: 1)",
+        },
+        {
+          name: "limit",
+          in: "query",
+          required: false,
+          schema: {
+            type: "integer",
+            minimum: 1,
+            maximum: 100,
+            default: 10,
+          },
+          description: "Cantidad de registros por página (por defecto: 10, máximo: 100)",
+        },
       ],
       responses: {
         200: {
