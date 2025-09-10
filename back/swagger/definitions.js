@@ -1210,11 +1210,6 @@ const definitions = {
         description: "ID único de la sesión",
         example: 1,
       },
-      tipo_sesion: {
-        type: "string",
-        description: "Tipo de sesión",
-        example: "Terapia Individual",
-      },
       fecha: {
         type: "string",
         format: "date",

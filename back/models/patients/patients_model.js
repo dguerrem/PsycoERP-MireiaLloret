@@ -158,7 +158,6 @@ const getPatientById = async (id) => {
   const sessionsQuery = `
         SELECT 
             id as idsesion,
-            type as tipo_sesion,
             DATE_FORMAT(session_date, '%Y-%m-%d') as fecha,
             price as precio,
             payment_method as metodo_pago
