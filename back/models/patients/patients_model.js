@@ -194,7 +194,6 @@ const getPatientById = async (id) => {
             s.id,
             DATE_FORMAT(s.session_date, '%Y-%m-%d') as fecha,
             c.name as clinica,
-            s.type as tipo,
             s.status as estado,
             s.price as precio,
             s.payment_method as tipo_pago,

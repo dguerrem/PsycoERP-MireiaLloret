@@ -1466,8 +1466,9 @@ const definitions = {
       },
       mode: {
         type: "string",
+        enum: ["presencial", "online"],
         description: "Modalidad de la sesión",
-        example: "Presencial",
+        example: "presencial",
       },
       type: {
         type: "string",
@@ -1476,9 +1477,9 @@ const definitions = {
       },
       status: {
         type: "string",
-        enum: ["scheduled", "completed", "cancelled", "no-show"],
+        enum: ["programada", "finalizada", "cancelada"],
         description: "Estado de la sesión",
-        example: "scheduled",
+        example: "programada",
       },
       price: {
         type: "number",
@@ -1547,6 +1548,18 @@ const definitions = {
         format: "time",
         description: "Hora de finalización (HH:MM:SS)",
         example: "10:00:00",
+      },
+      mode: {
+        type: "string",
+        enum: ["presencial", "online"],
+        description: "Modalidad de la sesión",
+        example: "presencial",
+      },
+      status: {
+        type: "string",
+        enum: ["programada", "finalizada", "cancelada"],
+        description: "Estado de la sesión",
+        example: "finalizada",
       },
       type: {
         type: "string",
@@ -1818,12 +1831,12 @@ const definitions = {
         type: "string",
         format: "email",
         description: "Email del usuario",
-        example: "admin@psicologia.com",
+        example: "demo@psycoerp.es",
       },
       password: {
         type: "string",
         description: "Contraseña del usuario",
-        example: "password123",
+        example: "PsycoERP123",
       },
     },
   },
@@ -1841,7 +1854,7 @@ const definitions = {
         type: "string",
         format: "email",
         description: "Email del usuario",
-        example: "admin@psicologia.com",
+        example: "demo@psycoerp.es",
       },
       name: {
         type: "string",
