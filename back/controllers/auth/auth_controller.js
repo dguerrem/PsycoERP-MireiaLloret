@@ -127,7 +127,7 @@ const refreshToken = async (req, res) => {
     // Verificar que el usuario existe y está activo
     const { getUserById } = require("../../models/auth/auth_model");
     const user = await getUserById(decoded.userId);
-
+    
     if (!user) {
       return res.status(404).json({
         success: false,

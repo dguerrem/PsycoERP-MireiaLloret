@@ -1901,7 +1901,7 @@ const definitions = {
       expires_in: {
         type: "string",
         description: "Tiempo de expiración del token",
-        example: "24h",
+        example: "7d",
       },
     },
   },

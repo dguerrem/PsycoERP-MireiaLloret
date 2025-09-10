@@ -26,7 +26,7 @@ const updateLastLogin = async (userId) => {
 const getUserById = async (userId) => {
   try {
     const [rows] = await db.execute(
-      "SELECT id, email, name, last_login FROM users WHERE id = ?",
+      "SELECT id, email, name, last_login, is_active FROM users WHERE id = ?",
       [userId]
     );
     return rows.length > 0 ? rows[0] : null;

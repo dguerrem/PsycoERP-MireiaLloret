@@ -92,6 +92,107 @@ const authPaths = {
       },
     },
   },
+  "/api/auth/refresh": {
+    post: {
+      tags: ["Auth"],
+      summary: "Renovar token JWT",
+      description: "Renueva un token JWT expirado o próximo a expirar. Acepta tokens expirados y genera uno nuevo con 7 días de validez.",
+      security: [
+        {
+          bearerAuth: [],
+        },
+      ],
+      responses: {
+        200: {
+          description: "Token renovado exitosamente",
+          content: {
+            "application/json": {
+              schema: {
+                type: "object",
+                properties: {
+                  success: {
+                    type: "boolean",
+                    example: true,
+                  },
+                  message: {
+                    type: "string",
+                    example: "Token renovado exitosamente",
+                  },
+                  data: {
+                    type: "object",
+                    properties: {
+                      access_token: {
+                        type: "string",
+                        example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+                      },
+                      token_type: {
+                        type: "string",
+                        example: "Bearer",
+                      },
+                      expires_in: {
+                        type: "string",
+                        example: "7d",
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+        401: {
+          description: "Token requerido, inválido o usuario no encontrado",
+          content: {
+            "application/json": {
+              schema: {
+                $ref: "#/components/schemas/ErrorResponse",
+              },
+              examples: {
+                no_token: {
+                  summary: "Token no proporcionado",
+                  value: {
+                    success: false,
+                    message: "Token requerido para renovación",
+                  },
+                },
+                invalid_token: {
+                  summary: "Token inválido",
+                  value: {
+                    success: false,
+                    message: "Token inválido para renovación",
+                  },
+                },
+                user_not_found: {
+                  summary: "Usuario no encontrado",
+                  value: {
+                    success: false,
+                    message: "Usuario no encontrado",
+                  },
+                },
+                account_disabled: {
+                  summary: "Cuenta desactivada",
+                  value: {
+                    success: false,
+                    message: "Cuenta desactivada",
+                  },
+                },
+              },
+            },
+          },
+        },
+        500: {
+          description: "Error interno del servidor",
+          content: {
+            "application/json": {
+              schema: {
+                $ref: "#/components/schemas/ErrorResponse",
+              },
+            },
+          },
+        },
+      },
+    },
+  },
   "/api/auth/hash-password": {
     post: {
       tags: ["Auth"],
