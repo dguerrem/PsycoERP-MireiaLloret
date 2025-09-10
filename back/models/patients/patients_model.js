@@ -245,10 +245,10 @@ const getPatientById = async (id) => {
         SELECT 
             title as titulo,
             content as contenido,
-            DATE_FORMAT(date, '%Y-%m-%d %H:%i:%s') as fecha
+            DATE_FORMAT(created_at, '%Y-%m-%d %H:%i:%s') as fecha
         FROM clinical_notes
         WHERE patient_id = ?
-        ORDER BY date DESC
+        ORDER BY created_at DESC
     `;
   
   const [clinicalNotesRows] = await db.execute(clinicalNotesQuery, [id]);
