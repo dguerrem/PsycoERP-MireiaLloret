@@ -1960,6 +1960,63 @@ const definitions = {
       },
     },
   },
+
+  CreateReminderRequest: {
+    type: "object",
+    required: ["session_id"],
+    properties: {
+      session_id: {
+        type: "integer",
+        format: "int64",
+        description: "ID de la sesión para la cual crear el recordatorio",
+        example: 1,
+      },
+    },
+  },
+
+  CreateReminderResponse: {
+    type: "object",
+    properties: {
+      success: {
+        type: "boolean",
+        example: true,
+      },
+      data: {
+        type: "object",
+        properties: {
+          id: {
+            type: "integer",
+            format: "int64",
+            description: "ID del recordatorio creado",
+            example: 15,
+          },
+          session_id: {
+            type: "integer",
+            format: "int64",
+            description: "ID de la sesión",
+            example: 1,
+          },
+          sent_at: {
+            type: "string",
+            format: "date-time",
+            description: "Fecha y hora cuando se envió el recordatorio",
+            example: "2024-12-16T10:30:00.000Z",
+          },
+          created_at: {
+            type: "string",
+            format: "date-time",
+            description: "Fecha de creación del registro",
+            example: "2024-12-16T10:30:00.000Z",
+          },
+        },
+      },
+      message: {
+        type: "string",
+        description: "Mensaje de éxito",
+        example: "Recordatorio creado exitosamente",
+      },
+    },
+  },
 };
 
 module.exports = definitions;

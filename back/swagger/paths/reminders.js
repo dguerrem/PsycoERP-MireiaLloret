@@ -28,6 +28,75 @@ const remindersPaths = {
       },
     },
   },
+  "/api/reminders": {
+    post: {
+      tags: ["Reminders"],
+      summary: "Crear nuevo recordatorio",
+      description: "Registra un recordatorio para una sesión específica en la tabla reminders",
+      requestBody: {
+        required: true,
+        content: {
+          "application/json": {
+            schema: {
+              $ref: "#/components/schemas/CreateReminderRequest",
+            },
+          },
+        },
+      },
+      responses: {
+        201: {
+          description: "Recordatorio creado exitosamente",
+          content: {
+            "application/json": {
+              schema: {
+                $ref: "#/components/schemas/CreateReminderResponse",
+              },
+            },
+          },
+        },
+        400: {
+          description: "Datos de entrada inválidos",
+          content: {
+            "application/json": {
+              schema: {
+                $ref: "#/components/schemas/ErrorResponse",
+              },
+            },
+          },
+        },
+        404: {
+          description: "Sesión no encontrada o no está programada",
+          content: {
+            "application/json": {
+              schema: {
+                $ref: "#/components/schemas/ErrorResponse",
+              },
+            },
+          },
+        },
+        409: {
+          description: "Ya existe un recordatorio para esta sesión",
+          content: {
+            "application/json": {
+              schema: {
+                $ref: "#/components/schemas/ErrorResponse",
+              },
+            },
+          },
+        },
+        500: {
+          description: "Error interno del servidor",
+          content: {
+            "application/json": {
+              schema: {
+                $ref: "#/components/schemas/ErrorResponse",
+              },
+            },
+          },
+        },
+      },
+    },
+  },
 };
 
 module.exports = remindersPaths;

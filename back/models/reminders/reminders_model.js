@@ -47,6 +47,36 @@ const getPendingReminders = async () => {
   };
 };
 
+const createReminder = async (sessionId) => {
+  // Verificar que no existe ya un reminder para esta sesión
+  const checkReminderQuery = `
+    SELECT id 
+    FROM reminders 
+    WHERE session_id = ?
+  `;
+  
+  const [reminderResult] = await db.execute(checkReminderQuery, [sessionId]);
+  
+  if (reminderResult.length > 0) {
+    throw new Error("La sesión ya tiene un recordatorio enviado.");
+  }
+  
+  // Insertar el nuevo reminder
+  const insertQuery = `
+    INSERT INTO reminders (session_id)
+    VALUES (?)
+  `;
+  
+  const [result] = await db.execute(insertQuery, [sessionId]);
+  
+  return {
+    id: result.insertId,
+    session_id: sessionId,
+    created_at: new Date()
+  };
+};
+
 module.exports = {
   getPendingReminders,
+  createReminder,
 };
