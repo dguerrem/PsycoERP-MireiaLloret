@@ -18,7 +18,6 @@ const getClinics = async (filters = {}) => {
         SELECT 
             id,
             name,
-            address,
             clinic_color,
             DATE_FORMAT(created_at,'%Y-%m-%d') as created_at,
             DATE_FORMAT(updated_at,'%Y-%m-%d') as updated_at
@@ -73,7 +72,7 @@ const getClinics = async (filters = {}) => {
 };
 
 const updateClinic = async (id, data) => {
-  const { name, address, clinic_color } = data;
+  const { name, clinic_color } = data;
   
   const fields = [];
   const params = [];
@@ -83,10 +82,6 @@ const updateClinic = async (id, data) => {
     params.push(name);
   }
   
-  if (address !== undefined) {
-    fields.push("address = ?");
-    params.push(address);
-  }
   
   if (clinic_color !== undefined) {
     fields.push("clinic_color = ?");
@@ -141,7 +136,6 @@ const getDeletedClinics = async (filters = {}) => {
         SELECT 
             id,
             name,
-            address,
             clinic_color,
             DATE_FORMAT(created_at,'%Y-%m-%d') as created_at,
             DATE_FORMAT(updated_at,'%Y-%m-%d') as updated_at
@@ -196,26 +190,23 @@ const getDeletedClinics = async (filters = {}) => {
 };
 
 const createClinic = async (data) => {
-  const { name, address, clinic_color } = data;
+  const { name, clinic_color } = data;
   
   if (!name) {
     throw new Error("Name is required");
   }
   
-  if (!address) {
-    throw new Error("Address is required");
-  }
   
   if (!clinic_color) {
     throw new Error("Clinic color is required");
   }
   
   const query = `
-    INSERT INTO clinics (name, address, clinic_color)
-    VALUES (?, ?, ?)
+    INSERT INTO clinics (name, clinic_color)
+    VALUES (?, ?)
   `;
   
-  const [result] = await db.execute(query, [name, address, clinic_color]);
+  const [result] = await db.execute(query, [name, clinic_color]);
   
   return {
     id: result.insertId,

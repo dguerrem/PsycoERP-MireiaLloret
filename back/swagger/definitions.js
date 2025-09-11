@@ -296,12 +296,6 @@ const definitions = {
         description: "Nombre de la clínica",
         example: "Clínica Psicológica Centro",
       },
-      address: {
-        type: "string",
-        nullable: true,
-        description: "Dirección de la clínica",
-        example: "Av. Principal 123, Ciudad",
-      },
       clinic_color: {
         type: "string",
         nullable: true,
@@ -331,12 +325,6 @@ const definitions = {
         description: "Nombre de la clínica",
         example: "Clínica Psicológica Centro Actualizada",
       },
-      address: {
-        type: "string",
-        nullable: true,
-        description: "Dirección de la clínica",
-        example: "Av. Principal 456, Ciudad",
-      },
       clinic_color: {
         type: "string",
         nullable: true,
@@ -349,17 +337,12 @@ const definitions = {
 
   CreateClinicRequest: {
     type: "object",
-    required: ["name", "address", "clinic_color"],
+    required: ["name", "clinic_color"],
     properties: {
       name: {
         type: "string",
         description: "Nombre de la clínica (requerido)",
         example: "Clínica Psicológica Nueva",
-      },
-      address: {
-        type: "string",
-        description: "Dirección de la clínica (requerido)",
-        example: "Av. Nueva 789, Ciudad",
       },
       clinic_color: {
         type: "string",
@@ -396,11 +379,6 @@ const definitions = {
             type: "string",
             description: "Nombre de la clínica",
             example: "Clínica Psicológica Nueva",
-          },
-          address: {
-            type: "string",
-            description: "Dirección de la clínica",
-            example: "Av. Nueva 789, Ciudad",
           },
           clinic_color: {
             type: "string",
