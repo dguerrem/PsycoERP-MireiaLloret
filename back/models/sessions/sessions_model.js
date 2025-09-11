@@ -189,7 +189,6 @@ const createSession = async (sessionData) => {
       start_time,
       end_time,
       mode,
-      type,
       status,
       price,
       payment_method,

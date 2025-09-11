@@ -1185,12 +1185,6 @@ const definitions = {
         description: "Teléfono del paciente",
         example: "+34 666 123 456",
       },
-      tipo: {
-        type: "string",
-        enum: ["individual", "group", "family", "couples"],
-        description: "Tipo de sesión preferida",
-        example: "individual",
-      },
       PatientResumeSessions: {
         type: "array",
         items: {
