@@ -1878,6 +1878,88 @@ const definitions = {
       },
     },
   },
+
+  ReminderSession: {
+    type: "object",
+    properties: {
+      session_id: {
+        type: "integer",
+        format: "int64",
+        description: "ID único de la sesión",
+        example: 1,
+      },
+      start_time: {
+        type: "string",
+        format: "time",
+        description: "Hora de inicio (HH:MM:SS)",
+        example: "09:00:00",
+      },
+      end_time: {
+        type: "string",
+        format: "time",
+        description: "Hora de finalización (HH:MM:SS)",
+        example: "10:00:00",
+      },
+      patient_name: {
+        type: "string",
+        description: "Nombre completo del paciente",
+        example: "Juan Pérez García",
+      },
+      reminder_sent: {
+        type: "boolean",
+        description: "Indica si se ha enviado recordatorio para esta sesión",
+        example: false,
+      },
+    },
+  },
+
+  RemindersResponse: {
+    type: "object",
+    properties: {
+      success: {
+        type: "boolean",
+        example: true,
+      },
+      data: {
+        type: "array",
+        items: {
+          $ref: "#/components/schemas/ReminderSession",
+        },
+        description: "Lista de sesiones con información de recordatorios",
+      },
+      total: {
+        type: "integer",
+        description: "Número total de sesiones pendientes de recordatorio",
+        example: 5,
+      },
+      message: {
+        type: "string",
+        description: "Mensaje descriptivo de la consulta",
+        example: "Sesiones programadas para mañana (2024-12-16)",
+      },
+      metadata: {
+        type: "object",
+        properties: {
+          targetDate: {
+            type: "string",
+            format: "date",
+            description: "Fecha objetivo calculada",
+            example: "2024-12-16",
+          },
+          currentDay: {
+            type: "integer",
+            description: "Día de la semana actual (0=Domingo, 1=Lunes, ...)",
+            example: 1,
+          },
+          description: {
+            type: "string",
+            description: "Descripción del período consultado",
+            example: "Sesiones de mañana",
+          },
+        },
+      },
+    },
+  },
 };
 
 module.exports = definitions;
