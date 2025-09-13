@@ -1,5 +1,10 @@
-import { Injectable, signal } from '@angular/core';
+import { Injectable, signal, inject } from '@angular/core';
+import { Observable } from 'rxjs';
+import { HttpClient, HttpParams } from '@angular/common/http';
+import { finalize, tap } from 'rxjs/operators';
 import { BaseCrudService } from '../../../core/services/base-crud.service';
+import { LoadingService } from '../../../core/services/loading.service';
+import { ToastService } from '../../../core/services/toast.service';
 import { Clinic } from '../models/clinic.model';
 
 /**
@@ -11,7 +16,6 @@ import { Clinic } from '../models/clinic.model';
 export class ClinicsService extends BaseCrudService<Clinic> {
   constructor() {
     super('/clinics', 'Clínica');
-    this.loadInitialData();
   }
 
   private clinics = signal<Clinic[]>([]);
@@ -22,62 +26,52 @@ export class ClinicsService extends BaseCrudService<Clinic> {
   }
 
   /**
-   * Cargar datos iniciales desde la API
+   * Load active clinics with pagination - calls /clinics?page=1&limit=12
    */
-  private loadInitialData(): void {
-    this.loadClinics();
+  loadActiveClinics(page: number, limit: number): Observable<any> {
+    return this.getAllPaginated(page, limit);
+  }
+
+  /**
+   * Load inactive clinics with pagination - calls /clinics/deleted?page=1&limit=12
+   */
+  loadInactiveClinics(page: number, limit: number): Observable<any> {
+    const params = new HttpParams()
+      .set('page', page.toString())
+      .set('limit', limit.toString());
+
+    this.loadingService.show();
+
+    return this.http
+      .get<any>(`${this.apiUrl}/deleted`, { params })
+      .pipe(
+        finalize(() => this.loadingService.hide())
+      );
   }
 
   /**
    * Crear una nueva clínica - Conecta con API real
    */
-  createClinic(formData: Clinic): void {
-    // Usar API real - el loading se maneja automáticamente en BaseCrudService
-    this.create(formData).subscribe({
-      next: (newClinic) => {
-        // Recargar todos los datos para asegurar consistencia
-        this.loadClinics();
-      },
-      error: () => {
-        // Error handling manejado por errorInterceptor
-      },
-    });
+  createClinic(formData: Clinic): Observable<Clinic> {
+    return this.create(formData);
   }
 
   /**
    * Actualizar una clínica existente - Conecta con API real
    */
-  updateClinic(clinicId: string, formData: Clinic): void {
-    // Usar API real - el loading se maneja automáticamente en BaseCrudService
-    this.update(clinicId, formData).subscribe({
-      next: (updatedClinic) => {
-        // Recargar todos los datos para asegurar consistencia
-        this.loadClinics();
-      },
-      error: () => {
-        // Error handling manejado por errorInterceptor
-      },
-    });
+  updateClinic(clinicId: string, formData: Clinic): Observable<Clinic> {
+    return this.update(clinicId, formData);
   }
 
   /**
    * Eliminar una clínica - Conecta con API real
    */
-  deleteClinic(clinicId: string): void {
-    // Usar API real - el loading se maneja automáticamente en BaseCrudService
-    this.delete(clinicId).subscribe({
-      next: () => {
-        // Recargar todos los datos para asegurar consistencia
-        this.loadClinics();
-      },
-      error: () => {
-        // Error handling manejado por errorInterceptor
-      },
-    });
+  deleteClinic(clinicId: string): Observable<void> {
+    return this.delete(clinicId);
   }
 
   /**
-   * Cargar clínicas desde la API
+   * Cargar clínicas desde la API (for backward compatibility)
    */
   loadClinics(): void {
     // El loading se maneja automáticamente en BaseCrudService

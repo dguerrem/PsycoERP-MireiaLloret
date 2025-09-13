@@ -20,7 +20,9 @@ import { ClinicCardComponent } from '../clinic-card/clinic-card.component';
 export class ClinicsListComponent {
   @Input({ required: true }) clinics!: Clinic[];
   @Input() trackByFn?: TrackByFunction<Clinic>;
+  @Input() isDeletedView: boolean = false;
 
   @Output() onEdit = new EventEmitter<Clinic>();
   @Output() onDelete = new EventEmitter<Clinic>();
+  @Output() onRestore = new EventEmitter<Clinic>();
 }

@@ -28,23 +28,6 @@
           }
         </div>
 
-        <div>
-          <label for="address" class="text-sm font-semibold leading-none text-gray-700 peer-disabled:cursor-not-allowed peer-disabled:opacity-70 mb-2 block">
-            Dirección *
-          </label>
-          <input
-            id="address"
-            type="text"
-            formControlName="address"
-            class="flex h-10 w-full rounded-md border border-gray-300 bg-gray-50 px-3 py-2 text-sm text-gray-900 placeholder:text-gray-500 hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white focus:border-blue-500 disabled:cursor-not-allowed disabled:opacity-50 transition-colors"
-            [class.border-red-500]="getFieldError('address')"
-            [class.focus:ring-red-500]="getFieldError('address')"
-            [class.focus:border-red-500]="getFieldError('address')"
-            placeholder="Ej: Calle Principal 123">
-          @if (getFieldError('address')) {
-            <p class="text-red-500 text-xs mt-1">{{ getFieldError('address') }}</p>
-          }
-        </div>
 
         <div>
           <label for="clinic_color" class="text-sm font-semibold leading-none text-gray-700 peer-disabled:cursor-not-allowed peer-disabled:opacity-70 mb-2 block">
@@ -55,15 +38,31 @@
               id="clinic_color"
               type="color"
               formControlName="clinic_color"
-              class="w-12 h-10 rounded border border-gray-300 bg-gray-50 cursor-pointer hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500">
+              class="w-12 h-10 rounded border border-gray-300 bg-gray-50 cursor-pointer hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-[#0891b2]">
             <input
               type="text"
               formControlName="clinic_color"
-              class="flex h-10 w-full rounded-md border border-gray-300 bg-gray-50 px-3 py-2 text-sm text-gray-900 placeholder:text-gray-500 hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white focus:border-blue-500 disabled:cursor-not-allowed disabled:opacity-50 transition-colors"
+              class="flex h-10 w-full rounded-md border border-gray-300 bg-gray-50 px-3 py-2 text-sm text-gray-900 placeholder:text-gray-500 hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-[#0891b2] focus:bg-white focus:border-[#0891b2] disabled:cursor-not-allowed disabled:opacity-50 transition-colors"
               placeholder="#3b82f6">
           </div>
           @if (getFieldError('clinic_color')) {
             <p class="text-red-500 text-xs mt-1">{{ getFieldError('clinic_color') }}</p>
+          }
+        </div>
+
+        <div>
+          <label for="status" class="text-sm font-semibold leading-none text-gray-700 peer-disabled:cursor-not-allowed peer-disabled:opacity-70 mb-2 block">
+            Estado *
+          </label>
+          <select
+            id="status"
+            formControlName="status"
+            class="flex h-10 w-full rounded-md border border-gray-300 bg-gray-50 px-3 py-2 text-sm text-gray-900 hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-[#0891b2] focus:bg-white focus:border-[#0891b2] disabled:cursor-not-allowed disabled:opacity-50 transition-colors">
+            <option value="active">Activa</option>
+            <option value="inactive">Inactiva</option>
+          </select>
+          @if (getFieldError('status')) {
+            <p class="text-red-500 text-xs mt-1">{{ getFieldError('status') }}</p>
           }
         </div>
 
@@ -76,7 +75,7 @@
           </button>
           <button
             type="submit"
-            class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2 flex-1"
+            class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-[#0891b2] text-white hover:bg-[#0891b2]/90 h-10 px-4 py-2 flex-1"
             [disabled]="!isFormValid">
             {{ submitButtonText }}
           </button>
