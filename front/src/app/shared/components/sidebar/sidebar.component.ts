@@ -2,6 +2,7 @@ import { Component, Input, Output, EventEmitter, inject, ChangeDetectionStrategy
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { MenuService } from '../../../core/services/menu.service';
+import { AuthService } from '../../../core/services/auth.service';
 
 @Component({
   selector: 'app-sidebar',
@@ -13,6 +14,7 @@ import { MenuService } from '../../../core/services/menu.service';
 export class SidebarComponent {
   private router = inject(Router);
   private menuService = inject(MenuService);
+  private authService = inject(AuthService);
 
   @Input() activeModule: string = '';
   @Input() isOpen: boolean = false;
@@ -39,8 +41,7 @@ export class SidebarComponent {
   }
 
   onLogout(): void {
-    // TODO: Implement logout logic with auth service
-    console.log('Logout clicked');
+    this.authService.logout();
   }
 
 }
