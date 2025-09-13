@@ -12,7 +12,7 @@ import { Clinic } from './models/clinic.model';
 import { ConfirmationModalComponent } from '../../shared/components/confirmation-modal/confirmation-modal.component';
 import { SectionHeaderComponent } from '../../shared/components/section-header/section-header.component';
 import { ClinicsListComponent } from './components/clinics-list/clinics-list.component';
-import { ClinicaFormComponent } from './components/clinica-form/clinica-form.component';
+import { ClinicFormComponent } from './components/clinic-form/clinic-form.component';
 
 @Component({
   selector: 'app-clinics',
@@ -23,7 +23,7 @@ import { ClinicaFormComponent } from './components/clinica-form/clinica-form.com
     CommonModule,
     FormsModule,
     ConfirmationModalComponent,
-    ClinicaFormComponent,
+    ClinicFormComponent,
     SectionHeaderComponent,
     ClinicsListComponent,
   ],
@@ -75,10 +75,7 @@ export class ClinicsComponent {
 
     if (editing) {
       // Editar clínica existente
-      this.clinicsService.updateClinic(
-        editing.id!,
-        clinicData as Clinic
-      );
+      this.clinicsService.updateClinic(editing.id!, clinicData as Clinic);
     } else {
       // Crear nueva clínica
       this.clinicsService.createClinic(clinicData as Clinic);

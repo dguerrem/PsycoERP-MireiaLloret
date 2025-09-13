@@ -9,12 +9,14 @@ import {
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
 import { Patient } from '../../shared/models/patient.model';
 import { PatientsService } from './services/patients.service';
 import { ConfirmationModalComponent } from '../../shared/components/confirmation-modal/confirmation-modal.component';
 import { SectionHeaderComponent } from '../../shared/components/section-header/section-header.component';
 import { PatientsListComponent } from './components/patients-list/patients-list.component';
 import { PaginationComponent } from '../../shared/components/pagination/pagination.component';
+import { PatientFormComponent } from './components/patient-form/patient-form.component';
 
 type TabType = 'active' | 'inactive';
 
@@ -30,11 +32,13 @@ type TabType = 'active' | 'inactive';
     SectionHeaderComponent,
     PatientsListComponent,
     PaginationComponent,
+    PatientFormComponent,
   ],
 })
 export class PatientComponent implements OnInit {
   // Services
   private patientsService = inject(PatientsService);
+  private router = inject(Router);
 
   // State signals
   showCreateForm = signal(false);
@@ -296,6 +300,13 @@ export class PatientComponent implements OnInit {
     } else {
       this.loadDeletedPatients(1, size);
     }
+  }
+
+  /**
+   * Navigate to patient detail
+   */
+  navigateToDetail(patient: Patient): void {
+    this.router.navigate(['/patient', patient.id]);
   }
 
   /**

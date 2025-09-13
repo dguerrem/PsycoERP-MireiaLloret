@@ -53,7 +53,7 @@
           <div class="flex-1 overflow-y-auto pb-20">
             <app-patients-list [patients]="patientsList()" [trackByFn]="trackByPatientId"
               (onEdit)="openEditForm($event)" (onDelete)="openDeleteModal($event)"
-              (onRestore)="openRestoreModal($event)">
+              (onRestore)="openRestoreModal($event)" (onViewDetail)="navigateToDetail($event)">
             </app-patients-list>
           </div>
 
@@ -75,7 +75,7 @@
           <div class="flex-1 overflow-y-auto pb-20">
             <app-patients-list [patients]="patientsList()" [trackByFn]="trackByPatientId" [isDeletedView]="true"
               (onEdit)="openEditForm($event)" (onDelete)="openDeleteModal($event)"
-              (onRestore)="openRestoreModal($event)">
+              (onRestore)="openRestoreModal($event)" (onViewDetail)="navigateToDetail($event)">
             </app-patients-list>
           </div>
 
@@ -98,7 +98,12 @@
 </div>
 
 <!-- Patient Form Modal -->
-<!-- TODO: Add patient form component when available -->
+<app-patient-form
+  [isOpen]="showForm()"
+  [patient]="editingPatient()"
+  (onSave)="handleSave($event)"
+  (onCancel)="closeForm()">
+</app-patient-form>
 
 <!-- Delete Confirmation Modal -->
 <app-confirmation-modal [isOpen]="deletingPatient() !== null" title="Confirmar Eliminación"

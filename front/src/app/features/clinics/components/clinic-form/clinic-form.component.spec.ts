@@ -1,26 +1,25 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ReactiveFormsModule } from '@angular/forms';
-import { ClinicaFormComponent } from './clinica-form.component';
-import { Clinic } from '../models/clinic.model';
+import { ClinicFormComponent } from './clinic-form.component';
+import { Clinic } from '../../models/clinic.model';
 
-describe('ClinicaFormComponent', () => {
-  let component: ClinicaFormComponent;
-  let fixture: ComponentFixture<ClinicaFormComponent>;
+describe('ClinicFormComponent', () => {
+  let component: ClinicFormComponent;
+  let fixture: ComponentFixture<ClinicFormComponent>;
 
   const mockClinic: Clinic = {
     id: '1',
     name: 'Test Clinic',
     address: 'Test Address 123',
-    clinic_color: '#ff0000'
+    clinic_color: '#ff0000',
   };
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [ClinicaFormComponent, ReactiveFormsModule]
-    })
-    .compileComponents();
+      imports: [ClinicFormComponent, ReactiveFormsModule],
+    }).compileComponents();
 
-    fixture = TestBed.createComponent(ClinicaFormComponent);
+    fixture = TestBed.createComponent(ClinicFormComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });
@@ -62,8 +61,8 @@ describe('ClinicaFormComponent', () => {
         currentValue: mockClinic,
         previousValue: null,
         firstChange: false,
-        isFirstChange: () => false
-      }
+        isFirstChange: () => false,
+      },
     });
     fixture.detectChanges();
 
@@ -78,13 +77,15 @@ describe('ClinicaFormComponent', () => {
         currentValue: mockClinic,
         previousValue: null,
         firstChange: false,
-        isFirstChange: () => false
-      }
+        isFirstChange: () => false,
+      },
     });
 
     expect(component.clinicaForm.value.name).toBe(mockClinic.name);
     expect(component.clinicaForm.value.address).toBe(mockClinic.address);
-    expect(component.clinicaForm.value.clinic_color).toBe(mockClinic.clinic_color);
+    expect(component.clinicaForm.value.clinic_color).toBe(
+      mockClinic.clinic_color
+    );
   });
 
   it('should reset form when creating new clinic', () => {
@@ -94,8 +95,8 @@ describe('ClinicaFormComponent', () => {
         currentValue: null,
         previousValue: mockClinic,
         firstChange: false,
-        isFirstChange: () => false
-      }
+        isFirstChange: () => false,
+      },
     });
 
     expect(component.clinicaForm.value.name).toBe('');
@@ -108,7 +109,9 @@ describe('ClinicaFormComponent', () => {
     component.isOpen = true;
     fixture.detectChanges();
 
-    const cancelButton = fixture.nativeElement.querySelector('button[type="button"]:not(.absolute)');
+    const cancelButton = fixture.nativeElement.querySelector(
+      'button[type="button"]:not(.absolute)'
+    );
     cancelButton.click();
 
     expect(component.onCancel.emit).toHaveBeenCalled();
@@ -131,7 +134,7 @@ describe('ClinicaFormComponent', () => {
     component.clinicaForm.patchValue({
       name: 'New Clinic',
       address: 'New Address 123',
-      clinic_color: '#00ff00'
+      clinic_color: '#00ff00',
     });
     fixture.detectChanges();
 
@@ -140,7 +143,7 @@ describe('ClinicaFormComponent', () => {
     expect(component.onSave.emit).toHaveBeenCalledWith({
       name: 'New Clinic',
       address: 'New Address 123',
-      clinic_color: '#00ff00'
+      clinic_color: '#00ff00',
     });
   });
 
@@ -148,7 +151,7 @@ describe('ClinicaFormComponent', () => {
     component.clinicaForm.patchValue({
       name: '',
       address: '',
-      clinic_color: '#3b82f6'
+      clinic_color: '#3b82f6',
     });
 
     expect(component.getFieldError('name')).toBeTruthy();
@@ -159,13 +162,15 @@ describe('ClinicaFormComponent', () => {
   it('should validate minimum length', () => {
     component.clinicaForm.patchValue({
       name: 'A',
-      address: 'B'
+      address: 'B',
     });
     component.clinicaForm.get('name')?.markAsTouched();
     component.clinicaForm.get('address')?.markAsTouched();
 
     expect(component.getFieldError('name')).toContain('al menos 2 caracteres');
-    expect(component.getFieldError('address')).toContain('al menos 5 caracteres');
+    expect(component.getFieldError('address')).toContain(
+      'al menos 5 caracteres'
+    );
   });
 
   it('should return correct button text for create mode', () => {

@@ -1,19 +1,30 @@
-import { Component, EventEmitter, Input, Output, OnInit, OnChanges, SimpleChanges, ChangeDetectionStrategy } from '@angular/core';
-import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
+import {
+  Component,
+  EventEmitter,
+  Input,
+  Output,
+  OnInit,
+  OnChanges,
+  SimpleChanges,
+  ChangeDetectionStrategy,
+} from '@angular/core';
+import {
+  FormBuilder,
+  FormGroup,
+  Validators,
+  ReactiveFormsModule,
+} from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { Clinic } from '../../models/clinic.model';
 
 @Component({
   selector: 'app-clinica-form',
   standalone: true,
-  templateUrl: './clinica-form.component.html',
+  templateUrl: './clinic-form.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [
-    CommonModule,
-    ReactiveFormsModule
-  ]
+  imports: [CommonModule, ReactiveFormsModule],
 })
-export class ClinicaFormComponent implements OnInit, OnChanges {
+export class ClinicFormComponent implements OnInit, OnChanges {
   @Input() isOpen: boolean = false;
   @Input() clinica: Clinic | null = null;
 
@@ -44,7 +55,7 @@ export class ClinicaFormComponent implements OnInit, OnChanges {
     this.clinicaForm = this.fb.group({
       name: ['', [Validators.required, Validators.minLength(2)]],
       address: ['', [Validators.required, Validators.minLength(5)]],
-      clinic_color: ['#3b82f6', [Validators.required]]
+      clinic_color: ['#3b82f6', [Validators.required]],
     });
   }
 
@@ -53,7 +64,7 @@ export class ClinicaFormComponent implements OnInit, OnChanges {
       this.clinicaForm.patchValue({
         name: this.clinica.name,
         address: this.clinica.address,
-        clinic_color: this.clinica.clinic_color
+        clinic_color: this.clinica.clinic_color,
       });
     } else {
       this.resetForm();
@@ -64,7 +75,7 @@ export class ClinicaFormComponent implements OnInit, OnChanges {
     this.clinicaForm.reset({
       name: '',
       address: '',
-      clinic_color: '#3b82f6'
+      clinic_color: '#3b82f6',
     });
   }
 
@@ -91,7 +102,7 @@ export class ClinicaFormComponent implements OnInit, OnChanges {
       if (this.isEditing && this.clinica) {
         const updatedClinic: Clinic = {
           ...this.clinica,
-          ...formData
+          ...formData,
         };
         this.onSave.emit(updatedClinic);
       } else {
@@ -112,7 +123,9 @@ export class ClinicaFormComponent implements OnInit, OnChanges {
       }
       if (field.errors?.['minlength']) {
         const minLength = field.errors['minlength'].requiredLength;
-        return `${this.getFieldLabel(fieldName)} debe tener al menos ${minLength} caracteres`;
+        return `${this.getFieldLabel(
+          fieldName
+        )} debe tener al menos ${minLength} caracteres`;
       }
     }
     return null;
@@ -122,7 +135,7 @@ export class ClinicaFormComponent implements OnInit, OnChanges {
     const labels: { [key: string]: string } = {
       name: 'Nombre de la clínica',
       address: 'Dirección',
-      clinic_color: 'Color identificativo'
+      clinic_color: 'Color identificativo',
     };
     return labels[fieldName] || fieldName;
   }
