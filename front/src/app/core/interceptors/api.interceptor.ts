@@ -1,35 +1,67 @@
-import { HttpInterceptorFn, HttpRequest, HttpHandlerFn } from '@angular/common/http';
+import { HttpInterceptorFn, HttpRequest, HttpHandlerFn, HttpErrorResponse } from '@angular/common/http';
 import { inject } from '@angular/core';
-import { finalize } from 'rxjs/operators';
+import { catchError, switchMap, finalize } from 'rxjs/operators';
+import { throwError } from 'rxjs';
 import { environment } from '../../../environments/environment';
+import { AuthService } from '../services/auth.service';
 
 export const apiInterceptor: HttpInterceptorFn = (req: HttpRequest<unknown>, next: HttpHandlerFn) => {
-  // Solo modificar URLs que no sean completas (no empiecen con http)
-  if (!req.url.startsWith('http')) {
-    // Construir URL completa
-    const apiUrl = `${environment.api.baseUrl}${req.url}`;
-    
-    // Clonar request con nueva URL y headers
-    const modifiedReq = req.clone({
-      url: apiUrl,
-      setHeaders: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
-        // Preparado para futuro token de auth
-        // 'Authorization': `Bearer ${token}`
-      }
-    });
+  const authService = inject(AuthService);
 
-    return next(modifiedReq);
+  // Construir URL completa si no es una URL completa
+  let apiUrl = req.url;
+  if (!req.url.startsWith('http')) {
+    apiUrl = `${environment.api.baseUrl}${req.url}`;
   }
 
-  // Si ya es una URL completa, solo agregar headers básicos
+  // Preparar headers básicos
+  const headers: Record<string, string> = {
+    'Content-Type': 'application/json',
+    'Accept': 'application/json'
+  };
+
+  // Añadir token de autorización si existe y no es una petición de login
+  const token = authService.token();
+  if (token && !req.url.includes('/auth/login')) {
+    headers['Authorization'] = `Bearer ${token}`;
+  }
+
+  // Clonar request con nueva URL y headers
   const modifiedReq = req.clone({
-    setHeaders: {
-      'Content-Type': 'application/json',
-      'Accept': 'application/json'
-    }
+    url: apiUrl,
+    setHeaders: headers
   });
 
-  return next(modifiedReq);
+  // Procesar respuesta y manejar errores
+  return next(modifiedReq).pipe(
+    catchError((error: HttpErrorResponse) => {
+      if (error.status === 401 && token && !req.url.includes('/auth/refresh')) {
+        // Token expirado o inválido, intentar refresh
+        return authService.refreshToken().pipe(
+          switchMap(() => {
+            // Reintento con nuevo token
+            const newToken = authService.token();
+            if (newToken) {
+              const retryReq = modifiedReq.clone({
+                setHeaders: {
+                  ...headers,
+                  'Authorization': `Bearer ${newToken}`
+                }
+              });
+              return next(retryReq);
+            }
+            return throwError(() => error);
+          }),
+          catchError(() => {
+            // Si el refresh falla, hacer logout y propagar error
+            authService.logout();
+            return throwError(() => error);
+          })
+        );
+      }
+
+      // Para otros errores, simplemente propagarlos
+      return throwError(() => error);
+    })
+  );
 };
