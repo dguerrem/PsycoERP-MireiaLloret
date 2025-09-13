@@ -61,7 +61,7 @@ export abstract class BaseCrudService<T> {
   getAllPaginated(page = 1, per_page = 10): Observable<PaginationResponse<T>> {
     const params = new HttpParams()
       .set('page', page.toString())
-      .set('per_page', per_page.toString());
+      .set('limit', per_page.toString());
     
     this.loadingService.show();
     

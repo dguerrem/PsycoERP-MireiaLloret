@@ -46,13 +46,13 @@ export class PatientComponent implements OnInit {
   // Separate state for each tab
   activePatients = signal<Patient[]>([]);
   deletedPatients = signal<Patient[]>([]);
-  
+
   // Loading is handled globally by LoadingInterceptor - no local loading needed
-  
+
   // Separate pagination states
   activePagination = signal<any>(null);
   deletedPagination = signal<any>(null);
-  
+
   // Separate counts
   activePatientsCount = signal(0);
   deletedPatientsCount = signal(0);
@@ -61,7 +61,7 @@ export class PatientComponent implements OnInit {
   patientsList = computed(() => {
     return this.activeTab() === 'active' ? this.activePatients() : this.deletedPatients();
   });
-  
+
   paginationData = computed(() => {
     return this.activeTab() === 'active' ? this.activePagination() : this.deletedPagination();
   });
@@ -76,8 +76,8 @@ export class PatientComponent implements OnInit {
 
   ngOnInit() {
     // Load data for both tabs to show correct counts
-    this.loadActivePatients(1, 10);
-    this.loadDeletedPatients(1, 10);
+    this.loadActivePatients(1, 12);
+    this.loadDeletedPatients(1, 12);
   }
 
   /**
@@ -217,7 +217,7 @@ export class PatientComponent implements OnInit {
       // TODO: Implementar llamada al endpoint de restauración
       // Por ahora simulo la llamada con un timeout
       console.log('Restaurando paciente:', restoring);
-      
+
       // Simular respuesta exitosa
       setTimeout(() => {
         // Reload both tabs to update counts
@@ -247,7 +247,7 @@ export class PatientComponent implements OnInit {
   private reloadBothTabs(): void {
     const activePag = this.activePagination();
     const deletedPag = this.deletedPagination();
-    
+
     this.loadActivePatients(activePag?.currentPage || 1, activePag?.recordsPerPage || 10);
     this.loadDeletedPatients(deletedPag?.currentPage || 1, deletedPag?.recordsPerPage || 10);
   }
@@ -265,8 +265,8 @@ export class PatientComponent implements OnInit {
    */
   getTabClasses(tab: TabType): string {
     const baseClasses = 'data-[state=active]:bg-background dark:data-[state=active]:text-foreground focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:outline-ring dark:data-[state=active]:border-input dark:data-[state=active]:bg-input/30 text-foreground dark:text-muted-foreground h-[calc(100%-1px)] flex-1 justify-center rounded-md border border-transparent px-2 py-1 whitespace-nowrap transition-[color,box-shadow] focus-visible:ring-[3px] focus-visible:outline-1 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:shadow-sm [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*=\'size-\'])]:size-4 flex items-center gap-2 text-sm font-medium';
-    
-    return this.activeTab() === tab 
+
+    return this.activeTab() === tab
       ? `${baseClasses} bg-background text-foreground shadow-sm`
       : baseClasses;
   }
@@ -277,7 +277,7 @@ export class PatientComponent implements OnInit {
   onPageChange(page: number): void {
     const tab = this.activeTab();
     const perPage = this.paginationData()?.recordsPerPage || 10;
-    
+
     if (tab === 'active') {
       this.loadActivePatients(page, perPage);
     } else {
@@ -290,7 +290,7 @@ export class PatientComponent implements OnInit {
    */
   onPageSizeChange(size: number): void {
     const tab = this.activeTab();
-    
+
     if (tab === 'active') {
       this.loadActivePatients(1, size);
     } else {
