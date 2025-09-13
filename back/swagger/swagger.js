@@ -2,12 +2,14 @@ const swaggerJsdoc = require("swagger-jsdoc");
 const swaggerUi = require("swagger-ui-express");
 
 const definitions = require("./definitions");
+const authPaths = require("./paths/auth");
 const sessionsPaths = require("./paths/sessions");
 const patientsPaths = require("./paths/patients");
 const bonusesPaths = require("./paths/bonuses");
 const clinicsPaths = require("./paths/clinics");
 const dashboardPaths = require("./paths/dashboard");
 const clinicalNotesPaths = require("./paths/clinical_notes");
+const remindersPaths = require("./paths/reminders");
 
 const swaggerDefinition = {
   openapi: "3.0.0",
@@ -28,16 +30,35 @@ const swaggerDefinition = {
   ],
   components: {
     schemas: definitions,
+    securitySchemes: {
+      bearerAuth: {
+        type: "http",
+        scheme: "bearer",
+        bearerFormat: "JWT",
+        description: "JWT token obtenido del endpoint de login",
+      },
+    },
   },
+  security: [
+    {
+      bearerAuth: [],
+    },
+  ],
   paths: {
+    ...authPaths,
     ...sessionsPaths,
     ...patientsPaths,
     ...bonusesPaths,
     ...clinicsPaths,
     ...dashboardPaths,
     ...clinicalNotesPaths,
+    ...remindersPaths,
   },
   tags: [
+    {
+      name: "Auth",
+      description: "Autenticación de usuarios",
+    },
     {
       name: "Sessions",
       description: "Gestión de sesiones de terapia",
@@ -61,6 +82,10 @@ const swaggerDefinition = {
     {
       name: "Clinical Notes",
       description: "Gestión de notas clínicas e historial médico",
+    },
+    {
+      name: "Reminders",
+      description: "Gestión de recordatorios de sesiones",
     },
   ],
 };

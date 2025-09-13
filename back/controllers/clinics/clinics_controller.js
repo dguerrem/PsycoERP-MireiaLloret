@@ -1,5 +1,6 @@
 const {
   getClinics,
+  getDeletedClinics,
   createClinic,
   updateClinic,
   deleteClinic,
@@ -9,17 +10,22 @@ const obtenerClinicas = async (req, res) => {
   try {
     const {
       name,
+      page,
+      limit,
     } = req.query;
 
+    // Construir filtros incluyendo paginación
     const filters = {};
     if (name) filters.name = name;
+    if (page) filters.page = page;
+    if (limit) filters.limit = limit;
 
-    const clinicas = await getClinics(filters);
+    const result = await getClinics(filters);
 
     res.json({
       success: true,
-      total: clinicas.length,
-      data: clinicas,
+      pagination: result.pagination,
+      data: result.data,
     });
   } catch (err) {
     console.error("Error al obtener clínicas:", err.message);
@@ -33,7 +39,7 @@ const obtenerClinicas = async (req, res) => {
 const actualizarClinica = async (req, res) => {
   try {
     const { id } = req.params;
-    const { name, address, clinic_color } = req.body;
+    const { name, clinic_color } = req.body;
 
     if (!id || isNaN(id)) {
       return res.status(400).json({
@@ -44,7 +50,6 @@ const actualizarClinica = async (req, res) => {
 
     const data = {};
     if (name !== undefined) data.name = name;
-    if (address !== undefined) data.address = address;
     if (clinic_color !== undefined) data.clinic_color = clinic_color;
 
     if (Object.keys(data).length === 0) {
@@ -110,9 +115,39 @@ const eliminarClinica = async (req, res) => {
   }
 };
 
+const obtenerClinicasEliminadas = async (req, res) => {
+  try {
+    const {
+      name,
+      page,
+      limit,
+    } = req.query;
+
+    // Construir filtros incluyendo paginación
+    const filters = {};
+    if (name) filters.name = name;
+    if (page) filters.page = page;
+    if (limit) filters.limit = limit;
+
+    const result = await getDeletedClinics(filters);
+
+    res.json({
+      success: true,
+      pagination: result.pagination,
+      data: result.data,
+    });
+  } catch (err) {
+    console.error("Error al obtener clínicas eliminadas:", err.message);
+    res.status(500).json({
+      success: false,
+      error: "Error al obtener las clínicas eliminadas",
+    });
+  }
+};
+
 const crearClinica = async (req, res) => {
   try {
-    const { name, address, clinic_color } = req.body;
+    const { name, clinic_color } = req.body;
 
     if (!name || name.trim() === "") {
       return res.status(400).json({
@@ -121,12 +156,6 @@ const crearClinica = async (req, res) => {
       });
     }
 
-    if (!address || address.trim() === "") {
-      return res.status(400).json({
-        success: false,
-        error: "La dirección de la clínica es requerida",
-      });
-    }
 
     if (!clinic_color || clinic_color.trim() === "") {
       return res.status(400).json({
@@ -137,7 +166,6 @@ const crearClinica = async (req, res) => {
 
     const data = { 
       name: name.trim(),
-      address: address.trim(),
       clinic_color: clinic_color.trim()
     };
 
@@ -158,12 +186,6 @@ const crearClinica = async (req, res) => {
       });
     }
 
-    if (err.message === "Address is required") {
-      return res.status(400).json({
-        success: false,
-        error: "La dirección de la clínica es requerida",
-      });
-    }
 
     if (err.message === "Clinic color is required") {
       return res.status(400).json({
@@ -181,6 +203,7 @@ const crearClinica = async (req, res) => {
 
 module.exports = {
   obtenerClinicas,
+  obtenerClinicasEliminadas,
   crearClinica,
   actualizarClinica,
   eliminarClinica,

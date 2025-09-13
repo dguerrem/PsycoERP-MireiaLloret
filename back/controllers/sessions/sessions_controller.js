@@ -275,7 +275,7 @@ const obtenerEnlaceWhatsApp = async (req, res) => {
     }
 
     // Validar que la sesión esté programada
-    if (sessionData.status !== "scheduled") {
+    if (sessionData.status !== "programada") {
       return res.status(400).json({
         success: false,
         error: "Solo se pueden generar enlaces para sesiones programadas",

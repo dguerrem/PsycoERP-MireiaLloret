@@ -2,21 +2,23 @@ const { getBonuses, getBonusesByPatientId, getBonusHistoryById, useBonusSession,
 
 const obtenerBonuses = async (req, res) => {
   try {
-    const { patient_id, status, fecha_desde, fecha_hasta } = req.query;
+    const { patient_id, status, fecha_desde, fecha_hasta, page, limit } = req.query;
 
-    // Construir filtros directamente
+    // Construir filtros incluyendo paginación
     const filters = {};
     if (patient_id) filters.patient_id = patient_id;
     if (status) filters.status = status;
     if (fecha_desde) filters.fecha_desde = fecha_desde;
     if (fecha_hasta) filters.fecha_hasta = fecha_hasta;
+    if (page) filters.page = page;
+    if (limit) filters.limit = limit;
 
-    const bonuses = await getBonuses(filters);
+    const result = await getBonuses(filters);
 
     res.json({
       success: true,
-      total: bonuses.length,
-      data: bonuses,
+      pagination: result.pagination,
+      data: result.data,
     });
   } catch (err) {
     console.error("Error al obtener bonuses:", err.message);

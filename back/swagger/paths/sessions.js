@@ -31,7 +31,7 @@ const sessionsPaths = {
           required: false,
           schema: {
             type: "string",
-            enum: ["scheduled", "completed", "cancelled", "no-show"],
+            enum: ["programada", "finalizada", "cancelada"],
           },
           description: "Estado de la sesión",
         },
@@ -191,6 +191,7 @@ const sessionsPaths = {
                 },
                 mode: {
                   type: "string",
+                  enum: ["presencial", "online"],
                   description: "Modalidad de la sesión",
                 },
                 type: {
@@ -199,8 +200,8 @@ const sessionsPaths = {
                 },
                 status: {
                   type: "string",
-                  enum: ["scheduled", "completed", "cancelled", "no-show"],
-                  default: "scheduled",
+                  enum: ["programada", "finalizada", "cancelada"],
+                  default: "programada",
                   description: "Estado de la sesión",
                 },
                 price: {
@@ -329,8 +330,8 @@ const sessionsPaths = {
                 },
                 mode: {
                   type: "string",
-                  description:
-                    "Modalidad de la sesión (ej: presencial, online)",
+                  enum: ["presencial", "online"],
+                  description: "Modalidad de la sesión",
                 },
                 type: {
                   type: "string",
@@ -338,7 +339,7 @@ const sessionsPaths = {
                 },
                 status: {
                   type: "string",
-                  enum: ["scheduled", "completed", "cancelled", "no-show"],
+                  enum: ["programada", "finalizada", "cancelada"],
                   description: "Estado de la sesión",
                 },
                 price: {

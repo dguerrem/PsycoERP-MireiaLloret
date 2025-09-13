@@ -99,9 +99,8 @@ const definitions = {
         type: "boolean",
         example: true,
       },
-      total: {
-        type: "integer",
-        example: 3,
+      pagination: {
+        $ref: "#/components/schemas/PaginationInfo",
       },
       data: {
         type: "array",
@@ -297,12 +296,6 @@ const definitions = {
         description: "Nombre de la clínica",
         example: "Clínica Psicológica Centro",
       },
-      address: {
-        type: "string",
-        nullable: true,
-        description: "Dirección de la clínica",
-        example: "Av. Principal 123, Ciudad",
-      },
       clinic_color: {
         type: "string",
         nullable: true,
@@ -332,12 +325,6 @@ const definitions = {
         description: "Nombre de la clínica",
         example: "Clínica Psicológica Centro Actualizada",
       },
-      address: {
-        type: "string",
-        nullable: true,
-        description: "Dirección de la clínica",
-        example: "Av. Principal 456, Ciudad",
-      },
       clinic_color: {
         type: "string",
         nullable: true,
@@ -350,17 +337,12 @@ const definitions = {
 
   CreateClinicRequest: {
     type: "object",
-    required: ["name", "address", "clinic_color"],
+    required: ["name", "clinic_color"],
     properties: {
       name: {
         type: "string",
         description: "Nombre de la clínica (requerido)",
         example: "Clínica Psicológica Nueva",
-      },
-      address: {
-        type: "string",
-        description: "Dirección de la clínica (requerido)",
-        example: "Av. Nueva 789, Ciudad",
       },
       clinic_color: {
         type: "string",
@@ -397,11 +379,6 @@ const definitions = {
             type: "string",
             description: "Nombre de la clínica",
             example: "Clínica Psicológica Nueva",
-          },
-          address: {
-            type: "string",
-            description: "Dirección de la clínica",
-            example: "Av. Nueva 789, Ciudad",
           },
           clinic_color: {
             type: "string",
@@ -469,9 +446,8 @@ const definitions = {
         type: "boolean",
         example: true,
       },
-      total: {
-        type: "integer",
-        example: 3,
+      pagination: {
+        $ref: "#/components/schemas/PaginationInfo",
       },
       data: {
         type: "array",
@@ -1187,12 +1163,6 @@ const definitions = {
         description: "Teléfono del paciente",
         example: "+34 666 123 456",
       },
-      tipo: {
-        type: "string",
-        enum: ["individual", "group", "family", "couples"],
-        description: "Tipo de sesión preferida",
-        example: "individual",
-      },
       PatientResumeSessions: {
         type: "array",
         items: {
@@ -1211,11 +1181,6 @@ const definitions = {
         format: "int64",
         description: "ID único de la sesión",
         example: 1,
-      },
-      tipo_sesion: {
-        type: "string",
-        description: "Tipo de sesión",
-        example: "Terapia Individual",
       },
       fecha: {
         type: "string",
@@ -1468,8 +1433,9 @@ const definitions = {
       },
       mode: {
         type: "string",
+        enum: ["presencial", "online"],
         description: "Modalidad de la sesión",
-        example: "Presencial",
+        example: "presencial",
       },
       type: {
         type: "string",
@@ -1478,9 +1444,9 @@ const definitions = {
       },
       status: {
         type: "string",
-        enum: ["scheduled", "completed", "cancelled", "no-show"],
+        enum: ["programada", "finalizada", "cancelada"],
         description: "Estado de la sesión",
-        example: "scheduled",
+        example: "programada",
       },
       price: {
         type: "number",
@@ -1550,6 +1516,18 @@ const definitions = {
         description: "Hora de finalización (HH:MM:SS)",
         example: "10:00:00",
       },
+      mode: {
+        type: "string",
+        enum: ["presencial", "online"],
+        description: "Modalidad de la sesión",
+        example: "presencial",
+      },
+      status: {
+        type: "string",
+        enum: ["programada", "finalizada", "cancelada"],
+        description: "Estado de la sesión",
+        example: "finalizada",
+      },
       type: {
         type: "string",
         description: "Tipo de sesión",
@@ -1566,11 +1544,6 @@ const definitions = {
         enum: ["cash", "card", "transfer", "insurance"],
         description: "Método de pago",
         example: "card",
-      },
-      completed: {
-        type: "boolean",
-        description: "Si la sesión está completada o no",
-        example: true,
       },
       notes: {
         type: "string",
@@ -1808,6 +1781,239 @@ const definitions = {
         type: "integer",
         description: "Número de sesiones realizadas en esta semana",
         example: 15,
+      },
+    },
+  },
+
+  LoginRequest: {
+    type: "object",
+    required: ["email", "password"],
+    properties: {
+      email: {
+        type: "string",
+        format: "email",
+        description: "Email del usuario",
+        example: "demo@psycoerp.es",
+      },
+      password: {
+        type: "string",
+        description: "Contraseña del usuario",
+        example: "PsycoERP123",
+      },
+    },
+  },
+
+  User: {
+    type: "object",
+    properties: {
+      id: {
+        type: "integer",
+        format: "int64",
+        description: "ID único del usuario",
+        example: 1,
+      },
+      email: {
+        type: "string",
+        format: "email",
+        description: "Email del usuario",
+        example: "demo@psycoerp.es",
+      },
+      name: {
+        type: "string",
+        description: "Nombre del usuario",
+        example: "Admin Usuario",
+      },
+      last_login: {
+        type: "string",
+        format: "date-time",
+        nullable: true,
+        description: "Fecha del último login",
+        example: "2024-12-15T14:30:00Z",
+      },
+    },
+  },
+
+  LoginResponse: {
+    type: "object",
+    properties: {
+      success: {
+        type: "boolean",
+        example: true,
+      },
+      message: {
+        type: "string",
+        example: "Login exitoso",
+      },
+      data: {
+        type: "object",
+        properties: {
+          user: {
+            $ref: "#/components/schemas/User",
+          },
+          token: {
+            $ref: "#/components/schemas/JWTToken",
+          },
+        },
+      },
+    },
+  },
+
+  JWTToken: {
+    type: "object",
+    properties: {
+      access_token: {
+        type: "string",
+        description: "Token JWT de acceso",
+        example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+      },
+      token_type: {
+        type: "string",
+        description: "Tipo de token",
+        example: "Bearer",
+      },
+      expires_in: {
+        type: "string",
+        description: "Tiempo de expiración del token",
+        example: "7d",
+      },
+    },
+  },
+
+  ReminderSession: {
+    type: "object",
+    properties: {
+      session_id: {
+        type: "integer",
+        format: "int64",
+        description: "ID único de la sesión",
+        example: 1,
+      },
+      start_time: {
+        type: "string",
+        format: "time",
+        description: "Hora de inicio (HH:MM:SS)",
+        example: "09:00:00",
+      },
+      end_time: {
+        type: "string",
+        format: "time",
+        description: "Hora de finalización (HH:MM:SS)",
+        example: "10:00:00",
+      },
+      patient_name: {
+        type: "string",
+        description: "Nombre completo del paciente",
+        example: "Juan Pérez García",
+      },
+      reminder_sent: {
+        type: "boolean",
+        description: "Indica si se ha enviado recordatorio para esta sesión",
+        example: false,
+      },
+    },
+  },
+
+  RemindersResponse: {
+    type: "object",
+    properties: {
+      success: {
+        type: "boolean",
+        example: true,
+      },
+      data: {
+        type: "array",
+        items: {
+          $ref: "#/components/schemas/ReminderSession",
+        },
+        description: "Lista de sesiones con información de recordatorios",
+      },
+      total: {
+        type: "integer",
+        description: "Número total de sesiones pendientes de recordatorio",
+        example: 5,
+      },
+      message: {
+        type: "string",
+        description: "Mensaje descriptivo de la consulta",
+        example: "Sesiones programadas para mañana (2024-12-16)",
+      },
+      metadata: {
+        type: "object",
+        properties: {
+          targetDate: {
+            type: "string",
+            format: "date",
+            description: "Fecha objetivo calculada",
+            example: "2024-12-16",
+          },
+          currentDay: {
+            type: "integer",
+            description: "Día de la semana actual (0=Domingo, 1=Lunes, ...)",
+            example: 1,
+          },
+          description: {
+            type: "string",
+            description: "Descripción del período consultado",
+            example: "Sesiones de mañana",
+          },
+        },
+      },
+    },
+  },
+
+  CreateReminderRequest: {
+    type: "object",
+    required: ["session_id"],
+    properties: {
+      session_id: {
+        type: "integer",
+        format: "int64",
+        description: "ID de la sesión para la cual crear el recordatorio",
+        example: 1,
+      },
+    },
+  },
+
+  CreateReminderResponse: {
+    type: "object",
+    properties: {
+      success: {
+        type: "boolean",
+        example: true,
+      },
+      data: {
+        type: "object",
+        properties: {
+          id: {
+            type: "integer",
+            format: "int64",
+            description: "ID del recordatorio creado",
+            example: 15,
+          },
+          session_id: {
+            type: "integer",
+            format: "int64",
+            description: "ID de la sesión",
+            example: 1,
+          },
+          sent_at: {
+            type: "string",
+            format: "date-time",
+            description: "Fecha y hora cuando se envió el recordatorio",
+            example: "2024-12-16T10:30:00.000Z",
+          },
+          created_at: {
+            type: "string",
+            format: "date-time",
+            description: "Fecha de creación del registro",
+            example: "2024-12-16T10:30:00.000Z",
+          },
+        },
+      },
+      message: {
+        type: "string",
+        description: "Mensaje de éxito",
+        example: "Recordatorio creado exitosamente",
       },
     },
   },
