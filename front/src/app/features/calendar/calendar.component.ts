@@ -27,6 +27,8 @@ export class CalendarComponent {
 
   readonly showSessionPopup = signal(false);
   readonly showNewSessionDialog = signal(false);
+  readonly showReminderConfirmModal = signal(false);
+  readonly pendingReminderSession = signal<SessionData | null>(null);
   readonly clinicConfigs = CLINIC_CONFIGS;
 
   readonly weekDays = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
@@ -156,5 +158,38 @@ export class CalendarComponent {
 
   formatPaymentMethod(method: string): string {
     return SessionUtils.formatPaymentMethod(method);
+  }
+
+  onSendReminder(sessionData: SessionData, event: Event): void {
+    event.stopPropagation(); // Prevenir que se abra el popup de sesión
+    this.pendingReminderSession.set(sessionData);
+    this.showReminderConfirmModal.set(true);
+  }
+
+  onConfirmSendReminder(): void {
+    const sessionData = this.pendingReminderSession();
+    if (sessionData) {
+      this.calendarService.openWhatsAppReminder(sessionData);
+      this.calendarService.sendReminder(sessionData.SessionDetailData.session_id);
+    }
+    this.onCloseReminderConfirmModal();
+  }
+
+  onCloseReminderConfirmModal(): void {
+    this.showReminderConfirmModal.set(false);
+    this.pendingReminderSession.set(null);
+  }
+
+  canSendReminder(sessionData: SessionData): boolean {
+    const detail = sessionData.SessionDetailData;
+    return !detail.sended && !detail.completed && !detail.cancelled && !detail.no_show;
+  }
+
+  getFormattedSessionDate(sessionData: SessionData): string {
+    return new Date(sessionData.SessionDetailData.session_date).toLocaleDateString('es-ES');
+  }
+
+  getFormattedSessionTime(sessionData: SessionData): string {
+    return sessionData.SessionDetailData.start_time.substring(0, 5);
   }
 }

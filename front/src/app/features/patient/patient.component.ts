@@ -139,12 +139,12 @@ export class PatientComponent implements OnInit {
   /**
    * Manejar guardado del formulario (crear/editar)
    */
-  handleSave(patientData: Patient | Partial<Patient>): void {
+  handleSave(patientData: Patient): void {
     const editing = this.editingPatient();
 
     if (editing) {
       // Editar paciente existente
-      this.patientsService.update(editing.id, patientData as Partial<Patient>).subscribe({
+      this.patientsService.update(editing.id!, patientData).subscribe({
         next: () => {
           // Reload current tab data
           this.reloadCurrentTab();
@@ -152,7 +152,7 @@ export class PatientComponent implements OnInit {
       });
     } else {
       // Crear nuevo paciente
-      this.patientsService.create(patientData as Partial<Patient>).subscribe({
+      this.patientsService.create(patientData).subscribe({
         next: () => {
           // Reload active patients (new patients go to active)
           const activePag = this.activePagination();
@@ -184,10 +184,10 @@ export class PatientComponent implements OnInit {
   handleDeletePatient(): void {
     const deleting = this.deletingPatient();
     if (deleting) {
-      this.patientsService.delete(deleting.id).subscribe({
+      this.patientsService.delete(deleting.id!).subscribe({
         next: () => {
-          // Reload current tab data
-          this.reloadCurrentTab();
+          // Reload both tabs to update counts
+          this.reloadBothTabs();
         }
       });
       this.closeDeleteModal();
@@ -220,7 +220,8 @@ export class PatientComponent implements OnInit {
       
       // Simular respuesta exitosa
       setTimeout(() => {
-        this.reloadCurrentTab();
+        // Reload both tabs to update counts
+        this.reloadBothTabs();
         this.closeRestoreModal();
       }, 500);
     }
@@ -238,6 +239,17 @@ export class PatientComponent implements OnInit {
       const deletedPag = this.deletedPagination();
       this.loadDeletedPatients(deletedPag?.currentPage || 1, deletedPag?.recordsPerPage || 10);
     }
+  }
+
+  /**
+   * Recargar datos de ambas pestañas para actualizar contadores
+   */
+  private reloadBothTabs(): void {
+    const activePag = this.activePagination();
+    const deletedPag = this.deletedPagination();
+    
+    this.loadActivePatients(activePag?.currentPage || 1, activePag?.recordsPerPage || 10);
+    this.loadDeletedPatients(deletedPag?.currentPage || 1, deletedPag?.recordsPerPage || 10);
   }
 
   /**

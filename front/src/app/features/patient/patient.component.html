@@ -53,43 +53,63 @@
       <!-- Tab content -->
       <div class="flex-1 overflow-hidden mt-6">
         @if (activeTab() === 'active') {
-          <div role="tabpanel" class="flex-1 outline-none h-full">
-            <app-patients-list 
-              [patients]="patientsList()"
-              [trackByFn]="trackByPatientId"
-              (onEdit)="openEditForm($event)"
-              (onDelete)="openDeleteModal($event)"
-              (onRestore)="openRestoreModal($event)">
-            </app-patients-list>
+          <div role="tabpanel" class="flex-1 outline-none h-full flex flex-col">
+            <div class="flex-1 overflow-y-auto">
+              <app-patients-list 
+                [patients]="patientsList()"
+                [trackByFn]="trackByPatientId"
+                (onEdit)="openEditForm($event)"
+                (onDelete)="openDeleteModal($event)"
+                (onRestore)="openRestoreModal($event)">
+              </app-patients-list>
+            </div>
+            
+            <!-- Paginación para pacientes activos -->
+            @if (paginationData()) {
+              <div class="flex-shrink-0 bg-background border-t px-4 py-4 mt-4">
+                <app-pagination
+                  [currentPage]="paginationData()!.currentPage"
+                  [totalPages]="paginationData()!.totalPages"
+                  [totalRecords]="paginationData()!.totalRecords"
+                  [recordsPerPage]="paginationData()!.recordsPerPage"
+                  [hasNextPage]="paginationData()!.hasNextPage"
+                  [hasPrevPage]="paginationData()!.hasPrevPage"
+                  (onPageChange)="onPageChange($event)"
+                  (onPageSizeChange)="onPageSizeChange($event)">
+                </app-pagination>
+              </div>
+            }
           </div>
         }
         
         @if (activeTab() === 'inactive') {
-          <div role="tabpanel" class="flex-1 outline-none h-full">
-            <app-patients-list 
-              [patients]="patientsList()"
-              [trackByFn]="trackByPatientId"
-              [isDeletedView]="true"
-              (onEdit)="openEditForm($event)"
-              (onDelete)="openDeleteModal($event)"
-              (onRestore)="openRestoreModal($event)">
-            </app-patients-list>
-          </div>
-        }
-        
-        <!-- Paginación fija en el footer -->
-        @if (paginationData()) {
-          <div class="flex-shrink-0 bg-background border-t px-4 py-4 mt-4">
-            <app-pagination
-              [currentPage]="paginationData()!.currentPage"
-              [totalPages]="paginationData()!.totalPages"
-              [totalRecords]="paginationData()!.totalRecords"
-              [recordsPerPage]="paginationData()!.recordsPerPage"
-              [hasNextPage]="paginationData()!.hasNextPage"
-              [hasPrevPage]="paginationData()!.hasPrevPage"
-              (onPageChange)="onPageChange($event)"
-              (onPageSizeChange)="onPageSizeChange($event)">
-            </app-pagination>
+          <div role="tabpanel" class="flex-1 outline-none h-full flex flex-col">
+            <div class="flex-1 overflow-y-auto">
+              <app-patients-list 
+                [patients]="patientsList()"
+                [trackByFn]="trackByPatientId"
+                [isDeletedView]="true"
+                (onEdit)="openEditForm($event)"
+                (onDelete)="openDeleteModal($event)"
+                (onRestore)="openRestoreModal($event)">
+              </app-patients-list>
+            </div>
+            
+            <!-- Paginación para pacientes inactivos -->
+            @if (paginationData()) {
+              <div class="flex-shrink-0 bg-background border-t px-4 py-4 mt-4">
+                <app-pagination
+                  [currentPage]="paginationData()!.currentPage"
+                  [totalPages]="paginationData()!.totalPages"
+                  [totalRecords]="paginationData()!.totalRecords"
+                  [recordsPerPage]="paginationData()!.recordsPerPage"
+                  [hasNextPage]="paginationData()!.hasNextPage"
+                  [hasPrevPage]="paginationData()!.hasPrevPage"
+                  (onPageChange)="onPageChange($event)"
+                  (onPageSizeChange)="onPageSizeChange($event)">
+                </app-pagination>
+              </div>
+            }
           </div>
         }
       </div>

@@ -23,6 +23,7 @@ export class CalendarService {
         completed: false,
         cancelled: false,
         no_show: false,
+        sended: false,
         notes: "Primera sesión del mes",
         created_at: "2025-08-25T10:00:00.000Z",
         updated_at: "2025-08-25T10:00:00.000Z",
@@ -67,6 +68,7 @@ export class CalendarService {
         completed: true,
         cancelled: false,
         no_show: false,
+        sended: true,
         notes: "Sesión completada con éxito",
         created_at: "2025-08-25T11:00:00.000Z",
         updated_at: "2025-08-30T12:00:00.000Z",
@@ -101,6 +103,7 @@ export class CalendarService {
         completed: false,
         cancelled: false,
         no_show: false,
+        sended: false,
         notes: "Paciente nuevo",
         created_at: "2025-08-26T14:00:00.000Z",
         updated_at: "2025-08-26T14:00:00.000Z",
@@ -129,6 +132,7 @@ export class CalendarService {
         completed: false,
         cancelled: true,
         no_show: false,
+        sended: true,
         notes: "Cancelada por el paciente",
         created_at: "2025-08-27T09:00:00.000Z",
         updated_at: "2025-08-28T16:30:00.000Z",
@@ -157,6 +161,7 @@ export class CalendarService {
         completed: false,
         cancelled: false,
         no_show: false,
+        sended: false,
         notes: "Sesión de seguimiento",
         created_at: "2025-08-28T13:00:00.000Z",
         updated_at: "2025-08-28T13:00:00.000Z",
@@ -191,6 +196,7 @@ export class CalendarService {
         completed: true,
         cancelled: false,
         no_show: false,
+        sended: true,
         notes: "Excelente progreso",
         created_at: "2025-08-29T10:00:00.000Z",
         updated_at: "2025-09-03T15:00:00.000Z",
@@ -209,6 +215,267 @@ export class CalendarService {
             date: "2025-09-03 14:30:00"
           }
         ]
+      }
+    },
+    {
+      SessionDetailData: {
+        session_id: 7,
+        session_date: "2025-09-04",
+        start_time: "09:30:00",
+        end_time: "10:30:00",
+        type: "Terapia Individual",
+        mode: "Presencial",
+        price: 65,
+        payment_method: "card",
+        payment_status: "paid",
+        completed: false,
+        cancelled: false,
+        no_show: false,
+        sended: false,
+        notes: "Primera sesión después de vacaciones",
+        created_at: "2025-08-30T12:00:00.000Z",
+        updated_at: "2025-08-30T12:00:00.000Z",
+        PatientData: {
+          id: 107,
+          name: "Carmen Díaz"
+        },
+        ClinicDetailData: {
+          clinic_id: 2,
+          clinic_name: "Clínica Sur"
+        },
+        MedicalRecordData: []
+      }
+    },
+    {
+      SessionDetailData: {
+        session_id: 8,
+        session_date: "2025-09-04",
+        start_time: "11:00:00",
+        end_time: "12:00:00",
+        type: "Terapia de Pareja",
+        mode: "Online",
+        price: 80,
+        payment_method: "transfer",
+        payment_status: "pending",
+        completed: false,
+        cancelled: false,
+        no_show: false,
+        sended: false,
+        notes: "Sesión de seguimiento de pareja",
+        created_at: "2025-08-30T13:00:00.000Z",
+        updated_at: "2025-08-30T13:00:00.000Z",
+        PatientData: {
+          id: 108,
+          name: "Roberto Fernández"
+        },
+        ClinicDetailData: {
+          clinic_id: 3,
+          clinic_name: "Clínica Centro"
+        },
+        MedicalRecordData: []
+      }
+    },
+    {
+      SessionDetailData: {
+        session_id: 9,
+        session_date: "2025-09-05",
+        start_time: "08:00:00",
+        end_time: "09:00:00",
+        type: "Evaluación Psicológica",
+        mode: "Presencial",
+        price: 90,
+        payment_method: "bizum",
+        payment_status: "paid",
+        completed: false,
+        cancelled: false,
+        no_show: false,
+        sended: true,
+        notes: "Evaluación inicial completa",
+        created_at: "2025-08-31T09:00:00.000Z",
+        updated_at: "2025-08-31T09:00:00.000Z",
+        PatientData: {
+          id: 109,
+          name: "Isabel Moreno"
+        },
+        ClinicDetailData: {
+          clinic_id: 4,
+          clinic_name: "Clínica Este"
+        },
+        MedicalRecordData: []
+      }
+    },
+    {
+      SessionDetailData: {
+        session_id: 10,
+        session_date: "2025-09-05",
+        start_time: "16:30:00",
+        end_time: "17:30:00",
+        type: "Terapia Familiar",
+        mode: "Presencial",
+        price: 85,
+        payment_method: "cash",
+        payment_status: "pending",
+        completed: false,
+        cancelled: false,
+        no_show: false,
+        sended: false,
+        notes: "Primera sesión familiar",
+        created_at: "2025-08-31T14:00:00.000Z",
+        updated_at: "2025-08-31T14:00:00.000Z",
+        PatientData: {
+          id: 110,
+          name: "Familia Ruiz"
+        },
+        ClinicDetailData: {
+          clinic_id: 5,
+          clinic_name: "Clínica Oeste"
+        },
+        MedicalRecordData: []
+      }
+    },
+    {
+      SessionDetailData: {
+        session_id: 11,
+        session_date: "2025-09-06",
+        start_time: "10:00:00",
+        end_time: "11:00:00",
+        type: "Terapia Individual",
+        mode: "Online",
+        price: 60,
+        payment_method: "card",
+        payment_status: "paid",
+        completed: false,
+        cancelled: false,
+        no_show: false,
+        sended: false,
+        notes: "Seguimiento de ansiedad",
+        created_at: "2025-09-01T10:00:00.000Z",
+        updated_at: "2025-09-01T10:00:00.000Z",
+        PatientData: {
+          id: 111,
+          name: "Miguel Torres"
+        },
+        ClinicDetailData: {
+          clinic_id: 1,
+          clinic_name: "Clínica Norte"
+        },
+        MedicalRecordData: []
+      }
+    },
+    {
+      SessionDetailData: {
+        session_id: 12,
+        session_date: "2025-09-06",
+        start_time: "15:00:00",
+        end_time: "16:00:00",
+        type: "Terapia Individual",
+        mode: "Presencial",
+        price: 70,
+        payment_method: "transfer",
+        payment_status: "paid",
+        completed: false,
+        cancelled: false,
+        no_show: false,
+        sended: true,
+        notes: "Terapia de duelo",
+        created_at: "2025-09-01T11:00:00.000Z",
+        updated_at: "2025-09-01T11:00:00.000Z",
+        PatientData: {
+          id: 112,
+          name: "Elena Vásquez"
+        },
+        ClinicDetailData: {
+          clinic_id: 2,
+          clinic_name: "Clínica Sur"
+        },
+        MedicalRecordData: []
+      }
+    },
+    {
+      SessionDetailData: {
+        session_id: 13,
+        session_date: "2025-09-07",
+        start_time: "09:00:00",
+        end_time: "10:00:00",
+        type: "Terapia Grupal",
+        mode: "Presencial",
+        price: 45,
+        payment_method: "bizum",
+        payment_status: "pending",
+        completed: false,
+        cancelled: false,
+        no_show: false,
+        sended: false,
+        notes: "Terapia grupal de autoestima",
+        created_at: "2025-09-02T08:00:00.000Z",
+        updated_at: "2025-09-02T08:00:00.000Z",
+        PatientData: {
+          id: 113,
+          name: "Grupo Autoestima"
+        },
+        ClinicDetailData: {
+          clinic_id: 3,
+          clinic_name: "Clínica Centro"
+        },
+        MedicalRecordData: []
+      }
+    },
+    {
+      SessionDetailData: {
+        session_id: 14,
+        session_date: "2025-09-07",
+        start_time: "12:00:00",
+        end_time: "13:00:00",
+        type: "Consulta de Seguimiento",
+        mode: "Online",
+        price: 50,
+        payment_method: "card",
+        payment_status: "paid",
+        completed: false,
+        cancelled: false,
+        no_show: false,
+        sended: false,
+        notes: "Revisión trimestral",
+        created_at: "2025-09-02T09:00:00.000Z",
+        updated_at: "2025-09-02T09:00:00.000Z",
+        PatientData: {
+          id: 114,
+          name: "Andrea Jiménez"
+        },
+        ClinicDetailData: {
+          clinic_id: 4,
+          clinic_name: "Clínica Este"
+        },
+        MedicalRecordData: []
+      }
+    },
+    {
+      SessionDetailData: {
+        session_id: 15,
+        session_date: "2025-09-08",
+        start_time: "14:00:00",
+        end_time: "15:00:00",
+        type: "Terapia Individual",
+        mode: "Presencial",
+        price: 65,
+        payment_method: "cash",
+        payment_status: "pending",
+        completed: false,
+        cancelled: false,
+        no_show: false,
+        sended: false,
+        notes: "Sesión de relajación",
+        created_at: "2025-09-02T10:00:00.000Z",
+        updated_at: "2025-09-02T10:00:00.000Z",
+        PatientData: {
+          id: 115,
+          name: "Francisco Luna"
+        },
+        ClinicDetailData: {
+          clinic_id: 5,
+          clinic_name: "Clínica Oeste"
+        },
+        MedicalRecordData: []
       }
     }
   ]);
@@ -371,5 +638,22 @@ export class CalendarService {
     this._sessionData.update(data => 
       data.filter(sessionData => sessionData.SessionDetailData.session_id !== sessionId)
     );
+  }
+
+  sendReminder(sessionId: number): void {
+    this.updateSessionData(sessionId, { sended: true });
+  }
+
+  openWhatsAppReminder(sessionData: SessionData): void {
+    const phoneNumber = '642963419';
+    const patientName = sessionData.SessionDetailData.PatientData.name;
+    const sessionDate = new Date(sessionData.SessionDetailData.session_date).toLocaleDateString('es-ES');
+    const sessionTime = sessionData.SessionDetailData.start_time.substring(0, 5);
+    
+    const message = `Hola ${patientName}, te recordamos que tienes una cita programada para el ${sessionDate} a las ${sessionTime}. ¡Te esperamos!`;
+    const encodedMessage = encodeURIComponent(message);
+    const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodedMessage}`;
+    
+    window.open(whatsappUrl, '_blank');
   }
 }

@@ -73,7 +73,7 @@ export class PatientDetailComponent implements OnInit {
       this.patientsService.addPatient(patientData);
     } else {
       const { id, created_at, updated_at, ...patientData } = patient;
-      this.patientsService.updatePatient(patient.id, patientData);
+      this.patientsService.updatePatient(patient.id!, patientData);
     }
     
     this.router.navigate(['/patient']);

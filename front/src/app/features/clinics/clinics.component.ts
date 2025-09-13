@@ -8,7 +8,7 @@ import {
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ClinicsService } from './services/clinics.service';
-import { Clinic, ClinicFormData } from './models/clinic.model';
+import { Clinic } from './models/clinic.model';
 import { ConfirmationModalComponent } from '../../shared/components/confirmation-modal/confirmation-modal.component';
 import { SectionHeaderComponent } from '../../shared/components/section-header/section-header.component';
 import { ClinicsListComponent } from './components/clinics-list/clinics-list.component';
@@ -70,18 +70,18 @@ export class ClinicsComponent {
   /**
    * Manejar guardado del formulario (crear/editar)
    */
-  handleSave(clinicData: Clinic | ClinicFormData): void {
+  handleSave(clinicData: Clinic): void {
     const editing = this.editingClinica();
 
     if (editing) {
       // Editar clínica existente
       this.clinicsService.updateClinic(
-        editing.id,
-        clinicData as ClinicFormData
+        editing.id!,
+        clinicData as Clinic
       );
     } else {
       // Crear nueva clínica
-      this.clinicsService.createClinic(clinicData as ClinicFormData);
+      this.clinicsService.createClinic(clinicData as Clinic);
     }
 
     this.closeForm();
@@ -107,7 +107,7 @@ export class ClinicsComponent {
   handleDeleteClinic(): void {
     const deleting = this.deletingClinic();
     if (deleting) {
-      this.clinicsService.deleteClinic(deleting.id);
+      this.clinicsService.deleteClinic(deleting.id!);
       this.closeDeleteModal();
     }
   }

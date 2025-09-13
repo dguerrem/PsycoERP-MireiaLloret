@@ -103,6 +103,7 @@ export class NewSessionDialogComponent {
       completed: [false],
       cancelled: [false],
       no_show: [false],
+      sended: [false],
       notes: ['']
     });
   }
@@ -190,6 +191,7 @@ export class NewSessionDialogComponent {
         completed: formData.completed,
         cancelled: formData.cancelled,
         no_show: formData.no_show,
+        sended: formData.sended,
         notes: formData.notes || undefined,
         PatientData: {
           id: parseInt(formData.patient_id),

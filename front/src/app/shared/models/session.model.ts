@@ -16,6 +16,7 @@ export interface SessionData {
     completed: boolean;     // true/false
     cancelled: boolean;     // true/false - to handle cancelled sessions
     no_show: boolean;       // true/false - to handle no-show sessions
+    sended: boolean;        // true/false - to handle reminder sent status
     notes?: string;         // "Primera sesión del paciente"
     created_at: string;     // ISO timestamp
     updated_at: string;     // ISO timestamp

@@ -1,13 +1,13 @@
 export interface Patient {
-  id: number;
+  id?: number;
   name: string;
   email: string;
   phone: string;
   dni: string;
-  status: string;                    // "active", "inactive", etc.
-  session_type: string;              // "individual", "group", etc.
+  status: string;
+  session_type: string;
   address: string;
-  birth_date: string;                // "1985-03-15"
+  birth_date: string;
   emergency_contact_name: string;
   emergency_contact_phone: string;
   medical_history: string;
@@ -17,8 +17,8 @@ export interface Patient {
   insurance_provider: string;
   insurance_number: string;
   notes: string;
-  created_at: string;               // "2025-08-25"
-  updated_at: string;               // "2025-08-25T19:17:42.000Z"
+  created_at: string;
+  updated_at: string;
 }
 
 export interface PatientsResponse {
