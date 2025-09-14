@@ -5,6 +5,12 @@ import { BaseCrudService } from '../../../core/services/base-crud.service';
 import { Patient } from '../../../shared/models/patient.model';
 import { PaginationResponse } from '../../../shared/models/pagination.interface';
 
+export interface PatientFilters {
+  name?: string;
+  email?: string;
+  dni?: string;
+}
+
 @Injectable({ providedIn: 'root' })
 export class PatientsService extends BaseCrudService<Patient> {
   constructor() {
@@ -111,9 +117,47 @@ export class PatientsService extends BaseCrudService<Patient> {
    */
   loadActivePatientsPaginated(
     page = 1,
-    per_page = 10
+    per_page = 10,
+    filters?: PatientFilters
   ): Observable<PaginationResponse<Patient>> {
+    if (filters && this.hasActiveFilters(filters)) {
+      return this.loadActivePatientsWithFilters(page, per_page, filters);
+    }
     return this.getAllPaginated(page, per_page);
+  }
+
+  /**
+   * Cargar pacientes activos con filtros
+   */
+  private loadActivePatientsWithFilters(
+    page: number,
+    per_page: number,
+    filters: PatientFilters
+  ): Observable<PaginationResponse<Patient>> {
+    let params = new HttpParams()
+      .set('page', page.toString())
+      .set('limit', per_page.toString());
+
+    // Add filter parameters only if they have values
+    if (filters.name?.trim()) {
+      params = params.set('name', filters.name.trim());
+    }
+
+    if (filters.email?.trim()) {
+      params = params.set('email', filters.email.trim());
+    }
+
+    if (filters.dni?.trim()) {
+      params = params.set('dni', filters.dni.trim());
+    }
+
+    return this.http.get<PaginationResponse<Patient>>(
+      this.apiUrl,
+      {
+        ...this.httpOptions,
+        params,
+      }
+    );
   }
 
   /**
@@ -121,11 +165,25 @@ export class PatientsService extends BaseCrudService<Patient> {
    */
   loadDeletedPatientsPaginated(
     page = 1,
-    per_page = 10
+    per_page = 10,
+    filters?: PatientFilters
   ): Observable<PaginationResponse<Patient>> {
-    const params = new HttpParams()
+    let params = new HttpParams()
       .set('page', page.toString())
       .set('limit', per_page.toString()); // El endpoint deleted usa 'limit' en lugar de 'per_page'
+
+    // Add filter parameters only if they have values
+    if (filters?.name?.trim()) {
+      params = params.set('name', filters.name.trim());
+    }
+
+    if (filters?.email?.trim()) {
+      params = params.set('email', filters.email.trim());
+    }
+
+    if (filters?.dni?.trim()) {
+      params = params.set('dni', filters.dni.trim());
+    }
 
     return this.http.get<PaginationResponse<Patient>>(
       `${this.apiUrl}/deleted`,
@@ -133,6 +191,17 @@ export class PatientsService extends BaseCrudService<Patient> {
         ...this.httpOptions,
         params,
       }
+    );
+  }
+
+  /**
+   * Check if filters have any active values
+   */
+  private hasActiveFilters(filters: PatientFilters): boolean {
+    return !!(
+      filters.name?.trim() ||
+      filters.email?.trim() ||
+      filters.dni?.trim()
     );
   }
 

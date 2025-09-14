@@ -11,12 +11,13 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { Patient } from '../../shared/models/patient.model';
-import { PatientsService } from './services/patients.service';
+import { PatientsService, PatientFilters } from './services/patients.service';
 import { ConfirmationModalComponent } from '../../shared/components/confirmation-modal/confirmation-modal.component';
 import { SectionHeaderComponent } from '../../shared/components/section-header/section-header.component';
 import { PatientsListComponent } from './components/patients-list/patients-list.component';
 import { PaginationComponent } from '../../shared/components/pagination/pagination.component';
 import { PatientFormComponent } from './components/patient-form/patient-form.component';
+import { PatientFiltersModalComponent } from './components/patient-filters-modal/patient-filters-modal.component';
 
 type TabType = 'active' | 'inactive';
 
@@ -33,6 +34,7 @@ type TabType = 'active' | 'inactive';
     PatientsListComponent,
     PaginationComponent,
     PatientFormComponent,
+    PatientFiltersModalComponent,
   ],
 })
 export class PatientComponent implements OnInit {
@@ -46,6 +48,10 @@ export class PatientComponent implements OnInit {
   deletingPatient = signal<Patient | null>(null);
   restoringPatient = signal<Patient | null>(null);
   activeTab = signal<TabType>('active');
+
+  // Filters state
+  showFiltersModal = signal(false);
+  currentFilters = signal<PatientFilters>({});
 
   // Separate state for each tab
   activePatients = signal<Patient[]>([]);
@@ -88,7 +94,8 @@ export class PatientComponent implements OnInit {
    * Cargar pacientes activos
    */
   private loadActivePatients(page: number, perPage: number): void {
-    this.patientsService.loadActivePatientsPaginated(page, perPage).subscribe({
+    const filters = this.currentFilters();
+    this.patientsService.loadActivePatientsPaginated(page, perPage, filters).subscribe({
       next: (response) => {
         this.activePatients.set(response.data);
         this.activePagination.set(response.pagination);
@@ -104,7 +111,8 @@ export class PatientComponent implements OnInit {
    * Cargar pacientes eliminados
    */
   private loadDeletedPatients(page: number, perPage: number): void {
-    this.patientsService.loadDeletedPatientsPaginated(page, perPage).subscribe({
+    const filters = this.currentFilters();
+    this.patientsService.loadDeletedPatientsPaginated(page, perPage, filters).subscribe({
       next: (response) => {
         this.deletedPatients.set(response.data);
         this.deletedPagination.set(response.pagination);
@@ -314,5 +322,55 @@ export class PatientComponent implements OnInit {
    */
   trackByPatientId(index: number, patient: Patient): number {
     return patient?.id || index;
+  }
+
+  /**
+   * Open filters modal
+   */
+  openFiltersModal(): void {
+    this.showFiltersModal.set(true);
+  }
+
+  /**
+   * Close filters modal
+   */
+  closeFiltersModal(): void {
+    this.showFiltersModal.set(false);
+  }
+
+  /**
+   * Apply filters and reload data
+   */
+  handleApplyFilters(filters: PatientFilters): void {
+    this.currentFilters.set(filters);
+    this.closeFiltersModal();
+
+    // Reload current tab with filters from page 1
+    this.reloadCurrentTabFromBeginning();
+  }
+
+  /**
+   * Clear all filters and reload data
+   */
+  handleClearFilters(): void {
+    this.currentFilters.set({});
+    this.closeFiltersModal();
+
+    // Reload current tab without filters from page 1
+    this.reloadCurrentTabFromBeginning();
+  }
+
+  /**
+   * Reload current tab from page 1 (used when filters change)
+   */
+  private reloadCurrentTabFromBeginning(): void {
+    const tab = this.activeTab();
+    const perPage = this.paginationData()?.recordsPerPage || 12;
+
+    if (tab === 'active') {
+      this.loadActivePatients(1, perPage);
+    } else {
+      this.loadDeletedPatients(1, perPage);
+    }
   }
 }
