@@ -8,8 +8,8 @@ import {
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { SessionData, SessionUtils } from '../../models/session.model';
-import { CLINIC_CONFIGS, ClinicConfig } from '../../models/clinic-config.model';
+import { SessionData, SessionUtils } from '../../../../shared/models/session.model';
+import { CLINIC_CONFIGS, ClinicConfig } from '../../../../shared/models/clinic-config.model';
 
 /**
  * Session popup component displaying session details with tabs

@@ -1,21 +1,32 @@
-import { Component, Output, EventEmitter, signal, ChangeDetectionStrategy } from '@angular/core';
+import {
+  Component,
+  Output,
+  EventEmitter,
+  signal,
+  ChangeDetectionStrategy,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { SessionData } from '../../models/session.model';
-import { CLINIC_CONFIGS, ClinicConfig } from '../../models/clinic-config.model';
+import {
+  ReactiveFormsModule,
+  FormBuilder,
+  FormGroup,
+  Validators,
+} from '@angular/forms';
+import { SessionData } from '../../../../shared/models/session.model';
+import { CLINIC_CONFIGS } from '../../../../shared/models/clinic-config.model';
 
 /**
  * Modal dialog component for creating new session appointments
- * 
+ *
  * Features:
  * - Reactive forms with validation
  * - Custom dropdowns matching React UI
  * - Real-time form updates with signals
  * - Responsive design with Tailwind CSS
- * 
+ *
  * @example
  * ```html
- * <app-new-session-dialog 
+ * <app-new-session-dialog
  *   (close)="onCloseDialog()"
  *   (sessionDataCreated)="onSessionCreated($event)">
  * </app-new-session-dialog>
@@ -26,18 +37,23 @@ import { CLINIC_CONFIGS, ClinicConfig } from '../../models/clinic-config.model';
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule],
   templateUrl: './new-session-dialog.component.html',
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class NewSessionDialogComponent {
   @Output() close = new EventEmitter<void>();
-  @Output() sessionDataCreated = new EventEmitter<Omit<SessionData['SessionDetailData'], 'session_id' | 'created_at' | 'updated_at'>>();
+  @Output() sessionDataCreated = new EventEmitter<
+    Omit<
+      SessionData['SessionDetailData'],
+      'session_id' | 'created_at' | 'updated_at'
+    >
+  >();
 
   /** Clinic configurations for dropdown options */
   readonly clinicConfigs = CLINIC_CONFIGS;
-  
+
   /** Loading state signal */
   readonly isLoading = signal(false);
-  
+
   /** Error message signal */
   readonly error = signal<string | null>(null);
 
@@ -47,7 +63,7 @@ export class NewSessionDialogComponent {
     clinic: false,
     type: false,
     payment: false,
-    modality: false
+    modality: false,
   });
 
   /** Available session types */
@@ -57,17 +73,26 @@ export class NewSessionDialogComponent {
     'Terapia Familiar',
     'Terapia Grupal',
     'Evaluación Psicológica',
-    'Consulta de Seguimiento'
+    'Consulta de Seguimiento',
   ];
 
   /** Available session modes */
   readonly sessionModes: ('Online' | 'Presencial')[] = ['Presencial', 'Online'];
-  
+
   /** Available payment methods */
-  readonly paymentMethods: ('cash' | 'card' | 'transfer' | 'bizum')[] = ['cash', 'card', 'transfer', 'bizum'];
-  
+  readonly paymentMethods: ('cash' | 'card' | 'transfer' | 'bizum')[] = [
+    'cash',
+    'card',
+    'transfer',
+    'bizum',
+  ];
+
   /** Available payment statuses */
-  readonly paymentStatuses: ('pending' | 'paid' | 'partial')[] = ['pending', 'paid', 'partial'];
+  readonly paymentStatuses: ('pending' | 'paid' | 'partial')[] = [
+    'pending',
+    'paid',
+    'partial',
+  ];
 
   /** Mock patient data */
   readonly patients = [
@@ -76,7 +101,7 @@ export class NewSessionDialogComponent {
     { id: 103, name: 'María Rodríguez' },
     { id: 104, name: 'Juan Martínez' },
     { id: 105, name: 'Laura Sánchez' },
-    { id: 106, name: 'Pedro González' }
+    { id: 106, name: 'Pedro González' },
   ];
 
   /** Reactive form for session data */
@@ -86,7 +111,7 @@ export class NewSessionDialogComponent {
     // Set default date to today
     const today = new Date();
     const formattedDate = today.toISOString().split('T')[0];
-    
+
     // Initialize reactive form
     this.sessionForm = this.fb.group({
       patient_id: ['', Validators.required],
@@ -104,7 +129,7 @@ export class NewSessionDialogComponent {
       cancelled: [false],
       no_show: [false],
       sended: [false],
-      notes: ['']
+      notes: [''],
     });
   }
 
@@ -130,9 +155,9 @@ export class NewSessionDialogComponent {
   onPatientChange(): void {
     const patientId = this.sessionForm.get('patient_id')?.value;
     if (patientId) {
-      const patient = this.patients.find(p => p.id === parseInt(patientId));
+      const patient = this.patients.find((p) => p.id === parseInt(patientId));
       this.sessionForm.patchValue({
-        patient_name: patient ? patient.name : ''
+        patient_name: patient ? patient.name : '',
       });
     }
   }
@@ -147,9 +172,9 @@ export class NewSessionDialogComponent {
       const endDate = new Date();
       endDate.setHours(hours + 1, minutes, 0);
       const endTime = endDate.toTimeString().slice(0, 5);
-      
+
       this.sessionForm.patchValue({
-        end_time: endTime
+        end_time: endTime,
       });
     }
   }
@@ -179,7 +204,10 @@ export class NewSessionDialogComponent {
 
     // Simulate API call
     setTimeout(() => {
-      const sessionData: Omit<SessionData['SessionDetailData'], 'session_id' | 'created_at' | 'updated_at'> = {
+      const sessionData: Omit<
+        SessionData['SessionDetailData'],
+        'session_id' | 'created_at' | 'updated_at'
+      > = {
         session_date: formData.session_date,
         start_time: formData.start_time + ':00',
         end_time: formData.end_time + ':00',
@@ -195,13 +223,15 @@ export class NewSessionDialogComponent {
         notes: formData.notes || undefined,
         PatientData: {
           id: parseInt(formData.patient_id),
-          name: formData.patient_name || this.getPatientName(parseInt(formData.patient_id))
+          name:
+            formData.patient_name ||
+            this.getPatientName(parseInt(formData.patient_id)),
         },
         ClinicDetailData: {
           clinic_id: parseInt(formData.clinic_id),
-          clinic_name: this.getClinicName(parseInt(formData.clinic_id))
+          clinic_name: this.getClinicName(parseInt(formData.clinic_id)),
         },
-        MedicalRecordData: []
+        MedicalRecordData: [],
       };
 
       this.sessionDataCreated.emit(sessionData);
@@ -213,7 +243,7 @@ export class NewSessionDialogComponent {
    * Gets patient name by ID
    */
   getPatientName(patientId: number): string {
-    const patient = this.patients.find(p => p.id === patientId);
+    const patient = this.patients.find((p) => p.id === patientId);
     return patient ? patient.name : `Paciente ${patientId}`;
   }
 
@@ -221,7 +251,7 @@ export class NewSessionDialogComponent {
    * Gets clinic name by ID
    */
   getClinicName(clinicId: number): string {
-    const clinic = this.clinicConfigs.find(c => c.id === clinicId);
+    const clinic = this.clinicConfigs.find((c: any) => c.id === clinicId);
     return clinic ? clinic.name : `Clínica ${clinicId}`;
   }
 
@@ -233,7 +263,7 @@ export class NewSessionDialogComponent {
       cash: 'Efectivo',
       card: 'Tarjeta',
       transfer: 'Transferencia',
-      bizum: 'Bizum'
+      bizum: 'Bizum',
     };
     return paymentMethodTexts[method] || method;
   }
@@ -245,7 +275,7 @@ export class NewSessionDialogComponent {
     const paymentStatusTexts = {
       pending: 'Pendiente',
       paid: 'Pagado',
-      partial: 'Parcial'
+      partial: 'Parcial',
     };
     return paymentStatusTexts[status] || status;
   }
@@ -301,20 +331,25 @@ export class NewSessionDialogComponent {
     this.sessionForm.patchValue({ notes: value });
   }
 
-  toggleDropdown(dropdown: 'patient' | 'clinic' | 'type' | 'payment' | 'modality'): void {
-    this.dropdownStates.update(states => ({
+  toggleDropdown(
+    dropdown: 'patient' | 'clinic' | 'type' | 'payment' | 'modality'
+  ): void {
+    this.dropdownStates.update((states) => ({
       patient: false,
       clinic: false,
       type: false,
       payment: false,
       modality: false,
-      [dropdown]: !states[dropdown]
+      [dropdown]: !states[dropdown],
     }));
   }
 
-  selectOption(dropdown: 'patient' | 'clinic' | 'type' | 'payment' | 'modality', value: string): void {
-    this.dropdownStates.update(states => ({ ...states, [dropdown]: false }));
-    
+  selectOption(
+    dropdown: 'patient' | 'clinic' | 'type' | 'payment' | 'modality',
+    value: string
+  ): void {
+    this.dropdownStates.update((states) => ({ ...states, [dropdown]: false }));
+
     switch (dropdown) {
       case 'patient':
         this.updatePatientId(value);
@@ -337,21 +372,27 @@ export class NewSessionDialogComponent {
   /**
    * Gets display value for dropdown based on current form state
    */
-  getDisplayValue(dropdown: 'patient' | 'clinic' | 'type' | 'payment' | 'modality'): string {
+  getDisplayValue(
+    dropdown: 'patient' | 'clinic' | 'type' | 'payment' | 'modality'
+  ): string {
     const form = this.sessionForm;
-    
+
     switch (dropdown) {
       case 'patient':
         const patientId = form.get('patient_id')?.value;
         if (patientId) {
-          const patient = this.patients.find(p => p.id === parseInt(patientId));
+          const patient = this.patients.find(
+            (p) => p.id === parseInt(patientId)
+          );
           return patient ? patient.name : 'Seleccionar paciente';
         }
         return 'Seleccionar paciente';
       case 'clinic':
         const clinicId = form.get('clinic_id')?.value;
         if (clinicId) {
-          const clinic = this.clinicConfigs.find(c => c.id === parseInt(clinicId));
+          const clinic = this.clinicConfigs.find(
+            (c: any) => c.id === parseInt(clinicId)
+          );
           return clinic ? clinic.name : 'Seleccionar clínica';
         }
         return 'Seleccionar clínica';
@@ -359,7 +400,9 @@ export class NewSessionDialogComponent {
         return form.get('type')?.value || 'Seleccionar tipo';
       case 'payment':
         const paymentMethod = form.get('payment_method')?.value;
-        return paymentMethod ? this.getPaymentMethodText(paymentMethod) : 'Seleccionar método';
+        return paymentMethod
+          ? this.getPaymentMethodText(paymentMethod)
+          : 'Seleccionar método';
       case 'modality':
         return form.get('mode')?.value || 'Seleccionar modalidad';
       default:
