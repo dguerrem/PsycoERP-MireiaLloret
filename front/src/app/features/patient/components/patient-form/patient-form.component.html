@@ -1,7 +1,7 @@
 <!-- Patient Form Modal -->
 @if (isOpen) {
   <div class="fixed inset-0 z-50 bg-black/80 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0">
-    <div class="fixed left-[50%] top-[50%] z-50 grid w-full max-w-4xl translate-x-[-50%] translate-y-[-50%] gap-4 border bg-background p-6 shadow-lg duration-200 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[state=closed]:slide-out-to-left-1/2 data-[state=closed]:slide-out-to-top-[48%] data-[state=open]:slide-in-from-left-1/2 data-[state=open]:slide-in-from-top-[48%] sm:rounded-lg max-h-[90vh] overflow-y-auto">
+    <div class="fixed left-[50%] top-[50%] z-50 grid w-full max-w-6xl translate-x-[-50%] translate-y-[-50%] gap-4 border bg-background p-6 shadow-lg duration-200 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[state=closed]:slide-out-to-left-1/2 data-[state=closed]:slide-out-to-top-[48%] data-[state=open]:slide-in-from-left-1/2 data-[state=open]:slide-in-from-top-[48%] sm:rounded-lg max-h-[90vh] overflow-y-auto">
 
       <!-- Modal Header -->
       <div class="flex flex-col space-y-1.5 text-center sm:text-left">
@@ -11,277 +11,369 @@
       <!-- Modal Content -->
       <form [formGroup]="patientForm" (ngSubmit)="handleSubmit()" class="space-y-6">
 
-        <!-- Información Personal -->
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <label for="name" class="text-sm font-semibold leading-none text-gray-700 peer-disabled:cursor-not-allowed peer-disabled:opacity-70 mb-2 block">
-              Nombre Completo *
-            </label>
-            <input
-              id="name"
-              type="text"
-              formControlName="name"
-              class="flex h-10 w-full rounded-md border border-gray-300 bg-gray-50 px-3 py-2 text-sm text-gray-900 placeholder:text-gray-500 hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-[#0891b2] focus:bg-white focus:border-[#0891b2] disabled:cursor-not-allowed disabled:opacity-50 transition-colors"
-              [class.border-red-500]="getFieldError('name')"
-              [class.focus:ring-red-500]="getFieldError('name')"
-              [class.focus:border-red-500]="getFieldError('name')"
-              placeholder="Ej: Juan Pérez García">
-            @if (getFieldError('name')) {
-              <p class="text-red-500 text-xs mt-1">{{ getFieldError('name') }}</p>
-            }
-          </div>
+        <!-- Información Personal Básica -->
+        <div class="space-y-4">
+          <h3 class="text-lg font-medium text-gray-900">Información Personal</h3>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+              <label for="name" class="text-sm font-semibold leading-none text-gray-700 peer-disabled:cursor-not-allowed peer-disabled:opacity-70 mb-2 block">
+                Nombre *
+              </label>
+              <input
+                id="name"
+                type="text"
+                formControlName="name"
+                class="flex h-10 w-full rounded-md border border-gray-300 bg-gray-50 px-3 py-2 text-sm text-gray-900 placeholder:text-gray-500 hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-[#0891b2] focus:bg-white focus:border-[#0891b2] disabled:cursor-not-allowed disabled:opacity-50 transition-colors"
+                [class.border-red-500]="getFieldError('name')"
+                [class.focus:ring-red-500]="getFieldError('name')"
+                [class.focus:border-red-500]="getFieldError('name')"
+                placeholder="Juan">
+              @if (getFieldError('name')) {
+                <p class="text-red-500 text-xs mt-1">{{ getFieldError('name') }}</p>
+              }
+            </div>
 
-          <div>
-            <label for="email" class="text-sm font-semibold leading-none text-gray-700 peer-disabled:cursor-not-allowed peer-disabled:opacity-70 mb-2 block">
-              Email *
-            </label>
-            <input
-              id="email"
-              type="email"
-              formControlName="email"
-              class="flex h-10 w-full rounded-md border border-gray-300 bg-gray-50 px-3 py-2 text-sm text-gray-900 placeholder:text-gray-500 hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-[#0891b2] focus:bg-white focus:border-[#0891b2] disabled:cursor-not-allowed disabled:opacity-50 transition-colors"
-              [class.border-red-500]="getFieldError('email')"
-              [class.focus:ring-red-500]="getFieldError('email')"
-              [class.focus:border-red-500]="getFieldError('email')"
-              placeholder="juan.perez@email.com">
-            @if (getFieldError('email')) {
-              <p class="text-red-500 text-xs mt-1">{{ getFieldError('email') }}</p>
-            }
-          </div>
+            <div>
+              <label for="surname" class="text-sm font-semibold leading-none text-gray-700 peer-disabled:cursor-not-allowed peer-disabled:opacity-70 mb-2 block">
+                Apellidos *
+              </label>
+              <input
+                id="surname"
+                type="text"
+                formControlName="surname"
+                class="flex h-10 w-full rounded-md border border-gray-300 bg-gray-50 px-3 py-2 text-sm text-gray-900 placeholder:text-gray-500 hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-[#0891b2] focus:bg-white focus:border-[#0891b2] disabled:cursor-not-allowed disabled:opacity-50 transition-colors"
+                [class.border-red-500]="getFieldError('surname')"
+                [class.focus:ring-red-500]="getFieldError('surname')"
+                [class.focus:border-red-500]="getFieldError('surname')"
+                placeholder="Pérez García">
+              @if (getFieldError('surname')) {
+                <p class="text-red-500 text-xs mt-1">{{ getFieldError('surname') }}</p>
+              }
+            </div>
 
-          <div>
-            <label for="phone" class="text-sm font-semibold leading-none text-gray-700 peer-disabled:cursor-not-allowed peer-disabled:opacity-70 mb-2 block">
-              Teléfono *
-            </label>
-            <input
-              id="phone"
-              type="tel"
-              formControlName="phone"
-              class="flex h-10 w-full rounded-md border border-gray-300 bg-gray-50 px-3 py-2 text-sm text-gray-900 placeholder:text-gray-500 hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-[#0891b2] focus:bg-white focus:border-[#0891b2] disabled:cursor-not-allowed disabled:opacity-50 transition-colors"
-              [class.border-red-500]="getFieldError('phone')"
-              [class.focus:ring-red-500]="getFieldError('phone')"
-              [class.focus:border-red-500]="getFieldError('phone')"
-              placeholder="+34 666 123 456">
-            @if (getFieldError('phone')) {
-              <p class="text-red-500 text-xs mt-1">{{ getFieldError('phone') }}</p>
-            }
-          </div>
+            <div>
+              <label for="dni" class="text-sm font-semibold leading-none text-gray-700 peer-disabled:cursor-not-allowed peer-disabled:opacity-70 mb-2 block">
+                DNI *
+              </label>
+              <input
+                id="dni"
+                type="text"
+                formControlName="dni"
+                class="flex h-10 w-full rounded-md border border-gray-300 bg-gray-50 px-3 py-2 text-sm text-gray-900 placeholder:text-gray-500 hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-[#0891b2] focus:bg-white focus:border-[#0891b2] disabled:cursor-not-allowed disabled:opacity-50 transition-colors"
+                [class.border-red-500]="getFieldError('dni')"
+                [class.focus:ring-red-500]="getFieldError('dni')"
+                [class.focus:border-red-500]="getFieldError('dni')"
+                placeholder="12345678A">
+              @if (getFieldError('dni')) {
+                <p class="text-red-500 text-xs mt-1">{{ getFieldError('dni') }}</p>
+              }
+            </div>
 
-          <div>
-            <label for="dni" class="text-sm font-semibold leading-none text-gray-700 peer-disabled:cursor-not-allowed peer-disabled:opacity-70 mb-2 block">
-              DNI *
-            </label>
-            <input
-              id="dni"
-              type="text"
-              formControlName="dni"
-              class="flex h-10 w-full rounded-md border border-gray-300 bg-gray-50 px-3 py-2 text-sm text-gray-900 placeholder:text-gray-500 hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-[#0891b2] focus:bg-white focus:border-[#0891b2] disabled:cursor-not-allowed disabled:opacity-50 transition-colors"
-              [class.border-red-500]="getFieldError('dni')"
-              [class.focus:ring-red-500]="getFieldError('dni')"
-              [class.focus:border-red-500]="getFieldError('dni')"
-              placeholder="12345678A">
-            @if (getFieldError('dni')) {
-              <p class="text-red-500 text-xs mt-1">{{ getFieldError('dni') }}</p>
-            }
-          </div>
+            <div>
+              <label for="email" class="text-sm font-semibold leading-none text-gray-700 peer-disabled:cursor-not-allowed peer-disabled:opacity-70 mb-2 block">
+                Email *
+              </label>
+              <input
+                id="email"
+                type="email"
+                formControlName="email"
+                class="flex h-10 w-full rounded-md border border-gray-300 bg-gray-50 px-3 py-2 text-sm text-gray-900 placeholder:text-gray-500 hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-[#0891b2] focus:bg-white focus:border-[#0891b2] disabled:cursor-not-allowed disabled:opacity-50 transition-colors"
+                [class.border-red-500]="getFieldError('email')"
+                [class.focus:ring-red-500]="getFieldError('email')"
+                [class.focus:border-red-500]="getFieldError('email')"
+                placeholder="juan.perez@email.com">
+              @if (getFieldError('email')) {
+                <p class="text-red-500 text-xs mt-1">{{ getFieldError('email') }}</p>
+              }
+            </div>
 
-          <div>
-            <label for="birth_date" class="text-sm font-semibold leading-none text-gray-700 peer-disabled:cursor-not-allowed peer-disabled:opacity-70 mb-2 block">
-              Fecha de Nacimiento *
-            </label>
-            <input
-              id="birth_date"
-              type="date"
-              formControlName="birth_date"
-              class="flex h-10 w-full rounded-md border border-gray-300 bg-gray-50 px-3 py-2 text-sm text-gray-900 placeholder:text-gray-500 hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-[#0891b2] focus:bg-white focus:border-[#0891b2] disabled:cursor-not-allowed disabled:opacity-50 transition-colors"
-              [class.border-red-500]="getFieldError('birth_date')"
-              [class.focus:ring-red-500]="getFieldError('birth_date')"
-              [class.focus:border-red-500]="getFieldError('birth_date')">
-            @if (getFieldError('birth_date')) {
-              <p class="text-red-500 text-xs mt-1">{{ getFieldError('birth_date') }}</p>
-            }
-          </div>
+            <div>
+              <label for="phone" class="text-sm font-semibold leading-none text-gray-700 peer-disabled:cursor-not-allowed peer-disabled:opacity-70 mb-2 block">
+                Teléfono *
+              </label>
+              <input
+                id="phone"
+                type="tel"
+                formControlName="phone"
+                class="flex h-10 w-full rounded-md border border-gray-300 bg-gray-50 px-3 py-2 text-sm text-gray-900 placeholder:text-gray-500 hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-[#0891b2] focus:bg-white focus:border-[#0891b2] disabled:cursor-not-allowed disabled:opacity-50 transition-colors"
+                [class.border-red-500]="getFieldError('phone')"
+                [class.focus:ring-red-500]="getFieldError('phone')"
+                [class.focus:border-red-500]="getFieldError('phone')"
+                placeholder="+34 666 123 456">
+              @if (getFieldError('phone')) {
+                <p class="text-red-500 text-xs mt-1">{{ getFieldError('phone') }}</p>
+              }
+            </div>
 
-          <div>
-            <label for="address" class="text-sm font-semibold leading-none text-gray-700 peer-disabled:cursor-not-allowed peer-disabled:opacity-70 mb-2 block">
-              Dirección *
-            </label>
-            <input
-              id="address"
-              type="text"
-              formControlName="address"
-              class="flex h-10 w-full rounded-md border border-gray-300 bg-gray-50 px-3 py-2 text-sm text-gray-900 placeholder:text-gray-500 hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-[#0891b2] focus:bg-white focus:border-[#0891b2] disabled:cursor-not-allowed disabled:opacity-50 transition-colors"
-              [class.border-red-500]="getFieldError('address')"
-              [class.focus:ring-red-500]="getFieldError('address')"
-              [class.focus:border-red-500]="getFieldError('address')"
-              placeholder="Calle Mayor 123, Valencia">
-            @if (getFieldError('address')) {
-              <p class="text-red-500 text-xs mt-1">{{ getFieldError('address') }}</p>
-            }
-          </div>
-        </div>
+            <div>
+              <label for="birth_date" class="text-sm font-semibold leading-none text-gray-700 peer-disabled:cursor-not-allowed peer-disabled:opacity-70 mb-2 block">
+                Fecha de Nacimiento *
+              </label>
+              <input
+                id="birth_date"
+                type="date"
+                formControlName="birth_date"
+                (change)="onBirthDateChange()"
+                class="flex h-10 w-full rounded-md border border-gray-300 bg-gray-50 px-3 py-2 text-sm text-gray-900 placeholder:text-gray-500 hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-[#0891b2] focus:bg-white focus:border-[#0891b2] disabled:cursor-not-allowed disabled:opacity-50 transition-colors"
+                [class.border-red-500]="getFieldError('birth_date')"
+                [class.focus:ring-red-500]="getFieldError('birth_date')"
+                [class.focus:border-red-500]="getFieldError('birth_date')">
+              @if (getFieldError('birth_date')) {
+                <p class="text-red-500 text-xs mt-1">{{ getFieldError('birth_date') }}</p>
+              }
+            </div>
 
-        <!-- Estado y Tipo de Sesión -->
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <label for="status" class="text-sm font-semibold leading-none text-gray-700 peer-disabled:cursor-not-allowed peer-disabled:opacity-70 mb-2 block">
-              Estado *
-            </label>
-            <select
-              id="status"
-              formControlName="status"
-              class="flex h-10 w-full rounded-md border border-gray-300 bg-gray-50 px-3 py-2 text-sm text-gray-900 hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-[#0891b2] focus:bg-white focus:border-[#0891b2] disabled:cursor-not-allowed disabled:opacity-50 transition-colors">
-              <option value="active">Activo</option>
-              <option value="inactive">Inactivo</option>
-            </select>
-          </div>
+            <div>
+              <label for="gender" class="text-sm font-semibold leading-none text-gray-700 peer-disabled:cursor-not-allowed peer-disabled:opacity-70 mb-2 block">
+                Sexo *
+              </label>
+              <select
+                id="gender"
+                formControlName="gender"
+                class="flex h-10 w-full rounded-md border border-gray-300 bg-gray-50 px-3 py-2 text-sm text-gray-900 hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-[#0891b2] focus:bg-white focus:border-[#0891b2] disabled:cursor-not-allowed disabled:opacity-50 transition-colors"
+                [class.border-red-500]="getFieldError('gender')"
+                [class.focus:ring-red-500]="getFieldError('gender')"
+                [class.focus:border-red-500]="getFieldError('gender')">
+                <option value="">Seleccionar...</option>
+                <option value="masculino">Masculino</option>
+                <option value="femenino">Femenino</option>
+                <option value="otro">Otro</option>
+              </select>
+              @if (getFieldError('gender')) {
+                <p class="text-red-500 text-xs mt-1">{{ getFieldError('gender') }}</p>
+              }
+            </div>
 
-          <div>
-            <label for="session_type" class="text-sm font-semibold leading-none text-gray-700 peer-disabled:cursor-not-allowed peer-disabled:opacity-70 mb-2 block">
-              Tipo de Sesión *
-            </label>
-            <select
-              id="session_type"
-              formControlName="session_type"
-              class="flex h-10 w-full rounded-md border border-gray-300 bg-gray-50 px-3 py-2 text-sm text-gray-900 hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-[#0891b2] focus:bg-white focus:border-[#0891b2] disabled:cursor-not-allowed disabled:opacity-50 transition-colors">
-              <option value="individual">Individual</option>
-              <option value="group">Grupal</option>
-            </select>
-          </div>
-        </div>
+            <div>
+              <label for="occupation" class="text-sm font-semibold leading-none text-gray-700 peer-disabled:cursor-not-allowed peer-disabled:opacity-70 mb-2 block">
+                Escuela/Trabajo *
+              </label>
+              <input
+                id="occupation"
+                type="text"
+                formControlName="occupation"
+                class="flex h-10 w-full rounded-md border border-gray-300 bg-gray-50 px-3 py-2 text-sm text-gray-900 placeholder:text-gray-500 hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-[#0891b2] focus:bg-white focus:border-[#0891b2] disabled:cursor-not-allowed disabled:opacity-50 transition-colors"
+                [class.border-red-500]="getFieldError('occupation')"
+                [class.focus:ring-red-500]="getFieldError('occupation')"
+                [class.focus:border-red-500]="getFieldError('occupation')"
+                placeholder="Estudiante / Ingeniero / etc.">
+              @if (getFieldError('occupation')) {
+                <p class="text-red-500 text-xs mt-1">{{ getFieldError('occupation') }}</p>
+              }
+            </div>
 
-        <!-- Contacto de Emergencia -->
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <label for="emergency_contact_name" class="text-sm font-semibold leading-none text-gray-700 peer-disabled:cursor-not-allowed peer-disabled:opacity-70 mb-2 block">
-              Contacto de Emergencia *
-            </label>
-            <input
-              id="emergency_contact_name"
-              type="text"
-              formControlName="emergency_contact_name"
-              class="flex h-10 w-full rounded-md border border-gray-300 bg-gray-50 px-3 py-2 text-sm text-gray-900 placeholder:text-gray-500 hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-[#0891b2] focus:bg-white focus:border-[#0891b2] disabled:cursor-not-allowed disabled:opacity-50 transition-colors"
-              [class.border-red-500]="getFieldError('emergency_contact_name')"
-              [class.focus:ring-red-500]="getFieldError('emergency_contact_name')"
-              [class.focus:border-red-500]="getFieldError('emergency_contact_name')"
-              placeholder="María Pérez">
-            @if (getFieldError('emergency_contact_name')) {
-              <p class="text-red-500 text-xs mt-1">{{ getFieldError('emergency_contact_name') }}</p>
-            }
-          </div>
-
-          <div>
-            <label for="emergency_contact_phone" class="text-sm font-semibold leading-none text-gray-700 peer-disabled:cursor-not-allowed peer-disabled:opacity-70 mb-2 block">
-              Teléfono de Emergencia *
-            </label>
-            <input
-              id="emergency_contact_phone"
-              type="tel"
-              formControlName="emergency_contact_phone"
-              class="flex h-10 w-full rounded-md border border-gray-300 bg-gray-50 px-3 py-2 text-sm text-gray-900 placeholder:text-gray-500 hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-[#0891b2] focus:bg-white focus:border-[#0891b2] disabled:cursor-not-allowed disabled:opacity-50 transition-colors"
-              [class.border-red-500]="getFieldError('emergency_contact_phone')"
-              [class.focus:ring-red-500]="getFieldError('emergency_contact_phone')"
-              [class.focus:border-red-500]="getFieldError('emergency_contact_phone')"
-              placeholder="+34 666 987 654">
-            @if (getFieldError('emergency_contact_phone')) {
-              <p class="text-red-500 text-xs mt-1">{{ getFieldError('emergency_contact_phone') }}</p>
-            }
+            <!-- Indicador de menor/mayor de edad -->
+            <div class="md:col-span-1">
+              <label class="text-sm font-semibold leading-none text-gray-700 mb-2 block">
+                Edad
+              </label>
+              <div class="flex items-center h-10 px-3 py-2 text-sm bg-gray-100 rounded-md border border-gray-300">
+                <span class="font-medium"
+                      [class.text-amber-600]="patientForm.get('is_minor')?.value"
+                      [class.text-green-600]="!patientForm.get('is_minor')?.value">
+                  {{ patientForm.get('is_minor')?.value ? 'Menor de edad' : 'Mayor de edad' }}
+                </span>
+              </div>
+            </div>
           </div>
         </div>
 
-        <!-- Información Médica -->
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <label for="medical_history" class="text-sm font-semibold leading-none text-gray-700 peer-disabled:cursor-not-allowed peer-disabled:opacity-70 mb-2 block">
-              Historial Médico
-            </label>
-            <textarea
-              id="medical_history"
-              formControlName="medical_history"
-              rows="3"
-              class="flex w-full rounded-md border border-gray-300 bg-gray-50 px-3 py-2 text-sm text-gray-900 placeholder:text-gray-500 hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-[#0891b2] focus:bg-white focus:border-[#0891b2] disabled:cursor-not-allowed disabled:opacity-50 transition-colors resize-none"
-              placeholder="Antecedentes de ansiedad..."></textarea>
-          </div>
+        <!-- Dirección -->
+        <div class="space-y-4">
+          <h3 class="text-lg font-medium text-gray-900">Dirección</h3>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+              <label for="street" class="text-sm font-semibold leading-none text-gray-700 peer-disabled:cursor-not-allowed peer-disabled:opacity-70 mb-2 block">
+                Calle *
+              </label>
+              <input
+                id="street"
+                type="text"
+                formControlName="street"
+                class="flex h-10 w-full rounded-md border border-gray-300 bg-gray-50 px-3 py-2 text-sm text-gray-900 placeholder:text-gray-500 hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-[#0891b2] focus:bg-white focus:border-[#0891b2] disabled:cursor-not-allowed disabled:opacity-50 transition-colors"
+                [class.border-red-500]="getFieldError('street')"
+                [class.focus:ring-red-500]="getFieldError('street')"
+                [class.focus:border-red-500]="getFieldError('street')"
+                placeholder="Calle Mayor">
+              @if (getFieldError('street')) {
+                <p class="text-red-500 text-xs mt-1">{{ getFieldError('street') }}</p>
+              }
+            </div>
 
-          <div>
-            <label for="current_medication" class="text-sm font-semibold leading-none text-gray-700 peer-disabled:cursor-not-allowed peer-disabled:opacity-70 mb-2 block">
-              Medicación Actual
-            </label>
-            <textarea
-              id="current_medication"
-              formControlName="current_medication"
-              rows="3"
-              class="flex w-full rounded-md border border-gray-300 bg-gray-50 px-3 py-2 text-sm text-gray-900 placeholder:text-gray-500 hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-[#0891b2] focus:bg-white focus:border-[#0891b2] disabled:cursor-not-allowed disabled:opacity-50 transition-colors resize-none"
-              placeholder="Sertralina 50mg..."></textarea>
-          </div>
+            <div>
+              <label for="number" class="text-sm font-semibold leading-none text-gray-700 peer-disabled:cursor-not-allowed peer-disabled:opacity-70 mb-2 block">
+                Número *
+              </label>
+              <input
+                id="number"
+                type="text"
+                formControlName="number"
+                class="flex h-10 w-full rounded-md border border-gray-300 bg-gray-50 px-3 py-2 text-sm text-gray-900 placeholder:text-gray-500 hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-[#0891b2] focus:bg-white focus:border-[#0891b2] disabled:cursor-not-allowed disabled:opacity-50 transition-colors"
+                [class.border-red-500]="getFieldError('number')"
+                [class.focus:ring-red-500]="getFieldError('number')"
+                [class.focus:border-red-500]="getFieldError('number')"
+                placeholder="123">
+              @if (getFieldError('number')) {
+                <p class="text-red-500 text-xs mt-1">{{ getFieldError('number') }}</p>
+              }
+            </div>
 
-          <div>
-            <label for="allergies" class="text-sm font-semibold leading-none text-gray-700 peer-disabled:cursor-not-allowed peer-disabled:opacity-70 mb-2 block">
-              Alergias
-            </label>
-            <input
-              id="allergies"
-              type="text"
-              formControlName="allergies"
-              class="flex h-10 w-full rounded-md border border-gray-300 bg-gray-50 px-3 py-2 text-sm text-gray-900 placeholder:text-gray-500 hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-[#0891b2] focus:bg-white focus:border-[#0891b2] disabled:cursor-not-allowed disabled:opacity-50 transition-colors"
-              placeholder="Penicilina...">
-          </div>
+            <div>
+              <label for="door" class="text-sm font-semibold leading-none text-gray-700 peer-disabled:cursor-not-allowed peer-disabled:opacity-70 mb-2 block">
+                Puerta
+              </label>
+              <input
+                id="door"
+                type="text"
+                formControlName="door"
+                class="flex h-10 w-full rounded-md border border-gray-300 bg-gray-50 px-3 py-2 text-sm text-gray-900 placeholder:text-gray-500 hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-[#0891b2] focus:bg-white focus:border-[#0891b2] disabled:cursor-not-allowed disabled:opacity-50 transition-colors"
+                placeholder="2º A">
+            </div>
 
-          <div>
-            <label for="referred_by" class="text-sm font-semibold leading-none text-gray-700 peer-disabled:cursor-not-allowed peer-disabled:opacity-70 mb-2 block">
-              Referido por
-            </label>
-            <input
-              id="referred_by"
-              type="text"
-              formControlName="referred_by"
-              class="flex h-10 w-full rounded-md border border-gray-300 bg-gray-50 px-3 py-2 text-sm text-gray-900 placeholder:text-gray-500 hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-[#0891b2] focus:bg-white focus:border-[#0891b2] disabled:cursor-not-allowed disabled:opacity-50 transition-colors"
-              placeholder="Dr. Smith...">
+            <div>
+              <label for="postal_code" class="text-sm font-semibold leading-none text-gray-700 peer-disabled:cursor-not-allowed peer-disabled:opacity-70 mb-2 block">
+                Código Postal *
+              </label>
+              <input
+                id="postal_code"
+                type="text"
+                formControlName="postal_code"
+                class="flex h-10 w-full rounded-md border border-gray-300 bg-gray-50 px-3 py-2 text-sm text-gray-900 placeholder:text-gray-500 hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-[#0891b2] focus:bg-white focus:border-[#0891b2] disabled:cursor-not-allowed disabled:opacity-50 transition-colors"
+                [class.border-red-500]="getFieldError('postal_code')"
+                [class.focus:ring-red-500]="getFieldError('postal_code')"
+                [class.focus:border-red-500]="getFieldError('postal_code')"
+                placeholder="28001">
+              @if (getFieldError('postal_code')) {
+                <p class="text-red-500 text-xs mt-1">{{ getFieldError('postal_code') }}</p>
+              }
+            </div>
+
+            <div>
+              <label for="city" class="text-sm font-semibold leading-none text-gray-700 peer-disabled:cursor-not-allowed peer-disabled:opacity-70 mb-2 block">
+                Ciudad *
+              </label>
+              <input
+                id="city"
+                type="text"
+                formControlName="city"
+                class="flex h-10 w-full rounded-md border border-gray-300 bg-gray-50 px-3 py-2 text-sm text-gray-900 placeholder:text-gray-500 hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-[#0891b2] focus:bg-white focus:border-[#0891b2] disabled:cursor-not-allowed disabled:opacity-50 transition-colors"
+                [class.border-red-500]="getFieldError('city')"
+                [class.focus:ring-red-500]="getFieldError('city')"
+                [class.focus:border-red-500]="getFieldError('city')"
+                placeholder="Madrid">
+              @if (getFieldError('city')) {
+                <p class="text-red-500 text-xs mt-1">{{ getFieldError('city') }}</p>
+              }
+            </div>
+
+            <div>
+              <label for="province" class="text-sm font-semibold leading-none text-gray-700 peer-disabled:cursor-not-allowed peer-disabled:opacity-70 mb-2 block">
+                Provincia *
+              </label>
+              <input
+                id="province"
+                type="text"
+                formControlName="province"
+                class="flex h-10 w-full rounded-md border border-gray-300 bg-gray-50 px-3 py-2 text-sm text-gray-900 placeholder:text-gray-500 hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-[#0891b2] focus:bg-white focus:border-[#0891b2] disabled:cursor-not-allowed disabled:opacity-50 transition-colors"
+                [class.border-red-500]="getFieldError('province')"
+                [class.focus:ring-red-500]="getFieldError('province')"
+                [class.focus:border-red-500]="getFieldError('province')"
+                placeholder="Madrid">
+              @if (getFieldError('province')) {
+                <p class="text-red-500 text-xs mt-1">{{ getFieldError('province') }}</p>
+              }
+            </div>
           </div>
         </div>
 
-        <!-- Información del Seguro -->
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <label for="insurance_provider" class="text-sm font-semibold leading-none text-gray-700 peer-disabled:cursor-not-allowed peer-disabled:opacity-70 mb-2 block">
-              Aseguradora
-            </label>
-            <input
-              id="insurance_provider"
-              type="text"
-              formControlName="insurance_provider"
-              class="flex h-10 w-full rounded-md border border-gray-300 bg-gray-50 px-3 py-2 text-sm text-gray-900 placeholder:text-gray-500 hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-[#0891b2] focus:bg-white focus:border-[#0891b2] disabled:cursor-not-allowed disabled:opacity-50 transition-colors"
-              placeholder="Sanitas...">
-          </div>
+        <!-- Información del Tratamiento -->
+        <div class="space-y-4">
+          <h3 class="text-lg font-medium text-gray-900">Información del Tratamiento</h3>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label for="session_price" class="text-sm font-semibold leading-none text-gray-700 peer-disabled:cursor-not-allowed peer-disabled:opacity-70 mb-2 block">
+                Precio de la Sesión (€) *
+              </label>
+              <input
+                id="session_price"
+                type="number"
+                step="0.01"
+                min="0"
+                formControlName="session_price"
+                class="flex h-10 w-full rounded-md border border-gray-300 bg-gray-50 px-3 py-2 text-sm text-gray-900 placeholder:text-gray-500 hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-[#0891b2] focus:bg-white focus:border-[#0891b2] disabled:cursor-not-allowed disabled:opacity-50 transition-colors"
+                [class.border-red-500]="getFieldError('session_price')"
+                [class.focus:ring-red-500]="getFieldError('session_price')"
+                [class.focus:border-red-500]="getFieldError('session_price')"
+                placeholder="50.00">
+              @if (getFieldError('session_price')) {
+                <p class="text-red-500 text-xs mt-1">{{ getFieldError('session_price') }}</p>
+              }
+            </div>
 
-          <div>
-            <label for="insurance_number" class="text-sm font-semibold leading-none text-gray-700 peer-disabled:cursor-not-allowed peer-disabled:opacity-70 mb-2 block">
-              Número de Póliza
-            </label>
-            <input
-              id="insurance_number"
-              type="text"
-              formControlName="insurance_number"
-              class="flex h-10 w-full rounded-md border border-gray-300 bg-gray-50 px-3 py-2 text-sm text-gray-900 placeholder:text-gray-500 hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-[#0891b2] focus:bg-white focus:border-[#0891b2] disabled:cursor-not-allowed disabled:opacity-50 transition-colors"
-              placeholder="POL123456789...">
-          </div>
-        </div>
+            <div>
+              <label for="clinic_id" class="text-sm font-semibold leading-none text-gray-700 peer-disabled:cursor-not-allowed peer-disabled:opacity-70 mb-2 block">
+                Clínica *
+              </label>
+              <select
+                id="clinic_id"
+                formControlName="clinic_id"
+                class="flex h-10 w-full rounded-md border border-gray-300 bg-gray-50 px-3 py-2 text-sm text-gray-900 hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-[#0891b2] focus:bg-white focus:border-[#0891b2] disabled:cursor-not-allowed disabled:opacity-50 transition-colors"
+                [class.border-red-500]="getFieldError('clinic_id')"
+                [class.focus:ring-red-500]="getFieldError('clinic_id')"
+                [class.focus:border-red-500]="getFieldError('clinic_id')">
+                <option value="">Seleccionar clínica...</option>
+                @for (clinic of clinics; track clinic.id) {
+                  <option [value]="clinic.id">{{ clinic.name }}</option>
+                }
+              </select>
+              @if (getFieldError('clinic_id')) {
+                <p class="text-red-500 text-xs mt-1">{{ getFieldError('clinic_id') }}</p>
+              }
+            </div>
 
-        <!-- Notas -->
-        <div>
-          <label for="notes" class="text-sm font-semibold leading-none text-gray-700 peer-disabled:cursor-not-allowed peer-disabled:opacity-70 mb-2 block">
-            Notas Adicionales
-          </label>
-          <textarea
-            id="notes"
-            formControlName="notes"
-            rows="3"
-            class="flex w-full rounded-md border border-gray-300 bg-gray-50 px-3 py-2 text-sm text-gray-900 placeholder:text-gray-500 hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-[#0891b2] focus:bg-white focus:border-[#0891b2] disabled:cursor-not-allowed disabled:opacity-50 transition-colors resize-none"
-            placeholder="Paciente muy colaborativo..."></textarea>
+            <div>
+              <label for="treatment_start_date" class="text-sm font-semibold leading-none text-gray-700 peer-disabled:cursor-not-allowed peer-disabled:opacity-70 mb-2 block">
+                Fecha Inicio Tratamiento *
+              </label>
+              <input
+                id="treatment_start_date"
+                type="date"
+                formControlName="treatment_start_date"
+                class="flex h-10 w-full rounded-md border border-gray-300 bg-gray-50 px-3 py-2 text-sm text-gray-900 placeholder:text-gray-500 hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-[#0891b2] focus:bg-white focus:border-[#0891b2] disabled:cursor-not-allowed disabled:opacity-50 transition-colors"
+                [class.border-red-500]="getFieldError('treatment_start_date')"
+                [class.focus:ring-red-500]="getFieldError('treatment_start_date')"
+                [class.focus:border-red-500]="getFieldError('treatment_start_date')">
+              @if (getFieldError('treatment_start_date')) {
+                <p class="text-red-500 text-xs mt-1">{{ getFieldError('treatment_start_date') }}</p>
+              }
+            </div>
+
+            <div>
+              <label for="treatment_status" class="text-sm font-semibold leading-none text-gray-700 peer-disabled:cursor-not-allowed peer-disabled:opacity-70 mb-2 block">
+                Estado del Tratamiento *
+              </label>
+              <select
+                id="treatment_status"
+                formControlName="treatment_status"
+                class="flex h-10 w-full rounded-md border border-gray-300 bg-gray-50 px-3 py-2 text-sm text-gray-900 hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-[#0891b2] focus:bg-white focus:border-[#0891b2] disabled:cursor-not-allowed disabled:opacity-50 transition-colors"
+                [class.border-red-500]="getFieldError('treatment_status')"
+                [class.focus:ring-red-500]="getFieldError('treatment_status')"
+                [class.focus:border-red-500]="getFieldError('treatment_status')">
+                <option value="en_curso">En curso</option>
+                <option value="fin_tratamiento">Fin del tratamiento</option>
+                <option value="en_pausa">En pausa</option>
+                <option value="abandono">Abandono</option>
+                <option value="derivacion">Derivación</option>
+              </select>
+              @if (getFieldError('treatment_status')) {
+                <p class="text-red-500 text-xs mt-1">{{ getFieldError('treatment_status') }}</p>
+              }
+            </div>
+          </div>
         </div>
 
         <!-- Buttons -->
-        <div class="flex gap-2 pt-4">
+        <div class="flex gap-2 pt-6">
           <button
             type="button"
             class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-gray-300 bg-gray-50 hover:border-gray-400 hover:bg-gray-100 h-10 px-4 py-2 flex-1"

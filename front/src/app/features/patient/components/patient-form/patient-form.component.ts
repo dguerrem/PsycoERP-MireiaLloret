@@ -16,6 +16,7 @@ import {
 } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { Patient } from '../../../../shared/models/patient.model';
+import { Clinic } from '../../../clinics/models/clinic.model';
 
 @Component({
   selector: 'app-patient-form',
@@ -27,6 +28,7 @@ import { Patient } from '../../../../shared/models/patient.model';
 export class PatientFormComponent implements OnInit, OnChanges {
   @Input() isOpen: boolean = false;
   @Input() patient: Patient | null = null;
+  @Input() clinics: Clinic[] = [];
 
   @Output() onSave = new EventEmitter<Patient>();
   @Output() onCancel = new EventEmitter<void>();
@@ -53,23 +55,32 @@ export class PatientFormComponent implements OnInit, OnChanges {
 
   private initializeForm(): void {
     this.patientForm = this.fb.group({
+      // Datos personales básicos
       name: ['', [Validators.required, Validators.minLength(2)]],
+      surname: ['', [Validators.required, Validators.minLength(2)]],
       email: ['', [Validators.required, Validators.email]],
       phone: ['', [Validators.required, Validators.minLength(9)]],
       dni: ['', [Validators.required, Validators.minLength(8)]],
-      status: ['active', [Validators.required]],
-      session_type: ['individual', [Validators.required]],
-      address: ['', [Validators.required, Validators.minLength(5)]],
       birth_date: ['', [Validators.required]],
-      emergency_contact_name: ['', [Validators.required]],
-      emergency_contact_phone: ['', [Validators.required]],
-      medical_history: [''],
-      current_medication: [''],
-      allergies: [''],
-      referred_by: [''],
-      insurance_provider: [''],
-      insurance_number: [''],
-      notes: [''],
+      gender: ['', [Validators.required]],
+      occupation: ['', [Validators.required]],
+
+      // Dirección completa
+      street: ['', [Validators.required]],
+      number: ['', [Validators.required]],
+      door: [''],
+      postal_code: ['', [Validators.required, Validators.pattern(/^[0-9]{5}$/)]],
+      city: ['', [Validators.required]],
+      province: ['', [Validators.required]],
+
+      // Datos del tratamiento
+      session_price: ['', [Validators.required, Validators.min(0)]],
+      clinic_id: ['', [Validators.required]],
+      treatment_start_date: ['', [Validators.required]],
+      treatment_status: ['en_curso', [Validators.required]],
+
+      // Campos automáticos
+      is_minor: [false],
       created_at: [''],
       updated_at: [''],
     });
@@ -79,22 +90,24 @@ export class PatientFormComponent implements OnInit, OnChanges {
     if (this.patient) {
       this.patientForm.patchValue({
         name: this.patient.name,
+        surname: this.patient.surname || '',
         email: this.patient.email,
         phone: this.patient.phone,
         dni: this.patient.dni,
-        status: this.patient.status,
-        session_type: this.patient.session_type,
-        address: this.patient.address,
         birth_date: this.patient.birth_date,
-        emergency_contact_name: this.patient.emergency_contact_name,
-        emergency_contact_phone: this.patient.emergency_contact_phone,
-        medical_history: this.patient.medical_history,
-        current_medication: this.patient.current_medication,
-        allergies: this.patient.allergies,
-        referred_by: this.patient.referred_by,
-        insurance_provider: this.patient.insurance_provider,
-        insurance_number: this.patient.insurance_number,
-        notes: this.patient.notes,
+        gender: this.patient.gender || '',
+        occupation: this.patient.occupation || '',
+        street: this.patient.street || '',
+        number: this.patient.number || '',
+        door: this.patient.door || '',
+        postal_code: this.patient.postal_code || '',
+        city: this.patient.city || '',
+        province: this.patient.province || '',
+        session_price: this.patient.session_price || '',
+        clinic_id: this.patient.clinic_id || '',
+        treatment_start_date: this.patient.treatment_start_date || '',
+        treatment_status: this.patient.treatment_status || 'en_curso',
+        is_minor: this.patient.is_minor || false,
         created_at: this.patient.created_at,
         updated_at: this.patient.updated_at,
       });
@@ -106,22 +119,24 @@ export class PatientFormComponent implements OnInit, OnChanges {
   private resetForm(): void {
     this.patientForm.reset({
       name: '',
+      surname: '',
       email: '',
       phone: '',
       dni: '',
-      status: 'active',
-      session_type: 'individual',
-      address: '',
       birth_date: '',
-      emergency_contact_name: '',
-      emergency_contact_phone: '',
-      medical_history: '',
-      current_medication: '',
-      allergies: '',
-      referred_by: '',
-      insurance_provider: '',
-      insurance_number: '',
-      notes: '',
+      gender: '',
+      occupation: '',
+      street: '',
+      number: '',
+      door: '',
+      postal_code: '',
+      city: '',
+      province: '',
+      session_price: '',
+      clinic_id: '',
+      treatment_start_date: '',
+      treatment_status: 'en_curso',
+      is_minor: false,
       created_at: '',
       updated_at: '',
     });
@@ -182,25 +197,52 @@ export class PatientFormComponent implements OnInit, OnChanges {
     return null;
   }
 
+  /**
+   * Calculate if patient is minor based on birth date
+   */
+  calculateIsMinor(): void {
+    const birthDate = this.patientForm.get('birth_date')?.value;
+    if (birthDate) {
+      const today = new Date();
+      const birth = new Date(birthDate);
+      const age = today.getFullYear() - birth.getFullYear();
+      const monthDiff = today.getMonth() - birth.getMonth();
+      const dayDiff = today.getDate() - birth.getDate();
+
+      const actualAge = age - (monthDiff < 0 || (monthDiff === 0 && dayDiff < 0) ? 1 : 0);
+      const isMinor = actualAge < 18;
+
+      this.patientForm.patchValue({ is_minor: isMinor });
+    }
+  }
+
+  /**
+   * Handle birth date change to calculate if minor
+   */
+  onBirthDateChange(): void {
+    this.calculateIsMinor();
+  }
+
   private getFieldLabel(fieldName: string): string {
     const labels: { [key: string]: string } = {
-      name: 'Nombre completo',
+      name: 'Nombre',
+      surname: 'Apellidos',
       email: 'Email',
       phone: 'Teléfono',
       dni: 'DNI',
-      status: 'Estado',
-      session_type: 'Tipo de sesión',
-      address: 'Dirección',
       birth_date: 'Fecha de nacimiento',
-      emergency_contact_name: 'Contacto de emergencia',
-      emergency_contact_phone: 'Teléfono de emergencia',
-      medical_history: 'Historial médico',
-      current_medication: 'Medicación actual',
-      allergies: 'Alergias',
-      referred_by: 'Referido por',
-      insurance_provider: 'Aseguradora',
-      insurance_number: 'Número de póliza',
-      notes: 'Notas',
+      gender: 'Sexo',
+      occupation: 'Escuela/Trabajo',
+      street: 'Calle',
+      number: 'Número',
+      door: 'Puerta',
+      postal_code: 'Código postal',
+      city: 'Ciudad',
+      province: 'Provincia',
+      session_price: 'Precio de la sesión',
+      clinic_id: 'Clínica',
+      treatment_start_date: 'Fecha inicio tratamiento',
+      treatment_status: 'Estado del tratamiento',
     };
     return labels[fieldName] || fieldName;
   }

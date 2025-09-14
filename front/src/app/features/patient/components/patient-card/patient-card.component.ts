@@ -27,7 +27,8 @@ export class PatientCardComponent {
   /**
    * Get status color for badge
    */
-  getStatusColor(status: string): string {
+  getStatusColor(status?: string): string {
+    if (!status) return 'bg-gray-100 text-gray-800';
     switch (status) {
       case 'active':
         return 'bg-green-100 text-green-800';
@@ -45,7 +46,8 @@ export class PatientCardComponent {
   /**
    * Get status label in Spanish
    */
-  getStatusLabel(status: string): string {
+  getStatusLabel(status?: string): string {
+    if (!status) return 'Sin estado';
     switch (status) {
       case 'active':
         return 'Activo';
@@ -63,7 +65,8 @@ export class PatientCardComponent {
   /**
    * Format date for display
    */
-  formatDate(dateString: string): string {
+  formatDate(dateString?: string): string {
+    if (!dateString) return 'N/A';
     const date = new Date(dateString);
     return date.toLocaleDateString('es-ES', {
       day: 'numeric',
@@ -75,7 +78,8 @@ export class PatientCardComponent {
   /**
    * Capitalize session type
    */
-  capitalizeSessionType(sessionType: string): string {
+  capitalizeSessionType(sessionType?: string): string {
+    if (!sessionType) return 'N/A';
     const typeMap: { [key: string]: string } = {
       'individual': 'Individual',
       'couples': 'Pareja',
