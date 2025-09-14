@@ -24,31 +24,34 @@ export class ClinicCardComponent {
   @Output() onRestore = new EventEmitter<Clinic>();
 
   /**
-   * Get status color for badge
+   * Get darker border color based on clinic color
    */
-  getStatusColor(status: string): string {
-    switch (status) {
-      case 'active':
-        return 'bg-green-100 text-green-800';
-      case 'inactive':
-        return 'bg-gray-100 text-gray-800';
-      default:
-        return 'bg-gray-100 text-gray-800';
-    }
+  getBorderColor(clinicColor: string): string {
+    // Convert hex to RGB and darken it
+    const hex = clinicColor.replace('#', '');
+    const r = parseInt(hex.substring(0, 2), 16);
+    const g = parseInt(hex.substring(2, 4), 16);
+    const b = parseInt(hex.substring(4, 6), 16);
+
+    // Darken by reducing RGB values
+    const darkerR = Math.max(0, r - 40);
+    const darkerG = Math.max(0, g - 40);
+    const darkerB = Math.max(0, b - 40);
+
+    return `rgb(${darkerR}, ${darkerG}, ${darkerB})`;
   }
 
   /**
-   * Get status label in Spanish
+   * Get background gradient based on clinic color
    */
-  getStatusLabel(status: string): string {
-    switch (status) {
-      case 'active':
-        return 'Activa';
-      case 'inactive':
-        return 'Inactiva';
-      default:
-        return status;
-    }
+  getBackgroundStyle(clinicColor: string): string {
+    // Convert hex to RGB for gradient
+    const hex = clinicColor.replace('#', '');
+    const r = parseInt(hex.substring(0, 2), 16);
+    const g = parseInt(hex.substring(2, 4), 16);
+    const b = parseInt(hex.substring(4, 6), 16);
+
+    return `linear-gradient(135deg, rgba(${r}, ${g}, ${b}, 0.082) 0%, rgba(${r}, ${g}, ${b}, 0.145) 100%)`;
   }
 
   /**

@@ -55,7 +55,7 @@ export class ClinicFormComponent implements OnInit, OnChanges {
     this.clinicaForm = this.fb.group({
       name: ['', [Validators.required, Validators.minLength(2)]],
       clinic_color: ['#3b82f6', [Validators.required]],
-      status: ['active', [Validators.required]],
+      status: ['active'],
     });
   }
 
@@ -64,7 +64,7 @@ export class ClinicFormComponent implements OnInit, OnChanges {
       this.clinicaForm.patchValue({
         name: this.clinica.name,
         clinic_color: this.clinica.clinic_color,
-        status: this.clinica.status,
+        status: 'active',
       });
     } else {
       this.resetForm();
@@ -135,7 +135,6 @@ export class ClinicFormComponent implements OnInit, OnChanges {
     const labels: { [key: string]: string } = {
       name: 'Nombre de la clínica',
       clinic_color: 'Color identificativo',
-      status: 'Estado',
     };
     return labels[fieldName] || fieldName;
   }
