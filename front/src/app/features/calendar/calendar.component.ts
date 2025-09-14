@@ -1,10 +1,18 @@
-import { Component, inject, signal, ChangeDetectionStrategy } from '@angular/core';
+import {
+  Component,
+  inject,
+  signal,
+  ChangeDetectionStrategy,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { SessionData, SessionUtils } from '../../shared/models/session.model';
-import { CLINIC_CONFIGS, ClinicConfig } from '../../shared/models/clinic-config.model';
-import { SessionPopupComponent } from '../../shared/components/session-popup/session-popup.component';
-import { NewSessionDialogComponent } from '../../shared/components/new-session-dialog/new-session-dialog.component';
+import {
+  CLINIC_CONFIGS,
+  ClinicConfig,
+} from '../../shared/models/clinic-config.model';
 import { CalendarService } from './services/calendar.service';
+import { SessionPopupComponent } from './components/session-popup/session-popup.component';
+import { NewSessionDialogComponent } from './components/new-session-dialog/new-session-dialog.component';
 
 @Component({
   selector: 'app-calendar',
@@ -12,7 +20,7 @@ import { CalendarService } from './services/calendar.service';
   imports: [CommonModule, SessionPopupComponent, NewSessionDialogComponent],
   templateUrl: './calendar.component.html',
   styleUrl: './calendar.component.scss',
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class CalendarComponent {
   private calendarService = inject(CalendarService);
@@ -23,7 +31,8 @@ export class CalendarComponent {
   readonly sessionData = this.calendarService.sessionData;
   readonly weekDates = this.calendarService.weekDates;
   readonly monthDates = this.calendarService.monthDates;
-  readonly sessionDataForCurrentPeriod = this.calendarService.sessionDataForCurrentPeriod;
+  readonly sessionDataForCurrentPeriod =
+    this.calendarService.sessionDataForCurrentPeriod;
 
   readonly showSessionPopup = signal(false);
   readonly showNewSessionDialog = signal(false);
@@ -33,8 +42,18 @@ export class CalendarComponent {
 
   readonly weekDays = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
   readonly monthNames = [
-    'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
-    'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
+    'Enero',
+    'Febrero',
+    'Marzo',
+    'Abril',
+    'Mayo',
+    'Junio',
+    'Julio',
+    'Agosto',
+    'Septiembre',
+    'Octubre',
+    'Noviembre',
+    'Diciembre',
   ];
 
   readonly hours = Array.from({ length: 14 }, (_, i) => {
@@ -76,17 +95,27 @@ export class CalendarComponent {
     this.showNewSessionDialog.set(false);
   }
 
-  onSessionDataCreated(sessionData: Omit<SessionData['SessionDetailData'], 'session_id' | 'created_at' | 'updated_at'>): void {
+  onSessionDataCreated(
+    sessionData: Omit<
+      SessionData['SessionDetailData'],
+      'session_id' | 'created_at' | 'updated_at'
+    >
+  ): void {
     this.calendarService.addSessionData(sessionData);
     this.showNewSessionDialog.set(false);
   }
 
   getClinicConfig(clinicId: number): ClinicConfig {
-    return this.clinicConfigs.find(config => config.id === clinicId) || this.clinicConfigs[0];
+    return (
+      this.clinicConfigs.find((config) => config.id === clinicId) ||
+      this.clinicConfigs[0]
+    );
   }
 
   getClinicConfigFromSessionData(sessionData: SessionData): ClinicConfig {
-    return this.getClinicConfig(sessionData.SessionDetailData.ClinicDetailData.clinic_id);
+    return this.getClinicConfig(
+      sessionData.SessionDetailData.ClinicDetailData.clinic_id
+    );
   }
 
   getSessionDataForDate(date: Date): SessionData[] {
@@ -95,7 +124,7 @@ export class CalendarComponent {
 
   getSessionDataForDateAndHour(date: Date, hour: string): SessionData[] {
     const sessions = this.getSessionDataForDate(date);
-    return sessions.filter(data => {
+    return sessions.filter((data) => {
       const sessionHour = data.SessionDetailData.start_time.substring(0, 5);
       return sessionHour === hour;
     });
@@ -124,9 +153,15 @@ export class CalendarComponent {
     const end = dates[6];
 
     if (start.getMonth() === end.getMonth()) {
-      return `${start.getDate()}-${end.getDate()} ${this.monthNames[start.getMonth()]} ${start.getFullYear()}`;
+      return `${start.getDate()}-${end.getDate()} ${
+        this.monthNames[start.getMonth()]
+      } ${start.getFullYear()}`;
     } else {
-      return `${start.getDate()} ${this.monthNames[start.getMonth()]} - ${end.getDate()} ${this.monthNames[end.getMonth()]} ${start.getFullYear()}`;
+      return `${start.getDate()} ${
+        this.monthNames[start.getMonth()]
+      } - ${end.getDate()} ${
+        this.monthNames[end.getMonth()]
+      } ${start.getFullYear()}`;
     }
   }
 
@@ -170,7 +205,9 @@ export class CalendarComponent {
     const sessionData = this.pendingReminderSession();
     if (sessionData) {
       this.calendarService.openWhatsAppReminder(sessionData);
-      this.calendarService.sendReminder(sessionData.SessionDetailData.session_id);
+      this.calendarService.sendReminder(
+        sessionData.SessionDetailData.session_id
+      );
     }
     this.onCloseReminderConfirmModal();
   }
@@ -182,11 +219,18 @@ export class CalendarComponent {
 
   canSendReminder(sessionData: SessionData): boolean {
     const detail = sessionData.SessionDetailData;
-    return !detail.sended && !detail.completed && !detail.cancelled && !detail.no_show;
+    return (
+      !detail.sended &&
+      !detail.completed &&
+      !detail.cancelled &&
+      !detail.no_show
+    );
   }
 
   getFormattedSessionDate(sessionData: SessionData): string {
-    return new Date(sessionData.SessionDetailData.session_date).toLocaleDateString('es-ES');
+    return new Date(
+      sessionData.SessionDetailData.session_date
+    ).toLocaleDateString('es-ES');
   }
 
   getFormattedSessionTime(sessionData: SessionData): string {
