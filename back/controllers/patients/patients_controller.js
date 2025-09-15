@@ -8,13 +8,15 @@ const {
 const obtenerPacientes = async (req, res) => {
   try {
     const {
-      name,
+      first_name,
+      last_name,
       email,
       dni,
       status,
-      session_type,
-      insurance_provider,
-      referred_by,
+      gender,
+      occupation,
+      clinic_id,
+      is_minor,
       birth_date,
       fecha_desde,
       fecha_hasta,
@@ -43,13 +45,15 @@ const obtenerPacientes = async (req, res) => {
     
     // Construir filtros incluyendo paginación
     const filters = {};
-    if (name) filters.name = name;
+    if (first_name) filters.first_name = first_name;
+    if (last_name) filters.last_name = last_name;
     if (email) filters.email = email;
     if (dni) filters.dni = dni;
     if (status) filters.status = status;
-    if (session_type) filters.session_type = session_type;
-    if (insurance_provider) filters.insurance_provider = insurance_provider;
-    if (referred_by) filters.referred_by = referred_by;
+    if (gender) filters.gender = gender;
+    if (occupation) filters.occupation = occupation;
+    if (clinic_id) filters.clinic_id = clinic_id;
+    if (is_minor !== undefined) filters.is_minor = is_minor;
 
     // Parámetros de paginación
     filters.page = pageNum;
@@ -124,13 +128,15 @@ const obtenerPacientePorId = async (req, res) => {
 const obtenerPacientesEliminados = async (req, res) => {
   try {
     const {
-      name,
+      first_name,
+      last_name,
       email,
       dni,
       status,
-      session_type,
-      insurance_provider,
-      referred_by,
+      gender,
+      occupation,
+      clinic_id,
+      is_minor,
       birth_date,
       fecha_desde,
       fecha_hasta,
@@ -159,13 +165,15 @@ const obtenerPacientesEliminados = async (req, res) => {
     
     // Construir filtros incluyendo paginación
     const filters = {};
-    if (name) filters.name = name;
+    if (first_name) filters.first_name = first_name;
+    if (last_name) filters.last_name = last_name;
     if (email) filters.email = email;
     if (dni) filters.dni = dni;
     if (status) filters.status = status;
-    if (session_type) filters.session_type = session_type;
-    if (insurance_provider) filters.insurance_provider = insurance_provider;
-    if (referred_by) filters.referred_by = referred_by;
+    if (gender) filters.gender = gender;
+    if (occupation) filters.occupation = occupation;
+    if (clinic_id) filters.clinic_id = clinic_id;
+    if (is_minor !== undefined) filters.is_minor = is_minor;
 
     // Parámetros de paginación
     filters.page = pageNum;

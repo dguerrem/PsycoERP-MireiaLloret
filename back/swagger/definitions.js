@@ -785,10 +785,15 @@ const definitions = {
         description: "ID único del paciente",
         example: 1,
       },
-      name: {
+      first_name: {
         type: "string",
-        description: "Nombre completo del paciente",
-        example: "Juan Pérez García",
+        description: "Nombre del paciente",
+        example: "Juan",
+      },
+      last_name: {
+        type: "string",
+        description: "Apellidos del paciente",
+        example: "Pérez García",
       },
       email: {
         type: "string",
@@ -806,23 +811,23 @@ const definitions = {
         description: "DNI del paciente",
         example: "12345678A",
       },
-      status: {
+      gender: {
         type: "string",
-        enum: ["active", "inactive", "discharged", "on-hold"],
-        description: "Estado del paciente",
-        example: "active",
+        enum: ["M", "F", "O"],
+        description: "Género del paciente (M=Masculino, F=Femenino, O=Otro)",
+        example: "M",
       },
-      session_type: {
-        type: "string",
-        enum: ["individual", "group", "family", "couples"],
-        description: "Tipo de sesión preferida",
-        example: "individual",
-      },
-      address: {
+      occupation: {
         type: "string",
         nullable: true,
-        description: "Dirección del paciente",
-        example: "Calle Mayor 123, Valencia",
+        description: "Ocupación/Escuela/Trabajo",
+        example: "Estudiante de Psicología",
+      },
+      status: {
+        type: "string",
+        enum: ["en curso", "fin del tratamiento", "en pausa", "abandono", "derivación"],
+        description: "Estado del tratamiento",
+        example: "en curso",
       },
       birth_date: {
         type: "string",
@@ -831,59 +836,68 @@ const definitions = {
         description: "Fecha de nacimiento",
         example: "1985-03-15",
       },
-      emergency_contact_name: {
+      street: {
         type: "string",
         nullable: true,
-        description: "Nombre del contacto de emergencia",
-        example: "María Pérez",
+        description: "Nombre de la calle",
+        example: "Calle Mayor",
       },
-      emergency_contact_phone: {
+      street_number: {
         type: "string",
         nullable: true,
-        description: "Teléfono del contacto de emergencia",
-        example: "+34 666 987 654",
+        description: "Número de la calle",
+        example: "123",
       },
-      medical_history: {
+      door: {
         type: "string",
         nullable: true,
-        description: "Historial médico",
-        example: "Antecedentes de ansiedad",
+        description: "Puerta/Piso",
+        example: "2A",
       },
-      current_medication: {
+      postal_code: {
         type: "string",
         nullable: true,
-        description: "Medicación actual",
-        example: "Sertralina 50mg",
+        description: "Código postal",
+        example: "28001",
       },
-      allergies: {
+      city: {
         type: "string",
         nullable: true,
-        description: "Alergias conocidas",
-        example: "Penicilina",
+        description: "Ciudad",
+        example: "Madrid",
       },
-      referred_by: {
+      province: {
         type: "string",
         nullable: true,
-        description: "Referido por",
-        example: "Dr. Smith",
+        description: "Provincia",
+        example: "Madrid",
       },
-      insurance_provider: {
-        type: "string",
+      session_price: {
+        type: "number",
+        format: "decimal",
         nullable: true,
-        description: "Proveedor de seguros",
-        example: "Sanitas",
+        description: "Precio por sesión en euros",
+        example: 60.00,
       },
-      insurance_number: {
-        type: "string",
+      clinic_id: {
+        type: "integer",
+        format: "int64",
         nullable: true,
-        description: "Número de póliza",
-        example: "POL123456789",
+        description: "ID de la clínica asignada",
+        example: 1,
       },
-      notes: {
+      treatment_start_date: {
         type: "string",
+        format: "date",
         nullable: true,
-        description: "Notas adicionales",
-        example: "Paciente muy colaborativo",
+        description: "Fecha de inicio del tratamiento",
+        example: "2024-01-15",
+      },
+      is_minor: {
+        type: "boolean",
+        nullable: true,
+        description: "Indica si es menor de edad",
+        example: false,
       },
       created_at: {
         type: "string",
@@ -1029,7 +1043,7 @@ const definitions = {
     properties: {
       nombre: {
         type: "string",
-        description: "Nombre completo del paciente",
+        description: "Nombre completo del paciente (concatenación de first_name + last_name)",
         example: "Juan Pérez García",
       },
       dni: {
@@ -1046,9 +1060,9 @@ const definitions = {
       },
       estado: {
         type: "string",
-        enum: ["active", "inactive", "discharged", "on-hold"],
-        description: "Estado del paciente",
-        example: "active",
+        enum: ["en curso", "fin del tratamiento", "en pausa", "abandono", "derivación"],
+        description: "Estado del tratamiento",
+        example: "en curso",
       },
       email: {
         type: "string",
@@ -1064,26 +1078,48 @@ const definitions = {
       direccion: {
         type: "string",
         nullable: true,
-        description: "Dirección del paciente",
-        example: "Calle Mayor 123, Valencia",
+        description: "Dirección completa del paciente (concatenación de street, street_number, door, city, province, postal_code)",
+        example: "Calle Mayor 123 2A Madrid Madrid 28001",
       },
-      contacto_emergencia: {
+      genero: {
+        type: "string",
+        enum: ["M", "F", "O"],
+        nullable: true,
+        description: "Género del paciente (M=Masculino, F=Femenino, O=Otro)",
+        example: "M",
+      },
+      ocupacion: {
         type: "string",
         nullable: true,
-        description: "Nombre del contacto de emergencia",
-        example: "María Pérez",
+        description: "Ocupación/Escuela/Trabajo",
+        example: "Estudiante de Psicología",
       },
-      telefono_emergencia: {
-        type: "string",
+      precio_sesion: {
+        type: "number",
+        format: "decimal",
         nullable: true,
-        description: "Teléfono del contacto de emergencia",
-        example: "+34 666 987 654",
+        description: "Precio por sesión en euros",
+        example: 60.00,
       },
-      notas: {
-        type: "string",
+      clinic_id: {
+        type: "integer",
+        format: "int64",
         nullable: true,
-        description: "Notas adicionales",
-        example: "Paciente muy colaborativo",
+        description: "ID de la clínica asignada",
+        example: 1,
+      },
+      fecha_inicio_tratamiento: {
+        type: "string",
+        format: "date",
+        nullable: true,
+        description: "Fecha de inicio del tratamiento (YYYY-MM-DD)",
+        example: "2024-01-15",
+      },
+      menor_edad: {
+        type: "boolean",
+        nullable: true,
+        description: "Indica si es menor de edad",
+        example: false,
       },
     },
   },

@@ -18,25 +18,27 @@ const getPatients = async (filters = {}) => {
   let dataQuery = `
         SELECT 
             id,
-            name,
+            first_name,
+            last_name,
             email,
             phone,
             dni,
+            gender,
+            occupation,
             status,
-            session_type,
-            address,
             DATE_FORMAT(birth_date, '%Y-%m-%d') as birth_date,
-            emergency_contact_name,
-            emergency_contact_phone,
-            medical_history,
-            current_medication,
-            allergies,
-            referred_by,
-            insurance_provider,
-            insurance_number,
-            notes,
+            street,
+            street_number,
+            door,
+            postal_code,
+            city,
+            province,
+            session_price,
+            clinic_id,
+            DATE_FORMAT(treatment_start_date, '%Y-%m-%d') as treatment_start_date,
+            is_minor,
             DATE_FORMAT(created_at,'%Y-%m-%d') as created_at,
-            updated_at
+            DATE_FORMAT(updated_at,'%Y-%m-%d') as updated_at
         FROM patients
         WHERE is_active = true
     `;
@@ -45,9 +47,14 @@ const getPatients = async (filters = {}) => {
   const conditions = [];
 
   // Aplicar filtros
-  if (filters.name) {
-    conditions.push("name LIKE ?");
-    params.push(`%${filters.name}%`);
+  if (filters.first_name) {
+    conditions.push("first_name LIKE ?");
+    params.push(`%${filters.first_name}%`);
+  }
+
+  if (filters.last_name) {
+    conditions.push("last_name LIKE ?");
+    params.push(`%${filters.last_name}%`);
   }
 
   if (filters.email) {
@@ -65,19 +72,24 @@ const getPatients = async (filters = {}) => {
     params.push(filters.status);
   }
 
-  if (filters.session_type) {
-    conditions.push("session_type = ?");
-    params.push(filters.session_type);
+  if (filters.gender) {
+    conditions.push("gender = ?");
+    params.push(filters.gender);
   }
 
-  if (filters.insurance_provider) {
-    conditions.push("insurance_provider LIKE ?");
-    params.push(`%${filters.insurance_provider}%`);
+  if (filters.occupation) {
+    conditions.push("occupation LIKE ?");
+    params.push(`%${filters.occupation}%`);
   }
 
-  if (filters.referred_by) {
-    conditions.push("referred_by LIKE ?");
-    params.push(`%${filters.referred_by}%`);
+  if (filters.clinic_id) {
+    conditions.push("clinic_id = ?");
+    params.push(filters.clinic_id);
+  }
+
+  if (filters.is_minor !== undefined) {
+    conditions.push("is_minor = ?");
+    params.push(filters.is_minor);
   }
 
   if (filters.birth_date) {
@@ -140,8 +152,7 @@ const getPatientById = async (id) => {
         SELECT 
             id,
             email,
-            phone,
-            session_type as tipo
+            phone
         FROM patients
         WHERE id = ? AND is_active = true
     `;
@@ -171,16 +182,19 @@ const getPatientById = async (id) => {
   // Consulta para obtener datos detallados del paciente
   const patientDataQuery = `
         SELECT 
-            name as nombre,
+            CONCAT(first_name, ' ', last_name) as nombre,
             dni,
             DATE_FORMAT(birth_date, '%Y-%m-%d') as fecha_nacimiento,
             status as estado,
             email,
             phone as telefono,
-            address as direccion,
-            emergency_contact_name as contacto_emergencia,
-            emergency_contact_phone as telefono_emergencia,
-            notes as notas
+            CONCAT_WS(' ', street, street_number, door, city, province, postal_code) as direccion,
+            gender as genero,
+            occupation as ocupacion,
+            session_price as precio_sesion,
+            clinic_id,
+            DATE_FORMAT(treatment_start_date, '%Y-%m-%d') as fecha_inicio_tratamiento,
+            is_minor as menor_edad
         FROM patients
         WHERE id = ? AND is_active = true
     `;
@@ -289,25 +303,27 @@ const getDeletedPatients = async (filters = {}) => {
   let dataQuery = `
         SELECT 
             id,
-            name,
+            first_name,
+            last_name,
             email,
             phone,
             dni,
+            gender,
+            occupation,
             status,
-            session_type,
-            address,
             DATE_FORMAT(birth_date, '%Y-%m-%d') as birth_date,
-            emergency_contact_name,
-            emergency_contact_phone,
-            medical_history,
-            current_medication,
-            allergies,
-            referred_by,
-            insurance_provider,
-            insurance_number,
-            notes,
+            street,
+            street_number,
+            door,
+            postal_code,
+            city,
+            province,
+            session_price,
+            clinic_id,
+            DATE_FORMAT(treatment_start_date, '%Y-%m-%d') as treatment_start_date,
+            is_minor,
             DATE_FORMAT(created_at,'%Y-%m-%d') as created_at,
-            updated_at
+            DATE_FORMAT(updated_at,'%Y-%m-%d') as updated_at
         FROM patients
         WHERE is_active = false
     `;
@@ -316,9 +332,14 @@ const getDeletedPatients = async (filters = {}) => {
   const conditions = [];
 
   // Aplicar filtros
-  if (filters.name) {
-    conditions.push("name LIKE ?");
-    params.push(`%${filters.name}%`);
+  if (filters.first_name) {
+    conditions.push("first_name LIKE ?");
+    params.push(`%${filters.first_name}%`);
+  }
+
+  if (filters.last_name) {
+    conditions.push("last_name LIKE ?");
+    params.push(`%${filters.last_name}%`);
   }
 
   if (filters.email) {
@@ -336,19 +357,24 @@ const getDeletedPatients = async (filters = {}) => {
     params.push(filters.status);
   }
 
-  if (filters.session_type) {
-    conditions.push("session_type = ?");
-    params.push(filters.session_type);
+  if (filters.gender) {
+    conditions.push("gender = ?");
+    params.push(filters.gender);
   }
 
-  if (filters.insurance_provider) {
-    conditions.push("insurance_provider LIKE ?");
-    params.push(`%${filters.insurance_provider}%`);
+  if (filters.occupation) {
+    conditions.push("occupation LIKE ?");
+    params.push(`%${filters.occupation}%`);
   }
 
-  if (filters.referred_by) {
-    conditions.push("referred_by LIKE ?");
-    params.push(`%${filters.referred_by}%`);
+  if (filters.clinic_id) {
+    conditions.push("clinic_id = ?");
+    params.push(filters.clinic_id);
+  }
+
+  if (filters.is_minor !== undefined) {
+    conditions.push("is_minor = ?");
+    params.push(filters.is_minor);
   }
 
   if (filters.birth_date) {

@@ -6,13 +6,22 @@ const patientsPaths = {
       description: "Obtiene una lista de pacientes que han sido eliminados lógicamente (soft delete)",
       parameters: [
         {
-          name: "name",
+          name: "first_name",
           in: "query",
           required: false,
           schema: {
             type: "string",
           },
           description: "Nombre del paciente (búsqueda parcial)",
+        },
+        {
+          name: "last_name",
+          in: "query",
+          required: false,
+          schema: {
+            type: "string",
+          },
+          description: "Apellidos del paciente (búsqueda parcial)",
         },
         {
           name: "email",
@@ -39,37 +48,47 @@ const patientsPaths = {
           required: false,
           schema: {
             type: "string",
-            enum: ["active", "inactive", "discharged", "on-hold"],
+            enum: ["en curso", "fin del tratamiento", "en pausa", "abandono", "derivación"],
           },
-          description: "Estado del paciente",
+          description: "Estado del tratamiento",
         },
         {
-          name: "session_type",
+          name: "gender",
           in: "query",
           required: false,
           schema: {
             type: "string",
-            enum: ["individual", "group", "family", "couples"],
+            enum: ["M", "F", "O"],
           },
-          description: "Tipo de sesión del paciente",
+          description: "Género del paciente (M=Masculino, F=Femenino, O=Otro)",
         },
         {
-          name: "insurance_provider",
-          in: "query",
-          required: false,
-          schema: {
-            type: "string",
-          },
-          description: "Proveedor de seguros (búsqueda parcial)",
-        },
-        {
-          name: "referred_by",
+          name: "occupation",
           in: "query",
           required: false,
           schema: {
             type: "string",
           },
-          description: "Referido por (búsqueda parcial)",
+          description: "Ocupación/Escuela/Trabajo (búsqueda parcial)",
+        },
+        {
+          name: "clinic_id",
+          in: "query",
+          required: false,
+          schema: {
+            type: "integer",
+            format: "int64",
+          },
+          description: "ID de la clínica asignada",
+        },
+        {
+          name: "is_minor",
+          in: "query",
+          required: false,
+          schema: {
+            type: "boolean",
+          },
+          description: "Filtrar por menores de edad (true/false)",
         },
         {
           name: "birth_date",
@@ -166,13 +185,22 @@ const patientsPaths = {
       description: "Obtiene una lista de pacientes con filtros opcionales",
       parameters: [
         {
-          name: "name",
+          name: "first_name",
           in: "query",
           required: false,
           schema: {
             type: "string",
           },
           description: "Nombre del paciente (búsqueda parcial)",
+        },
+        {
+          name: "last_name",
+          in: "query",
+          required: false,
+          schema: {
+            type: "string",
+          },
+          description: "Apellidos del paciente (búsqueda parcial)",
         },
         {
           name: "email",
@@ -199,37 +227,47 @@ const patientsPaths = {
           required: false,
           schema: {
             type: "string",
-            enum: ["active", "inactive", "discharged", "on-hold"],
+            enum: ["en curso", "fin del tratamiento", "en pausa", "abandono", "derivación"],
           },
-          description: "Estado del paciente",
+          description: "Estado del tratamiento",
         },
         {
-          name: "session_type",
+          name: "gender",
           in: "query",
           required: false,
           schema: {
             type: "string",
-            enum: ["individual", "group", "family", "couples"],
+            enum: ["M", "F", "O"],
           },
-          description: "Tipo de sesión del paciente",
+          description: "Género del paciente (M=Masculino, F=Femenino, O=Otro)",
         },
         {
-          name: "insurance_provider",
-          in: "query",
-          required: false,
-          schema: {
-            type: "string",
-          },
-          description: "Proveedor de seguros (búsqueda parcial)",
-        },
-        {
-          name: "referred_by",
+          name: "occupation",
           in: "query",
           required: false,
           schema: {
             type: "string",
           },
-          description: "Referido por (búsqueda parcial)",
+          description: "Ocupación/Escuela/Trabajo (búsqueda parcial)",
+        },
+        {
+          name: "clinic_id",
+          in: "query",
+          required: false,
+          schema: {
+            type: "integer",
+            format: "int64",
+          },
+          description: "ID de la clínica asignada",
+        },
+        {
+          name: "is_minor",
+          in: "query",
+          required: false,
+          schema: {
+            type: "boolean",
+          },
+          description: "Filtrar por menores de edad (true/false)",
         },
         {
           name: "birth_date",
