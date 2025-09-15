@@ -1833,6 +1833,82 @@ const definitions = {
     },
   },
 
+  UserDetail: {
+    type: "object",
+    properties: {
+      id: {
+        type: "integer",
+        format: "int64",
+        description: "ID único del usuario",
+        example: 1,
+      },
+      name: {
+        type: "string",
+        description: "Nombre completo del usuario",
+        example: "Admin Usuario",
+      },
+      dni: {
+        type: "string",
+        nullable: true,
+        description: "Documento Nacional de Identidad",
+        example: "12345678A",
+      },
+      street: {
+        type: "string",
+        nullable: true,
+        description: "Nombre de la calle",
+        example: "Calle Mayor",
+      },
+      street_number: {
+        type: "string",
+        nullable: true,
+        description: "Número de la calle",
+        example: "123",
+      },
+      door: {
+        type: "string",
+        nullable: true,
+        description: "Puerta/Piso",
+        example: "2A",
+      },
+      city: {
+        type: "string",
+        nullable: true,
+        description: "Ciudad",
+        example: "Madrid",
+      },
+      province: {
+        type: "string",
+        nullable: true,
+        description: "Provincia",
+        example: "Madrid",
+      },
+      postal_code: {
+        type: "string",
+        nullable: true,
+        description: "Código postal",
+        example: "28001",
+      },
+    },
+  },
+
+  UserDetailResponse: {
+    type: "object",
+    properties: {
+      success: {
+        type: "boolean",
+        example: true,
+      },
+      data: {
+        $ref: "#/components/schemas/UserDetail",
+      },
+      message: {
+        type: "string",
+        example: "Usuario obtenido exitosamente",
+      },
+    },
+  },
+
   LoginResponse: {
     type: "object",
     properties: {

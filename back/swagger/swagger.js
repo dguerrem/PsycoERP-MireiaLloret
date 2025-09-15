@@ -10,6 +10,7 @@ const clinicsPaths = require("./paths/clinics");
 const dashboardPaths = require("./paths/dashboard");
 const clinicalNotesPaths = require("./paths/clinical_notes");
 const remindersPaths = require("./paths/reminders");
+const usersPaths = require("./paths/users");
 
 const swaggerDefinition = {
   openapi: "3.0.0",
@@ -53,6 +54,7 @@ const swaggerDefinition = {
     ...dashboardPaths,
     ...clinicalNotesPaths,
     ...remindersPaths,
+    ...usersPaths,
   },
   tags: [
     {
@@ -86,6 +88,10 @@ const swaggerDefinition = {
     {
       name: "Reminders",
       description: "Gestión de recordatorios de sesiones",
+    },
+    {
+      name: "Users",
+      description: "Gestión de usuarios del sistema",
     },
   ],
 };
