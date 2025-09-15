@@ -1909,6 +1909,76 @@ const definitions = {
     },
   },
 
+  UpdateUserRequest: {
+    type: "object",
+    properties: {
+      name: {
+        type: "string",
+        description: "Nombre completo del usuario",
+        example: "Admin Usuario Actualizado",
+      },
+      dni: {
+        type: "string",
+        nullable: true,
+        description: "Documento Nacional de Identidad",
+        example: "12345678A",
+      },
+      street: {
+        type: "string",
+        nullable: true,
+        description: "Nombre de la calle",
+        example: "Calle Mayor",
+      },
+      street_number: {
+        type: "string",
+        nullable: true,
+        description: "Número de la calle",
+        example: "123",
+      },
+      door: {
+        type: "string",
+        nullable: true,
+        description: "Puerta/Piso",
+        example: "2A",
+      },
+      city: {
+        type: "string",
+        nullable: true,
+        description: "Ciudad",
+        example: "Madrid",
+      },
+      province: {
+        type: "string",
+        nullable: true,
+        description: "Provincia",
+        example: "Madrid",
+      },
+      postal_code: {
+        type: "string",
+        nullable: true,
+        description: "Código postal",
+        example: "28001",
+      },
+    },
+  },
+
+  UpdateUserResponse: {
+    type: "object",
+    properties: {
+      success: {
+        type: "boolean",
+        example: true,
+      },
+      data: {
+        $ref: "#/components/schemas/UserDetail",
+      },
+      message: {
+        type: "string",
+        example: "Usuario actualizado exitosamente",
+      },
+    },
+  },
+
   LoginResponse: {
     type: "object",
     properties: {
