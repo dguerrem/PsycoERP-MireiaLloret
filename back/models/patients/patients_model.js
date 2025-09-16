@@ -401,9 +401,116 @@ const deletePatient = async (id) => {
   return result.affectedRows > 0;
 };
 
+// Crear un nuevo paciente
+const createPatient = async (patientData) => {
+  const {
+    first_name,
+    last_name,
+    email,
+    phone,
+    dni,
+    gender,
+    occupation,
+    birth_date,
+    street,
+    street_number,
+    door,
+    postal_code,
+    city,
+    province,
+    session_price,
+    clinic_id,
+    treatment_start_date,
+    status,
+    is_minor,
+  } = patientData;
+
+  const query = `
+    INSERT INTO patients (
+      first_name,
+      last_name,
+      email,
+      phone,
+      dni,
+      gender,
+      occupation,
+      birth_date,
+      street,
+      street_number,
+      door,
+      postal_code,
+      city,
+      province,
+      session_price,
+      clinic_id,
+      treatment_start_date,
+      status,
+      is_minor,
+      is_active
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, true)
+  `;
+
+  const params = [
+    first_name,
+    last_name,
+    email,
+    phone,
+    dni,
+    gender,
+    occupation,
+    birth_date,
+    street,
+    street_number,
+    door,
+    postal_code,
+    city,
+    province,
+    session_price,
+    clinic_id,
+    treatment_start_date,
+    status,
+    is_minor,
+  ];
+
+  const [result] = await db.execute(query, params);
+
+  // Obtener el paciente recién creado
+  const getPatientQuery = `
+    SELECT
+      id,
+      first_name,
+      last_name,
+      email,
+      phone,
+      dni,
+      gender,
+      occupation,
+      DATE_FORMAT(birth_date, '%Y-%m-%d') as birth_date,
+      street,
+      street_number,
+      door,
+      postal_code,
+      city,
+      province,
+      session_price,
+      clinic_id,
+      DATE_FORMAT(treatment_start_date, '%Y-%m-%d') as treatment_start_date,
+      status,
+      is_minor,
+      DATE_FORMAT(created_at,'%Y-%m-%d') as created_at,
+      DATE_FORMAT(updated_at,'%Y-%m-%d') as updated_at
+    FROM patients
+    WHERE id = ? AND is_active = true
+  `;
+
+  const [patientRows] = await db.execute(getPatientQuery, [result.insertId]);
+  return patientRows[0];
+};
+
 module.exports = {
   getPatients,
   getPatientById,
   getDeletedPatients,
   deletePatient,
+  createPatient,
 };

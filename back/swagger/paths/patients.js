@@ -356,6 +356,63 @@ const patientsPaths = {
         },
       },
     },
+    post: {
+      tags: ["Patients"],
+      summary: "Crear nuevo paciente",
+      description: "Crea un nuevo paciente en el sistema con los datos proporcionados",
+      requestBody: {
+        required: true,
+        content: {
+          "application/json": {
+            schema: {
+              $ref: "#/components/schemas/CreatePatientRequest",
+            },
+          },
+        },
+      },
+      responses: {
+        201: {
+          description: "Paciente creado exitosamente",
+          content: {
+            "application/json": {
+              schema: {
+                $ref: "#/components/schemas/CreatePatientResponse",
+              },
+            },
+          },
+        },
+        400: {
+          description: "Datos de entrada inválidos o campos requeridos faltantes",
+          content: {
+            "application/json": {
+              schema: {
+                $ref: "#/components/schemas/ErrorResponse",
+              },
+            },
+          },
+        },
+        409: {
+          description: "Email o DNI ya registrados",
+          content: {
+            "application/json": {
+              schema: {
+                $ref: "#/components/schemas/ErrorResponse",
+              },
+            },
+          },
+        },
+        500: {
+          description: "Error interno del servidor",
+          content: {
+            "application/json": {
+              schema: {
+                $ref: "#/components/schemas/ErrorResponse",
+              },
+            },
+          },
+        },
+      },
+    },
   },
   "/api/patients/{id}": {
     get: {

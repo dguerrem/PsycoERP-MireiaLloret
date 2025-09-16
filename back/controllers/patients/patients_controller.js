@@ -3,6 +3,7 @@ const {
   getPatientById,
   getDeletedPatients,
   deletePatient,
+  createPatient,
 } = require("../../models/patients/patients_model");
 
 const obtenerPacientes = async (req, res) => {
@@ -237,9 +238,147 @@ const eliminarPaciente = async (req, res) => {
   }
 };
 
+const crearPaciente = async (req, res) => {
+  try {
+    const {
+      first_name,
+      last_name,
+      email,
+      phone,
+      dni,
+      gender,
+      occupation,
+      birth_date,
+      street,
+      street_number,
+      door,
+      postal_code,
+      city,
+      province,
+      session_price,
+      clinic_id,
+      treatment_start_date,
+      status,
+      is_minor,
+    } = req.body;
+
+    // Validaciones obligatorias
+    if (!first_name || !last_name || !email || !phone || !dni) {
+      return res.status(400).json({
+        success: false,
+        error: "Los campos first_name, last_name, email, phone y dni son obligatorios",
+      });
+    }
+
+    // Validación de email
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      return res.status(400).json({
+        success: false,
+        error: "El formato del email no es válido",
+      });
+    }
+
+    // Validación de género
+    if (gender && !["M", "F", "O"].includes(gender)) {
+      return res.status(400).json({
+        success: false,
+        error: "El género debe ser M, F o O",
+      });
+    }
+
+    // Validación de status
+    const validStatuses = ["en curso", "fin del tratamiento", "en pausa", "abandono", "derivación"];
+    if (status && !validStatuses.includes(status)) {
+      return res.status(400).json({
+        success: false,
+        error: "El status debe ser uno de: " + validStatuses.join(", "),
+      });
+    }
+
+    // Validación de clinic_id
+    if (clinic_id && isNaN(clinic_id)) {
+      return res.status(400).json({
+        success: false,
+        error: "El clinic_id debe ser un número válido",
+      });
+    }
+
+    // Validación de session_price
+    if (session_price && (isNaN(session_price) || session_price < 0)) {
+      return res.status(400).json({
+        success: false,
+        error: "El precio de sesión debe ser un número válido mayor o igual a 0",
+      });
+    }
+
+    // Validación de is_minor
+    if (is_minor !== undefined && typeof is_minor !== "boolean") {
+      return res.status(400).json({
+        success: false,
+        error: "El campo is_minor debe ser un valor booleano",
+      });
+    }
+
+    const patientData = {
+      first_name,
+      last_name,
+      email,
+      phone,
+      dni,
+      gender: gender || "O",
+      occupation,
+      birth_date,
+      street,
+      street_number,
+      door,
+      postal_code,
+      city,
+      province,
+      session_price,
+      clinic_id,
+      treatment_start_date,
+      status: status || "en curso",
+      is_minor,
+    };
+
+    const nuevoPaciente = await createPatient(patientData);
+
+    res.status(201).json({
+      success: true,
+      data: nuevoPaciente,
+      message: "Paciente creado exitosamente",
+    });
+  } catch (err) {
+    console.error("Error al crear paciente:", err.message);
+
+    // Manejo de errores específicos de base de datos
+    if (err.code === 'ER_DUP_ENTRY') {
+      if (err.message.includes('email')) {
+        return res.status(409).json({
+          success: false,
+          error: "El email ya está registrado para otro paciente",
+        });
+      }
+      if (err.message.includes('dni')) {
+        return res.status(409).json({
+          success: false,
+          error: "El DNI ya está registrado para otro paciente",
+        });
+      }
+    }
+
+    res.status(500).json({
+      success: false,
+      error: "Error al crear el paciente",
+    });
+  }
+};
+
 module.exports = {
   obtenerPacientes,
   obtenerPacientePorId,
   obtenerPacientesEliminados,
   eliminarPaciente,
+  crearPaciente,
 };

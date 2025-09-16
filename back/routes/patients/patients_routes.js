@@ -6,9 +6,11 @@ const {
   obtenerPacientePorId,
   obtenerPacientesEliminados,
   eliminarPaciente,
+  crearPaciente,
 } = require("../../controllers/patients/patients_controller");
 
 router.get("/", obtenerPacientes);
+router.post("/", crearPaciente);
 router.get("/deleted", obtenerPacientesEliminados);
 router.get("/:id", obtenerPacientePorId);
 router.delete("/:id", eliminarPaciente);

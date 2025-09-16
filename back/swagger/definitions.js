@@ -563,6 +563,144 @@ const definitions = {
     },
   },
 
+  CreatePatientRequest: {
+    type: "object",
+    required: ["first_name", "last_name", "email", "phone", "dni"],
+    properties: {
+      first_name: {
+        type: "string",
+        description: "Nombre del paciente (requerido)",
+        example: "Juan",
+      },
+      last_name: {
+        type: "string",
+        description: "Apellidos del paciente (requerido)",
+        example: "Pérez García",
+      },
+      email: {
+        type: "string",
+        format: "email",
+        description: "Email del paciente (requerido)",
+        example: "juan.perez@email.com",
+      },
+      phone: {
+        type: "string",
+        description: "Teléfono del paciente (requerido)",
+        example: "+34 666 123 456",
+      },
+      dni: {
+        type: "string",
+        description: "DNI del paciente (requerido)",
+        example: "12345678A",
+      },
+      gender: {
+        type: "string",
+        enum: ["M", "F", "O"],
+        description: "Género del paciente (M=Masculino, F=Femenino, O=Otro)",
+        example: "M",
+      },
+      occupation: {
+        type: "string",
+        nullable: true,
+        description: "Ocupación/Escuela/Trabajo",
+        example: "Estudiante de Psicología",
+      },
+      birth_date: {
+        type: "string",
+        format: "date",
+        nullable: true,
+        description: "Fecha de nacimiento (YYYY-MM-DD)",
+        example: "1985-03-15",
+      },
+      street: {
+        type: "string",
+        nullable: true,
+        description: "Nombre de la calle",
+        example: "Calle Mayor",
+      },
+      street_number: {
+        type: "string",
+        nullable: true,
+        description: "Número de la calle",
+        example: "123",
+      },
+      door: {
+        type: "string",
+        nullable: true,
+        description: "Puerta/Piso",
+        example: "2A",
+      },
+      postal_code: {
+        type: "string",
+        nullable: true,
+        description: "Código postal",
+        example: "28001",
+      },
+      city: {
+        type: "string",
+        nullable: true,
+        description: "Ciudad",
+        example: "Madrid",
+      },
+      province: {
+        type: "string",
+        nullable: true,
+        description: "Provincia",
+        example: "Madrid",
+      },
+      session_price: {
+        type: "number",
+        format: "decimal",
+        nullable: true,
+        description: "Precio por sesión en euros",
+        example: 60.00,
+      },
+      clinic_id: {
+        type: "integer",
+        format: "int64",
+        nullable: true,
+        description: "ID de la clínica asignada",
+        example: 1,
+      },
+      treatment_start_date: {
+        type: "string",
+        format: "date",
+        nullable: true,
+        description: "Fecha de inicio del tratamiento (YYYY-MM-DD)",
+        example: "2024-01-15",
+      },
+      status: {
+        type: "string",
+        enum: ["en curso", "fin del tratamiento", "en pausa", "abandono", "derivación"],
+        description: "Estado del tratamiento",
+        example: "en curso",
+      },
+      is_minor: {
+        type: "boolean",
+        nullable: true,
+        description: "Indica si es menor de edad",
+        example: false,
+      },
+    },
+  },
+
+  CreatePatientResponse: {
+    type: "object",
+    properties: {
+      success: {
+        type: "boolean",
+        example: true,
+      },
+      data: {
+        $ref: "#/components/schemas/Patient",
+      },
+      message: {
+        type: "string",
+        example: "Paciente creado exitosamente",
+      },
+    },
+  },
+
   CreateBonusRequest: {
     type: "object",
     required: ["patient_id", "total_sessions", "price_per_session", "total_price"],
