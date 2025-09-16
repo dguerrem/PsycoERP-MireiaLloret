@@ -1164,15 +1164,8 @@ const definitions = {
           PatientInvoice: {
             type: "array",
             items: {},
-            description: "Facturas del paciente (vacío por ahora)", 
+            description: "Facturas del paciente (vacío por ahora)",
             example: [],
-          },
-          PatientBonus: {
-            oneOf: [
-              { $ref: "#/components/schemas/PatientBonusesData" },
-              { type: "object" }
-            ],
-            description: "Bonuses del paciente con KPIs y detalles",
           },
         },
       },

@@ -113,7 +113,6 @@ const obtenerPacientePorId = async (req, res) => {
         PatientMedicalRecord: pacienteData.PatientMedicalRecord,
         PatientSessions: pacienteData.PatientSessions,
         PatientInvoice: [],
-        PatientBonus: pacienteData.PatientBonus,
       },
     });
   } catch (err) {
