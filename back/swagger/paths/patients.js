@@ -414,6 +414,77 @@ const patientsPaths = {
       },
     },
   },
+  "/api/patients/{id}/restore": {
+    put: {
+      tags: ["Patients"],
+      summary: "Restaurar paciente eliminado",
+      description: "Restaura un paciente previamente eliminado (soft delete) estableciendo is_active = true. Solo funciona con pacientes que han sido eliminados lógicamente.",
+      parameters: [
+        {
+          name: "id",
+          in: "path",
+          required: true,
+          schema: {
+            type: "integer",
+            format: "int64",
+          },
+          description: "ID único del paciente a restaurar",
+        },
+      ],
+      responses: {
+        200: {
+          description: "Paciente restaurado exitosamente",
+          content: {
+            "application/json": {
+              schema: {
+                type: "object",
+                properties: {
+                  success: {
+                    type: "boolean",
+                    example: true,
+                  },
+                  message: {
+                    type: "string",
+                    example: "Paciente restaurado correctamente",
+                  },
+                },
+              },
+            },
+          },
+        },
+        400: {
+          description: "ID del paciente inválido o no proporcionado",
+          content: {
+            "application/json": {
+              schema: {
+                $ref: "#/components/schemas/ErrorResponse",
+              },
+            },
+          },
+        },
+        404: {
+          description: "Paciente no encontrado o ya está activo",
+          content: {
+            "application/json": {
+              schema: {
+                $ref: "#/components/schemas/ErrorResponse",
+              },
+            },
+          },
+        },
+        500: {
+          description: "Error interno del servidor",
+          content: {
+            "application/json": {
+              schema: {
+                $ref: "#/components/schemas/ErrorResponse",
+              },
+            },
+          },
+        },
+      },
+    },
+  },
   "/api/patients/{id}": {
     get: {
       tags: ["Patients"],

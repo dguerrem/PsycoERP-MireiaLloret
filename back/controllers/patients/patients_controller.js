@@ -4,6 +4,7 @@ const {
   getDeletedPatients,
   deletePatient,
   createPatient,
+  restorePatient,
 } = require("../../models/patients/patients_model");
 
 const obtenerPacientes = async (req, res) => {
@@ -375,10 +376,52 @@ const crearPaciente = async (req, res) => {
   }
 };
 
+const restaurarPaciente = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    if (!id) {
+      return res.status(400).json({
+        success: false,
+        error: "ID del paciente es requerido",
+      });
+    }
+
+    // Validar que el ID sea un número válido
+    if (isNaN(id)) {
+      return res.status(400).json({
+        success: false,
+        error: "ID del paciente debe ser un número válido",
+      });
+    }
+
+    const restaurado = await restorePatient(id);
+
+    if (!restaurado) {
+      return res.status(404).json({
+        success: false,
+        error: "Paciente no encontrado o ya está activo",
+      });
+    }
+
+    res.json({
+      success: true,
+      message: "Paciente restaurado correctamente",
+    });
+  } catch (err) {
+    console.error("Error al restaurar paciente:", err.message);
+    res.status(500).json({
+      success: false,
+      error: "Error al restaurar el paciente",
+    });
+  }
+};
+
 module.exports = {
   obtenerPacientes,
   obtenerPacientePorId,
   obtenerPacientesEliminados,
   eliminarPaciente,
   crearPaciente,
+  restaurarPaciente,
 };

@@ -507,10 +507,23 @@ const createPatient = async (patientData) => {
   return patientRows[0];
 };
 
+// Restaurar un paciente (revertir soft delete)
+const restorePatient = async (id) => {
+  const query = `
+    UPDATE patients
+    SET is_active = true, updated_at = CURRENT_TIMESTAMP
+    WHERE id = ? AND is_active = false
+  `;
+
+  const [result] = await db.execute(query, [id]);
+  return result.affectedRows > 0;
+};
+
 module.exports = {
   getPatients,
   getPatientById,
   getDeletedPatients,
   deletePatient,
   createPatient,
+  restorePatient,
 };
