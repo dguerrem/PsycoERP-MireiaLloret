@@ -2434,36 +2434,18 @@ const definitions = {
       data: {
         type: "object",
         properties: {
-          id: {
-            type: "integer",
-            format: "int64",
-            description: "ID del recordatorio creado",
-            example: 15,
-          },
-          session_id: {
-            type: "integer",
-            format: "int64",
-            description: "ID de la sesión",
-            example: 1,
-          },
-          sent_at: {
+          whatsapp_deeplink: {
             type: "string",
-            format: "date-time",
-            description: "Fecha y hora cuando se envió el recordatorio",
-            example: "2024-12-16T10:30:00.000Z",
-          },
-          created_at: {
-            type: "string",
-            format: "date-time",
-            description: "Fecha de creación del registro",
-            example: "2024-12-16T10:30:00.000Z",
+            format: "uri",
+            description: "Deeplink de WhatsApp listo para usar que abrirá la aplicación con el mensaje pre-cargado personalizado para la sesión",
+            example: "https://wa.me/34666123456?text=*RECORDATORIO%20DE%20CITA%20PSICOL%C3%93GICA*%0A%0AHola%20Juan%20P%C3%A9rez%20Garc%C3%ADa%2C%0A%0ATe%20recuerdo%20que%20tienes%20una%20cita%20programada%20para%3A%0A%0A*Fecha%3A*%20lunes%2C%2016%20de%20diciembre%20de%202024%0A*Hora%3A*%2010%3A00%20-%2011%3A00%0A*Modalidad%3A*%20Presencial%0A*Cl%C3%ADnica%3A*%20Cl%C3%ADnica%20Psicol%C3%B3gica%20Centro%0A%0A%C2%A1Conf%C3%ADrmame%20asistencia%20cuando%20puedas%20%21",
           },
         },
       },
       message: {
         type: "string",
         description: "Mensaje de éxito",
-        example: "Recordatorio creado exitosamente",
+        example: "Recordatorio creado exitosamente con deeplink de WhatsApp",
       },
     },
   },

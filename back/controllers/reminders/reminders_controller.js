@@ -52,16 +52,24 @@ const crearRecordatorio = async (req, res) => {
       });
     }
 
-    const reminder = await createReminder(parseInt(session_id));
+    const reminderData = await createReminder(parseInt(session_id));
+
+    // Generar mensaje de WhatsApp personalizado
+    const whatsappMessage = generarMensajeWhatsApp(reminderData);
+
+    // Generar deeplink de WhatsApp
+    const whatsappDeeplink = generarDeeplinkWhatsApp(reminderData.patient_phone, whatsappMessage);
 
     res.status(201).json({
       success: true,
-      data: reminder,
-      message: "Recordatorio creado exitosamente"
+      data: {
+        whatsapp_deeplink: whatsappDeeplink
+      },
+      message: "Recordatorio creado exitosamente con deeplink de WhatsApp"
     });
   } catch (err) {
     console.error("Error al crear recordatorio:", err.message);
-    
+
     // Manejar errores específicos
     if (err.message === "Session not found or not scheduled") {
       return res.status(404).json({
@@ -70,7 +78,7 @@ const crearRecordatorio = async (req, res) => {
         message: "La sesión debe existir y estar en estado 'programada'"
       });
     }
-    
+
     if (err.message === "Reminder already exists for this session") {
       return res.status(409).json({
         success: false,
@@ -85,6 +93,68 @@ const crearRecordatorio = async (req, res) => {
       message: "Ha ocurrido un error interno del servidor"
     });
   }
+};
+
+// Función para generar mensaje de WhatsApp personalizado
+const generarMensajeWhatsApp = (sessionData) => {
+  const fecha = new Date(sessionData.session_date);
+  const fechaFormateada = fecha.toLocaleDateString('es-ES', {
+    weekday: 'long',
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric'
+  });
+
+  const horaInicio = sessionData.start_time.slice(0, 5); // HH:MM
+  const horaFin = sessionData.end_time.slice(0, 5); // HH:MM
+
+  let mensaje = `*RECORDATORIO DE CITA PSICOLÓGICA*\n\n`;
+  mensaje += `Hola ${sessionData.patient_name},\n\n`;
+  mensaje += `Te recuerdo que tienes una cita programada para:\n\n`;
+  mensaje += `*Fecha:* ${fechaFormateada}\n`;
+  mensaje += `*Hora:* ${horaInicio} - ${horaFin}\n`;
+  mensaje += `*Modalidad:* ${sessionData.mode === 'presencial' ? 'Presencial' : 'Online'}\n`;
+
+  if (sessionData.mode === 'presencial' && sessionData.clinic_name) {
+    mensaje += `*Clínica:* ${sessionData.clinic_name}\n`;
+  } else if (sessionData.mode === 'online') {
+    // Generar enlace de Google Meet aleatorio
+    const meetId = generarIdGoogleMeet();
+    mensaje += `*Enlace de la sesión:* https://meet.google.com/${meetId}\n`;
+  }
+
+  mensaje += `¡Confírmame asistencia cuando puedas !\n\n`;
+
+  return mensaje; 
+};
+
+// Función para generar ID aleatorio de Google Meet
+const generarIdGoogleMeet = () => {
+  const caracteres = 'abcdefghijklmnopqrstuvwxyz';
+  const generarSegmento = (longitud) => {
+    let resultado = '';
+    for (let i = 0; i < longitud; i++) {
+      resultado += caracteres.charAt(Math.floor(Math.random() * caracteres.length));
+    }
+    return resultado;
+  };
+
+  return `${generarSegmento(3)}-${generarSegmento(4)}-${generarSegmento(3)}`;
+};
+
+// Función para generar deeplink de WhatsApp
+const generarDeeplinkWhatsApp = (telefono, mensaje) => {
+  // Limpiar el número de teléfono (solo números)
+  const telefonoLimpio = telefono.replace(/\D/g, '');
+
+  // Asegurar que el código de país esté presente (España por defecto)
+  const telefonoFinal = telefonoLimpio.startsWith('34') ? telefonoLimpio : `34${telefonoLimpio}`;
+
+  // Codificar el mensaje para URL manteniendo los emojis
+  const mensajeCodificado = encodeURIComponent(mensaje);
+
+  // Generar deeplink de WhatsApp
+  return `https://wa.me/${telefonoFinal}?text=${mensajeCodificado}`;
 };
 
 module.exports = {

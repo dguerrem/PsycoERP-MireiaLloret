@@ -31,8 +31,8 @@ const remindersPaths = {
   "/api/reminders": {
     post: {
       tags: ["Reminders"],
-      summary: "Crear nuevo recordatorio",
-      description: "Registra un recordatorio para una sesión específica en la tabla reminders",
+      summary: "Crear recordatorio con WhatsApp deeplink",
+      description: "Crea un recordatorio para una sesión específica y genera un deeplink de WhatsApp personalizado. Incluye información completa del paciente, sesión, clínica (si es presencial) o enlace de Google Meet (si es online). El mensaje está optimizado para recordatorios automáticos.",
       requestBody: {
         required: true,
         content: {
@@ -45,7 +45,7 @@ const remindersPaths = {
       },
       responses: {
         201: {
-          description: "Recordatorio creado exitosamente",
+          description: "Recordatorio creado exitosamente con deeplink de WhatsApp generado",
           content: {
             "application/json": {
               schema: {
