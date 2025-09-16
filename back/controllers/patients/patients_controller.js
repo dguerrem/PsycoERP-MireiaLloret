@@ -5,6 +5,7 @@ const {
   deletePatient,
   createPatient,
   restorePatient,
+  updatePatient,
 } = require("../../models/patients/patients_model");
 
 const obtenerPacientes = async (req, res) => {
@@ -417,6 +418,153 @@ const restaurarPaciente = async (req, res) => {
   }
 };
 
+const actualizarPaciente = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const {
+      first_name,
+      last_name,
+      email,
+      phone,
+      dni,
+      gender,
+      occupation,
+      birth_date,
+      street,
+      street_number,
+      door,
+      postal_code,
+      city,
+      province,
+      session_price,
+      clinic_id,
+      treatment_start_date,
+      status,
+      is_minor,
+    } = req.body;
+
+    // Validar que se proporcione el ID y sea un número válido
+    if (!id || isNaN(id)) {
+      return res.status(400).json({
+        success: false,
+        error: "ID es requerido y debe ser un número válido",
+      });
+    }
+
+    // Crear objeto con los datos a actualizar (solo campos no undefined)
+    const updateData = {};
+    if (first_name !== undefined) updateData.first_name = first_name;
+    if (last_name !== undefined) updateData.last_name = last_name;
+    if (email !== undefined) updateData.email = email;
+    if (phone !== undefined) updateData.phone = phone;
+    if (dni !== undefined) updateData.dni = dni;
+    if (gender !== undefined) updateData.gender = gender;
+    if (occupation !== undefined) updateData.occupation = occupation;
+    if (birth_date !== undefined) updateData.birth_date = birth_date;
+    if (street !== undefined) updateData.street = street;
+    if (street_number !== undefined) updateData.street_number = street_number;
+    if (door !== undefined) updateData.door = door;
+    if (postal_code !== undefined) updateData.postal_code = postal_code;
+    if (city !== undefined) updateData.city = city;
+    if (province !== undefined) updateData.province = province;
+    if (session_price !== undefined) updateData.session_price = session_price;
+    if (clinic_id !== undefined) updateData.clinic_id = clinic_id;
+    if (treatment_start_date !== undefined) updateData.treatment_start_date = treatment_start_date;
+    if (status !== undefined) updateData.status = status;
+    if (is_minor !== undefined) updateData.is_minor = is_minor;
+
+    // Validar que se envíe al menos un campo
+    if (Object.keys(updateData).length === 0) {
+      return res.status(400).json({
+        success: false,
+        error: "Debe proporcionar al menos un campo para actualizar",
+      });
+    }
+
+    // Validaciones de formato si se proporcionan los campos
+    if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      return res.status(400).json({
+        success: false,
+        error: "El formato del email no es válido",
+      });
+    }
+
+    if (gender && !["M", "F", "O"].includes(gender)) {
+      return res.status(400).json({
+        success: false,
+        error: "El género debe ser M, F o O",
+      });
+    }
+
+    const validStatuses = ["en curso", "fin del tratamiento", "en pausa", "abandono", "derivación"];
+    if (status && !validStatuses.includes(status)) {
+      return res.status(400).json({
+        success: false,
+        error: "El status debe ser uno de: " + validStatuses.join(", "),
+      });
+    }
+
+    if (clinic_id && isNaN(clinic_id)) {
+      return res.status(400).json({
+        success: false,
+        error: "El clinic_id debe ser un número válido",
+      });
+    }
+
+    if (session_price && (isNaN(session_price) || session_price < 0)) {
+      return res.status(400).json({
+        success: false,
+        error: "El precio de sesión debe ser un número válido mayor o igual a 0",
+      });
+    }
+
+    if (is_minor !== undefined && typeof is_minor !== "boolean") {
+      return res.status(400).json({
+        success: false,
+        error: "El campo is_minor debe ser un valor booleano",
+      });
+    }
+
+    const pacienteActualizado = await updatePatient(parseInt(id), updateData);
+
+    if (!pacienteActualizado) {
+      return res.status(404).json({
+        success: false,
+        error: "Paciente no encontrado o no está activo",
+      });
+    }
+
+    res.json({
+      success: true,
+      data: pacienteActualizado,
+      message: "Paciente actualizado exitosamente",
+    });
+  } catch (err) {
+    console.error("Error al actualizar paciente:", err.message);
+
+    // Manejo de errores específicos de base de datos
+    if (err.code === 'ER_DUP_ENTRY') {
+      if (err.message.includes('email')) {
+        return res.status(409).json({
+          success: false,
+          error: "El email ya está registrado para otro paciente",
+        });
+      }
+      if (err.message.includes('dni')) {
+        return res.status(409).json({
+          success: false,
+          error: "El DNI ya está registrado para otro paciente",
+        });
+      }
+    }
+
+    res.status(500).json({
+      success: false,
+      error: "Error al actualizar el paciente",
+    });
+  }
+};
+
 module.exports = {
   obtenerPacientes,
   obtenerPacientePorId,
@@ -424,4 +572,5 @@ module.exports = {
   eliminarPaciente,
   crearPaciente,
   restaurarPaciente,
+  actualizarPaciente,
 };

@@ -8,12 +8,14 @@ const {
   eliminarPaciente,
   crearPaciente,
   restaurarPaciente,
+  actualizarPaciente,
 } = require("../../controllers/patients/patients_controller");
 
 router.get("/", obtenerPacientes);
 router.post("/", crearPaciente);
 router.get("/deleted", obtenerPacientesEliminados);
 router.get("/:id", obtenerPacientePorId);
+router.put("/:id", actualizarPaciente);
 router.put("/:id/restore", restaurarPaciente);
 router.delete("/:id", eliminarPaciente);
 

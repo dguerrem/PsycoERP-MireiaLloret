@@ -519,6 +519,64 @@ const restorePatient = async (id) => {
   return result.affectedRows > 0;
 };
 
+// Actualizar un paciente existente
+const updatePatient = async (id, updateData) => {
+  // Verificar que hay campos para actualizar
+  if (Object.keys(updateData).length === 0) {
+    throw new Error("No hay campos para actualizar");
+  }
+
+  // Construir la query dinámicamente
+  const setClause = Object.keys(updateData).map(key => `${key} = ?`).join(', ');
+  const values = Object.values(updateData);
+
+  const query = `
+    UPDATE patients
+    SET ${setClause}, updated_at = CURRENT_TIMESTAMP
+    WHERE id = ? AND is_active = true
+  `;
+
+  values.push(id);
+
+  const [result] = await db.execute(query, values);
+
+  if (result.affectedRows === 0) {
+    return null;
+  }
+
+  // Obtener el paciente actualizado
+  const getPatientQuery = `
+    SELECT
+      id,
+      first_name,
+      last_name,
+      email,
+      phone,
+      dni,
+      gender,
+      occupation,
+      DATE_FORMAT(birth_date, '%Y-%m-%d') as birth_date,
+      street,
+      street_number,
+      door,
+      postal_code,
+      city,
+      province,
+      session_price,
+      clinic_id,
+      DATE_FORMAT(treatment_start_date, '%Y-%m-%d') as treatment_start_date,
+      status,
+      is_minor,
+      DATE_FORMAT(created_at,'%Y-%m-%d') as created_at,
+      DATE_FORMAT(updated_at,'%Y-%m-%d') as updated_at
+    FROM patients
+    WHERE id = ? AND is_active = true
+  `;
+
+  const [patientRows] = await db.execute(getPatientQuery, [id]);
+  return patientRows[0];
+};
+
 module.exports = {
   getPatients,
   getPatientById,
@@ -526,4 +584,5 @@ module.exports = {
   deletePatient,
   createPatient,
   restorePatient,
+  updatePatient,
 };

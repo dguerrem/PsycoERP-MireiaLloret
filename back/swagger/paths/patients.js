@@ -486,6 +486,85 @@ const patientsPaths = {
     },
   },
   "/api/patients/{id}": {
+    put: {
+      tags: ["Patients"],
+      summary: "Actualizar paciente",
+      description: "Actualiza los datos de un paciente existente. Solo se modificarán los campos proporcionados en el request body.",
+      parameters: [
+        {
+          name: "id",
+          in: "path",
+          required: true,
+          schema: {
+            type: "integer",
+            format: "int64",
+          },
+          description: "ID único del paciente a actualizar",
+        },
+      ],
+      requestBody: {
+        required: true,
+        content: {
+          "application/json": {
+            schema: {
+              $ref: "#/components/schemas/UpdatePatientRequest",
+            },
+          },
+        },
+      },
+      responses: {
+        200: {
+          description: "Paciente actualizado exitosamente",
+          content: {
+            "application/json": {
+              schema: {
+                $ref: "#/components/schemas/UpdatePatientResponse",
+              },
+            },
+          },
+        },
+        400: {
+          description: "Datos de entrada inválidos, ID inválido o no se proporcionaron campos para actualizar",
+          content: {
+            "application/json": {
+              schema: {
+                $ref: "#/components/schemas/ErrorResponse",
+              },
+            },
+          },
+        },
+        404: {
+          description: "Paciente no encontrado o no está activo",
+          content: {
+            "application/json": {
+              schema: {
+                $ref: "#/components/schemas/ErrorResponse",
+              },
+            },
+          },
+        },
+        409: {
+          description: "Email o DNI ya registrados para otro paciente",
+          content: {
+            "application/json": {
+              schema: {
+                $ref: "#/components/schemas/ErrorResponse",
+              },
+            },
+          },
+        },
+        500: {
+          description: "Error interno del servidor",
+          content: {
+            "application/json": {
+              schema: {
+                $ref: "#/components/schemas/ErrorResponse",
+              },
+            },
+          },
+        },
+      },
+    },
     get: {
       tags: ["Patients"],
       summary: "Obtener paciente por ID",
