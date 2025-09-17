@@ -42,7 +42,7 @@ const getClinics = async (filters = {}) => {
   }
 
   // Agregar ordenamiento y paginación solo a la query de datos
-  dataQuery += " ORDER BY created_at DESC";
+  dataQuery += " ORDER BY name ASC";
   dataQuery += " LIMIT ? OFFSET ?";
   
   // Ejecutar ambas queries
