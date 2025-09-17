@@ -3,8 +3,8 @@
 
     <!-- Header -->
     <app-section-header
-      title="Recordatorios"
-      subtitle="Gestiona los recordatorios de sesiones para tus pacientes">
+      title="Reminders"
+      subtitle="Manage session reminders for your patients">
     </app-section-header>
 
     <!-- Content -->
@@ -24,7 +24,7 @@
           <button
             class="mt-2 text-sm underline hover:no-underline"
             (click)="onRetry()">
-            Reintentar
+            Retry
           </button>
         </div>
       }
@@ -32,15 +32,15 @@
       <!-- Loading State -->
       @if (isLoading()) {
         <div class="flex items-center justify-center h-full">
-          <div class="text-muted-foreground">Cargando recordatorios...</div>
+          <div class="text-muted-foreground">Loading reminders...</div>
         </div>
-      } @else if (recordatorios().length > 0) {
-        <!-- Recordatorios Grid -->
+      } @else if (reminders().length > 0) {
+        <!-- Reminders Grid -->
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          @for (recordatorio of recordatorios(); track recordatorio.id) {
+          @for (reminder of reminders(); track reminder.id) {
             <app-reminder-card
-              [recordatorio]="recordatorio"
-              [isLoading]="isRecordatorioLoading(recordatorio.id)"
+              [reminder]="reminder"
+              [isLoading]="isReminderLoading(reminder.id)"
               (sendReminder)="onSendReminder($event)">
             </app-reminder-card>
           }
@@ -51,8 +51,8 @@
           <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-12 h-12 text-muted-foreground mx-auto mb-4">
             <path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"></path>
           </svg>
-          <h3 class="text-lg font-semibold text-foreground mb-2">No hay recordatorios pendientes</h3>
-          <p class="text-muted-foreground">Los recordatorios aparecerán aquí cuando tengas sesiones programadas</p>
+          <h3 class="text-lg font-semibold text-foreground mb-2">No pending reminders</h3>
+          <p class="text-muted-foreground">Reminders will appear here when you have scheduled sessions</p>
         </div>
       }
 

@@ -1,15 +1,14 @@
-// Modelo para uso interno en el componente
-export interface Recordatorio {
+// Internal model for component use
+export interface Reminder {
   id: string;
   sessionId: number;
   patientName: string;
   startTime: string;
   endTime: string;
-  clinicColor: string;
   sent: boolean;
 }
 
-// Modelo que llega del endpoint GET /api/reminders/pending
+// Model from GET /api/reminders/pending endpoint
 export interface PendingReminderFromAPI {
   session_id: number;
   start_time: string;
@@ -18,12 +17,12 @@ export interface PendingReminderFromAPI {
   reminder_sent: boolean;
 }
 
-// Respuesta del endpoint GET /api/reminders/pending
+// Response from GET /api/reminders/pending endpoint
 export interface PendingRemindersResponse {
   data: PendingReminderFromAPI[];
 }
 
-// Respuesta del endpoint POST /api/reminders
+// Response from POST /api/reminders endpoint
 export interface SendReminderResponse {
   data: {
     whatsapp_deeplink: string;

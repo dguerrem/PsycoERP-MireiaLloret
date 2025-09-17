@@ -2,7 +2,7 @@ import { Component, inject, OnInit, ChangeDetectionStrategy } from '@angular/cor
 import { CommonModule } from '@angular/common';
 import { SectionHeaderComponent } from '../../shared/components/section-header/section-header.component';
 import { ReminderCardComponent } from './components/reminder-card/reminder-card.component';
-import { RecordatoriosService } from './services/recordatorios.service';
+import { RemindersService } from './services/reminders.service';
 
 @Component({
   selector: 'app-reminder',
@@ -17,30 +17,30 @@ import { RecordatoriosService } from './services/recordatorios.service';
   ]
 })
 export class ReminderComponent implements OnInit {
-  private recordatoriosService = inject(RecordatoriosService);
+  private remindersService = inject(RemindersService);
 
-  protected recordatorios = this.recordatoriosService.all;
-  protected isLoading = this.recordatoriosService.isLoading;
-  protected sendingStates = this.recordatoriosService.isSending;
-  protected error = this.recordatoriosService.error;
+  protected reminders = this.remindersService.all;
+  protected isLoading = this.remindersService.isLoading;
+  protected sendingStates = this.remindersService.isSending;
+  protected error = this.remindersService.error;
 
   ngOnInit(): void {
-    this.recordatoriosService.loadRecordatorios();
+    this.remindersService.loadReminders();
   }
 
   protected async onSendReminder(id: string): Promise<void> {
     try {
-      await this.recordatoriosService.sendReminder(id);
+      await this.remindersService.sendReminder(id);
     } catch (error) {
-      console.error('Error enviando recordatorio:', error);
+      console.error('Error sending reminder:', error);
     }
   }
 
   protected onRetry(): void {
-    this.recordatoriosService.loadRecordatorios();
+    this.remindersService.loadReminders();
   }
 
-  protected isRecordatorioLoading(id: string): boolean {
-    return this.recordatoriosService.isRecordatorioLoading(id);
+  protected isReminderLoading(id: string): boolean {
+    return this.remindersService.isReminderLoading(id);
   }
 }
