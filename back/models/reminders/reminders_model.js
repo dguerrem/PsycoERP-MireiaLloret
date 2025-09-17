@@ -30,7 +30,7 @@ const getPendingReminders = async () => {
       s.id as session_id,
       s.start_time,
       s.end_time,
-      p.name as patient_name,
+      p.first_name as patient_name,
       IF(r.id IS NOT NULL, true, false) as reminder_sent
     FROM sessions s
     INNER JOIN patients p ON s.patient_id = p.id
