@@ -2,6 +2,10 @@ const express = require("express");
 const cors = require("cors");
 require("dotenv").config();
 
+const { google } = require("googleapis");
+const fs = require("fs");
+const path = require("path");
+
 const { testConnection } = require("./config/db");
 const {
   swaggerUi,
@@ -27,6 +31,43 @@ const usersRoutes = require("./routes/users/users_routes");
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+// Configuración de credenciales de Google OAuth 2.0
+const CREDENTIALS_PATH = path.join(__dirname, ".secret", "credentials.json");
+const TOKEN_PATH = path.join(__dirname, ".secret", "token.json");
+const credentials = JSON.parse(fs.readFileSync(CREDENTIALS_PATH));
+const { client_id, client_secret, redirect_uris } = credentials.web;
+
+const oAuth2Client = new google.auth.OAuth2(
+  client_id,
+  client_secret,
+  redirect_uris[0]
+);
+
+// Ruta para el manejo del callback de Google
+app.get("/oauth2callback", async (req, res) => {
+  const code = req.query.code;
+
+  if (!code) {
+    return res.status(400).send("Falta el código de autorización.");
+  }
+
+  try {
+    const { tokens } = await oAuth2Client.getToken(code);
+    oAuth2Client.setCredentials(tokens);
+
+    // Guarda el token para futuros usos
+    fs.writeFileSync(TOKEN_PATH, JSON.stringify(tokens));
+    console.log("Token de acceso y actualización guardados.");
+
+    res.send(
+      "Autenticación con Google completada con éxito. Ya puedes cerrar esta ventana."
+    );
+  } catch (error) {
+    console.error("Error al obtener el token:", error);
+    res.status(500).send("Error durante la autenticación.");
+  }
+});
 
 // 🔧 SWAGGER UI - Documentación
 app.use(
