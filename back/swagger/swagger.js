@@ -3,13 +3,13 @@ const swaggerUi = require("swagger-ui-express");
 
 const definitions = require("./definitions");
 const authPaths = require("./paths/auth");
-const sessionsPaths = require("./paths/sessions");
-const patientsPaths = require("./paths/patients");
 const bonusesPaths = require("./paths/bonuses");
+const clinicalNotesPaths = require("./paths/clinical_notes");
 const clinicsPaths = require("./paths/clinics");
 const dashboardPaths = require("./paths/dashboard");
-const clinicalNotesPaths = require("./paths/clinical_notes");
+const patientsPaths = require("./paths/patients");
 const remindersPaths = require("./paths/reminders");
+const sessionsPaths = require("./paths/sessions");
 const usersPaths = require("./paths/users");
 
 const swaggerDefinition = {
@@ -47,13 +47,13 @@ const swaggerDefinition = {
   ],
   paths: {
     ...authPaths,
-    ...sessionsPaths,
-    ...patientsPaths,
     ...bonusesPaths,
+    ...clinicalNotesPaths,
     ...clinicsPaths,
     ...dashboardPaths,
-    ...clinicalNotesPaths,
+    ...patientsPaths,
     ...remindersPaths,
+    ...sessionsPaths,
     ...usersPaths,
   },
   tags: [
@@ -62,16 +62,12 @@ const swaggerDefinition = {
       description: "Autenticación de usuarios",
     },
     {
-      name: "Sessions",
-      description: "Gestión de sesiones de terapia",
-    },
-    {
-      name: "Patients",
-      description: "Gestión de pacientes",
-    },
-    {
       name: "Bonuses",
       description: "Gestión de bonuses de pacientes",
+    },
+    {
+      name: "Clinical Notes",
+      description: "Gestión de notas clínicas e historial médico",
     },
     {
       name: "Clinics",
@@ -82,12 +78,16 @@ const swaggerDefinition = {
       description: "KPIs y métricas del dashboard",
     },
     {
-      name: "Clinical Notes",
-      description: "Gestión de notas clínicas e historial médico",
+      name: "Patients",
+      description: "Gestión de pacientes",
     },
     {
       name: "Reminders",
       description: "Gestión de recordatorios de sesiones",
+    },
+    {
+      name: "Sessions",
+      description: "Gestión de sesiones de terapia",
     },
     {
       name: "Users",
