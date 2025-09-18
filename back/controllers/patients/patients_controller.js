@@ -399,21 +399,36 @@ const restaurarPaciente = async (req, res) => {
     const restaurado = await restorePatient(id);
 
     if (!restaurado) {
-      return res.status(404).json({
+      return res.status(500).json({
         success: false,
-        error: "Paciente no encontrado o ya está activo",
+        error: "Error interno al activar el paciente",
       });
     }
 
     res.json({
       success: true,
-      message: "Paciente restaurado correctamente",
+      message: "Paciente activado exitosamente. Status cambiado a 'en curso'",
     });
   } catch (err) {
-    console.error("Error al restaurar paciente:", err.message);
+    console.error("Error al activar paciente:", err.message);
+
+    if (err.message === "Patient not found") {
+      return res.status(404).json({
+        success: false,
+        error: "Paciente no encontrado",
+      });
+    }
+
+    if (err.message === "Patient already active") {
+      return res.status(409).json({
+        success: false,
+        error: "El paciente ya está activo (status: en curso)",
+      });
+    }
+
     res.status(500).json({
       success: false,
-      error: "Error al restaurar el paciente",
+      error: "Error al activar el paciente",
     });
   }
 };

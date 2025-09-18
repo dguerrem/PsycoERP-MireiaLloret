@@ -507,15 +507,36 @@ const createPatient = async (patientData) => {
   return patientRows[0];
 };
 
-// Restaurar un paciente (revertir soft delete)
+// Restaurar un paciente (activar cambiando status a "en curso")
 const restorePatient = async (id) => {
-  const query = `
-    UPDATE patients
-    SET is_active = true, updated_at = CURRENT_TIMESTAMP
-    WHERE id = ? AND is_active = false
+  // Primero verificar si el paciente existe y su status actual
+  const checkQuery = `
+    SELECT id, status, is_active
+    FROM patients
+    WHERE id = ? AND is_active = true
   `;
 
-  const [result] = await db.execute(query, [id]);
+  const [patientRows] = await db.execute(checkQuery, [id]);
+
+  if (patientRows.length === 0) {
+    throw new Error("Patient not found");
+  }
+
+  const patient = patientRows[0];
+
+  // Verificar si el paciente ya está activo (status "en curso")
+  if (patient.status === "en curso") {
+    throw new Error("Patient already active");
+  }
+
+  // Actualizar el status a "en curso" para reactivar al paciente
+  const updateQuery = `
+    UPDATE patients
+    SET status = 'en curso', updated_at = CURRENT_TIMESTAMP
+    WHERE id = ? AND is_active = true
+  `;
+
+  const [result] = await db.execute(updateQuery, [id]);
   return result.affectedRows > 0;
 };
 

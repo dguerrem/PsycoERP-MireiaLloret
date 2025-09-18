@@ -417,8 +417,8 @@ const patientsPaths = {
   "/api/patients/{id}/restore": {
     put: {
       tags: ["Patients"],
-      summary: "Restaurar paciente eliminado",
-      description: "Restaura un paciente previamente eliminado (soft delete) estableciendo is_active = true. Solo funciona con pacientes que han sido eliminados lógicamente.",
+      summary: "Activar paciente",
+      description: "Activa un paciente cambiando su status a 'en curso'. Solo funciona con pacientes que tengan un status diferente a 'en curso'.",
       parameters: [
         {
           name: "id",
@@ -428,12 +428,12 @@ const patientsPaths = {
             type: "integer",
             format: "int64",
           },
-          description: "ID único del paciente a restaurar",
+          description: "ID único del paciente a activar",
         },
       ],
       responses: {
         200: {
-          description: "Paciente restaurado exitosamente",
+          description: "Paciente activado exitosamente",
           content: {
             "application/json": {
               schema: {
@@ -445,7 +445,7 @@ const patientsPaths = {
                   },
                   message: {
                     type: "string",
-                    example: "Paciente restaurado correctamente",
+                    example: "Paciente activado exitosamente. Status cambiado a 'en curso'",
                   },
                 },
               },
@@ -463,7 +463,17 @@ const patientsPaths = {
           },
         },
         404: {
-          description: "Paciente no encontrado o ya está activo",
+          description: "Paciente no encontrado",
+          content: {
+            "application/json": {
+              schema: {
+                $ref: "#/components/schemas/ErrorResponse",
+              },
+            },
+          },
+        },
+        409: {
+          description: "El paciente ya está activo (status: en curso)",
           content: {
             "application/json": {
               schema: {
