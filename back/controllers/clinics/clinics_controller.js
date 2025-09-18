@@ -147,7 +147,7 @@ const obtenerClinicasEliminadas = async (req, res) => {
 
 const crearClinica = async (req, res) => {
   try {
-    const { name, clinic_color } = req.body;
+    const { name, clinic_color, address, price, percentage } = req.body;
 
     if (!name || name.trim() === "") {
       return res.status(400).json({
@@ -156,7 +156,6 @@ const crearClinica = async (req, res) => {
       });
     }
 
-
     if (!clinic_color || clinic_color.trim() === "") {
       return res.status(400).json({
         success: false,
@@ -164,10 +163,36 @@ const crearClinica = async (req, res) => {
       });
     }
 
-    const data = { 
+    const data = {
       name: name.trim(),
       clinic_color: clinic_color.trim()
     };
+
+    if (address !== undefined && address !== null) {
+      data.address = address.trim();
+    }
+
+    if (price !== undefined && price !== null) {
+      const priceNum = parseFloat(price);
+      if (isNaN(priceNum) || priceNum < 0) {
+        return res.status(400).json({
+          success: false,
+          error: "El precio debe ser un número válido mayor o igual a 0",
+        });
+      }
+      data.price = priceNum;
+    }
+
+    if (percentage !== undefined && percentage !== null) {
+      const percentageNum = parseFloat(percentage);
+      if (isNaN(percentageNum) || percentageNum < 0 || percentageNum > 100) {
+        return res.status(400).json({
+          success: false,
+          error: "El porcentaje debe ser un número válido entre 0 y 100",
+        });
+      }
+      data.percentage = percentageNum;
+    }
 
     const nuevaClinica = await createClinic(data);
 
@@ -178,14 +203,13 @@ const crearClinica = async (req, res) => {
     });
   } catch (err) {
     console.error("Error al crear clínica:", err.message);
-    
+
     if (err.message === "Name is required") {
       return res.status(400).json({
         success: false,
         error: "El nombre de la clínica es requerido",
       });
     }
-
 
     if (err.message === "Clinic color is required") {
       return res.status(400).json({

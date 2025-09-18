@@ -196,24 +196,45 @@ const getDeletedClinics = async (filters = {}) => {
 };
 
 const createClinic = async (data) => {
-  const { name, clinic_color } = data;
-  
+  const { name, clinic_color, address, price, percentage } = data;
+
   if (!name) {
     throw new Error("Name is required");
   }
-  
-  
+
   if (!clinic_color) {
     throw new Error("Clinic color is required");
   }
-  
+
+  const fields = ["name", "clinic_color"];
+  const values = [name, clinic_color];
+  const placeholders = ["?", "?"];
+
+  if (address !== undefined) {
+    fields.push("address");
+    values.push(address);
+    placeholders.push("?");
+  }
+
+  if (price !== undefined) {
+    fields.push("price");
+    values.push(price);
+    placeholders.push("?");
+  }
+
+  if (percentage !== undefined) {
+    fields.push("percentage");
+    values.push(percentage);
+    placeholders.push("?");
+  }
+
   const query = `
-    INSERT INTO clinics (name, clinic_color)
-    VALUES (?, ?)
+    INSERT INTO clinics (${fields.join(", ")})
+    VALUES (${placeholders.join(", ")})
   `;
-  
-  const [result] = await db.execute(query, [name, clinic_color]);
-  
+
+  const [result] = await db.execute(query, values);
+
   return {
     id: result.insertId,
     ...data,
