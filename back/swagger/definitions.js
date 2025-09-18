@@ -296,11 +296,31 @@ const definitions = {
         description: "Nombre de la clínica",
         example: "Clínica Psicológica Centro",
       },
+      address: {
+        type: "string",
+        nullable: true,
+        description: "Dirección de la clínica",
+        example: "Calle Mayor 123, Madrid",
+      },
       clinic_color: {
         type: "string",
         nullable: true,
         description: "Color de la clínica en formato hexadecimal",
         example: "#3B82F6",
+      },
+      price: {
+        type: "number",
+        format: "decimal",
+        nullable: true,
+        description: "Precio base por sesión en euros",
+        example: 60.00,
+      },
+      percentage: {
+        type: "number",
+        format: "decimal",
+        nullable: true,
+        description: "Porcentaje (0.00-100.00)",
+        example: 15.50,
       },
       created_at: {
         type: "string",

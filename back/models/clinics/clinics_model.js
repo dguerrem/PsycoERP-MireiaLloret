@@ -15,10 +15,13 @@ const getClinics = async (filters = {}) => {
 
   // Query principal para obtener datos
   let dataQuery = `
-        SELECT 
+        SELECT
             id,
             name,
+            address,
             clinic_color,
+            price,
+            percentage,
             DATE_FORMAT(created_at,'%Y-%m-%d') as created_at,
             DATE_FORMAT(updated_at,'%Y-%m-%d') as updated_at
         FROM clinics
@@ -133,10 +136,13 @@ const getDeletedClinics = async (filters = {}) => {
 
   // Query principal para obtener datos
   let dataQuery = `
-        SELECT 
+        SELECT
             id,
             name,
+            address,
             clinic_color,
+            price,
+            percentage,
             DATE_FORMAT(created_at,'%Y-%m-%d') as created_at,
             DATE_FORMAT(updated_at,'%Y-%m-%d') as updated_at
         FROM clinics
