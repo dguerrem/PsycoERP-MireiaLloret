@@ -124,6 +124,9 @@ const generarMensajeWhatsApp = async (sessionData) => {
 
   if (sessionData.mode === "presencial" && sessionData.clinic_name) {
     mensaje += `*Clínica:* ${sessionData.clinic_name}\n`;
+    if (sessionData.clinic_address) {
+      mensaje += `*Dirección:* ${sessionData.clinic_address}\n`;
+    }
   } else if (sessionData.mode === "online") {
     try {
       // Crear Google Meet REAL

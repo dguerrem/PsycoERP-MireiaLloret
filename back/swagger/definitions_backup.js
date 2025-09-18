@@ -337,6 +337,177 @@ const definitions = {
     },
   },
 
+  UpdateClinicRequest: {
+    type: "object",
+    properties: {
+      name: {
+        type: "string",
+        description: "Nombre de la clínica",
+        example: "Clínica Psicológica Centro Actualizada",
+      },
+      clinic_color: {
+        type: "string",
+        nullable: true,
+        description: "Color de la clínica en formato hexadecimal (#RRGGBB)",
+        pattern: "^#[0-9A-Fa-f]{6}$",
+        example: "#10B981",
+      },
+      address: {
+        type: "string",
+        nullable: true,
+        description: "Dirección de la clínica",
+        example: "Avenida Libertad 456, Barcelona",
+      },
+      price: {
+        type: "number",
+        format: "decimal",
+        nullable: true,
+        minimum: 0,
+        description: "Precio base por sesión en euros",
+        example: 65.00,
+      },
+      percentage: {
+        type: "number",
+        format: "decimal",
+        nullable: true,
+        minimum: 0,
+        maximum: 100,
+        description: "Porcentaje entre 0.00 y 100.00",
+        example: 20.00,
+      },
+    },
+  },
+
+  CreateClinicRequest: {
+    type: "object",
+    required: ["name", "clinic_color"],
+    properties: {
+      name: {
+        type: "string",
+        description: "Nombre de la clínica (requerido)",
+        example: "Clínica Psicológica Nueva",
+      },
+      clinic_color: {
+        type: "string",
+        description: "Color de la clínica en formato hexadecimal (#RRGGBB) (requerido)",
+        pattern: "^#[0-9A-Fa-f]{6}$",
+        example: "#EF4444",
+      },
+      address: {
+        type: "string",
+        nullable: true,
+        description: "Dirección de la clínica (opcional)",
+        example: "Calle Mayor 123, Madrid",
+      },
+      price: {
+        type: "number",
+        format: "decimal",
+        nullable: true,
+        minimum: 0,
+        description: "Precio base por sesión en euros (opcional)",
+        example: 60.00,
+      },
+      percentage: {
+        type: "number",
+        format: "decimal",
+        nullable: true,
+        minimum: 0,
+        maximum: 100,
+        description: "Porcentaje entre 0.00 y 100.00 (opcional)",
+        example: 15.50,
+      },
+    },
+  },
+
+  CreateClinicResponse: {
+    type: "object",
+    properties: {
+      success: {
+        type: "boolean",
+        description: "Indica si la operación fue exitosa",
+        example: true,
+      },
+      message: {
+        type: "string",
+        description: "Mensaje de éxito",
+        example: "Clínica creada exitosamente",
+      },
+      data: {
+        type: "object",
+        properties: {
+          id: {
+            type: "integer",
+            format: "int64",
+            description: "ID de la nueva clínica",
+            example: 5,
+          },
+          name: {
+            type: "string",
+            description: "Nombre de la clínica",
+            example: "Clínica Psicológica Nueva",
+          },
+          clinic_color: {
+            type: "string",
+            description: "Color de la clínica",
+            example: "#EF4444",
+          },
+          address: {
+            type: "string",
+            nullable: true,
+            description: "Dirección de la clínica",
+            example: "Calle Mayor 123, Madrid",
+          },
+          price: {
+            type: "number",
+            format: "decimal",
+            nullable: true,
+            description: "Precio base por sesión en euros",
+            example: 60.00,
+          },
+          percentage: {
+            type: "number",
+            format: "decimal",
+            nullable: true,
+            description: "Porcentaje",
+            example: 15.50,
+          },
+        },
+      },
+    },
+  },
+
+  DistributionByModalityItem: {
+    type: "object",
+    properties: {
+      modality_type: {
+        type: "string",
+        description: "Tipo de modalidad de la sesión (presencial/online)",
+        example: "Presencial",
+      },
+      session_count: {
+        type: "integer",
+        description: "Número total de sesiones realizadas con esta modalidad",
+        example: 45,
+      },
+    },
+  },
+
+  SuccessResponse: {
+    type: "object",
+    properties: {
+      success: {
+        type: "boolean",
+        description: "Indica si la operación fue exitosa",
+        example: true,
+      },
+      message: {
+        type: "string",
+        description: "Mensaje de éxito",
+        example: "Operación completada exitosamente",
+      },
+    },
+  },
+
   ClinicData: {
     type: "object",
     properties: {
@@ -350,6 +521,25 @@ const definitions = {
         type: "string",
         description: "Nombre de la clínica",
         example: "Clínica Psicológica Centro",
+      },
+    },
+  },
+
+  ClinicsResponse: {
+    type: "object",
+    properties: {
+      success: {
+        type: "boolean",
+        example: true,
+      },
+      pagination: {
+        $ref: "#/components/schemas/PaginationInfo",
+      },
+      data: {
+        type: "array",
+        items: {
+          $ref: "#/components/schemas/Clinic",
+        },
       },
     },
   },
@@ -454,170 +644,6 @@ const definitions = {
         type: "array",
         items: {
           $ref: "#/components/schemas/ClinicalNote",
-        },
-      },
-    },
-  },
-
-  ClinicsResponse: {
-    type: "object",
-    properties: {
-      success: {
-        type: "boolean",
-        example: true,
-      },
-      pagination: {
-        $ref: "#/components/schemas/PaginationInfo",
-      },
-      data: {
-        type: "array",
-        items: {
-          $ref: "#/components/schemas/Clinic",
-        },
-      },
-    },
-  },
-
-  CreateBonusRequest: {
-    type: "object",
-    required: ["patient_id", "total_sessions", "price_per_session", "total_price"],
-    properties: {
-      patient_id: {
-        type: "integer",
-        format: "int64",
-        description: "ID del paciente",
-        example: 1,
-      },
-      total_sessions: {
-        type: "integer",
-        description: "Número total de sesiones incluidas en el bonus",
-        example: 10,
-      },
-      price_per_session: {
-        type: "number",
-        format: "decimal",
-        description: "Precio por sesión en euros",
-        example: 50.00,
-      },
-      total_price: {
-        type: "number",
-        format: "decimal",
-        description: "Precio total del bonus",
-        example: 500.00,
-      },
-    },
-  },
-
-  CreateBonusResponse: {
-    type: "object",
-    properties: {
-      success: {
-        type: "boolean",
-        example: true,
-      },
-      message: {
-        type: "string",
-        example: "Bonus creado exitosamente",
-      },
-      data: {
-        $ref: "#/components/schemas/PatientBonusDetail",
-      },
-    },
-  },
-
-  CreateClinicRequest: {
-    type: "object",
-    required: ["name", "clinic_color"],
-    properties: {
-      name: {
-        type: "string",
-        description: "Nombre de la clínica (requerido)",
-        example: "Clínica Psicológica Nueva",
-      },
-      clinic_color: {
-        type: "string",
-        description: "Color de la clínica en formato hexadecimal (#RRGGBB) (requerido)",
-        pattern: "^#[0-9A-Fa-f]{6}$",
-        example: "#EF4444",
-      },
-      address: {
-        type: "string",
-        nullable: true,
-        description: "Dirección de la clínica (opcional)",
-        example: "Calle Mayor 123, Madrid",
-      },
-      price: {
-        type: "number",
-        format: "decimal",
-        nullable: true,
-        minimum: 0,
-        description: "Precio base por sesión en euros (opcional)",
-        example: 60.00,
-      },
-      percentage: {
-        type: "number",
-        format: "decimal",
-        nullable: true,
-        minimum: 0,
-        maximum: 100,
-        description: "Porcentaje entre 0.00 y 100.00 (opcional)",
-        example: 15.50,
-      },
-    },
-  },
-
-  CreateClinicResponse: {
-    type: "object",
-    properties: {
-      success: {
-        type: "boolean",
-        description: "Indica si la operación fue exitosa",
-        example: true,
-      },
-      message: {
-        type: "string",
-        description: "Mensaje de éxito",
-        example: "Clínica creada exitosamente",
-      },
-      data: {
-        type: "object",
-        properties: {
-          id: {
-            type: "integer",
-            format: "int64",
-            description: "ID de la nueva clínica",
-            example: 5,
-          },
-          name: {
-            type: "string",
-            description: "Nombre de la clínica",
-            example: "Clínica Psicológica Nueva",
-          },
-          clinic_color: {
-            type: "string",
-            description: "Color de la clínica",
-            example: "#EF4444",
-          },
-          address: {
-            type: "string",
-            nullable: true,
-            description: "Dirección de la clínica",
-            example: "Calle Mayor 123, Madrid",
-          },
-          price: {
-            type: "number",
-            format: "decimal",
-            nullable: true,
-            description: "Precio base por sesión en euros",
-            example: 60.00,
-          },
-          percentage: {
-            type: "number",
-            format: "decimal",
-            nullable: true,
-            description: "Porcentaje",
-            example: 15.50,
-          },
         },
       },
     },
@@ -761,20 +787,127 @@ const definitions = {
     },
   },
 
-  CreateReminderRequest: {
+  UpdatePatientRequest: {
     type: "object",
-    required: ["session_id"],
     properties: {
-      session_id: {
+      first_name: {
+        type: "string",
+        description: "Nombre del paciente",
+        example: "Juan",
+      },
+      last_name: {
+        type: "string",
+        description: "Apellidos del paciente",
+        example: "Pérez García",
+      },
+      email: {
+        type: "string",
+        format: "email",
+        description: "Email del paciente",
+        example: "juan.perez@email.com",
+      },
+      phone: {
+        type: "string",
+        description: "Teléfono del paciente",
+        example: "+34 666 123 456",
+      },
+      dni: {
+        type: "string",
+        description: "DNI del paciente",
+        example: "12345678A",
+      },
+      gender: {
+        type: "string",
+        enum: ["M", "F", "O"],
+        description: "Género del paciente (M=Masculino, F=Femenino, O=Otro)",
+        example: "M",
+      },
+      occupation: {
+        type: "string",
+        nullable: true,
+        description: "Ocupación/Escuela/Trabajo",
+        example: "Estudiante de Psicología",
+      },
+      birth_date: {
+        type: "string",
+        format: "date",
+        nullable: true,
+        description: "Fecha de nacimiento (YYYY-MM-DD)",
+        example: "1985-03-15",
+      },
+      street: {
+        type: "string",
+        nullable: true,
+        description: "Nombre de la calle",
+        example: "Calle Mayor",
+      },
+      street_number: {
+        type: "string",
+        nullable: true,
+        description: "Número de la calle",
+        example: "123",
+      },
+      door: {
+        type: "string",
+        nullable: true,
+        description: "Puerta/Piso",
+        example: "2A",
+      },
+      postal_code: {
+        type: "string",
+        nullable: true,
+        description: "Código postal",
+        example: "28001",
+      },
+      city: {
+        type: "string",
+        nullable: true,
+        description: "Ciudad",
+        example: "Madrid",
+      },
+      province: {
+        type: "string",
+        nullable: true,
+        description: "Provincia",
+        example: "Madrid",
+      },
+      session_price: {
+        type: "number",
+        format: "decimal",
+        nullable: true,
+        description: "Precio por sesión en euros",
+        example: 60.00,
+      },
+      clinic_id: {
         type: "integer",
         format: "int64",
-        description: "ID de la sesión para la cual crear el recordatorio",
+        nullable: true,
+        description: "ID de la clínica asignada",
         example: 1,
+      },
+      treatment_start_date: {
+        type: "string",
+        format: "date",
+        nullable: true,
+        description: "Fecha de inicio del tratamiento (YYYY-MM-DD)",
+        example: "2024-01-15",
+      },
+      status: {
+        type: "string",
+        enum: ["en curso", "fin del tratamiento", "en pausa", "abandono", "derivación"],
+        description: "Estado del tratamiento",
+        example: "en curso",
+      },
+      is_minor: {
+        type: "boolean",
+        nullable: true,
+        description: "Indica si es menor de edad",
+        example: false,
       },
     },
   },
 
-  CreateReminderResponse: {
+  UpdatePatientResponse: {
     type: "object",
     properties: {
       success: {
@@ -782,20 +915,58 @@ const definitions = {
         example: true,
       },
       data: {
-        type: "object",
-        properties: {
-          whatsapp_deeplink: {
-            type: "string",
-            format: "uri",
-            description: "Deeplink de WhatsApp listo para usar que abrirá la aplicación con el mensaje pre-cargado personalizado para la sesión",
-            example: "https://wa.me/34666123456?text=*RECORDATORIO%20DE%20CITA%20PSICOL%C3%93GICA*%0A%0AHola%20Juan%20P%C3%A9rez%20Garc%C3%ADa%2C%0A%0ATe%20recuerdo%20que%20tienes%20una%20cita%20programada%20para%3A%0A%0A*Fecha%3A*%20lunes%2C%2016%20de%20diciembre%20de%202024%0A*Hora%3A*%2010%3A00%20-%2011%3A00%0A*Modalidad%3A*%20Presencial%0A*Cl%C3%ADnica%3A*%20Cl%C3%ADnica%20Psicol%C3%B3gica%20Centro%0A%0A%C2%A1Conf%C3%ADrmame%20asistencia%20cuando%20puedas%20%21",
-          },
-        },
+        $ref: "#/components/schemas/Patient",
       },
       message: {
         type: "string",
-        description: "Mensaje de éxito",
-        example: "Recordatorio creado exitosamente con deeplink de WhatsApp",
+        example: "Paciente actualizado exitosamente",
+      },
+    },
+  },
+
+  CreateBonusRequest: {
+    type: "object",
+    required: ["patient_id", "total_sessions", "price_per_session", "total_price"],
+    properties: {
+      patient_id: {
+        type: "integer",
+        format: "int64",
+        description: "ID del paciente",
+        example: 1,
+      },
+      total_sessions: {
+        type: "integer",
+        description: "Número total de sesiones incluidas en el bonus",
+        example: 10,
+      },
+      price_per_session: {
+        type: "number",
+        format: "decimal",
+        description: "Precio por sesión en euros",
+        example: 50.00,
+      },
+      total_price: {
+        type: "number",
+        format: "decimal",
+        description: "Precio total del bonus",
+        example: 500.00,
+      },
+    },
+  },
+
+  CreateBonusResponse: {
+    type: "object",
+    properties: {
+      success: {
+        type: "boolean",
+        example: true,
+      },
+      message: {
+        type: "string",
+        example: "Bonus creado exitosamente",
+      },
+      data: {
+        $ref: "#/components/schemas/PatientBonusDetail",
       },
     },
   },
@@ -892,22 +1063,6 @@ const definitions = {
     },
   },
 
-  DistributionByModalityItem: {
-    type: "object",
-    properties: {
-      modality_type: {
-        type: "string",
-        description: "Tipo de modalidad de la sesión (presencial/online)",
-        example: "Presencial",
-      },
-      session_count: {
-        type: "integer",
-        description: "Número total de sesiones realizadas con esta modalidad",
-        example: 45,
-      },
-    },
-  },
-
   ErrorResponse: {
     type: "object",
     properties: {
@@ -929,70 +1084,6 @@ const definitions = {
           type: "string",
         },
         example: ["scheduled", "completed", "cancelled", "no-show"],
-      },
-    },
-  },
-
-  JWTToken: {
-    type: "object",
-    properties: {
-      access_token: {
-        type: "string",
-        description: "Token JWT de acceso",
-        example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
-      },
-      token_type: {
-        type: "string",
-        description: "Tipo de token",
-        example: "Bearer",
-      },
-      expires_in: {
-        type: "string",
-        description: "Tiempo de expiración del token",
-        example: "7d",
-      },
-    },
-  },
-
-  LoginRequest: {
-    type: "object",
-    required: ["email", "password"],
-    properties: {
-      email: {
-        type: "string",
-        format: "email",
-        description: "Email del usuario",
-        example: "demo@psycoerp.es",
-      },
-      password: {
-        type: "string",
-        description: "Contraseña del usuario",
-        example: "PsycoERP123",
-      },
-    },
-  },
-
-  LoginResponse: {
-    type: "object",
-    properties: {
-      success: {
-        type: "boolean",
-        example: true,
-      },
-      message: {
-        type: "string",
-        example: "Login exitoso",
-      },
-      data: {
-        type: "object",
-        properties: {
-          user: {
-            $ref: "#/components/schemas/User",
-          },
-          token: {
-            $ref: "#/components/schemas/JWTToken",
-          },
-        },
       },
     },
   },
@@ -1042,54 +1133,6 @@ const definitions = {
         format: "decimal",
         description: "Ingresos del mes",
         example: 3750.00,
-      },
-    },
-  },
-
-  PaginationInfo: {
-    type: "object",
-    properties: {
-      currentPage: {
-        type: "integer",
-        description: "Página actual",
-        example: 1,
-      },
-      totalPages: {
-        type: "integer",
-        description: "Total de páginas disponibles",
-        example: 5,
-      },
-      totalRecords: {
-        type: "integer",
-        description: "Total de registros encontrados",
-        example: 47,
-      },
-      recordsPerPage: {
-        type: "integer",
-        description: "Registros por página",
-        example: 10,
-      },
-      hasNextPage: {
-        type: "boolean",
-        description: "Indica si hay una página siguiente",
-        example: true,
-      },
-      hasPrevPage: {
-        type: "boolean",
-        description: "Indica si hay una página anterior",
-        example: false,
-      },
-      nextPage: {
-        type: "integer",
-        nullable: true,
-        description: "Número de la página siguiente (null si no hay)",
-        example: 2,
-      },
-      prevPage: {
-        type: "integer",
-        nullable: true,
-        description: "Número de la página anterior (null si no hay)",
-        example: null,
       },
     },
   },
@@ -1339,7 +1382,7 @@ const definitions = {
         example: 5,
       },
       total_activos: {
-        type: "integer",
+        type: "integer", 
         description: "Total de bonuses activos",
         example: 2,
       },
@@ -1466,7 +1509,7 @@ const definitions = {
             description: "Datos detallados del paciente",
           },
           PatientMedicalRecord: {
-            type: "array",
+            type: "array", 
             items: {
               $ref: "#/components/schemas/ClinicalNote",
             },
@@ -1550,6 +1593,142 @@ const definitions = {
     },
   },
 
+  PatientsResponse: {
+    type: "object",
+    properties: {
+      success: {
+        type: "boolean",
+        example: true,
+      },
+      pagination: {
+        $ref: "#/components/schemas/PaginationInfo",
+      },
+      data: {
+        type: "array",
+        items: {
+          $ref: "#/components/schemas/Patient",
+        },
+      },
+    },
+  },
+
+  PaginationInfo: {
+    type: "object",
+    properties: {
+      currentPage: {
+        type: "integer",
+        description: "Página actual",
+        example: 1,
+      },
+      totalPages: {
+        type: "integer",
+        description: "Total de páginas disponibles",
+        example: 5,
+      },
+      totalRecords: {
+        type: "integer",
+        description: "Total de registros encontrados",
+        example: 47,
+      },
+      recordsPerPage: {
+        type: "integer",
+        description: "Registros por página",
+        example: 10,
+      },
+      hasNextPage: {
+        type: "boolean",
+        description: "Indica si hay una página siguiente",
+        example: true,
+      },
+      hasPrevPage: {
+        type: "boolean",
+        description: "Indica si hay una página anterior",
+        example: false,
+      },
+      nextPage: {
+        type: "integer",
+        nullable: true,
+        description: "Número de la página siguiente (null si no hay)",
+        example: 2,
+      },
+      prevPage: {
+        type: "integer",
+        nullable: true,
+        description: "Número de la página anterior (null si no hay)",
+        example: null,
+      },
+    },
+  },
+
+  PaymentMethodsItem: {
+    type: "object",
+    properties: {
+      payment_method: {
+        type: "string",
+        enum: ["cash", "card", "transfer", "insurance"],
+        description: "Método de pago utilizado",
+        example: "cash",
+      },
+      percentage: {
+        type: "number",
+        format: "decimal",
+        description: "Porcentaje de uso de este método de pago",
+        example: 50.25,
+      },
+    },
+  },
+
+  RapidKPIData: {
+    type: "object",
+    properties: {
+      sesiones_mes: {
+        type: "integer",
+        description: "Número de sesiones del mes actual",
+        example: 45,
+      },
+      sesiones_variacion: {
+        type: "number",
+        format: "decimal",
+        description: "Porcentaje de variación vs mes anterior (positivo o negativo)",
+        example: 12.5,
+      },
+      ingresos_mes: {
+        type: "number",
+        format: "decimal",
+        description: "Ingresos del mes actual en euros",
+        example: 2750.00,
+      },
+      ingresos_variacion: {
+        type: "number",
+        format: "decimal", 
+        description: "Porcentaje de variación de ingresos vs mes anterior",
+        example: -8.3,
+      },
+      pacientes_activos: {
+        type: "integer",
+        description: "Número de pacientes activos",
+        example: 28,
+      },
+      pacientes_nuevos_mes: {
+        type: "integer",
+        description: "Nuevos pacientes este mes",
+        example: 5,
+      },
+      proximas_citas_hoy: {
+        type: "integer",
+        description: "Número de citas programadas para hoy",
+        example: 6,
+      },
+      siguiente_cita_hora: {
+        type: "string",
+        format: "time",
+        nullable: true,
+        description: "Hora de la siguiente cita de hoy (HH:MM:SS) o null si no hay más",
+        example: "14:30:00",
+      },
+    },
+  },
+
   PatientSession: {
     type: "object",
     properties: {
@@ -1599,176 +1778,6 @@ const definitions = {
         nullable: true,
         description: "Notas de la sesión",
         example: "Sesión muy productiva, buen progreso del paciente",
-      },
-    },
-  },
-
-  PatientsResponse: {
-    type: "object",
-    properties: {
-      success: {
-        type: "boolean",
-        example: true,
-      },
-      pagination: {
-        $ref: "#/components/schemas/PaginationInfo",
-      },
-      data: {
-        type: "array",
-        items: {
-          $ref: "#/components/schemas/Patient",
-        },
-      },
-    },
-  },
-
-  PaymentMethodsItem: {
-    type: "object",
-    properties: {
-      payment_method: {
-        type: "string",
-        enum: ["cash", "card", "transfer", "insurance"],
-        description: "Método de pago utilizado",
-        example: "cash",
-      },
-      percentage: {
-        type: "number",
-        format: "decimal",
-        description: "Porcentaje de uso de este método de pago",
-        example: 50.25,
-      },
-    },
-  },
-
-  RapidKPIData: {
-    type: "object",
-    properties: {
-      sesiones_mes: {
-        type: "integer",
-        description: "Número de sesiones del mes actual",
-        example: 45,
-      },
-      sesiones_variacion: {
-        type: "number",
-        format: "decimal",
-        description: "Porcentaje de variación vs mes anterior (positivo o negativo)",
-        example: 12.5,
-      },
-      ingresos_mes: {
-        type: "number",
-        format: "decimal",
-        description: "Ingresos del mes actual en euros",
-        example: 2750.00,
-      },
-      ingresos_variacion: {
-        type: "number",
-        format: "decimal",
-        description: "Porcentaje de variación de ingresos vs mes anterior",
-        example: -8.3,
-      },
-      pacientes_activos: {
-        type: "integer",
-        description: "Número de pacientes activos",
-        example: 28,
-      },
-      pacientes_nuevos_mes: {
-        type: "integer",
-        description: "Nuevos pacientes este mes",
-        example: 5,
-      },
-      proximas_citas_hoy: {
-        type: "integer",
-        description: "Número de citas programadas para hoy",
-        example: 6,
-      },
-      siguiente_cita_hora: {
-        type: "string",
-        format: "time",
-        nullable: true,
-        description: "Hora de la siguiente cita de hoy (HH:MM:SS) o null si no hay más",
-        example: "14:30:00",
-      },
-    },
-  },
-
-  ReminderSession: {
-    type: "object",
-    properties: {
-      session_id: {
-        type: "integer",
-        format: "int64",
-        description: "ID único de la sesión",
-        example: 1,
-      },
-      start_time: {
-        type: "string",
-        format: "time",
-        description: "Hora de inicio (HH:MM:SS)",
-        example: "09:00:00",
-      },
-      end_time: {
-        type: "string",
-        format: "time",
-        description: "Hora de finalización (HH:MM:SS)",
-        example: "10:00:00",
-      },
-      patient_name: {
-        type: "string",
-        description: "Nombre completo del paciente",
-        example: "Juan Pérez García",
-      },
-      reminder_sent: {
-        type: "boolean",
-        description: "Indica si se ha enviado recordatorio para esta sesión",
-        example: false,
-      },
-    },
-  },
-
-  RemindersResponse: {
-    type: "object",
-    properties: {
-      success: {
-        type: "boolean",
-        example: true,
-      },
-      data: {
-        type: "array",
-        items: {
-          $ref: "#/components/schemas/ReminderSession",
-        },
-        description: "Lista de sesiones con información de recordatorios",
-      },
-      total: {
-        type: "integer",
-        description: "Número total de sesiones pendientes de recordatorio",
-        example: 5,
-      },
-      message: {
-        type: "string",
-        description: "Mensaje descriptivo de la consulta",
-        example: "Sesiones programadas para mañana (2024-12-16)",
-      },
-      metadata: {
-        type: "object",
-        properties: {
-          targetDate: {
-            type: "string",
-            format: "date",
-            description: "Fecha objetivo calculada",
-            example: "2024-12-16",
-          },
-          currentDay: {
-            type: "integer",
-            description: "Día de la semana actual (0=Domingo, 1=Lunes, ...)",
-            example: 1,
-          },
-          description: {
-            type: "string",
-            description: "Descripción del período consultado",
-            example: "Sesiones de mañana",
-          },
-        },
       },
     },
   },
@@ -1964,15 +1973,6 @@ const definitions = {
     },
   },
 
-  SessionDetailResponse: {
-    type: "object",
-    properties: {
-      SessionDetailData: {
-        $ref: "#/components/schemas/SessionData",
-      },
-    },
-  },
-
   SessionItem: {
     type: "object",
     properties: {
@@ -1996,6 +1996,15 @@ const definitions = {
         type: "string",
         description: "Nombre de la clínica",
         example: "Clínica Psicológica Centro",
+      },
+    },
+  },
+
+  SessionDetailResponse: {
+    type: "object",
+    properties: {
+      SessionDetailData: {
+        $ref: "#/components/schemas/SessionData",
       },
     },
   },
@@ -2034,6 +2043,25 @@ const definitions = {
     },
   },
 
+  SessionsResponse: {
+    type: "object",
+    properties: {
+      success: {
+        type: "boolean",
+        example: true,
+      },
+      pagination: {
+        $ref: "#/components/schemas/PaginationInfo",
+      },
+      data: {
+        type: "array",
+        items: {
+          $ref: "#/components/schemas/SessionDetailResponse",
+        },
+      },
+    },
+  },
+
   SessionsByClinicItem: {
     type: "object",
     properties: {
@@ -2063,41 +2091,6 @@ const definitions = {
     },
   },
 
-  SessionsResponse: {
-    type: "object",
-    properties: {
-      success: {
-        type: "boolean",
-        example: true,
-      },
-      pagination: {
-        $ref: "#/components/schemas/PaginationInfo",
-      },
-      data: {
-        type: "array",
-        items: {
-          $ref: "#/components/schemas/SessionDetailResponse",
-        },
-      },
-    },
-  },
-
-  SuccessResponse: {
-    type: "object",
-    properties: {
-      success: {
-        type: "boolean",
-        description: "Indica si la operación fue exitosa",
-        example: true,
-      },
-      message: {
-        type: "string",
-        description: "Mensaje de éxito",
-        example: "Operación completada exitosamente",
-      },
-    },
-  },
-
   TodayUpcomingSessionsData: {
     type: "array",
     items: {
@@ -2112,254 +2105,6 @@ const definitions = {
       $ref: "#/components/schemas/SessionItem",
     },
     description: "Lista de sesiones del próximo día laborable (viernes→lunes, sábado→lunes, otros→día siguiente)",
-  },
-
-  UpdateClinicRequest: {
-    type: "object",
-    properties: {
-      name: {
-        type: "string",
-        description: "Nombre de la clínica",
-        example: "Clínica Psicológica Centro Actualizada",
-      },
-      clinic_color: {
-        type: "string",
-        nullable: true,
-        description: "Color de la clínica en formato hexadecimal (#RRGGBB)",
-        pattern: "^#[0-9A-Fa-f]{6}$",
-        example: "#10B981",
-      },
-      address: {
-        type: "string",
-        nullable: true,
-        description: "Dirección de la clínica",
-        example: "Avenida Libertad 456, Barcelona",
-      },
-      price: {
-        type: "number",
-        format: "decimal",
-        nullable: true,
-        minimum: 0,
-        description: "Precio base por sesión en euros",
-        example: 65.00,
-      },
-      percentage: {
-        type: "number",
-        format: "decimal",
-        nullable: true,
-        minimum: 0,
-        maximum: 100,
-        description: "Porcentaje entre 0.00 y 100.00",
-        example: 20.00,
-      },
-    },
-  },
-
-  UpdatePatientRequest: {
-    type: "object",
-    properties: {
-      first_name: {
-        type: "string",
-        description: "Nombre del paciente",
-        example: "Juan",
-      },
-      last_name: {
-        type: "string",
-        description: "Apellidos del paciente",
-        example: "Pérez García",
-      },
-      email: {
-        type: "string",
-        format: "email",
-        description: "Email del paciente",
-        example: "juan.perez@email.com",
-      },
-      phone: {
-        type: "string",
-        description: "Teléfono del paciente",
-        example: "+34 666 123 456",
-      },
-      dni: {
-        type: "string",
-        description: "DNI del paciente",
-        example: "12345678A",
-      },
-      gender: {
-        type: "string",
-        enum: ["M", "F", "O"],
-        description: "Género del paciente (M=Masculino, F=Femenino, O=Otro)",
-        example: "M",
-      },
-      occupation: {
-        type: "string",
-        nullable: true,
-        description: "Ocupación/Escuela/Trabajo",
-        example: "Estudiante de Psicología",
-      },
-      birth_date: {
-        type: "string",
-        format: "date",
-        nullable: true,
-        description: "Fecha de nacimiento (YYYY-MM-DD)",
-        example: "1985-03-15",
-      },
-      street: {
-        type: "string",
-        nullable: true,
-        description: "Nombre de la calle",
-        example: "Calle Mayor",
-      },
-      street_number: {
-        type: "string",
-        nullable: true,
-        description: "Número de la calle",
-        example: "123",
-      },
-      door: {
-        type: "string",
-        nullable: true,
-        description: "Puerta/Piso",
-        example: "2A",
-      },
-      postal_code: {
-        type: "string",
-        nullable: true,
-        description: "Código postal",
-        example: "28001",
-      },
-      city: {
-        type: "string",
-        nullable: true,
-        description: "Ciudad",
-        example: "Madrid",
-      },
-      province: {
-        type: "string",
-        nullable: true,
-        description: "Provincia",
-        example: "Madrid",
-      },
-      session_price: {
-        type: "number",
-        format: "decimal",
-        nullable: true,
-        description: "Precio por sesión en euros",
-        example: 60.00,
-      },
-      clinic_id: {
-        type: "integer",
-        format: "int64",
-        nullable: true,
-        description: "ID de la clínica asignada",
-        example: 1,
-      },
-      treatment_start_date: {
-        type: "string",
-        format: "date",
-        nullable: true,
-        description: "Fecha de inicio del tratamiento (YYYY-MM-DD)",
-        example: "2024-01-15",
-      },
-      status: {
-        type: "string",
-        enum: ["en curso", "fin del tratamiento", "en pausa", "abandono", "derivación"],
-        description: "Estado del tratamiento",
-        example: "en curso",
-      },
-      is_minor: {
-        type: "boolean",
-        nullable: true,
-        description: "Indica si es menor de edad",
-        example: false,
-      },
-    },
-  },
-
-  UpdatePatientResponse: {
-    type: "object",
-    properties: {
-      success: {
-        type: "boolean",
-        example: true,
-      },
-      data: {
-        $ref: "#/components/schemas/Patient",
-      },
-      message: {
-        type: "string",
-        example: "Paciente actualizado exitosamente",
-      },
-    },
-  },
-
-  UpdateUserRequest: {
-    type: "object",
-    properties: {
-      name: {
-        type: "string",
-        description: "Nombre completo del usuario",
-        example: "Admin Usuario Actualizado",
-      },
-      dni: {
-        type: "string",
-        nullable: true,
-        description: "Documento Nacional de Identidad",
-        example: "12345678A",
-      },
-      street: {
-        type: "string",
-        nullable: true,
-        description: "Nombre de la calle",
-        example: "Calle Mayor",
-      },
-      street_number: {
-        type: "string",
-        nullable: true,
-        description: "Número de la calle",
-        example: "123",
-      },
-      door: {
-        type: "string",
-        nullable: true,
-        description: "Puerta/Piso",
-        example: "2A",
-      },
-      city: {
-        type: "string",
-        nullable: true,
-        description: "Ciudad",
-        example: "Madrid",
-      },
-      province: {
-        type: "string",
-        nullable: true,
-        description: "Provincia",
-        example: "Madrid",
-      },
-      postal_code: {
-        type: "string",
-        nullable: true,
-        description: "Código postal",
-        example: "28001",
-      },
-    },
-  },
-
-  UpdateUserResponse: {
-    type: "object",
-    properties: {
-      success: {
-        type: "boolean",
-        example: true,
-      },
-      data: {
-        $ref: "#/components/schemas/UserDetail",
-      },
-      message: {
-        type: "string",
-        example: "Usuario actualizado exitosamente",
-      },
-    },
   },
 
   UseBonusSessionResponse: {
@@ -2405,6 +2150,45 @@ const definitions = {
             example: "active",
           },
         },
+      },
+    },
+  },
+
+  WeeklySessionsItem: {
+    type: "object",
+    properties: {
+      week_number: {
+        type: "integer",
+        description: "Número de semana del mes (1-5)",
+        example: 2,
+      },
+      week_label: {
+        type: "string",
+        description: "Etiqueta descriptiva de la semana",
+        example: "Semana 2",
+      },
+      session_count: {
+        type: "integer",
+        description: "Número de sesiones realizadas en esta semana",
+        example: 15,
+      },
+    },
+  },
+
+  LoginRequest: {
+    type: "object",
+    required: ["email", "password"],
+    properties: {
+      email: {
+        type: "string",
+        format: "email",
+        description: "Email del usuario",
+        example: "demo@psycoerp.es",
+      },
+      password: {
+        type: "string",
+        description: "Contraseña del usuario",
+        example: "PsycoERP123",
       },
     },
   },
@@ -2515,23 +2299,239 @@ const definitions = {
     },
   },
 
-  WeeklySessionsItem: {
+  UpdateUserRequest: {
     type: "object",
     properties: {
-      week_number: {
-        type: "integer",
-        description: "Número de semana del mes (1-5)",
-        example: 2,
-      },
-      week_label: {
+      name: {
         type: "string",
-        description: "Etiqueta descriptiva de la semana",
-        example: "Semana 2",
+        description: "Nombre completo del usuario",
+        example: "Admin Usuario Actualizado",
       },
-      session_count: {
+      dni: {
+        type: "string",
+        nullable: true,
+        description: "Documento Nacional de Identidad",
+        example: "12345678A",
+      },
+      street: {
+        type: "string",
+        nullable: true,
+        description: "Nombre de la calle",
+        example: "Calle Mayor",
+      },
+      street_number: {
+        type: "string",
+        nullable: true,
+        description: "Número de la calle",
+        example: "123",
+      },
+      door: {
+        type: "string",
+        nullable: true,
+        description: "Puerta/Piso",
+        example: "2A",
+      },
+      city: {
+        type: "string",
+        nullable: true,
+        description: "Ciudad",
+        example: "Madrid",
+      },
+      province: {
+        type: "string",
+        nullable: true,
+        description: "Provincia",
+        example: "Madrid",
+      },
+      postal_code: {
+        type: "string",
+        nullable: true,
+        description: "Código postal",
+        example: "28001",
+      },
+    },
+  },
+
+  UpdateUserResponse: {
+    type: "object",
+    properties: {
+      success: {
+        type: "boolean",
+        example: true,
+      },
+      data: {
+        $ref: "#/components/schemas/UserDetail",
+      },
+      message: {
+        type: "string",
+        example: "Usuario actualizado exitosamente",
+      },
+    },
+  },
+
+  LoginResponse: {
+    type: "object",
+    properties: {
+      success: {
+        type: "boolean",
+        example: true,
+      },
+      message: {
+        type: "string",
+        example: "Login exitoso",
+      },
+      data: {
+        type: "object",
+        properties: {
+          user: {
+            $ref: "#/components/schemas/User",
+          },
+          token: {
+            $ref: "#/components/schemas/JWTToken",
+          },
+        },
+      },
+    },
+  },
+
+  JWTToken: {
+    type: "object",
+    properties: {
+      access_token: {
+        type: "string",
+        description: "Token JWT de acceso",
+        example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+      },
+      token_type: {
+        type: "string",
+        description: "Tipo de token",
+        example: "Bearer",
+      },
+      expires_in: {
+        type: "string",
+        description: "Tiempo de expiración del token",
+        example: "7d",
+      },
+    },
+  },
+
+  ReminderSession: {
+    type: "object",
+    properties: {
+      session_id: {
         type: "integer",
-        description: "Número de sesiones realizadas en esta semana",
-        example: 15,
+        format: "int64",
+        description: "ID único de la sesión",
+        example: 1,
+      },
+      start_time: {
+        type: "string",
+        format: "time",
+        description: "Hora de inicio (HH:MM:SS)",
+        example: "09:00:00",
+      },
+      end_time: {
+        type: "string",
+        format: "time",
+        description: "Hora de finalización (HH:MM:SS)",
+        example: "10:00:00",
+      },
+      patient_name: {
+        type: "string",
+        description: "Nombre completo del paciente",
+        example: "Juan Pérez García",
+      },
+      reminder_sent: {
+        type: "boolean",
+        description: "Indica si se ha enviado recordatorio para esta sesión",
+        example: false,
+      },
+    },
+  },
+
+  RemindersResponse: {
+    type: "object",
+    properties: {
+      success: {
+        type: "boolean",
+        example: true,
+      },
+      data: {
+        type: "array",
+        items: {
+          $ref: "#/components/schemas/ReminderSession",
+        },
+        description: "Lista de sesiones con información de recordatorios",
+      },
+      total: {
+        type: "integer",
+        description: "Número total de sesiones pendientes de recordatorio",
+        example: 5,
+      },
+      message: {
+        type: "string",
+        description: "Mensaje descriptivo de la consulta",
+        example: "Sesiones programadas para mañana (2024-12-16)",
+      },
+      metadata: {
+        type: "object",
+        properties: {
+          targetDate: {
+            type: "string",
+            format: "date",
+            description: "Fecha objetivo calculada",
+            example: "2024-12-16",
+          },
+          currentDay: {
+            type: "integer",
+            description: "Día de la semana actual (0=Domingo, 1=Lunes, ...)",
+            example: 1,
+          },
+          description: {
+            type: "string",
+            description: "Descripción del período consultado",
+            example: "Sesiones de mañana",
+          },
+        },
+      },
+    },
+  },
+
+  CreateReminderRequest: {
+    type: "object",
+    required: ["session_id"],
+    properties: {
+      session_id: {
+        type: "integer",
+        format: "int64",
+        description: "ID de la sesión para la cual crear el recordatorio",
+        example: 1,
+      },
+    },
+  },
+
+  CreateReminderResponse: {
+    type: "object",
+    properties: {
+      success: {
+        type: "boolean",
+        example: true,
+      },
+      data: {
+        type: "object",
+        properties: {
+          whatsapp_deeplink: {
+            type: "string",
+            format: "uri",
+            description: "Deeplink de WhatsApp listo para usar que abrirá la aplicación con el mensaje pre-cargado personalizado para la sesión",
+            example: "https://wa.me/34666123456?text=*RECORDATORIO%20DE%20CITA%20PSICOL%C3%93GICA*%0A%0AHola%20Juan%20P%C3%A9rez%20Garc%C3%ADa%2C%0A%0ATe%20recuerdo%20que%20tienes%20una%20cita%20programada%20para%3A%0A%0A*Fecha%3A*%20lunes%2C%2016%20de%20diciembre%20de%202024%0A*Hora%3A*%2010%3A00%20-%2011%3A00%0A*Modalidad%3A*%20Presencial%0A*Cl%C3%ADnica%3A*%20Cl%C3%ADnica%20Psicol%C3%B3gica%20Centro%0A%0A%C2%A1Conf%C3%ADrmame%20asistencia%20cuando%20puedas%20%21",
+          },
+        },
+      },
+      message: {
+        type: "string",
+        description: "Mensaje de éxito",
+        example: "Recordatorio creado exitosamente con deeplink de WhatsApp",
       },
     },
   },

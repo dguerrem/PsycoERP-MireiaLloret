@@ -64,6 +64,7 @@ const createReminder = async (sessionId) => {
       p.first_name as patient_name,
       p.phone as patient_phone,
       c.name as clinic_name,
+      c.address as clinic_address,
       r.id as reminder_id
     FROM sessions s
     INNER JOIN patients p ON s.patient_id = p.id
@@ -109,6 +110,7 @@ const createReminder = async (sessionId) => {
     patient_name: sessionData.patient_name,
     patient_phone: sessionData.patient_phone,
     clinic_name: sessionData.clinic_name,
+    clinic_address: sessionData.clinic_address,
     created_at: new Date(),
   };
 };
