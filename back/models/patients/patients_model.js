@@ -244,8 +244,8 @@ const getPatientById = async (id) => {
   };
 };
 
-// Obtener pacientes eliminados (soft deleted) con filtros opcionales y paginación
-const getDeletedPatients = async (filters = {}) => {
+// Obtener pacientes inactivos (status != 'en curso') con filtros opcionales y paginación
+const getInactivePatients = async (filters = {}) => {
   // Extraer parámetros de paginación
   const page = parseInt(filters.page) || 1;
   const limit = parseInt(filters.limit) || 10;
@@ -255,12 +255,12 @@ const getDeletedPatients = async (filters = {}) => {
   let countQuery = `
         SELECT COUNT(*) as total
         FROM patients
-        WHERE is_active = false
+        WHERE is_active = true AND status != 'en curso'
     `;
 
   // Query principal para obtener datos
   let dataQuery = `
-        SELECT 
+        SELECT
             id,
             first_name,
             last_name,
@@ -284,7 +284,7 @@ const getDeletedPatients = async (filters = {}) => {
             DATE_FORMAT(created_at,'%Y-%m-%d') as created_at,
             DATE_FORMAT(updated_at,'%Y-%m-%d') as updated_at
         FROM patients
-        WHERE is_active = false
+        WHERE is_active = true AND status != 'en curso'
     `;
 
   const params = [];
@@ -601,7 +601,7 @@ const updatePatient = async (id, updateData) => {
 module.exports = {
   getPatients,
   getPatientById,
-  getDeletedPatients,
+  getInactivePatients,
   deletePatient,
   createPatient,
   restorePatient,

@@ -1,7 +1,7 @@
 const {
   getPatients,
   getPatientById,
-  getDeletedPatients,
+  getInactivePatients,
   deletePatient,
   createPatient,
   restorePatient,
@@ -127,7 +127,7 @@ const obtenerPacientePorId = async (req, res) => {
   }
 };
 
-const obtenerPacientesEliminados = async (req, res) => {
+const obtenerPacientesInactivos = async (req, res) => {
   try {
     const {
       first_name,
@@ -164,7 +164,7 @@ const obtenerPacientesEliminados = async (req, res) => {
         error: "El límite debe estar entre 1 y 100 registros",
       });
     }
-    
+
     // Construir filtros incluyendo paginación
     const filters = {};
     if (first_name) filters.first_name = first_name;
@@ -191,7 +191,7 @@ const obtenerPacientesEliminados = async (req, res) => {
       if (fecha_hasta) filters.fecha_hasta = fecha_hasta;
     }
 
-    const result = await getDeletedPatients(filters);
+    const result = await getInactivePatients(filters);
 
     res.json({
       success: true,
@@ -199,10 +199,10 @@ const obtenerPacientesEliminados = async (req, res) => {
       data: result.data,
     });
   } catch (err) {
-    console.error("Error al obtener pacientes eliminados:", err.message);
+    console.error("Error al obtener pacientes inactivos:", err.message);
     res.status(500).json({
       success: false,
-      error: "Error al obtener los pacientes eliminados",
+      error: "Error al obtener los pacientes inactivos",
     });
   }
 };
@@ -583,7 +583,7 @@ const actualizarPaciente = async (req, res) => {
 module.exports = {
   obtenerPacientes,
   obtenerPacientePorId,
-  obtenerPacientesEliminados,
+  obtenerPacientesInactivos,
   eliminarPaciente,
   crearPaciente,
   restaurarPaciente,

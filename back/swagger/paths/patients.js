@@ -1,9 +1,9 @@
 const patientsPaths = {
-  "/api/patients/deleted": {
+  "/api/patients/inactive": {
     get: {
       tags: ["Patients"],
-      summary: "Obtener pacientes eliminados",
-      description: "Obtiene una lista de pacientes que han sido eliminados lógicamente (soft delete)",
+      summary: "Obtener pacientes inactivos",
+      description: "Obtiene una lista de pacientes inactivos (status != 'en curso')",
       parameters: [
         {
           name: "first_name",
@@ -146,7 +146,7 @@ const patientsPaths = {
       ],
       responses: {
         200: {
-          description: "Lista de pacientes eliminados obtenida exitosamente",
+          description: "Lista de pacientes inactivos obtenida exitosamente",
           content: {
             "application/json": {
               schema: {

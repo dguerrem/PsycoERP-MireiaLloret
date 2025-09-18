@@ -4,7 +4,7 @@ const router = express.Router();
 const {
   obtenerPacientes,
   obtenerPacientePorId,
-  obtenerPacientesEliminados,
+  obtenerPacientesInactivos,
   eliminarPaciente,
   crearPaciente,
   restaurarPaciente,
@@ -13,7 +13,7 @@ const {
 
 router.get("/", obtenerPacientes);
 router.post("/", crearPaciente);
-router.get("/deleted", obtenerPacientesEliminados);
+router.get("/inactive", obtenerPacientesInactivos);
 router.get("/:id", obtenerPacientePorId);
 router.put("/:id", actualizarPaciente);
 router.put("/:id/restore", restaurarPaciente);
