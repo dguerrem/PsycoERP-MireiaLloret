@@ -39,7 +39,7 @@ const obtenerClinicas = async (req, res) => {
 const actualizarClinica = async (req, res) => {
   try {
     const { id } = req.params;
-    const { name, clinic_color } = req.body;
+    const { name, clinic_color, address, price, percentage } = req.body;
 
     if (!id || isNaN(id)) {
       return res.status(400).json({
@@ -49,8 +49,60 @@ const actualizarClinica = async (req, res) => {
     }
 
     const data = {};
-    if (name !== undefined) data.name = name;
-    if (clinic_color !== undefined) data.clinic_color = clinic_color;
+
+    if (name !== undefined) {
+      if (typeof name !== 'string' || name.trim() === '') {
+        return res.status(400).json({
+          success: false,
+          error: "El nombre debe ser un texto válido y no puede estar vacío",
+        });
+      }
+      data.name = name.trim();
+    }
+
+    if (clinic_color !== undefined) {
+      if (typeof clinic_color !== 'string' || clinic_color.trim() === '') {
+        return res.status(400).json({
+          success: false,
+          error: "El color debe ser un texto válido y no puede estar vacío",
+        });
+      }
+      data.clinic_color = clinic_color.trim();
+    }
+
+    if (address !== undefined) {
+      data.address = address === null ? null : (address ? address.trim() : null);
+    }
+
+    if (price !== undefined) {
+      if (price === null) {
+        data.price = null;
+      } else {
+        const priceNum = parseFloat(price);
+        if (isNaN(priceNum) || priceNum < 0) {
+          return res.status(400).json({
+            success: false,
+            error: "El precio debe ser un número válido mayor o igual a 0",
+          });
+        }
+        data.price = priceNum;
+      }
+    }
+
+    if (percentage !== undefined) {
+      if (percentage === null) {
+        data.percentage = null;
+      } else {
+        const percentageNum = parseFloat(percentage);
+        if (isNaN(percentageNum) || percentageNum < 0 || percentageNum > 100) {
+          return res.status(400).json({
+            success: false,
+            error: "El porcentaje debe ser un número válido entre 0 y 100",
+          });
+        }
+        data.percentage = percentageNum;
+      }
+    }
 
     if (Object.keys(data).length === 0) {
       return res.status(400).json({
@@ -67,7 +119,7 @@ const actualizarClinica = async (req, res) => {
     });
   } catch (err) {
     console.error("Error al actualizar clínica:", err.message);
-    
+
     if (err.message === "Clinic not found") {
       return res.status(404).json({
         success: false,

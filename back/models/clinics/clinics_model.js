@@ -75,36 +75,50 @@ const getClinics = async (filters = {}) => {
 };
 
 const updateClinic = async (id, data) => {
-  const { name, clinic_color } = data;
-  
+  const { name, clinic_color, address, price, percentage } = data;
+
   const fields = [];
   const params = [];
-  
+
   if (name !== undefined) {
     fields.push("name = ?");
     params.push(name);
   }
-  
-  
+
   if (clinic_color !== undefined) {
     fields.push("clinic_color = ?");
     params.push(clinic_color);
   }
-  
+
+  if (address !== undefined) {
+    fields.push("address = ?");
+    params.push(address);
+  }
+
+  if (price !== undefined) {
+    fields.push("price = ?");
+    params.push(price);
+  }
+
+  if (percentage !== undefined) {
+    fields.push("percentage = ?");
+    params.push(percentage);
+  }
+
   if (fields.length === 0) {
     throw new Error("No fields to update");
   }
 
   params.push(id);
-  
+
   const query = `UPDATE clinics SET ${fields.join(", ")} WHERE id = ? AND is_active = true`;
-  
+
   const [result] = await db.execute(query, params);
-  
+
   if (result.affectedRows === 0) {
     throw new Error("Clinic not found");
   }
-  
+
   return result;
 };
 
