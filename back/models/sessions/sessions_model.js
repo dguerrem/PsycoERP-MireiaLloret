@@ -11,14 +11,14 @@ const getSessions = async (filters = {}) => {
   let countQuery = `
         SELECT COUNT(*) as total
         FROM sessions s
-        LEFT JOIN patients p ON s.patient_id = p.id AND p.is_active = true
+        LEFT JOIN patients p ON s.patient_id = p.id AND p.is_active = true AND p.status = 'en curso'
         LEFT JOIN clinics c ON s.clinic_id = c.id AND c.is_active = true
         WHERE s.is_active = true
     `;
 
   // Query principal para obtener datos
   let dataQuery = `
-        SELECT 
+        SELECT
             s.id AS session_id,
             s.session_date,
             s.start_time,
@@ -33,7 +33,7 @@ const getSessions = async (filters = {}) => {
             c.id AS clinic_id,
             c.name AS clinic_name
         FROM sessions s
-        LEFT JOIN patients p ON s.patient_id = p.id AND p.is_active = true
+        LEFT JOIN patients p ON s.patient_id = p.id AND p.is_active = true AND p.status = 'en curso'
         LEFT JOIN clinics c ON s.clinic_id = c.id AND c.is_active = true
         WHERE s.is_active = true
     `;
@@ -268,7 +268,7 @@ const deleteSession = async (sessionId) => {
 // Obtener datos de sesión con paciente para WhatsApp
 const getSessionForWhatsApp = async (sessionId) => {
   const query = `
-    SELECT 
+    SELECT
       s.id,
       s.session_date,
       s.start_time,
@@ -276,7 +276,7 @@ const getSessionForWhatsApp = async (sessionId) => {
       p.name as patient_name,
       p.phone as patient_phone
     FROM sessions s
-    INNER JOIN patients p ON s.patient_id = p.id AND p.is_active = true
+    INNER JOIN patients p ON s.patient_id = p.id AND p.is_active = true AND p.status = 'en curso'
     WHERE s.id = ? AND s.is_active = true
   `;
   
