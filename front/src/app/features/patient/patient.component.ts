@@ -10,8 +10,8 @@ import {
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { Patient } from '../../shared/models/patient.model';
-import { PatientsService, PatientFilters } from './services/patients.service';
+import { Patient, PatientFilters } from '../../shared/models/patient.model';
+import { PatientsService } from './services/patients.service';
 import { ConfirmationModalComponent } from '../../shared/components/confirmation-modal/confirmation-modal.component';
 import { SectionHeaderComponent } from '../../shared/components/section-header/section-header.component';
 import { PatientsListComponent } from './components/patients-list/patients-list.component';

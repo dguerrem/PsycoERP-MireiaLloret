@@ -3,7 +3,7 @@
 
   <!-- Header section (fijo) -->
   <app-section-header title="Gestión de Pacientes" subtitle="Administra los pacientes registrados en la plataforma"
-    buttonText="Nuevo Paciente" (onButtonClick)="openCreateForm()" [showFiltersButton]="true" (onFiltersClick)="openFiltersModal()">
+    buttonText="Nuevo Paciente" [showButton]="true" (onButtonClick)="openCreateForm()" [showFiltersButton]="true" (onFiltersClick)="openFiltersModal()">
   </app-section-header>
 
   <!-- Sistema de pestañas -->
@@ -107,14 +107,14 @@
 
 <!-- Delete Confirmation Modal -->
 <app-confirmation-modal [isOpen]="deletingPatient() !== null" title="Confirmar Eliminación"
-  message="¿Estás seguro de que deseas eliminar el paciente " [itemName]="deletingPatient()?.name"
+  message="¿Estás seguro de que deseas eliminar el paciente " [itemName]="(deletingPatient()?.first_name || '') + ' ' + (deletingPatient()?.last_name || '')"
   confirmText="Eliminar" cancelText="Cancelar" confirmButtonType="destructive" (onConfirm)="handleDeletePatient()"
   (onCancel)="closeDeleteModal()">
 </app-confirmation-modal>
 
 <!-- Restore Confirmation Modal -->
 <app-confirmation-modal [isOpen]="restoringPatient() !== null" title="Confirmar Restauración"
-  message="¿Estás seguro de que deseas restaurar el paciente " [itemName]="restoringPatient()?.name"
+  message="¿Estás seguro de que deseas restaurar el paciente " [itemName]="(restoringPatient()?.first_name || '') + ' ' + (restoringPatient()?.last_name || '')"
   confirmText="Restaurar" cancelText="Cancelar" confirmButtonType="primary" (onConfirm)="handleRestorePatient()"
   (onCancel)="closeRestoreModal()">
 </app-confirmation-modal>

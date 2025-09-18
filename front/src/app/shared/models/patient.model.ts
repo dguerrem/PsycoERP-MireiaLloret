@@ -1,7 +1,37 @@
 export interface Patient {
-  id?: number;
+  id?: number; // Para edición
 
   // Datos personales básicos
+  first_name: string;
+  last_name: string;
+  email: string;
+  phone: string;
+  dni: string;
+  gender: 'M' | 'F' | 'O';
+  occupation: string;
+  birth_date: string; // "1985-03-15"
+
+  // Dirección completa
+  street: string;
+  street_number: string;
+  door: string;
+  postal_code: string;
+  city: string;
+  province: string;
+
+  // Información del tratamiento
+  session_price: number;
+  clinic_id: number;
+  treatment_start_date: string; // "2024-01-15"
+  status: 'en curso' | 'fin del tratamiento' | 'en pausa' | 'abandono' | 'derivación';
+
+  // Campos calculados/automáticos
+  is_minor: boolean;
+}
+
+// Backward compatibility interface for existing code
+export interface PatientLegacy {
+  id?: number;
   name: string;
   surname?: string;
   email: string;
@@ -10,25 +40,17 @@ export interface Patient {
   birth_date: string;
   gender?: string;
   occupation?: string;
-
-  // Dirección completa
   street?: string;
   number?: string;
   door?: string;
   postal_code?: string;
   city?: string;
   province?: string;
-
-  // Información del tratamiento
   session_price?: number;
   clinic_id?: string | number;
   treatment_start_date?: string;
   treatment_status?: string;
-
-  // Campos calculados/automáticos
   is_minor?: boolean;
-
-  // Campos heredados (mantenemos para compatibilidad)
   status?: string;
   session_type?: string;
   address?: string;
@@ -48,3 +70,19 @@ export interface Patient {
 export interface PatientsResponse {
   data: Patient[];
 }
+
+// Interface for filtering patients
+export interface PatientFilters {
+  first_name?: string;
+  last_name?: string;
+  email?: string;
+  dni?: string;
+  gender?: 'M' | 'F' | 'O';
+  clinic_id?: number;
+}
+
+// Create patient interface (without id)
+export type CreatePatientRequest = Omit<Patient, 'id'>;
+
+// Update patient interface
+export type UpdatePatientRequest = Partial<Patient> & { id: number };
