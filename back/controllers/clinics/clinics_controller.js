@@ -1,6 +1,5 @@
 const {
   getClinics,
-  getDeletedClinics,
   createClinic,
   updateClinic,
   deleteClinic,
@@ -165,33 +164,6 @@ const eliminarClinica = async (req, res) => {
   }
 };
 
-const obtenerClinicasEliminadas = async (req, res) => {
-  try {
-    const {
-      page,
-      limit,
-    } = req.query;
-
-    // Construir filtros incluyendo paginación
-    const filters = {};
-    if (page) filters.page = page;
-    if (limit) filters.limit = limit;
-
-    const result = await getDeletedClinics(filters);
-
-    res.json({
-      success: true,
-      pagination: result.pagination,
-      data: result.data,
-    });
-  } catch (err) {
-    console.error("Error al obtener clínicas eliminadas:", err.message);
-    res.status(500).json({
-      success: false,
-      error: "Error al obtener las clínicas eliminadas",
-    });
-  }
-};
 
 const crearClinica = async (req, res) => {
   try {
@@ -275,7 +247,6 @@ const crearClinica = async (req, res) => {
 
 module.exports = {
   obtenerClinicas,
-  obtenerClinicasEliminadas,
   crearClinica,
   actualizarClinica,
   eliminarClinica,

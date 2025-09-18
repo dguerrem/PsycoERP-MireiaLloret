@@ -110,60 +110,6 @@ const clinicsPaths = {
       },
     },
   },
-  "/api/clinics/deleted": {
-    get: {
-      tags: ["Clinics"],
-      summary: "Obtener clínicas eliminadas",
-      description: "Obtiene una lista de clínicas eliminadas (is_active = false) con paginación",
-      parameters: [
-        {
-          name: "page",
-          in: "query",
-          required: false,
-          schema: {
-            type: "integer",
-            minimum: 1,
-            default: 1,
-          },
-          description: "Número de página (por defecto: 1)",
-        },
-        {
-          name: "limit",
-          in: "query",
-          required: false,
-          schema: {
-            type: "integer",
-            minimum: 1,
-            maximum: 100,
-            default: 10,
-          },
-          description: "Cantidad de registros por página (por defecto: 10, máximo: 100)",
-        },
-      ],
-      responses: {
-        200: {
-          description: "Lista de clínicas eliminadas obtenida exitosamente",
-          content: {
-            "application/json": {
-              schema: {
-                $ref: "#/components/schemas/ClinicsResponse",
-              },
-            },
-          },
-        },
-        500: {
-          description: "Error interno del servidor",
-          content: {
-            "application/json": {
-              schema: {
-                $ref: "#/components/schemas/ErrorResponse",
-              },
-            },
-          },
-        },
-      },
-    },
-  },
   "/api/clinics/{id}": {
     put: {
       tags: ["Clinics"],
