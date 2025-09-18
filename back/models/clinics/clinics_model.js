@@ -29,29 +29,15 @@ const getClinics = async (filters = {}) => {
     `;
 
   const params = [];
-  const conditions = [];
-
-  // Aplicar filtros
-  if (filters.name) {
-    conditions.push("name LIKE ?");
-    params.push(`%${filters.name}%`);
-  }
-
-  // Aplicar condiciones a ambas queries
-  if (conditions.length > 0) {
-    const conditionsStr = " AND " + conditions.join(" AND ");
-    countQuery += conditionsStr;
-    dataQuery += conditionsStr;
-  }
 
   // Agregar ordenamiento y paginación solo a la query de datos
   dataQuery += " ORDER BY name ASC";
   dataQuery += " LIMIT ? OFFSET ?";
-  
+
   // Ejecutar ambas queries
   const [countResult] = await db.execute(countQuery, params);
   const totalRecords = countResult[0].total;
-  
+
   const [dataRows] = await db.execute(dataQuery, [...params, limit, offset]);
   
   // Calcular información de paginación
@@ -164,29 +150,15 @@ const getDeletedClinics = async (filters = {}) => {
     `;
 
   const params = [];
-  const conditions = [];
-
-  // Aplicar filtros
-  if (filters.name) {
-    conditions.push("name LIKE ?");
-    params.push(`%${filters.name}%`);
-  }
-
-  // Aplicar condiciones a ambas queries
-  if (conditions.length > 0) {
-    const conditionsStr = " AND " + conditions.join(" AND ");
-    countQuery += conditionsStr;
-    dataQuery += conditionsStr;
-  }
 
   // Agregar ordenamiento y paginación solo a la query de datos
   dataQuery += " ORDER BY updated_at DESC";
   dataQuery += " LIMIT ? OFFSET ?";
-  
+
   // Ejecutar ambas queries
   const [countResult] = await db.execute(countQuery, params);
   const totalRecords = countResult[0].total;
-  
+
   const [dataRows] = await db.execute(dataQuery, [...params, limit, offset]);
   
   // Calcular información de paginación

@@ -3,17 +3,8 @@ const clinicsPaths = {
     get: {
       tags: ["Clinics"],
       summary: "Obtener clínicas activas",
-      description: "Obtiene una lista de clínicas activas (is_active = true) con filtros opcionales",
+      description: "Obtiene una lista de clínicas activas (is_active = true) con paginación",
       parameters: [
-        {
-          name: "name",
-          in: "query",
-          required: false,
-          schema: {
-            type: "string",
-          },
-          description: "Nombre de la clínica (búsqueda parcial)",
-        },
         {
           name: "page",
           in: "query",
@@ -123,17 +114,8 @@ const clinicsPaths = {
     get: {
       tags: ["Clinics"],
       summary: "Obtener clínicas eliminadas",
-      description: "Obtiene una lista de clínicas eliminadas (is_active = false) con filtros opcionales y paginación",
+      description: "Obtiene una lista de clínicas eliminadas (is_active = false) con paginación",
       parameters: [
-        {
-          name: "name",
-          in: "query",
-          required: false,
-          schema: {
-            type: "string",
-          },
-          description: "Nombre de la clínica (búsqueda parcial)",
-        },
         {
           name: "page",
           in: "query",

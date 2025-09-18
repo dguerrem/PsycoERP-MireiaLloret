@@ -9,14 +9,12 @@ const {
 const obtenerClinicas = async (req, res) => {
   try {
     const {
-      name,
       page,
       limit,
     } = req.query;
 
     // Construir filtros incluyendo paginación
     const filters = {};
-    if (name) filters.name = name;
     if (page) filters.page = page;
     if (limit) filters.limit = limit;
 
@@ -170,14 +168,12 @@ const eliminarClinica = async (req, res) => {
 const obtenerClinicasEliminadas = async (req, res) => {
   try {
     const {
-      name,
       page,
       limit,
     } = req.query;
 
     // Construir filtros incluyendo paginación
     const filters = {};
-    if (name) filters.name = name;
     if (page) filters.page = page;
     if (limit) filters.limit = limit;
 
