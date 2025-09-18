@@ -1,8 +1,25 @@
-<div class="h-full flex flex-col max-h-full overflow-hidden p-4 md:p-6">
-  <app-section-header title="Configuración"
-    subtitle="Gestiona tu perfil profesional y configuración de cuenta"></app-section-header>
+<div class="p-4 sm:p-6 h-screen overflow-hidden">
+  <div class="w-full h-full flex flex-col max-h-full">
 
-  <div class="flex-1 overflow-y-auto">
+    <!-- Header -->
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4 sm:mb-6">
+      <div>
+        <h1 class="text-2xl sm:text-3xl font-black font-montserrat text-gray-900">Configuración</h1>
+        <p class="text-sm sm:text-base text-gray-600 mt-1 sm:mt-2">
+          Gestiona tu perfil profesional y configuración de cuenta
+        </p>
+      </div>
+    </div>
+
+    <!-- Main content -->
+    <div class="flex-1 overflow-y-auto min-h-0">
+
+      @if (isLoading()) {
+        <div class="flex items-center justify-center h-full">
+          <div class="text-muted-foreground">Cargando configuración...</div>
+        </div>
+      } @else {
+
     <form [formGroup]="configurationForm" (ngSubmit)="handleSave()" class="space-y-6">
       <div class="bg-gray-50 text-card-foreground flex flex-col gap-6 rounded-xl border py-6 shadow-sm">
         <div class="@container/card-header grid auto-rows-min grid-rows-[auto_auto] items-start gap-1.5 px-6">
@@ -64,16 +81,16 @@
                 }
               </div>
               <div>
-                <label class="text-sm font-semibold leading-none text-gray-700 peer-disabled:cursor-not-allowed peer-disabled:opacity-70 mb-2 block" for="number">
+                <label class="text-sm font-semibold leading-none text-gray-700 peer-disabled:cursor-not-allowed peer-disabled:opacity-70 mb-2 block" for="street_number">
                   Número
                 </label>
-                <input id="number" type="text" formControlName="number" placeholder="Ej: 123"
+                <input id="street_number" type="text" formControlName="street_number" placeholder="Ej: 123"
                   class="flex h-9 w-full rounded-md border border-gray-300 bg-white px-3 py-1 text-sm text-gray-900 placeholder:text-gray-500 hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-[#0891b2] focus:border-[#0891b2] disabled:cursor-not-allowed disabled:opacity-50 transition-colors"
-                  [class.border-red-500]="isFieldInvalid('number')"
-                  [class.focus:ring-red-500]="isFieldInvalid('number')"
-                  [class.focus:border-red-500]="isFieldInvalid('number')" />
-                @if (isFieldInvalid('number')) {
-                <p class="text-red-500 text-xs mt-1">{{ getFieldError('number') }}</p>
+                  [class.border-red-500]="isFieldInvalid('street_number')"
+                  [class.focus:ring-red-500]="isFieldInvalid('street_number')"
+                  [class.focus:border-red-500]="isFieldInvalid('street_number')" />
+                @if (isFieldInvalid('street_number')) {
+                <p class="text-red-500 text-xs mt-1">{{ getFieldError('street_number') }}</p>
                 }
               </div>
               <div>
@@ -110,16 +127,16 @@
                 }
               </div>
               <div>
-                <label class="text-sm font-semibold leading-none text-gray-700 peer-disabled:cursor-not-allowed peer-disabled:opacity-70 mb-2 block" for="postalCode">
+                <label class="text-sm font-semibold leading-none text-gray-700 peer-disabled:cursor-not-allowed peer-disabled:opacity-70 mb-2 block" for="postal_code">
                   Código Postal
                 </label>
-                <input id="postalCode" type="text" formControlName="postalCode" placeholder="Ej: 28001"
+                <input id="postal_code" type="text" formControlName="postal_code" placeholder="Ej: 28001"
                   class="flex h-9 w-full rounded-md border border-gray-300 bg-white px-3 py-1 text-sm text-gray-900 placeholder:text-gray-500 hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-[#0891b2] focus:border-[#0891b2] disabled:cursor-not-allowed disabled:opacity-50 transition-colors"
-                  [class.border-red-500]="isFieldInvalid('postalCode')"
-                  [class.focus:ring-red-500]="isFieldInvalid('postalCode')"
-                  [class.focus:border-red-500]="isFieldInvalid('postalCode')" />
-                @if (isFieldInvalid('postalCode')) {
-                <p class="text-red-500 text-xs mt-1">{{ getFieldError('postalCode') }}</p>
+                  [class.border-red-500]="isFieldInvalid('postal_code')"
+                  [class.focus:ring-red-500]="isFieldInvalid('postal_code')"
+                  [class.focus:border-red-500]="isFieldInvalid('postal_code')" />
+                @if (isFieldInvalid('postal_code')) {
+                <p class="text-red-500 text-xs mt-1">{{ getFieldError('postal_code') }}</p>
                 }
               </div>
             </div>
@@ -130,7 +147,7 @@
       <div class="flex justify-end pt-6">
         <button type="submit"
           class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-[#0891b2] text-white hover:bg-[#0891b2]/90 h-10 px-4 py-2 gap-2"
-          [disabled]="configurationForm.invalid">
+          [disabled]="configurationForm.invalid || isUpdating()">
           <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4">
             <path
@@ -139,9 +156,17 @@
             <path d="M17 21v-7a1 1 0 0 0-1-1H8a1 1 0 0 0-1 1v7"></path>
             <path d="M7 3v4a1 1 0 0 0 1 1h7"></path>
           </svg>
-          Guardar Configuración
+          @if (isUpdating()) {
+            Guardando...
+          } @else {
+            Guardar Configuración
+          }
         </button>
       </div>
     </form>
+
+      }
+
+    </div>
   </div>
 </div>

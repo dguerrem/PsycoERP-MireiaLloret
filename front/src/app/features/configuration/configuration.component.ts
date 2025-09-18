@@ -1,30 +1,43 @@
-import { Component, ChangeDetectionStrategy, inject } from '@angular/core';
+import { Component, ChangeDetectionStrategy, inject, OnInit, computed, signal } from '@angular/core';
 import { FormBuilder, Validators, ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
-import { SectionHeaderComponent } from '../../shared/components/section-header/section-header.component';
+import { UserService } from '../../core/services/user.service';
+import { UpdateUserProfileRequest } from '../../core/models/user.model';
 
 @Component({
   selector: 'app-configuration',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, SectionHeaderComponent],
+  imports: [CommonModule, ReactiveFormsModule],
   templateUrl: './configuration.component.html',
   styleUrl: './configuration.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class ConfigurationComponent {
+export class ConfigurationComponent implements OnInit {
   private fb = inject(FormBuilder);
+  private userService = inject(UserService);
+
+  // Signals para estados de loading
+  private saveInProgress = signal(false);
+
+  // Computed signals para el template
+  protected isLoading = computed(() => this.userService.isLoading());
+  protected isUpdating = computed(() => this.userService.isUpdating() || this.saveInProgress());
+  protected userProfile = computed(() => this.userService.profile());
 
   public configurationForm = this.fb.group({
-    name: ['Dr. María García López', Validators.required],
-    dni: ['12345678A', Validators.required],
-    street: ['Calle Mayor', Validators.required],
-    city: ['Madrid', Validators.required],
-    province: ['Madrid', Validators.required],
-    number: ['123', Validators.required],
-    door: ['2A'],
-    postalCode: ['28001', Validators.required],
-    profileImage: [null as string | null],
+    name: ['', Validators.required],
+    dni: ['', Validators.required],
+    street: ['', Validators.required],
+    street_number: ['', Validators.required],
+    door: [''],
+    city: ['', Validators.required],
+    province: ['', Validators.required],
+    postal_code: ['', Validators.required],
   });
+
+  async ngOnInit() {
+    await this.loadUserData();
+  }
 
   public isFieldInvalid(field: string): boolean {
     const control = this.configurationForm.get(field);
@@ -39,28 +52,62 @@ export class ConfigurationComponent {
     return '';
   }
 
-  public handleSave(): void {
-    if (this.configurationForm.valid) {
-      console.log(
-        '[Angular] Saving professional data:',
-        this.configurationForm.value
-      );
-      // Aquí iría la lógica para enviar los datos al backend
-      // Ejemplo: this.dataService.saveProfessionalData(this.configurationForm.value);
-    } else {
-      this.configurationForm.markAllAsTouched();
+  /**
+   * Carga los datos del usuario actual desde la API
+   */
+  private async loadUserData(): Promise<void> {
+    try {
+      const userId = this.userService.getUserIdFromStorage();
+
+      if (userId) {
+        const user = await this.userService.getUserProfileAsync(userId);
+
+        if (user) {
+          // Llenar el formulario con los datos del usuario
+          this.configurationForm.patchValue({
+            name: user.name || '',
+            dni: user.dni || '',
+            street: user.street || '',
+            street_number: user.street_number || '',
+            door: user.door || '',
+            city: user.city || '',
+            province: user.province || '',
+            postal_code: user.postal_code || ''
+          });
+        }
+      }
+    } catch (error) {
+      console.error('Error loading user data:', error);
     }
   }
 
-  public handleImageUpload(event: Event): void {
-    const file = (event.target as HTMLInputElement).files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        const base64Image = e.target?.result as string;
-        this.configurationForm.patchValue({ profileImage: base64Image });
-      };
-      reader.readAsDataURL(file);
+  /**
+   * Guarda los cambios del perfil del usuario
+   */
+  public async handleSave(): Promise<void> {
+    if (this.configurationForm.valid) {
+      this.saveInProgress.set(true);
+
+      try {
+        const userId = this.userService.getUserIdFromStorage();
+
+        if (userId) {
+          const formData = this.configurationForm.value as UpdateUserProfileRequest;
+
+          const updatedUser = await this.userService.updateUserProfileAsync(userId, formData);
+
+          if (updatedUser) {
+            console.log('Usuario actualizado correctamente:', updatedUser);
+          }
+        }
+      } catch (error) {
+        console.error('Error saving user profile:', error);
+      } finally {
+        this.saveInProgress.set(false);
+      }
+    } else {
+      // Marcar todos los campos como touched para mostrar errores
+      this.configurationForm.markAllAsTouched();
     }
   }
 }

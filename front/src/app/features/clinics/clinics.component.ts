@@ -11,12 +11,9 @@ import { FormsModule } from '@angular/forms';
 import { ClinicsService } from './services/clinics.service';
 import { Clinic } from './models/clinic.model';
 import { ConfirmationModalComponent } from '../../shared/components/confirmation-modal/confirmation-modal.component';
-import { SectionHeaderComponent } from '../../shared/components/section-header/section-header.component';
 import { PaginationComponent } from '../../shared/components/pagination/pagination.component';
 import { ClinicsListComponent } from './components/clinics-list/clinics-list.component';
 import { ClinicFormComponent } from './components/clinic-form/clinic-form.component';
-
-type TabType = 'active' | 'inactive';
 
 @Component({
   selector: 'app-clinics',
@@ -28,7 +25,6 @@ type TabType = 'active' | 'inactive';
     FormsModule,
     ConfirmationModalComponent,
     ClinicFormComponent,
-    SectionHeaderComponent,
     ClinicsListComponent,
     PaginationComponent,
   ],
@@ -42,37 +38,18 @@ export class ClinicsComponent implements OnInit {
   editingClinica = signal<Clinic | null>(null);
   deletingClinic = signal<Clinic | null>(null);
   restoringClinic = signal<Clinic | null>(null);
-  activeTab = signal<TabType>('active');
 
-  // Separate state for each tab
-  activeClinics = signal<Clinic[]>([]);
-  inactiveClinics = signal<Clinic[]>([]);
-
-  // Separate pagination states
-  activePagination = signal<any>(null);
-  inactivePagination = signal<any>(null);
-
-  // Separate counts
-  activeClinicsCount = signal(0);
-  inactiveClinicsCount = signal(0);
-
-  // Computed signals based on active tab
-  clinicsList = computed(() => {
-    return this.activeTab() === 'active' ? this.activeClinics() : this.inactiveClinics();
-  });
-
-  paginationData = computed(() => {
-    return this.activeTab() === 'active' ? this.activePagination() : this.inactivePagination();
-  });
+  // Only active clinics state
+  clinicsList = signal<Clinic[]>([]);
+  paginationData = signal<any>(null);
 
   showForm = computed(
     () => this.showCreateForm() || this.editingClinica() !== null
   );
 
   ngOnInit() {
-    // Load data for both tabs to show correct counts
+    // Load only active clinics
     this.loadActiveClinics(1, 12);
-    this.loadInactiveClinics(1, 12);
   }
 
   /**
@@ -81,9 +58,8 @@ export class ClinicsComponent implements OnInit {
   private loadActiveClinics(page: number, perPage: number): void {
     this.clinicsService.loadActiveClinics(page, perPage).subscribe({
       next: (response) => {
-        this.activeClinics.set(response.data);
-        this.activePagination.set(response.pagination);
-        this.activeClinicsCount.set(response.pagination?.totalRecords || 0);
+        this.clinicsList.set(response.data);
+        this.paginationData.set(response.pagination);
       },
       error: () => {
         // Error handling is managed by error interceptor
@@ -91,39 +67,6 @@ export class ClinicsComponent implements OnInit {
     });
   }
 
-  /**
-   * Load inactive clinics with pagination
-   */
-  private loadInactiveClinics(page: number, perPage: number): void {
-    this.clinicsService.loadInactiveClinics(page, perPage).subscribe({
-      next: (response) => {
-        this.inactiveClinics.set(response.data);
-        this.inactivePagination.set(response.pagination);
-        this.inactiveClinicsCount.set(response.pagination?.totalRecords || 0);
-      },
-      error: () => {
-        // Error handling is managed by error interceptor
-      },
-    });
-  }
-
-  /**
-   * Change active tab
-   */
-  setActiveTab(tab: TabType): void {
-    this.activeTab.set(tab);
-  }
-
-  /**
-   * Get CSS classes for tabs
-   */
-  getTabClasses(tab: TabType): string {
-    const baseClasses = 'data-[state=active]:bg-background dark:data-[state=active]:text-foreground focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:outline-ring dark:data-[state=active]:border-input dark:data-[state=active]:bg-input/30 text-foreground dark:text-muted-foreground h-[calc(100%-1px)] flex-1 justify-center rounded-md border border-transparent px-2 py-1 whitespace-nowrap transition-[color,box-shadow] focus-visible:ring-[3px] focus-visible:outline-1 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:shadow-sm [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*=\'size-\'])]:size-4 flex items-center gap-2 text-sm font-medium';
-
-    return this.activeTab() === tab
-      ? `${baseClasses} bg-background text-foreground shadow-sm`
-      : baseClasses;
-  }
 
   /**
    * Abrir modal para crear nueva clínica
@@ -159,7 +102,7 @@ export class ClinicsComponent implements OnInit {
       // Editar clínica existente
       this.clinicsService.updateClinic(editing.id!, clinicData as Clinic).subscribe({
         next: () => {
-          this.reloadCurrentTab();
+          this.reloadActiveClinics();
         }
       });
     } else {
@@ -167,8 +110,7 @@ export class ClinicsComponent implements OnInit {
       this.clinicsService.createClinic(clinicData as Clinic).subscribe({
         next: () => {
           // Reload active clinics (new clinics go to active)
-          const activePag = this.activePagination();
-          this.loadActiveClinics(activePag?.currentPage || 1, activePag?.recordsPerPage || 12);
+          this.reloadActiveClinics();
         }
       });
     }
@@ -198,8 +140,8 @@ export class ClinicsComponent implements OnInit {
     if (deleting) {
       this.clinicsService.deleteClinic(deleting.id!).subscribe({
         next: () => {
-          // Reload both tabs to update counts
-          this.reloadBothTabs();
+          // Reload active clinics to update list
+          this.reloadActiveClinics();
         }
       });
       this.closeDeleteModal();
@@ -233,7 +175,7 @@ export class ClinicsComponent implements OnInit {
       const updatedClinic = { ...restoring, status: 'active' };
       this.clinicsService.updateClinic(restoring.id!, updatedClinic).subscribe({
         next: () => {
-          this.reloadBothTabs();
+          this.reloadActiveClinics();
         }
       });
 
@@ -242,55 +184,26 @@ export class ClinicsComponent implements OnInit {
   }
 
   /**
-   * Reload current tab data
+   * Reload active clinics data
    */
-  private reloadCurrentTab(): void {
-    const tab = this.activeTab();
-    if (tab === 'active') {
-      const activePag = this.activePagination();
-      this.loadActiveClinics(activePag?.currentPage || 1, activePag?.recordsPerPage || 12);
-    } else {
-      const inactivePag = this.inactivePagination();
-      this.loadInactiveClinics(inactivePag?.currentPage || 1, inactivePag?.recordsPerPage || 12);
-    }
-  }
-
-  /**
-   * Reload data for both tabs to update counters
-   */
-  private reloadBothTabs(): void {
-    const activePag = this.activePagination();
-    const inactivePag = this.inactivePagination();
-
-    this.loadActiveClinics(activePag?.currentPage || 1, activePag?.recordsPerPage || 12);
-    this.loadInactiveClinics(inactivePag?.currentPage || 1, inactivePag?.recordsPerPage || 12);
+  private reloadActiveClinics(): void {
+    const currentPagination = this.paginationData();
+    this.loadActiveClinics(currentPagination?.currentPage || 1, currentPagination?.recordsPerPage || 12);
   }
 
   /**
    * Handle page change
    */
   onPageChange(page: number): void {
-    const tab = this.activeTab();
     const perPage = this.paginationData()?.recordsPerPage || 12;
-
-    if (tab === 'active') {
-      this.loadActiveClinics(page, perPage);
-    } else {
-      this.loadInactiveClinics(page, perPage);
-    }
+    this.loadActiveClinics(page, perPage);
   }
 
   /**
    * Handle page size change
    */
   onPageSizeChange(size: number): void {
-    const tab = this.activeTab();
-
-    if (tab === 'active') {
-      this.loadActiveClinics(1, size);
-    } else {
-      this.loadInactiveClinics(1, size);
-    }
+    this.loadActiveClinics(1, size);
   }
 
   /**
