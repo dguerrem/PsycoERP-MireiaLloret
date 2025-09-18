@@ -188,8 +188,8 @@ const crearClinica = async (req, res) => {
       clinic_color: clinic_color.trim()
     };
 
-    if (address !== undefined && address !== null) {
-      data.address = address.trim();
+    if (address !== undefined) {
+      data.address = address === null ? null : (address ? address.trim() : null);
     }
 
     if (price !== undefined && price !== null) {
