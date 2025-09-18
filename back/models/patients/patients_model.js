@@ -11,12 +11,12 @@ const getPatients = async (filters = {}) => {
   let countQuery = `
         SELECT COUNT(*) as total
         FROM patients
-        WHERE is_active = true
+        WHERE is_active = true AND status = 'en curso'
     `;
 
   // Query principal para obtener datos
   let dataQuery = `
-        SELECT 
+        SELECT
             id,
             first_name,
             last_name,
@@ -40,7 +40,7 @@ const getPatients = async (filters = {}) => {
             DATE_FORMAT(created_at,'%Y-%m-%d') as created_at,
             DATE_FORMAT(updated_at,'%Y-%m-%d') as updated_at
         FROM patients
-        WHERE is_active = true
+        WHERE is_active = true AND status = 'en curso'
     `;
 
   const params = [];
@@ -149,7 +149,7 @@ const getPatients = async (filters = {}) => {
 const getPatientById = async (id) => {
   // Consulta para obtener datos básicos del paciente
   const patientQuery = `
-        SELECT 
+        SELECT
             id,
             email,
             phone
@@ -181,7 +181,7 @@ const getPatientById = async (id) => {
   
   // Consulta para obtener datos detallados del paciente
   const patientDataQuery = `
-        SELECT 
+        SELECT
             CONCAT(first_name, ' ', last_name) as nombre,
             dni,
             DATE_FORMAT(birth_date, '%Y-%m-%d') as fecha_nacimiento,
