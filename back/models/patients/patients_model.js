@@ -598,6 +598,26 @@ const updatePatient = async (id, updateData) => {
   return patientRows[0];
 };
 
+// Obtener pacientes activos con información de clínica
+const getActivePatientsWithClinicInfo = async () => {
+  const query = `
+    SELECT
+      p.id as idPaciente,
+      CONCAT(p.first_name, ' ', p.last_name) as nombreCompleto,
+      p.clinic_id as idClinica,
+      c.name as nombreClinica,
+      c.price as precioSesion,
+      c.percentage as porcentaje
+    FROM patients p
+    LEFT JOIN clinics c ON p.clinic_id = c.id
+    WHERE p.is_active = 1 AND p.status = 'en curso' AND c.is_active = 1
+    ORDER BY CONCAT(p.first_name, ' ', p.last_name)
+  `;
+
+  const [rows] = await db.execute(query);
+  return rows;
+};
+
 module.exports = {
   getPatients,
   getPatientById,
@@ -606,4 +626,5 @@ module.exports = {
   createPatient,
   restorePatient,
   updatePatient,
+  getActivePatientsWithClinicInfo,
 };

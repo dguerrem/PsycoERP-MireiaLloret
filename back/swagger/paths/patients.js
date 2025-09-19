@@ -1,4 +1,33 @@
 const patientsPaths = {
+  "/api/patients/active-with-clinic": {
+    get: {
+      tags: ["Patients"],
+      summary: "Obtener pacientes activos con información de clínica",
+      description: "Obtiene una lista de todos los pacientes activos (is_active = 1 AND status = 'en curso') con la información de su clínica asociada",
+      responses: {
+        200: {
+          description: "Lista de pacientes activos con información de clínica obtenida exitosamente",
+          content: {
+            "application/json": {
+              schema: {
+                $ref: "#/components/schemas/ActivePatientsWithClinicResponse",
+              },
+            },
+          },
+        },
+        500: {
+          description: "Error interno del servidor",
+          content: {
+            "application/json": {
+              schema: {
+                $ref: "#/components/schemas/ErrorResponse",
+              },
+            },
+          },
+        },
+      },
+    },
+  },
   "/api/patients/inactive": {
     get: {
       tags: ["Patients"],

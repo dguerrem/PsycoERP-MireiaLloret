@@ -6,6 +6,7 @@ const {
   createPatient,
   restorePatient,
   updatePatient,
+  getActivePatientsWithClinicInfo,
 } = require("../../models/patients/patients_model");
 
 const obtenerPacientes = async (req, res) => {
@@ -580,6 +581,24 @@ const actualizarPaciente = async (req, res) => {
   }
 };
 
+const obtenerPacientesActivosConClinica = async (req, res) => {
+  try {
+    const datos = await getActivePatientsWithClinicInfo();
+
+    res.json({
+      success: true,
+      total: datos.length,
+      data: datos,
+    });
+  } catch (err) {
+    console.error("Error al obtener pacientes activos con clínica:", err.message);
+    res.status(500).json({
+      success: false,
+      error: "Error al obtener pacientes activos con información de clínica",
+    });
+  }
+};
+
 module.exports = {
   obtenerPacientes,
   obtenerPacientePorId,
@@ -588,4 +607,5 @@ module.exports = {
   crearPaciente,
   restaurarPaciente,
   actualizarPaciente,
+  obtenerPacientesActivosConClinica,
 };

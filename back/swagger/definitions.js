@@ -16,6 +16,67 @@ const definitions = {
     },
   },
 
+  ActivePatientWithClinicInfo: {
+    type: "object",
+    properties: {
+      idPaciente: {
+        type: "integer",
+        format: "int64",
+        description: "ID único del paciente",
+        example: 1,
+      },
+      nombreCompleto: {
+        type: "string",
+        description: "Nombre completo del paciente",
+        example: "Juan Pérez García",
+      },
+      idClinica: {
+        type: "integer",
+        format: "int64",
+        description: "ID de la clínica asociada",
+        example: 2,
+      },
+      nombreClinica: {
+        type: "string",
+        description: "Nombre de la clínica",
+        example: "Clínica Centro",
+      },
+      precioSesion: {
+        type: "number",
+        format: "decimal",
+        description: "Precio base por sesión de la clínica en euros",
+        example: 60.00,
+      },
+      porcentaje: {
+        type: "number",
+        format: "decimal",
+        description: "Porcentaje de la clínica",
+        example: 15.50,
+      },
+    },
+  },
+
+  ActivePatientsWithClinicResponse: {
+    type: "object",
+    properties: {
+      success: {
+        type: "boolean",
+        example: true,
+      },
+      total: {
+        type: "integer",
+        description: "Número total de pacientes activos encontrados",
+        example: 25,
+      },
+      data: {
+        type: "array",
+        items: {
+          $ref: "#/components/schemas/ActivePatientWithClinicInfo",
+        },
+      },
+    },
+  },
+
   Bonus: {
     type: "object",
     properties: {
