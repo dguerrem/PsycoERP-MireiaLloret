@@ -273,7 +273,7 @@ export class SessionPopupComponent {
 
     // Map Tailwind bg classes to hex colors
     const colorMap: { [key: string]: string } = {
-      'bg-blue-500': '#3b82f6',
+      'bg-[#0891b2]': '#0891b2',
       'bg-green-500': '#10b981',
       'bg-red-500': '#ef4444',
       'bg-yellow-500': '#eab308',
@@ -281,7 +281,6 @@ export class SessionPopupComponent {
       'bg-pink-500': '#ec4899',
       'bg-indigo-500': '#6366f1',
       'bg-orange-500': '#f97316',
-      'bg-cyan-500': '#06b6d4',
       'bg-teal-500': '#14b8a6',
     };
 

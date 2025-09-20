@@ -12,9 +12,7 @@
       @if (shouldShowFiltersButton) {
         <button
           type="button"
-          class="border border-gray-300 bg-gray-50 hover:text-white inline-flex items-center justify-center px-4 py-2 text-sm font-medium transition-all rounded-md"
-          onmouseover="this.style.backgroundColor='#0891b2'; this.style.borderColor='#0891b2'"
-          onmouseout="this.style.backgroundColor='#f9fafb'; this.style.borderColor='#d1d5db'"
+          class="border border-gray-300 bg-gray-50 hover:bg-primary hover:border-primary hover:text-white inline-flex items-center justify-center px-4 py-2 text-sm font-medium transition-all rounded-md"
           (click)="handleFiltersClick()">
           <svg class="h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>
@@ -27,8 +25,7 @@
       @if (shouldShowButton) {
         <button
           type="button"
-          style="background-color: #0891b2"
-          class="hover:opacity-90 inline-flex items-center justify-center px-4 py-2 text-white rounded-md transition-opacity font-medium"
+          class="bg-primary hover:opacity-90 inline-flex items-center justify-center px-4 py-2 text-white rounded-md transition-opacity font-medium"
           (click)="handleButtonClick()">
           <svg class="h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             @if (buttonIcon === 'plus') {

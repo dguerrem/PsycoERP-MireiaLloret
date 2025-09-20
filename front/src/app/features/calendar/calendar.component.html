@@ -11,8 +11,7 @@
       <div class="flex items-center gap-4">
         <button
           (click)="onNewSessionClick()"
-          style="background-color: #0891b2"
-          class="hover:opacity-90 w-full sm:w-auto inline-flex items-center justify-center px-4 py-2 text-white rounded-md transition-opacity font-medium">
+          class="bg-primary hover:opacity-90 w-full sm:w-auto inline-flex items-center justify-center px-4 py-2 text-white rounded-md transition-opacity font-medium">
           <svg class="h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
           </svg>
@@ -28,9 +27,7 @@
         <div class="flex items-center gap-2">
           <button
             (click)="navigatePrevious()"
-            class="border border-gray-300 bg-white hover:text-white inline-flex items-center justify-center rounded-xl px-3 py-2 text-sm font-medium transition-all"
-            onmouseover="this.style.backgroundColor='#0891b2'; this.style.borderColor='#0891b2'"
-            onmouseout="this.style.backgroundColor=''; this.style.borderColor='#d1d5db'">
+            class="border border-gray-300 bg-white hover:bg-primary hover:border-primary hover:text-white inline-flex items-center justify-center rounded-xl px-3 py-2 text-sm font-medium transition-all">
             <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
             </svg>
@@ -44,9 +41,7 @@
           </h2>
           <button
             (click)="navigateNext()"
-            class="border border-gray-300 bg-white hover:text-white inline-flex items-center justify-center rounded-xl px-3 py-2 text-sm font-medium transition-all"
-            onmouseover="this.style.backgroundColor='#0891b2'; this.style.borderColor='#0891b2'"
-            onmouseout="this.style.backgroundColor=''; this.style.borderColor='#d1d5db'">
+            class="border border-gray-300 bg-white hover:bg-primary hover:border-primary hover:text-white inline-flex items-center justify-center rounded-xl px-3 py-2 text-sm font-medium transition-all">
             <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
             </svg>
@@ -139,7 +134,7 @@
                           @if (canSendReminder(sessionData)) {
                             <button
                               (click)="onSendReminder(sessionData, $event)"
-                              class="absolute bottom-0.5 right-0.5 w-6 h-6 bg-blue-500 hover:bg-blue-600 rounded-full flex items-center justify-center z-10 transition-colors shadow-lg"
+                              class="absolute bottom-0.5 right-0.5 w-6 h-6 bg-[#0891b2] hover:bg-[#0891b2]/90 rounded-full flex items-center justify-center z-10 transition-colors shadow-lg"
                               title="Enviar recordatorio por WhatsApp">
                               <svg class="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 24 24">
                                 <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
@@ -200,7 +195,7 @@
                     @if (canSendReminder(sessionData)) {
                       <button
                         (click)="onSendReminder(sessionData, $event)"
-                        class="absolute bottom-0.5 right-0.5 w-6 h-6 bg-blue-500 hover:bg-blue-600 rounded-full flex items-center justify-center z-10 transition-colors shadow-lg"
+                        class="absolute bottom-0.5 right-0.5 w-6 h-6 bg-[#0891b2] hover:bg-[#0891b2]/90 rounded-full flex items-center justify-center z-10 transition-colors shadow-lg"
                         title="Enviar recordatorio por WhatsApp">
                         <svg class="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 24 24">
                           <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
@@ -291,8 +286,7 @@
         </button>
         <button
           (click)="onConfirmSendReminder()"
-          style="background-color: #0891b2"
-          class="px-4 py-2 text-sm font-medium text-white rounded-md hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-opacity">
+          class="bg-primary px-4 py-2 text-sm font-medium text-white rounded-md hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-opacity">
           Enviar Recordatorio
         </button>
       </div>

@@ -52,11 +52,9 @@
           @if (dropdownStates().patient) {
             <div class="absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-md shadow-lg max-h-60 overflow-auto">
               @for (patient of patients; track patient.id) {
-                <div 
+                <div
                   (click)="selectOption('patient', patient.id.toString())"
-                  class="px-3 py-2 cursor-pointer text-sm transition-colors hover:text-white"
-                  onmouseover="this.style.backgroundColor='#0891b2'; this.style.color='white'"
-                  onmouseout="this.style.backgroundColor=''; this.style.color=''">
+                  class="px-3 py-2 cursor-pointer text-sm transition-colors hover:bg-primary hover:text-white">
                   {{ patient.name }}
                 </div>
               }
@@ -127,11 +125,9 @@
             @if (dropdownStates().clinic) {
               <div class="absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-md shadow-lg max-h-60 overflow-auto">
                 @for (clinic of clinicConfigs; track clinic.id) {
-                  <div 
+                  <div
                     (click)="selectOption('clinic', clinic.id.toString())"
-                    class="px-3 py-2 cursor-pointer text-sm transition-colors hover:text-white"
-                    onmouseover="this.style.backgroundColor='#0891b2'; this.style.color='white'"
-                    onmouseout="this.style.backgroundColor=''; this.style.color=''">
+                    class="px-3 py-2 cursor-pointer text-sm transition-colors hover:bg-primary hover:text-white">
                     {{ clinic.name }}
                   </div>
                 }
@@ -158,11 +154,9 @@
             @if (dropdownStates().type) {
               <div class="absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-md shadow-lg max-h-60 overflow-auto">
                 @for (type of sessionTypes; track type) {
-                  <div 
+                  <div
                     (click)="selectOption('type', type)"
-                    class="px-3 py-2 cursor-pointer text-sm transition-colors hover:text-white"
-                    onmouseover="this.style.backgroundColor='#0891b2'; this.style.color='white'"
-                    onmouseout="this.style.backgroundColor=''; this.style.color=''">
+                    class="px-3 py-2 cursor-pointer text-sm transition-colors hover:bg-primary hover:text-white">
                     {{ type }}
                   </div>
                 }
@@ -210,11 +204,9 @@
             @if (dropdownStates().payment) {
               <div class="absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-md shadow-lg max-h-60 overflow-auto">
                 @for (method of paymentMethods; track method) {
-                  <div 
+                  <div
                     (click)="selectOption('payment', method)"
-                    class="px-3 py-2 cursor-pointer text-sm transition-colors hover:text-white"
-                    onmouseover="this.style.backgroundColor='#0891b2'; this.style.color='white'"
-                    onmouseout="this.style.backgroundColor=''; this.style.color=''">
+                    class="px-3 py-2 cursor-pointer text-sm transition-colors hover:bg-primary hover:text-white">
                     {{ getPaymentMethodText(method) }}
                   </div>
                 }
@@ -242,11 +234,9 @@
           @if (dropdownStates().modality) {
             <div class="absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-md shadow-lg max-h-60 overflow-auto">
               @for (mode of sessionModes; track mode) {
-                <div 
+                <div
                   (click)="selectOption('modality', mode)"
-                  class="px-3 py-2 cursor-pointer text-sm transition-colors hover:text-white"
-                  onmouseover="this.style.backgroundColor='#0891b2'; this.style.color='white'"
-                  onmouseout="this.style.backgroundColor=''; this.style.color=''">
+                  class="px-3 py-2 cursor-pointer text-sm transition-colors hover:bg-primary hover:text-white">
                   {{ mode }}
                 </div>
               }
@@ -275,9 +265,7 @@
           type="button"
           (click)="onClose()"
           [disabled]="isLoading()"
-          class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 border bg-white border-gray-300 hover:text-white shadow-sm h-9 px-4 py-2"
-          onmouseover="this.style.backgroundColor='#0891b2'; this.style.borderColor='#0891b2'"
-          onmouseout="this.style.backgroundColor=''; this.style.borderColor='#d1d5db'">
+          class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 border bg-white border-gray-300 hover:bg-primary hover:border-primary hover:text-white shadow-sm h-9 px-4 py-2">
           Cancelar
         </button>
         <button 
