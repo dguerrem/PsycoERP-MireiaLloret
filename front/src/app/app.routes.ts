@@ -19,21 +19,21 @@ export const routes: Routes = [
         (m) => m.MainLayoutComponent
       ),
     children: [
-      {
-        path: 'dashboard',
-        canActivate: [authGuard],
-        loadComponent: () =>
-          import('./features/dashboard/dashboard.component').then(
-            (m) => m.DashboardComponent
-          ),
-        data: {
-          menu: {
-            label: 'Dashboard',
-            icon: 'M3 13a1 1 0 0 1 1-1h12a1 1 0 0 1 1 1v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-6zM3 3a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V3zM15 3a2 2 0 0 1 2-2v2a2 2 0 0 1-2 2v4a2 2 0 0 1-2-2V3z',
-            order: 1,
-          },
-        },
-      },
+      // {
+      //   path: 'dashboard',
+      //   canActivate: [authGuard],
+      //   loadComponent: () =>
+      //     import('./features/dashboard/dashboard.component').then(
+      //       (m) => m.DashboardComponent
+      //     ),
+      //   data: {
+      //     menu: {
+      //       label: 'Dashboard',
+      //       icon: 'M3 13a1 1 0 0 1 1-1h12a1 1 0 0 1 1 1v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-6zM3 3a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V3zM15 3a2 2 0 0 1 2-2v2a2 2 0 0 1-2 2v4a2 2 0 0 1-2-2V3z',
+      //       order: 1,
+      //     },
+      //   },
+      // },
       {
         path: 'patient',
         canActivate: [authGuard],
@@ -162,6 +162,6 @@ export const routes: Routes = [
   },
   {
     path: '**',
-    redirectTo: 'dashboard',
+    redirectTo: 'calendar',
   },
 ];

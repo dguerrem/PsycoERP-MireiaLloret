@@ -115,7 +115,7 @@
 <!-- Restore Confirmation Modal -->
 <app-confirmation-modal [isOpen]="restoringPatient() !== null" title="Confirmar Restauración"
   message="¿Estás seguro de que deseas restaurar el paciente " [itemName]="(restoringPatient()?.first_name || '') + ' ' + (restoringPatient()?.last_name || '')"
-  confirmText="Restaurar" cancelText="Cancelar" confirmButtonType="primary" (onConfirm)="handleRestorePatient()"
+  confirmText="Restaurar" cancelText="Cancelar" confirmButtonType="primary" [isRestore]="true" (onConfirm)="handleRestorePatient()"
   (onCancel)="closeRestoreModal()">
 </app-confirmation-modal>
 
@@ -123,6 +123,7 @@
 <app-patient-filters-modal
   [isOpen]="showFiltersModal()"
   [currentFilters]="currentFilters()"
+  [showInactiveTab]="activeTab() === 'inactive'"
   (onApplyFilters)="handleApplyFilters($event)"
   (onClearFilters)="handleClearFilters()"
   (onCancel)="closeFiltersModal()">

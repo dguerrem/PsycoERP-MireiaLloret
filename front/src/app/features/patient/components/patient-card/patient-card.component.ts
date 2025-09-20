@@ -30,8 +30,6 @@ export class PatientCardComponent {
   getStatusColor(status?: string): string {
     if (!status) return 'bg-gray-100 text-gray-800';
     switch (status) {
-      case 'en curso':
-        return 'bg-green-100 text-green-800';
       case 'fin del tratamiento':
         return 'bg-blue-100 text-blue-800';
       case 'en pausa':
@@ -51,8 +49,6 @@ export class PatientCardComponent {
   getStatusLabel(status?: string): string {
     if (!status) return 'Sin estado';
     switch (status) {
-      case 'en curso':
-        return 'En curso';
       case 'fin del tratamiento':
         return 'Fin del tratamiento';
       case 'en pausa':

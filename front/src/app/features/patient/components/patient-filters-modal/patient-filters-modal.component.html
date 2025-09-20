@@ -68,7 +68,7 @@
           </div>
         </div>
 
-        <!-- Género y Clínica -->
+        <!-- Género y Estado (condicional) -->
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <label for="gender" class="text-sm font-semibold leading-none text-gray-700 peer-disabled:cursor-not-allowed peer-disabled:opacity-70 mb-2 block">
@@ -84,6 +84,28 @@
               }
             </select>
           </div>
+
+          <!-- Status selector (only for inactive tab) -->
+          @if (showInactiveTab) {
+            <div>
+              <label for="status" class="text-sm font-semibold leading-none text-gray-700 peer-disabled:cursor-not-allowed peer-disabled:opacity-70 mb-2 block">
+                Estado
+              </label>
+              <select
+                id="status"
+                formControlName="status"
+                class="flex h-10 w-full rounded-md border border-gray-300 bg-gray-50 px-3 py-2 text-sm text-gray-900 hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-[#0891b2] focus:bg-white focus:border-[#0891b2] disabled:cursor-not-allowed disabled:opacity-50 transition-colors">
+                <option value="">Todos los estados</option>
+                @for (option of statusOptions; track option.value) {
+                  <option [value]="option.value">{{ option.label }}</option>
+                }
+              </select>
+            </div>
+          }
+        </div>
+
+        <!-- Clínica -->
+        <div class="grid grid-cols-1 gap-4">
 
           <div class="relative">
             <label for="clinic_search" class="text-sm font-semibold leading-none text-gray-700 peer-disabled:cursor-not-allowed peer-disabled:opacity-70 mb-2 block">

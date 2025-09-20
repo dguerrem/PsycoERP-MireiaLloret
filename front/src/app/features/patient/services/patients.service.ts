@@ -190,7 +190,7 @@ export class PatientsService extends BaseCrudService<Patient> {
     }
 
     return this.http.get<PaginationResponse<Patient>>(
-      `${this.apiUrl}/deleted`,
+      `${this.apiUrl}/inactive`,
       {
         ...this.httpOptions,
         params,

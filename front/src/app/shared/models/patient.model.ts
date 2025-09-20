@@ -27,6 +27,10 @@ export interface Patient {
 
   // Campos calculados/automáticos
   is_minor: boolean;
+
+  // Timestamps del sistema
+  created_at?: string; // ISO string format
+  updated_at?: string; // ISO string format
 }
 
 // Backward compatibility interface for existing code
@@ -79,10 +83,11 @@ export interface PatientFilters {
   dni?: string;
   gender?: 'M' | 'F' | 'O';
   clinic_id?: number;
+  status?: 'en curso' | 'fin del tratamiento' | 'en pausa' | 'abandono' | 'derivación';
 }
 
-// Create patient interface (without id)
-export type CreatePatientRequest = Omit<Patient, 'id'>;
+// Create patient interface (without id and timestamps)
+export type CreatePatientRequest = Omit<Patient, 'id' | 'created_at' | 'updated_at'>;
 
 // Update patient interface
 export type UpdatePatientRequest = Partial<Patient> & { id: number };

@@ -29,6 +29,7 @@ import { ClinicsService } from '../../../clinics/services/clinics.service';
 export class PatientFiltersModalComponent implements OnInit, OnChanges {
   @Input() isOpen: boolean = false;
   @Input() currentFilters: PatientFilters = {};
+  @Input() showInactiveTab: boolean = false; // Indica si estamos en el tab de inactivos
 
   @Output() onApplyFilters = new EventEmitter<PatientFilters>();
   @Output() onClearFilters = new EventEmitter<void>();
@@ -51,6 +52,15 @@ export class PatientFiltersModalComponent implements OnInit, OnChanges {
     { value: 'M', label: 'Masculino' },
     { value: 'F', label: 'Femenino' },
     { value: 'O', label: 'Otro' }
+  ];
+
+  // Options for status select (only for inactive tab)
+  protected statusOptions = [
+    { value: 'en curso', label: 'En curso' },
+    { value: 'fin del tratamiento', label: 'Fin del tratamiento' },
+    { value: 'en pausa', label: 'En pausa' },
+    { value: 'abandono', label: 'Abandono' },
+    { value: 'derivación', label: 'Derivación' }
   ];
 
   constructor() {
@@ -77,6 +87,7 @@ export class PatientFiltersModalComponent implements OnInit, OnChanges {
       dni: [''],
       gender: [''],
       clinic_id: [''],
+      status: [''],
     });
   }
 
@@ -89,6 +100,7 @@ export class PatientFiltersModalComponent implements OnInit, OnChanges {
         dni: this.currentFilters.dni || '',
         gender: this.currentFilters.gender || '',
         clinic_id: this.currentFilters.clinic_id || '',
+        status: this.currentFilters.status || '',
       });
 
       // Set selected clinic for search display (if clinics are already loaded)
@@ -248,6 +260,11 @@ export class PatientFiltersModalComponent implements OnInit, OnChanges {
       filters.clinic_id = formValue.clinic_id;
     }
 
+    // Only include status filter if we're on inactive tab
+    if (this.showInactiveTab && formValue.status) {
+      filters.status = formValue.status;
+    }
+
     this.onApplyFilters.emit(filters);
   }
 
@@ -262,6 +279,7 @@ export class PatientFiltersModalComponent implements OnInit, OnChanges {
       dni: '',
       gender: '',
       clinic_id: '',
+      status: '',
     });
 
     // Reset clinic selector
@@ -291,7 +309,8 @@ export class PatientFiltersModalComponent implements OnInit, OnChanges {
       formValue.email?.trim() ||
       formValue.dni?.trim() ||
       formValue.gender ||
-      formValue.clinic_id
+      formValue.clinic_id ||
+      (this.showInactiveTab && formValue.status)
     );
   }
 }
