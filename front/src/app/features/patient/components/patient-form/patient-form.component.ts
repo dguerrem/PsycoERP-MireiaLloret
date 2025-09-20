@@ -164,7 +164,7 @@ export class PatientFormComponent implements OnInit, OnChanges {
   }
 
   get title(): string {
-    return this.isEditing ? 'Editar Paciente' : 'Crear Nuevo Paciente';
+    return this.isEditing ? 'Editar Paciente' : 'Crear nuevo paciente';
   }
 
   get submitButtonText(): string {
