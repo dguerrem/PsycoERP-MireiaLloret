@@ -55,6 +55,9 @@ export class ClinicFormComponent implements OnInit, OnChanges {
     this.clinicaForm = this.fb.group({
       name: ['', [Validators.required, Validators.minLength(2)]],
       clinic_color: ['#3b82f6', [Validators.required]],
+      address: ['', [Validators.required, Validators.minLength(5)]],
+      price: [0, [Validators.required, Validators.min(0), Validators.max(1000)]],
+      percentage: [0, [Validators.required, Validators.min(0), Validators.max(100)]],
       status: ['active'],
     });
   }
@@ -64,6 +67,9 @@ export class ClinicFormComponent implements OnInit, OnChanges {
       this.clinicaForm.patchValue({
         name: this.clinica.name,
         clinic_color: this.clinica.clinic_color,
+        address: this.clinica.address || '',
+        price: this.clinica.price || 0,
+        percentage: this.clinica.percentage || 0,
         status: 'active',
       });
     } else {
@@ -75,6 +81,9 @@ export class ClinicFormComponent implements OnInit, OnChanges {
     this.clinicaForm.reset({
       name: '',
       clinic_color: '#3b82f6',
+      address: '',
+      price: 0,
+      percentage: 0,
       status: 'active',
     });
   }
@@ -127,6 +136,14 @@ export class ClinicFormComponent implements OnInit, OnChanges {
           fieldName
         )} debe tener al menos ${minLength} caracteres`;
       }
+      if (field.errors?.['min']) {
+        const minValue = field.errors['min'].min;
+        return `${this.getFieldLabel(fieldName)} debe ser mayor o igual a ${minValue}`;
+      }
+      if (field.errors?.['max']) {
+        const maxValue = field.errors['max'].max;
+        return `${this.getFieldLabel(fieldName)} debe ser menor o igual a ${maxValue}`;
+      }
     }
     return null;
   }
@@ -135,6 +152,9 @@ export class ClinicFormComponent implements OnInit, OnChanges {
     const labels: { [key: string]: string } = {
       name: 'Nombre de la clínica',
       clinic_color: 'Color identificativo',
+      address: 'Dirección',
+      price: 'Precio por sesión',
+      percentage: 'Porcentaje de comisión',
     };
     return labels[fieldName] || fieldName;
   }
