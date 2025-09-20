@@ -18,13 +18,14 @@ import { CommonModule } from '@angular/common';
 import { PatientFilters } from '../../../../shared/models/patient.model';
 import { Clinic } from '../../../clinics/models/clinic.model';
 import { ClinicsService } from '../../../clinics/services/clinics.service';
+import { ClinicSelectorComponent } from '../../../../shared/components/clinic-selector';
 
 @Component({
   selector: 'app-patient-filters-modal',
   standalone: true,
   templateUrl: './patient-filters-modal.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule, ReactiveFormsModule, FormsModule],
+  imports: [CommonModule, ReactiveFormsModule, FormsModule, ClinicSelectorComponent],
 })
 export class PatientFiltersModalComponent implements OnInit, OnChanges {
   @Input() isOpen: boolean = false;
@@ -37,12 +38,6 @@ export class PatientFiltersModalComponent implements OnInit, OnChanges {
 
   filtersForm!: FormGroup;
   clinics: Clinic[] = [];
-  filteredClinics: Clinic[] = [];
-
-  // Clinic selector properties (like in patient-form)
-  clinicSearchTerm: string = '';
-  isClinicDropdownOpen: boolean = false;
-  selectedClinic: Clinic | null = null;
 
   private fb = inject(FormBuilder);
   private clinicsService = inject(ClinicsService);
@@ -103,8 +98,6 @@ export class PatientFiltersModalComponent implements OnInit, OnChanges {
         status: this.currentFilters.status || '',
       });
 
-      // Set selected clinic for search display (if clinics are already loaded)
-      this.setSelectedClinicFromFilters();
     }
   }
 
@@ -115,117 +108,14 @@ export class PatientFiltersModalComponent implements OnInit, OnChanges {
     this.clinicsService.loadActiveClinics(1, 1000).subscribe({
       next: (response) => {
         this.clinics = response.data || [];
-        this.filteredClinics = [...this.clinics];
-
-        // If we have filters with clinic_id, set the selected clinic
-        this.setSelectedClinicFromFilters();
       },
       error: (error) => {
         console.error('Error loading clinics:', error);
         this.clinics = [];
-        this.filteredClinics = [];
       }
     });
   }
 
-  /**
-   * Set selected clinic from current filters
-   */
-  private setSelectedClinicFromFilters(): void {
-    if (this.currentFilters?.clinic_id && this.clinics.length > 0) {
-      const clinic = this.clinics.find(c => c.id == this.currentFilters?.clinic_id);
-      if (clinic) {
-        this.selectedClinic = clinic;
-        this.clinicSearchTerm = clinic.name;
-        // Also update the form control
-        this.filtersForm.patchValue({ clinic_id: clinic.id ? clinic.id.toString() : '' });
-      }
-    }
-  }
-
-  /**
-   * Filter clinics based on search term
-   */
-  filterClinics(): void {
-    if (!this.clinicSearchTerm || !this.clinicSearchTerm.trim()) {
-      this.filteredClinics = [...this.clinics];
-    } else {
-      const searchTerm = this.clinicSearchTerm.toLowerCase().trim();
-      this.filteredClinics = this.clinics.filter(clinic =>
-        clinic.name.toLowerCase().includes(searchTerm)
-      );
-    }
-  }
-
-  /**
-   * Select a clinic from dropdown
-   */
-  selectClinic(clinic: Clinic): void {
-    this.selectedClinic = clinic;
-    this.filtersForm.patchValue({ clinic_id: clinic.id ? clinic.id.toString() : '' });
-    this.clinicSearchTerm = clinic.name;
-    this.isClinicDropdownOpen = false;
-
-    // Force update to show selected clinic
-    this.filterClinics();
-  }
-
-  /**
-   * Handle clinic search input (real-time)
-   */
-  onClinicSearchInput(event: Event): void {
-    const target = event.target as HTMLInputElement;
-    this.clinicSearchTerm = target.value;
-
-    this.filterClinics();
-    this.isClinicDropdownOpen = true;
-
-    // Clear selection if user is typing something different
-    if (this.selectedClinic && this.selectedClinic.name !== this.clinicSearchTerm) {
-      this.selectedClinic = null;
-      this.filtersForm.patchValue({ clinic_id: '' });
-    }
-  }
-
-  /**
-   * Clear selected clinic
-   */
-  clearSelectedClinic(): void {
-    this.selectedClinic = null;
-    this.clinicSearchTerm = '';
-    this.filtersForm.patchValue({ clinic_id: '' });
-    this.filteredClinics = [...this.clinics];
-    this.isClinicDropdownOpen = false;
-  }
-
-  /**
-   * Check if a clinic is currently selected
-   */
-  isClinicSelected(clinic: Clinic): boolean {
-    return this.selectedClinic !== null &&
-           this.selectedClinic.id === clinic.id;
-  }
-
-  /**
-   * Toggle clinic dropdown
-   */
-  toggleClinicDropdown(): void {
-    this.isClinicDropdownOpen = true;
-    if (!this.clinicSearchTerm) {
-      this.filteredClinics = [...this.clinics];
-    } else {
-      this.filterClinics();
-    }
-  }
-
-  /**
-   * Close clinic dropdown when clicking outside
-   */
-  closeClinicDropdown(): void {
-    setTimeout(() => {
-      this.isClinicDropdownOpen = false;
-    }, 150);
-  }
 
   /**
    * Apply filters and close modal
@@ -282,11 +172,6 @@ export class PatientFiltersModalComponent implements OnInit, OnChanges {
       status: '',
     });
 
-    // Reset clinic selector
-    this.selectedClinic = null;
-    this.clinicSearchTerm = '';
-    this.isClinicDropdownOpen = false;
-    this.filteredClinics = [...this.clinics];
 
     this.onClearFilters.emit();
   }
