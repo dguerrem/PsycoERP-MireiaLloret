@@ -30,14 +30,16 @@ export class PatientCardComponent {
   getStatusColor(status?: string): string {
     if (!status) return 'bg-gray-100 text-gray-800';
     switch (status) {
-      case 'active':
+      case 'en curso':
         return 'bg-green-100 text-green-800';
-      case 'inactive':
-        return 'bg-gray-100 text-gray-800';
-      case 'discharged':
+      case 'fin del tratamiento':
         return 'bg-blue-100 text-blue-800';
-      case 'on-hold':
+      case 'en pausa':
         return 'bg-yellow-100 text-yellow-800';
+      case 'abandono':
+        return 'bg-red-100 text-red-800';
+      case 'derivación':
+        return 'bg-purple-100 text-purple-800';
       default:
         return 'bg-gray-100 text-gray-800';
     }
@@ -49,17 +51,41 @@ export class PatientCardComponent {
   getStatusLabel(status?: string): string {
     if (!status) return 'Sin estado';
     switch (status) {
-      case 'active':
-        return 'Activo';
-      case 'inactive':
-        return 'Inactivo';
-      case 'discharged':
-        return 'Alta';
-      case 'on-hold':
-        return 'En Pausa';
+      case 'en curso':
+        return 'En curso';
+      case 'fin del tratamiento':
+        return 'Fin del tratamiento';
+      case 'en pausa':
+        return 'En pausa';
+      case 'abandono':
+        return 'Abandono';
+      case 'derivación':
+        return 'Derivación';
       default:
         return status;
     }
+  }
+
+  /**
+   * Get patient full name
+   */
+  get patientFullName(): string {
+    return `${this.patient.first_name} ${this.patient.last_name}`;
+  }
+
+  /**
+   * Calculate patient age
+   */
+  get patientAge(): number {
+    if (!this.patient.birth_date) return 0;
+    const birthDate = new Date(this.patient.birth_date);
+    const today = new Date();
+    let age = today.getFullYear() - birthDate.getFullYear();
+    const monthDiff = today.getMonth() - birthDate.getMonth();
+    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+      age--;
+    }
+    return age;
   }
 
   /**

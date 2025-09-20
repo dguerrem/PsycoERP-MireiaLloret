@@ -4,16 +4,16 @@
     <div class="@container/card-header grid auto-rows-min grid-rows-[auto_auto] items-start gap-1.5 px-6 has-data-[slot=card-action]:grid-cols-[1fr_auto] [.border-b]:pb-6 pb-2 pt-2">
       <div class="flex items-start justify-between">
         <div>
-          <div class="font-semibold text-base">{{ patient.name }}</div>
+          <div class="font-semibold text-base">{{ patientFullName }}</div>
           <p class="text-muted-foreground mt-1 text-xs">DNI: {{ patient.dni }}</p>
         </div>
         <span class="inline-flex items-center justify-center rounded-md border px-2 py-0.5 text-xs font-medium w-fit whitespace-nowrap shrink-0 [&>svg]:size-3 gap-1 [&>svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive transition-[color,box-shadow] overflow-hidden border-transparent [a&]:hover:bg-primary/90"
-              [class]="isDeletedView ? 'bg-gray-100 text-gray-800' : getStatusColor(patient.status)">
+              [class]="isDeletedView ? 'bg-red-100 text-red-800' : getStatusColor(patient.status)">
           {{ isDeletedView ? 'Inactivo' : getStatusLabel(patient.status) }}
         </span>
       </div>
     </div>
-      
+
     <!-- Card Content -->
     <div class="px-6 pt-0">
       <div class="space-y-1 text-xs">
@@ -26,12 +26,16 @@
           <span>{{ patient.phone }}</span>
         </div>
         <div class="flex items-center justify-between text-xs">
-          <span class="text-muted-foreground">Tipo:</span>
-          <span class="capitalize">{{ capitalizeSessionType(patient.session_type) }}</span>
+          <span class="text-muted-foreground">Género:</span>
+          <span class="capitalize">{{ patient.gender === 'M' ? 'Masculino' : patient.gender === 'F' ? 'Femenino' : 'Otro' }}</span>
         </div>
         <div class="flex items-center justify-between text-xs">
-          <span class="text-muted-foreground">Desde:</span>
-          <span>{{ formatDate(patient.created_at) }}</span>
+          <span class="text-muted-foreground">Edad:</span>
+          <span>{{ patientAge }} años</span>
+        </div>
+        <div class="flex items-center justify-between text-xs">
+          <span class="text-muted-foreground">Tratamiento:</span>
+          <span>{{ formatDate(patient.treatment_start_date) }}</span>
         </div>
       </div>
     </div>

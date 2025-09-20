@@ -1,15 +1,11 @@
-import { Injectable, signal } from '@angular/core';
-import { Observable } from 'rxjs';
-import { HttpParams } from '@angular/common/http';
-import { BaseCrudService } from '../../../core/services/base-crud.service';
-import { Patient } from '../../../shared/models/patient.model';
+import { Injectable, signal, inject } from '@angular/core';
+import { Observable, lastValueFrom } from 'rxjs';
+import { HttpParams, HttpClient } from '@angular/common/http';
+import { BaseCrudService, ApiItemResponse } from '../../../core/services/base-crud.service';
+import { Patient, PatientFilters, CreatePatientRequest } from '../../../shared/models/patient.model';
 import { PaginationResponse } from '../../../shared/models/pagination.interface';
-
-export interface PatientFilters {
-  name?: string;
-  email?: string;
-  dni?: string;
-}
+import { ToastService } from '../../../core/services/toast.service';
+import { LoadingService } from '../../../core/services/loading.service';
 
 @Injectable({ providedIn: 'root' })
 export class PatientsService extends BaseCrudService<Patient> {
@@ -139,8 +135,12 @@ export class PatientsService extends BaseCrudService<Patient> {
       .set('limit', per_page.toString());
 
     // Add filter parameters only if they have values
-    if (filters.name?.trim()) {
-      params = params.set('name', filters.name.trim());
+    if (filters.first_name?.trim()) {
+      params = params.set('first_name', filters.first_name.trim());
+    }
+
+    if (filters.last_name?.trim()) {
+      params = params.set('last_name', filters.last_name.trim());
     }
 
     if (filters.email?.trim()) {
@@ -173,8 +173,12 @@ export class PatientsService extends BaseCrudService<Patient> {
       .set('limit', per_page.toString()); // El endpoint deleted usa 'limit' en lugar de 'per_page'
 
     // Add filter parameters only if they have values
-    if (filters?.name?.trim()) {
-      params = params.set('name', filters.name.trim());
+    if (filters?.first_name?.trim()) {
+      params = params.set('first_name', filters.first_name.trim());
+    }
+
+    if (filters?.last_name?.trim()) {
+      params = params.set('last_name', filters.last_name.trim());
     }
 
     if (filters?.email?.trim()) {
@@ -199,9 +203,12 @@ export class PatientsService extends BaseCrudService<Patient> {
    */
   private hasActiveFilters(filters: PatientFilters): boolean {
     return !!(
-      filters.name?.trim() ||
+      filters.first_name?.trim() ||
+      filters.last_name?.trim() ||
       filters.email?.trim() ||
-      filters.dni?.trim()
+      filters.dni?.trim() ||
+      filters.gender ||
+      filters.clinic_id
     );
   }
 
@@ -293,5 +300,218 @@ export class PatientsService extends BaseCrudService<Patient> {
    */
   addPatient(patient: Omit<Patient, 'id' | 'created_at' | 'updated_at'>): void {
     this.createPatient(patient);
+  }
+
+  // ============ NEW CRUD METHODS FOR COMPLETE INTEGRATION ============
+
+  /**
+   * Create patient with complete API integration
+   */
+  async createPatientAsync(patient: CreatePatientRequest): Promise<Patient | null> {
+    try {
+      this.loadingService.show();
+      const response = await lastValueFrom(
+        this.http.post<ApiItemResponse<Patient>>(`${this.apiUrl}`, patient, this.httpOptions)
+      );
+
+      this.toast.showSuccess('Paciente creado correctamente');
+
+      // Reload current page after creation
+      const currentPagination = this.paginationData();
+      this.loadAndSetActivePatientsPaginated(
+        currentPagination?.currentPage || 1,
+        currentPagination?.recordsPerPage || 10
+      );
+
+      return response.data;
+    } catch (error) {
+      console.error('Error creating patient:', error);
+      return null;
+    } finally {
+      this.loadingService.hide();
+    }
+  }
+
+  /**
+   * Update patient with complete API integration
+   */
+  async updatePatientAsync(id: number, patient: Partial<Patient>): Promise<Patient | null> {
+    try {
+      this.loadingService.show();
+      const response = await lastValueFrom(
+        this.http.put<ApiItemResponse<Patient>>(`${this.apiUrl}/${id}`, patient, this.httpOptions)
+      );
+
+      this.toast.showSuccess('Paciente actualizado correctamente');
+
+      // Reload current page after update
+      const currentPagination = this.paginationData();
+      this.loadAndSetActivePatientsPaginated(
+        currentPagination?.currentPage || 1,
+        currentPagination?.recordsPerPage || 10
+      );
+
+      return response.data;
+    } catch (error) {
+      console.error('Error updating patient:', error);
+      return null;
+    } finally {
+      this.loadingService.hide();
+    }
+  }
+
+  /**
+   * Restore deleted patient
+   */
+  async restorePatient(id: number): Promise<boolean> {
+    try {
+      this.loadingService.show();
+      await lastValueFrom(
+        this.http.post(`${this.apiUrl}/${id}/restore`, { id }, this.httpOptions)
+      );
+
+      this.toast.showSuccess('Paciente restaurado correctamente');
+
+      // Reload current page after restore
+      const currentPagination = this.paginationData();
+      this.loadAndSetDeletedPatientsPaginated(
+        currentPagination?.currentPage || 1,
+        currentPagination?.recordsPerPage || 10
+      );
+
+      return true;
+    } catch (error) {
+      console.error('Error restoring patient:', error);
+      return false;
+    } finally {
+      this.loadingService.hide();
+    }
+  }
+
+  /**
+   * Filter patients with new filter structure
+   */
+  async filterPatients(filters: PatientFilters): Promise<Patient[]> {
+    try {
+      this.loadingService.show();
+
+      let params = new HttpParams();
+
+      // Add filter parameters only if they have values
+      if (filters.first_name?.trim()) {
+        params = params.set('first_name', filters.first_name.trim());
+      }
+      if (filters.last_name?.trim()) {
+        params = params.set('last_name', filters.last_name.trim());
+      }
+      if (filters.email?.trim()) {
+        params = params.set('email', filters.email.trim());
+      }
+      if (filters.dni?.trim()) {
+        params = params.set('dni', filters.dni.trim());
+      }
+      if (filters.gender) {
+        params = params.set('gender', filters.gender);
+      }
+      if (filters.clinic_id) {
+        params = params.set('clinic_id', filters.clinic_id.toString());
+      }
+
+      const response = await lastValueFrom(
+        this.http.get<{ data: Patient[] }>(`${this.apiUrl}/filter`, {
+          ...this.httpOptions,
+          params
+        })
+      );
+
+      // Update internal state with filtered results
+      this.patients.set(response.data);
+      this.paginationData.set(null); // Clear pagination when filtering
+
+      return response.data;
+    } catch (error) {
+      console.error('Error filtering patients:', error);
+      return [];
+    } finally {
+      this.loadingService.hide();
+    }
+  }
+
+  /**
+   * Load patients with new filters (paginated)
+   */
+  private loadActivePatientsWithNewFilters(
+    page: number,
+    per_page: number,
+    filters: PatientFilters
+  ): Observable<PaginationResponse<Patient>> {
+    let params = new HttpParams()
+      .set('page', page.toString())
+      .set('limit', per_page.toString());
+
+    // Add filter parameters only if they have values
+    if (filters.first_name?.trim()) {
+      params = params.set('first_name', filters.first_name.trim());
+    }
+    if (filters.last_name?.trim()) {
+      params = params.set('last_name', filters.last_name.trim());
+    }
+    if (filters.email?.trim()) {
+      params = params.set('email', filters.email.trim());
+    }
+    if (filters.dni?.trim()) {
+      params = params.set('dni', filters.dni.trim());
+    }
+    if (filters.gender) {
+      params = params.set('gender', filters.gender);
+    }
+    if (filters.clinic_id) {
+      params = params.set('clinic_id', filters.clinic_id.toString());
+    }
+
+    return this.http.get<PaginationResponse<Patient>>(
+      this.apiUrl,
+      {
+        ...this.httpOptions,
+        params,
+      }
+    );
+  }
+
+  /**
+   * Check if new filters have any active values
+   */
+  private hasActiveNewFilters(filters: PatientFilters): boolean {
+    return !!(
+      filters.first_name?.trim() ||
+      filters.last_name?.trim() ||
+      filters.email?.trim() ||
+      filters.dni?.trim() ||
+      filters.gender ||
+      filters.clinic_id
+    );
+  }
+
+  /**
+   * Load patients with new filter structure (paginated and update state)
+   */
+  loadAndSetPatientsWithNewFilters(filters: PatientFilters, page = 1, per_page = 10): void {
+    if (!this.hasActiveNewFilters(filters)) {
+      // If no filters, load normal active patients
+      this.loadAndSetActivePatientsPaginated(page, per_page);
+      return;
+    }
+
+    this.isLoading.set(true);
+    this.loadActivePatientsWithNewFilters(page, per_page, filters).subscribe({
+      next: (response) => {
+        this.patients.set(response.data);
+        this.paginationData.set(response.pagination);
+        this.isLoading.set(false);
+      },
+      error: () => {
+        this.isLoading.set(false);
+      },
+    });
   }
 }

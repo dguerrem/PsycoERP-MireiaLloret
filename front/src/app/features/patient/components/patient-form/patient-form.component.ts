@@ -16,7 +16,7 @@ import {
   FormsModule,
 } from '@angular/forms';
 import { CommonModule } from '@angular/common';
-import { Patient } from '../../../../shared/models/patient.model';
+import { Patient, CreatePatientRequest } from '../../../../shared/models/patient.model';
 import { Clinic } from '../../../clinics/models/clinic.model';
 import { ClinicsService } from '../../../clinics/services/clinics.service';
 
@@ -43,6 +43,21 @@ export class PatientFormComponent implements OnInit, OnChanges {
 
   patientForm!: FormGroup;
 
+  // Options for selects
+  protected genderOptions = [
+    { value: 'M', label: 'Masculino' },
+    { value: 'F', label: 'Femenino' },
+    { value: 'O', label: 'Otro' }
+  ];
+
+  protected statusOptions = [
+    { value: 'en curso', label: 'En curso' },
+    { value: 'fin del tratamiento', label: 'Fin del tratamiento' },
+    { value: 'en pausa', label: 'En pausa' },
+    { value: 'abandono', label: 'Abandono' },
+    { value: 'derivación', label: 'Derivación' }
+  ];
+
   constructor(
     private fb: FormBuilder,
     private clinicsService: ClinicsService
@@ -68,8 +83,8 @@ export class PatientFormComponent implements OnInit, OnChanges {
   private initializeForm(): void {
     this.patientForm = this.fb.group({
       // Datos personales básicos
-      name: ['', [Validators.required, Validators.minLength(2)]],
-      surname: ['', [Validators.required, Validators.minLength(2)]],
+      first_name: ['', [Validators.required, Validators.minLength(2)]],
+      last_name: ['', [Validators.required, Validators.minLength(2)]],
       email: ['', [Validators.required, Validators.email]],
       phone: ['', [Validators.required, Validators.minLength(9)]],
       dni: ['', [Validators.required, Validators.minLength(8)]],
@@ -79,49 +94,43 @@ export class PatientFormComponent implements OnInit, OnChanges {
 
       // Dirección completa
       street: ['', [Validators.required]],
-      number: ['', [Validators.required]],
+      street_number: ['', [Validators.required]],
       door: [''],
       postal_code: ['', [Validators.required, Validators.pattern(/^[0-9]{5}$/)]],
       city: ['', [Validators.required]],
       province: ['', [Validators.required]],
 
       // Datos del tratamiento
-      session_price: ['', [Validators.required, Validators.min(0)]],
       clinic_id: ['', [Validators.required]],
       treatment_start_date: ['', [Validators.required]],
-      treatment_status: ['en_curso', [Validators.required]],
+      status: ['en curso', [Validators.required]],
 
       // Campos automáticos
       is_minor: [false],
-      created_at: [''],
-      updated_at: [''],
     });
   }
 
   private populateForm(): void {
     if (this.patient) {
       this.patientForm.patchValue({
-        name: this.patient.name,
-        surname: this.patient.surname || '',
-        email: this.patient.email,
-        phone: this.patient.phone,
-        dni: this.patient.dni,
-        birth_date: this.patient.birth_date,
+        first_name: this.patient.first_name || '',
+        last_name: this.patient.last_name || '',
+        email: this.patient.email || '',
+        phone: this.patient.phone || '',
+        dni: this.patient.dni || '',
+        birth_date: this.patient.birth_date || '',
         gender: this.patient.gender || '',
         occupation: this.patient.occupation || '',
         street: this.patient.street || '',
-        number: this.patient.number || '',
+        street_number: this.patient.street_number || '',
         door: this.patient.door || '',
         postal_code: this.patient.postal_code || '',
         city: this.patient.city || '',
         province: this.patient.province || '',
-        session_price: this.patient.session_price || '',
         clinic_id: this.patient.clinic_id || '',
         treatment_start_date: this.patient.treatment_start_date || '',
-        treatment_status: this.patient.treatment_status || 'en_curso',
+        status: this.patient.status || 'en curso',
         is_minor: this.patient.is_minor || false,
-        created_at: this.patient.created_at,
-        updated_at: this.patient.updated_at,
       });
 
       // Set selected clinic for search display (if clinics are already loaded)
@@ -133,8 +142,8 @@ export class PatientFormComponent implements OnInit, OnChanges {
 
   private resetForm(): void {
     this.patientForm.reset({
-      name: '',
-      surname: '',
+      first_name: '',
+      last_name: '',
       email: '',
       phone: '',
       dni: '',
@@ -142,18 +151,15 @@ export class PatientFormComponent implements OnInit, OnChanges {
       gender: '',
       occupation: '',
       street: '',
-      number: '',
+      street_number: '',
       door: '',
       postal_code: '',
       city: '',
       province: '',
-      session_price: '',
       clinic_id: '',
       treatment_start_date: '',
-      treatment_status: 'en_curso',
+      status: 'en curso',
       is_minor: false,
-      created_at: '',
-      updated_at: '',
     });
 
     // Reset clinic selector
@@ -190,7 +196,9 @@ export class PatientFormComponent implements OnInit, OnChanges {
         };
         this.onSave.emit(updatedPatient);
       } else {
-        this.onSave.emit(formData);
+        // Para crear nuevo paciente, no incluir el id
+        const { id, ...createData } = formData;
+        this.onSave.emit(createData);
       }
     }
   }
@@ -238,6 +246,22 @@ export class PatientFormComponent implements OnInit, OnChanges {
   }
 
   /**
+   * Get calculated age based on birth date
+   */
+  getCalculatedAge(): number {
+    const birthDate = this.patientForm.get('birth_date')?.value;
+    if (!birthDate) return 0;
+
+    const today = new Date();
+    const birth = new Date(birthDate);
+    const age = today.getFullYear() - birth.getFullYear();
+    const monthDiff = today.getMonth() - birth.getMonth();
+    const dayDiff = today.getDate() - birth.getDate();
+
+    return age - (monthDiff < 0 || (monthDiff === 0 && dayDiff < 0) ? 1 : 0);
+  }
+
+  /**
    * Handle birth date change to calculate if minor
    */
   onBirthDateChange(): void {
@@ -246,24 +270,23 @@ export class PatientFormComponent implements OnInit, OnChanges {
 
   private getFieldLabel(fieldName: string): string {
     const labels: { [key: string]: string } = {
-      name: 'Nombre',
-      surname: 'Apellidos',
+      first_name: 'Nombre',
+      last_name: 'Apellidos',
       email: 'Email',
       phone: 'Teléfono',
       dni: 'DNI',
       birth_date: 'Fecha de nacimiento',
-      gender: 'Sexo',
-      occupation: 'Escuela/Trabajo',
+      gender: 'Género',
+      occupation: 'Ocupación',
       street: 'Calle',
-      number: 'Número',
+      street_number: 'Número',
       door: 'Puerta',
       postal_code: 'Código postal',
       city: 'Ciudad',
       province: 'Provincia',
-      session_price: 'Precio de la sesión',
       clinic_id: 'Clínica',
       treatment_start_date: 'Fecha inicio tratamiento',
-      treatment_status: 'Estado del tratamiento',
+      status: 'Estado del tratamiento',
     };
     return labels[fieldName] || fieldName;
   }
@@ -298,6 +321,8 @@ export class PatientFormComponent implements OnInit, OnChanges {
       if (clinic) {
         this.selectedClinic = clinic;
         this.clinicSearchTerm = clinic.name;
+        // Also update the form control
+        this.patientForm.patchValue({ clinic_id: clinic.id ? clinic.id.toString() : '' });
       }
     }
   }
@@ -325,7 +350,7 @@ export class PatientFormComponent implements OnInit, OnChanges {
    */
   selectClinic(clinic: Clinic): void {
     this.selectedClinic = clinic;
-    this.patientForm.patchValue({ clinic_id: clinic.id });
+    this.patientForm.patchValue({ clinic_id: clinic.id ? clinic.id.toString() : '' });
     this.clinicSearchTerm = clinic.name;
     this.isClinicDropdownOpen = false;
 
@@ -390,4 +415,5 @@ export class PatientFormComponent implements OnInit, OnChanges {
       this.isClinicDropdownOpen = false;
     }, 150);
   }
+
 }
