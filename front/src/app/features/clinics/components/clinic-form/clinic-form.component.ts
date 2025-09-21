@@ -55,23 +55,36 @@ export class ClinicFormComponent implements OnInit, OnChanges {
     this.clinicaForm = this.fb.group({
       name: ['', [Validators.required, Validators.minLength(2)]],
       clinic_color: ['#3b82f6', [Validators.required]],
+      is_online: [false],
       address: ['', [Validators.required, Validators.minLength(5)]],
       price: [0, [Validators.required, Validators.min(0), Validators.max(1000)]],
       percentage: [0, [Validators.required, Validators.min(0), Validators.max(100)]],
       status: ['active'],
     });
+
+    // Escuchar cambios en el checkbox is_online
+    this.clinicaForm.get('is_online')?.valueChanges.subscribe(isOnline => {
+      this.updateAddressValidation(isOnline);
+    });
   }
 
   private populateForm(): void {
     if (this.clinica) {
+      // Determinar si es online basándose en si tiene dirección
+      const isOnline = !this.clinica.address || this.clinica.address.trim() === '';
+
       this.clinicaForm.patchValue({
         name: this.clinica.name,
         clinic_color: this.clinica.clinic_color,
+        is_online: isOnline,
         address: this.clinica.address || '',
         price: this.clinica.price || 0,
         percentage: this.clinica.percentage || 0,
         status: 'active',
       });
+
+      // Aplicar la lógica de validación después de poblar el formulario
+      this.updateAddressValidation(isOnline);
     } else {
       this.resetForm();
     }
@@ -81,11 +94,32 @@ export class ClinicFormComponent implements OnInit, OnChanges {
     this.clinicaForm.reset({
       name: '',
       clinic_color: '#3b82f6',
+      is_online: false,
       address: '',
       price: 0,
       percentage: 0,
       status: 'active',
     });
+
+    // Asegurar que las validaciones están correctas al resetear
+    this.updateAddressValidation(false);
+  }
+
+  private updateAddressValidation(isOnline: boolean): void {
+    const addressControl = this.clinicaForm.get('address');
+
+    if (isOnline) {
+      // Si es online, eliminar validaciones y limpiar el valor
+      addressControl?.clearValidators();
+      addressControl?.setValue('');
+      addressControl?.disable();
+    } else {
+      // Si no es online, añadir validaciones requeridas
+      addressControl?.setValidators([Validators.required, Validators.minLength(5)]);
+      addressControl?.enable();
+    }
+
+    addressControl?.updateValueAndValidity();
   }
 
   get isEditing(): boolean {
@@ -106,7 +140,15 @@ export class ClinicFormComponent implements OnInit, OnChanges {
 
   handleSubmit(): void {
     if (this.clinicaForm.valid) {
-      const formData = this.clinicaForm.value;
+      const formData = { ...this.clinicaForm.value };
+
+      // Excluir is_online del envío ya que no se almacena en BD
+      delete formData.is_online;
+
+      // Si es online, asegurar que address esté vacío
+      if (this.clinicaForm.get('is_online')?.value) {
+        formData.address = '';
+      }
 
       if (this.isEditing && this.clinica) {
         const updatedClinic: Clinic = {
@@ -152,6 +194,7 @@ export class ClinicFormComponent implements OnInit, OnChanges {
     const labels: { [key: string]: string } = {
       name: 'Nombre de la clínica',
       clinic_color: 'Color identificativo',
+      is_online: 'Clínica online',
       address: 'Dirección',
       price: 'Precio por sesión',
       percentage: 'Porcentaje de comisión',

@@ -50,10 +50,22 @@
           }
         </div>
 
+        <!-- Checkbox Online -->
+        <div class="flex items-center space-x-2">
+          <input
+            id="is_online"
+            type="checkbox"
+            formControlName="is_online"
+            class="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500 focus:ring-2">
+          <label for="is_online" class="text-sm font-medium text-gray-700 cursor-pointer">
+            Clínica Online
+          </label>
+        </div>
+
         <!-- Dirección -->
         <div>
           <label for="address" class="text-sm font-semibold leading-none text-gray-700 peer-disabled:cursor-not-allowed peer-disabled:opacity-70 mb-2 block">
-            Dirección
+            Dirección @if (!clinicaForm.get('is_online')?.value) { * }
           </label>
           <input
             id="address"
@@ -63,7 +75,9 @@
             [class.border-red-500]="getFieldError('address')"
             [class.focus:ring-red-500]="getFieldError('address')"
             [class.focus:border-red-500]="getFieldError('address')"
-            placeholder="Ej: Av. Principal 123, Ciudad">
+            [class.bg-gray-100]="clinicaForm.get('is_online')?.value"
+            [class.text-gray-400]="clinicaForm.get('is_online')?.value"
+            [placeholder]="clinicaForm.get('is_online')?.value ? 'Clínica online - No requiere dirección física' : 'Ej: Av. Principal 123, Ciudad'">
           @if (getFieldError('address')) {
             <p class="text-red-500 text-xs mt-1">{{ getFieldError('address') }}</p>
           }
