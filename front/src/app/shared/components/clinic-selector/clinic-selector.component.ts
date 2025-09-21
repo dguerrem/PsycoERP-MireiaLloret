@@ -5,23 +5,24 @@ import {
   computed,
   HostListener,
   ElementRef,
-  ViewChild
+  ViewChild,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormControl } from '@angular/forms';
+import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { Clinic } from '../../../features/clinics/models/clinic.model';
 
 @Component({
   selector: 'app-clinic-selector',
   standalone: true,
-  imports: [CommonModule],
-  templateUrl: './clinic-selector.component.html'
+  imports: [CommonModule, ReactiveFormsModule],
+  templateUrl: './clinic-selector.component.html',
+  viewProviders: [],
 })
 export class ClinicSelectorComponent {
   @ViewChild('searchInput') searchInput!: ElementRef<HTMLInputElement>;
 
   // Inputs
-  @Input() control!: FormControl<string | null>;
+  @Input() control!: FormControl<string | number | null>;
   @Input() clinics: Clinic[] = [];
   @Input() placeholder: string = 'Buscar clínica...';
   @Input() label: string = 'Clínica';
@@ -37,7 +38,7 @@ export class ClinicSelectorComponent {
     const term = this.searchTerm().toLowerCase().trim();
     if (!term) return this.clinics;
 
-    return this.clinics.filter(clinic =>
+    return this.clinics.filter((clinic) =>
       clinic.name.toLowerCase().includes(term)
     );
   });
@@ -45,7 +46,10 @@ export class ClinicSelectorComponent {
   selectedClinic = computed(() => {
     const selectedId = this.control?.value;
     if (!selectedId) return null;
-    return this.clinics.find(clinic => clinic.id === selectedId) || null;
+    // Convert to string for comparison since clinic.id is string
+    const idToMatch =
+      typeof selectedId === 'number' ? selectedId.toString() : selectedId;
+    return this.clinics.find((clinic) => clinic.id === idToMatch) || null;
   });
 
   // Event handlers
@@ -92,7 +96,12 @@ export class ClinicSelectorComponent {
   }
 
   isClinicSelected(clinic: Clinic): boolean {
-    return this.control?.value === clinic.id;
+    const selectedId = this.control?.value;
+    if (!selectedId || !clinic.id) return false;
+    // Convert to string for comparison since clinic.id is string
+    const idToMatch =
+      typeof selectedId === 'number' ? selectedId.toString() : selectedId;
+    return idToMatch === clinic.id;
   }
 
   openDropdown(): void {
@@ -108,7 +117,11 @@ export class ClinicSelectorComponent {
   @HostListener('keydown', ['$event'])
   onKeyDown(event: KeyboardEvent): void {
     if (!this.isDropdownOpen()) {
-      if (event.key === 'Enter' || event.key === 'ArrowDown' || event.key === 'ArrowUp') {
+      if (
+        event.key === 'Enter' ||
+        event.key === 'ArrowDown' ||
+        event.key === 'ArrowUp'
+      ) {
         event.preventDefault();
         this.openDropdown();
       }
@@ -121,13 +134,15 @@ export class ClinicSelectorComponent {
     switch (event.key) {
       case 'ArrowDown':
         event.preventDefault();
-        const nextIndex = currentIndex < filteredClinics.length - 1 ? currentIndex + 1 : 0;
+        const nextIndex =
+          currentIndex < filteredClinics.length - 1 ? currentIndex + 1 : 0;
         this.focusedIndex.set(nextIndex);
         break;
 
       case 'ArrowUp':
         event.preventDefault();
-        const prevIndex = currentIndex > 0 ? currentIndex - 1 : filteredClinics.length - 1;
+        const prevIndex =
+          currentIndex > 0 ? currentIndex - 1 : filteredClinics.length - 1;
         this.focusedIndex.set(prevIndex);
         break;
 
@@ -166,7 +181,11 @@ export class ClinicSelectorComponent {
   }
 
   get hasError(): boolean {
-    return this.control?.invalid && (this.control?.dirty || this.control?.touched) || false;
+    return (
+      (this.control?.invalid &&
+        (this.control?.dirty || this.control?.touched)) ||
+      false
+    );
   }
 
   get errorMessage(): string | null {
@@ -174,12 +193,9 @@ export class ClinicSelectorComponent {
 
     const errors = this.control?.errors;
     if (errors?.['required']) return 'Este campo es obligatorio';
-    if (errors?.['invalidClinic']) return 'La clínica seleccionada no es válida';
+    if (errors?.['invalidClinic'])
+      return 'La clínica seleccionada no es válida';
 
     return 'Campo inválido';
-  }
-
-  get labelText(): string {
-    return this.required ? `${this.label} *` : this.label;
   }
 }

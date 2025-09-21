@@ -7,6 +7,7 @@ import {
   OnChanges,
   SimpleChanges,
   ChangeDetectionStrategy,
+  ChangeDetectorRef,
 } from '@angular/core';
 import {
   FormBuilder,
@@ -16,17 +17,26 @@ import {
   FormsModule,
 } from '@angular/forms';
 import { CommonModule } from '@angular/common';
-import { Patient, CreatePatientRequest } from '../../../../shared/models/patient.model';
+import { Patient } from '../../../../shared/models/patient.model';
 import { Clinic } from '../../../clinics/models/clinic.model';
 import { ClinicsService } from '../../../clinics/services/clinics.service';
 import { ClinicSelectorComponent } from '../../../../shared/components/clinic-selector';
+import { ReusableModalComponent } from '../../../../shared/components/reusable-modal/reusable-modal.component';
+import { FormInputComponent } from '../../../../shared/components/form-input/form-input.component';
 
 @Component({
   selector: 'app-patient-form',
   standalone: true,
   templateUrl: './patient-form.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule, ReactiveFormsModule, FormsModule, ClinicSelectorComponent],
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    FormsModule,
+    ClinicSelectorComponent,
+    ReusableModalComponent,
+    FormInputComponent,
+  ],
 })
 export class PatientFormComponent implements OnInit, OnChanges {
   @Input() isOpen: boolean = false;
@@ -44,7 +54,7 @@ export class PatientFormComponent implements OnInit, OnChanges {
   protected genderOptions = [
     { value: 'M', label: 'Masculino' },
     { value: 'F', label: 'Femenino' },
-    { value: 'O', label: 'Otro' }
+    { value: 'O', label: 'Otro' },
   ];
 
   protected statusOptions = [
@@ -52,12 +62,14 @@ export class PatientFormComponent implements OnInit, OnChanges {
     { value: 'fin del tratamiento', label: 'Fin del tratamiento' },
     { value: 'en pausa', label: 'En pausa' },
     { value: 'abandono', label: 'Abandono' },
-    { value: 'derivación', label: 'Derivación' }
+    { value: 'derivación', label: 'Derivación' },
   ];
+
 
   constructor(
     private fb: FormBuilder,
-    private clinicsService: ClinicsService
+    private clinicsService: ClinicsService,
+    private cdr: ChangeDetectorRef
   ) {
     this.initializeForm();
   }
@@ -93,7 +105,10 @@ export class PatientFormComponent implements OnInit, OnChanges {
       street: ['', [Validators.required]],
       street_number: ['', [Validators.required]],
       door: [''],
-      postal_code: ['', [Validators.required, Validators.pattern(/^[0-9]{5}$/)]],
+      postal_code: [
+        '',
+        [Validators.required, Validators.pattern(/^[0-9]{5}$/)],
+      ],
       city: ['', [Validators.required]],
       province: ['', [Validators.required]],
 
@@ -129,7 +144,6 @@ export class PatientFormComponent implements OnInit, OnChanges {
         status: this.patient.status || 'en curso',
         is_minor: this.patient.is_minor || false,
       });
-
     } else {
       this.resetForm();
     }
@@ -156,7 +170,6 @@ export class PatientFormComponent implements OnInit, OnChanges {
       status: 'en curso',
       is_minor: false,
     });
-
   }
 
   get isEditing(): boolean {
@@ -228,7 +241,8 @@ export class PatientFormComponent implements OnInit, OnChanges {
       const monthDiff = today.getMonth() - birth.getMonth();
       const dayDiff = today.getDate() - birth.getDate();
 
-      const actualAge = age - (monthDiff < 0 || (monthDiff === 0 && dayDiff < 0) ? 1 : 0);
+      const actualAge =
+        age - (monthDiff < 0 || (monthDiff === 0 && dayDiff < 0) ? 1 : 0);
       const isMinor = actualAge < 18;
 
       this.patientForm.patchValue({ is_minor: isMinor });
@@ -289,13 +303,13 @@ export class PatientFormComponent implements OnInit, OnChanges {
     this.clinicsService.loadActiveClinics(1, 1000).subscribe({
       next: (response) => {
         this.clinics = response.data || [];
+        this.cdr.markForCheck(); // Trigger change detection
       },
       error: (error) => {
         console.error('Error loading clinics:', error);
         this.clinics = [];
-      }
+        this.cdr.markForCheck(); // Trigger change detection
+      },
     });
   }
-
-
 }
