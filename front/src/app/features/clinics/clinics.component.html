@@ -3,26 +3,13 @@
   <div class="w-full h-full flex flex-col max-h-full">
 
     <!-- Header -->
-    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4 sm:mb-6">
-      <div>
-        <h1 class="text-2xl sm:text-3xl font-black font-montserrat text-gray-900">Gestión de Clínicas</h1>
-        <p class="text-sm sm:text-base text-gray-600 mt-1 sm:mt-2">
-          Administra las clínicas registradas en la plataforma
-        </p>
-      </div>
-
-      <!-- Header buttons -->
-      <div class="flex items-center gap-4">
-        <button
-          class="bg-primary hover:opacity-90 w-full sm:w-auto inline-flex items-center justify-center px-4 py-2 text-white rounded-md transition-opacity font-medium"
-          (click)="openCreateForm()">
-          <svg class="h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
-          </svg>
-          Nueva Clínica
-        </button>
-      </div>
-    </div>
+    <app-section-header
+      title="Gestión de Clínicas"
+      subtitle="Administra las clínicas registradas en la plataforma"
+      buttonText="Nueva Clínica"
+      buttonIcon="plus"
+      (onButtonClick)="openCreateForm()">
+    </app-section-header>
 
     <!-- Main content -->
     <div class="flex-1 overflow-y-auto min-h-0">
