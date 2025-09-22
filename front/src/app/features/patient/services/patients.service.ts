@@ -1,8 +1,15 @@
 import { Injectable, signal, inject } from '@angular/core';
 import { Observable, lastValueFrom } from 'rxjs';
 import { HttpParams, HttpClient } from '@angular/common/http';
-import { BaseCrudService, ApiItemResponse } from '../../../core/services/base-crud.service';
-import { Patient, PatientFilters, CreatePatientRequest } from '../../../shared/models/patient.model';
+import {
+  BaseCrudService,
+  ApiItemResponse,
+} from '../../../core/services/base-crud.service';
+import {
+  Patient,
+  PatientFilters,
+  CreatePatientRequest,
+} from '../../../shared/models/patient.model';
 import { PaginationResponse } from '../../../shared/models/pagination.interface';
 import { ToastService } from '../../../core/services/toast.service';
 import { LoadingService } from '../../../core/services/loading.service';
@@ -123,7 +130,7 @@ export class PatientsService extends BaseCrudService<Patient> {
   }
 
   /**
-   * Cargar pacientes activos con filtros
+   * Cargar pacientes activos con filtros (ACTUALIZADO para incluir todos los filtros)
    */
   private loadActivePatientsWithFilters(
     page: number,
@@ -151,13 +158,23 @@ export class PatientsService extends BaseCrudService<Patient> {
       params = params.set('dni', filters.dni.trim());
     }
 
-    return this.http.get<PaginationResponse<Patient>>(
-      this.apiUrl,
-      {
-        ...this.httpOptions,
-        params,
-      }
-    );
+    // AÑADIR FILTROS FALTANTES
+    if (filters.gender) {
+      params = params.set('gender', filters.gender);
+    }
+
+    if (filters.clinic_id) {
+      params = params.set('clinic_id', filters.clinic_id.toString());
+    }
+
+    if (filters.status) {
+      params = params.set('status', filters.status);
+    }
+
+    return this.http.get<PaginationResponse<Patient>>(this.apiUrl, {
+      ...this.httpOptions,
+      params,
+    });
   }
 
   /**
@@ -189,6 +206,19 @@ export class PatientsService extends BaseCrudService<Patient> {
       params = params.set('dni', filters.dni.trim());
     }
 
+    // AÑADIR FILTROS FALTANTES PARA PACIENTES ELIMINADOS
+    if (filters?.gender) {
+      params = params.set('gender', filters.gender);
+    }
+
+    if (filters?.clinic_id) {
+      params = params.set('clinic_id', filters.clinic_id.toString());
+    }
+
+    if (filters?.status) {
+      params = params.set('status', filters.status);
+    }
+
     return this.http.get<PaginationResponse<Patient>>(
       `${this.apiUrl}/inactive`,
       {
@@ -208,7 +238,8 @@ export class PatientsService extends BaseCrudService<Patient> {
       filters.email?.trim() ||
       filters.dni?.trim() ||
       filters.gender ||
-      filters.clinic_id
+      filters.clinic_id ||
+      filters.status
     );
   }
 
@@ -307,11 +338,17 @@ export class PatientsService extends BaseCrudService<Patient> {
   /**
    * Create patient with complete API integration
    */
-  async createPatientAsync(patient: CreatePatientRequest): Promise<Patient | null> {
+  async createPatientAsync(
+    patient: CreatePatientRequest
+  ): Promise<Patient | null> {
     try {
       this.loadingService.show();
       const response = await lastValueFrom(
-        this.http.post<ApiItemResponse<Patient>>(`${this.apiUrl}`, patient, this.httpOptions)
+        this.http.post<ApiItemResponse<Patient>>(
+          `${this.apiUrl}`,
+          patient,
+          this.httpOptions
+        )
       );
 
       this.toast.showSuccess('Paciente creado correctamente');
@@ -335,11 +372,18 @@ export class PatientsService extends BaseCrudService<Patient> {
   /**
    * Update patient with complete API integration
    */
-  async updatePatientAsync(id: number, patient: Partial<Patient>): Promise<Patient | null> {
+  async updatePatientAsync(
+    id: number,
+    patient: Partial<Patient>
+  ): Promise<Patient | null> {
     try {
       this.loadingService.show();
       const response = await lastValueFrom(
-        this.http.put<ApiItemResponse<Patient>>(`${this.apiUrl}/${id}`, patient, this.httpOptions)
+        this.http.put<ApiItemResponse<Patient>>(
+          `${this.apiUrl}/${id}`,
+          patient,
+          this.httpOptions
+        )
       );
 
       this.toast.showSuccess('Paciente actualizado correctamente');
@@ -367,7 +411,7 @@ export class PatientsService extends BaseCrudService<Patient> {
     try {
       this.loadingService.show();
       await lastValueFrom(
-        this.http.post(`${this.apiUrl}/${id}/restore`, { id }, this.httpOptions)
+        this.http.put(`${this.apiUrl}/${id}/restore`, { id }, this.httpOptions)
       );
 
       this.toast.showSuccess('Paciente restaurado correctamente');
@@ -420,7 +464,7 @@ export class PatientsService extends BaseCrudService<Patient> {
       const response = await lastValueFrom(
         this.http.get<{ data: Patient[] }>(`${this.apiUrl}/filter`, {
           ...this.httpOptions,
-          params
+          params,
         })
       );
 
@@ -469,13 +513,10 @@ export class PatientsService extends BaseCrudService<Patient> {
       params = params.set('clinic_id', filters.clinic_id.toString());
     }
 
-    return this.http.get<PaginationResponse<Patient>>(
-      this.apiUrl,
-      {
-        ...this.httpOptions,
-        params,
-      }
-    );
+    return this.http.get<PaginationResponse<Patient>>(this.apiUrl, {
+      ...this.httpOptions,
+      params,
+    });
   }
 
   /**
@@ -495,7 +536,11 @@ export class PatientsService extends BaseCrudService<Patient> {
   /**
    * Load patients with new filter structure (paginated and update state)
    */
-  loadAndSetPatientsWithNewFilters(filters: PatientFilters, page = 1, per_page = 10): void {
+  loadAndSetPatientsWithNewFilters(
+    filters: PatientFilters,
+    page = 1,
+    per_page = 10
+  ): void {
     if (!this.hasActiveNewFilters(filters)) {
       // If no filters, load normal active patients
       this.loadAndSetActivePatientsPaginated(page, per_page);

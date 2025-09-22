@@ -201,6 +201,7 @@ export class PatientFormComponent implements OnInit, OnChanges {
       } else {
         // Para crear nuevo paciente, no incluir el id
         const { id, ...createData } = formData;
+        createData.session_price = 0; // Default value
         this.onSave.emit(createData);
       }
     }

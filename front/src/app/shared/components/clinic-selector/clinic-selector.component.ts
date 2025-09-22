@@ -19,18 +19,18 @@ import { Clinic } from '../../../features/clinics/models/clinic.model';
   viewProviders: [],
 })
 export class ClinicSelectorComponent {
-  @ViewChild('searchInput') searchInput!: ElementRef<HTMLInputElement>;
+  @ViewChild('modalSearchInput') modalSearchInput!: ElementRef<HTMLInputElement>;
 
   // Inputs
   @Input() control!: FormControl<string | number | null>;
   @Input() clinics: Clinic[] = [];
-  @Input() placeholder: string = 'Buscar clínica...';
+  @Input() placeholder: string = 'Seleccionar clínica...';
   @Input() label: string = 'Clínica';
   @Input() required: boolean = false;
 
   // Internal signals
   private searchTerm = signal<string>('');
-  private isDropdownOpen = signal<boolean>(false);
+  private isModalOpen = signal<boolean>(false);
   protected focusedIndex = signal<number>(-1);
 
   // Computed signals
@@ -43,42 +43,53 @@ export class ClinicSelectorComponent {
     );
   });
 
-  selectedClinic = computed(() => {
+  // Use a getter instead of computed for better control value tracking
+  get selectedClinic(): Clinic | null {
     const selectedId = this.control?.value;
-    if (!selectedId) return null;
-    // Convert to string for comparison since clinic.id is string
-    const idToMatch =
-      typeof selectedId === 'number' ? selectedId.toString() : selectedId;
-    return this.clinics.find((clinic) => clinic.id === idToMatch) || null;
-  });
+
+    // Handle empty string, null, undefined
+    if (!selectedId || selectedId === '') {
+      return null;
+    }
+
+    // Handle both string and number IDs
+    const foundClinic = this.clinics.find((clinic) => {
+      if (!clinic.id) return false;
+
+      // Convert both to strings for comparison
+      const clinicIdStr = clinic.id.toString();
+      const selectedIdStr = selectedId.toString();
+
+      return clinicIdStr === selectedIdStr;
+    });
+
+    return foundClinic || null;
+  }
 
   // Event handlers
   onSearchInput(event: Event): void {
     const target = event.target as HTMLInputElement;
     this.searchTerm.set(target.value);
     this.focusedIndex.set(-1);
-
-    if (!this.isDropdownOpen()) {
-      this.openDropdown();
-    }
-  }
-
-  onInputFocus(): void {
-    this.openDropdown();
-  }
-
-  onInputBlur(): void {
-    // Delay closing to allow for option selection
-    setTimeout(() => {
-      this.closeDropdown();
-    }, 150);
   }
 
   selectClinic(clinic: Clinic): void {
-    this.control.setValue(clinic.id || null);
+    // Convert to number if the clinic ID is a string that represents a number
+    let clinicId: string | number | null = clinic.id || null;
+
+    if (clinicId !== null && typeof clinicId === 'string') {
+      // Try to convert to number if it's a numeric string
+      const numericId = parseInt(clinicId, 10);
+      if (!isNaN(numericId)) {
+        clinicId = numericId;
+      }
+    }
+
+    this.control.setValue(clinicId);
     this.control.markAsTouched();
+
     this.searchTerm.set('');
-    this.closeDropdown();
+    this.closeModal();
     this.focusedIndex.set(-1);
   }
 
@@ -86,47 +97,50 @@ export class ClinicSelectorComponent {
     this.control.setValue(null);
     this.control.markAsTouched();
     this.searchTerm.set('');
-    this.closeDropdown();
     this.focusedIndex.set(-1);
-
-    // Focus the input
-    if (this.searchInput) {
-      this.searchInput.nativeElement.focus();
-    }
   }
 
   isClinicSelected(clinic: Clinic): boolean {
     const selectedId = this.control?.value;
-    if (!selectedId || !clinic.id) return false;
-    // Convert to string for comparison since clinic.id is string
-    const idToMatch =
-      typeof selectedId === 'number' ? selectedId.toString() : selectedId;
-    return idToMatch === clinic.id;
+    if (!selectedId || selectedId === '' || !clinic.id) return false;
+
+    // Convert both to strings for comparison
+    const clinicIdStr = clinic.id.toString();
+    const selectedIdStr = selectedId.toString();
+
+    return clinicIdStr === selectedIdStr;
   }
 
-  openDropdown(): void {
-    this.isDropdownOpen.set(true);
+  openModal(): void {
+    this.isModalOpen.set(true);
+    this.searchTerm.set('');
+
+    // Focus search input when modal opens
+    setTimeout(() => {
+      if (this.modalSearchInput) {
+        this.modalSearchInput.nativeElement.focus();
+      }
+    }, 100);
   }
 
-  private closeDropdown(): void {
-    this.isDropdownOpen.set(false);
+  closeModal(): void {
+    this.isModalOpen.set(false);
+    this.searchTerm.set('');
     this.focusedIndex.set(-1);
   }
 
   // Keyboard navigation
   @HostListener('keydown', ['$event'])
   onKeyDown(event: KeyboardEvent): void {
-    if (!this.isDropdownOpen()) {
-      if (
-        event.key === 'Enter' ||
-        event.key === 'ArrowDown' ||
-        event.key === 'ArrowUp'
-      ) {
-        event.preventDefault();
-        this.openDropdown();
-      }
+    // Handle opening modal with keyboard
+    if (!this.isModalOpen() && event.key === 'Enter') {
+      event.preventDefault();
+      this.openModal();
       return;
     }
+
+    // Handle modal keyboard navigation
+    if (!this.isModalOpen()) return;
 
     const filteredClinics = this.filteredClinics();
     const currentIndex = this.focusedIndex();
@@ -155,14 +169,11 @@ export class ClinicSelectorComponent {
 
       case 'Escape':
         event.preventDefault();
-        this.closeDropdown();
-        if (this.searchInput) {
-          this.searchInput.nativeElement.blur();
-        }
+        this.closeModal();
         break;
 
       case 'Tab':
-        this.closeDropdown();
+        // Allow normal tab behavior within modal
         break;
     }
   }
@@ -172,8 +183,8 @@ export class ClinicSelectorComponent {
     return this.searchTerm();
   }
 
-  get isDropdownOpenValue(): boolean {
-    return this.isDropdownOpen();
+  get isModalOpenValue(): boolean {
+    return this.isModalOpen();
   }
 
   get focusedIndexValue(): number {
