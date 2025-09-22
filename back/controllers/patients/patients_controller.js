@@ -258,7 +258,6 @@ const crearPaciente = async (req, res) => {
       postal_code,
       city,
       province,
-      session_price,
       clinic_id,
       treatment_start_date,
       status,
@@ -307,13 +306,6 @@ const crearPaciente = async (req, res) => {
       });
     }
 
-    // Validación de session_price
-    if (session_price && (isNaN(session_price) || session_price < 0)) {
-      return res.status(400).json({
-        success: false,
-        error: "El precio de sesión debe ser un número válido mayor o igual a 0",
-      });
-    }
 
     // Validación de is_minor
     if (is_minor !== undefined && typeof is_minor !== "boolean") {
@@ -338,7 +330,6 @@ const crearPaciente = async (req, res) => {
       postal_code,
       city,
       province,
-      session_price,
       clinic_id,
       treatment_start_date,
       status: status || "en curso",
@@ -452,7 +443,6 @@ const actualizarPaciente = async (req, res) => {
       postal_code,
       city,
       province,
-      session_price,
       clinic_id,
       treatment_start_date,
       status,
@@ -483,7 +473,6 @@ const actualizarPaciente = async (req, res) => {
     if (postal_code !== undefined) updateData.postal_code = postal_code;
     if (city !== undefined) updateData.city = city;
     if (province !== undefined) updateData.province = province;
-    if (session_price !== undefined) updateData.session_price = session_price;
     if (clinic_id !== undefined) updateData.clinic_id = clinic_id;
     if (treatment_start_date !== undefined) updateData.treatment_start_date = treatment_start_date;
     if (status !== undefined) updateData.status = status;
@@ -527,12 +516,6 @@ const actualizarPaciente = async (req, res) => {
       });
     }
 
-    if (session_price && (isNaN(session_price) || session_price < 0)) {
-      return res.status(400).json({
-        success: false,
-        error: "El precio de sesión debe ser un número válido mayor o igual a 0",
-      });
-    }
 
     if (is_minor !== undefined && typeof is_minor !== "boolean") {
       return res.status(400).json({

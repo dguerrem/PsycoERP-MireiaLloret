@@ -33,7 +33,6 @@ const getPatients = async (filters = {}) => {
             postal_code,
             city,
             province,
-            session_price,
             clinic_id,
             DATE_FORMAT(treatment_start_date, '%Y-%m-%d') as treatment_start_date,
             is_minor,
@@ -191,7 +190,6 @@ const getPatientById = async (id) => {
             CONCAT_WS(' ', street, street_number, door, city, province, postal_code) as direccion,
             gender as genero,
             occupation as ocupacion,
-            session_price as precio_sesion,
             clinic_id,
             DATE_FORMAT(treatment_start_date, '%Y-%m-%d') as fecha_inicio_tratamiento,
             is_minor as menor_edad
@@ -277,7 +275,6 @@ const getInactivePatients = async (filters = {}) => {
             postal_code,
             city,
             province,
-            session_price,
             clinic_id,
             DATE_FORMAT(treatment_start_date, '%Y-%m-%d') as treatment_start_date,
             is_minor,
@@ -418,7 +415,6 @@ const createPatient = async (patientData) => {
     postal_code,
     city,
     province,
-    session_price,
     clinic_id,
     treatment_start_date,
     status,
@@ -441,13 +437,12 @@ const createPatient = async (patientData) => {
       postal_code,
       city,
       province,
-      session_price,
       clinic_id,
       treatment_start_date,
       status,
       is_minor,
       is_active
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, true)
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, true)
   `;
 
   const params = [
@@ -465,7 +460,6 @@ const createPatient = async (patientData) => {
     postal_code,
     city,
     province,
-    session_price,
     clinic_id,
     treatment_start_date,
     status,
@@ -492,7 +486,6 @@ const createPatient = async (patientData) => {
       postal_code,
       city,
       province,
-      session_price,
       clinic_id,
       DATE_FORMAT(treatment_start_date, '%Y-%m-%d') as treatment_start_date,
       status,
@@ -583,7 +576,6 @@ const updatePatient = async (id, updateData) => {
       postal_code,
       city,
       province,
-      session_price,
       clinic_id,
       DATE_FORMAT(treatment_start_date, '%Y-%m-%d') as treatment_start_date,
       status,

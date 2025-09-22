@@ -734,13 +734,6 @@ const definitions = {
         description: "Provincia",
         example: "Madrid",
       },
-      session_price: {
-        type: "number",
-        format: "decimal",
-        nullable: true,
-        description: "Precio por sesión en euros",
-        example: 60.00,
-      },
       clinic_id: {
         type: "integer",
         format: "int64",
@@ -870,13 +863,6 @@ const definitions = {
         nullable: true,
         description: "Provincia",
         example: "Madrid",
-      },
-      session_price: {
-        type: "number",
-        format: "decimal",
-        nullable: true,
-        description: "Precio por sesión en euros",
-        example: 60.00,
       },
       clinic_id: {
         type: "integer",
@@ -1232,13 +1218,6 @@ const definitions = {
         nullable: true,
         description: "Provincia",
         example: "Madrid",
-      },
-      session_price: {
-        type: "number",
-        format: "decimal",
-        nullable: true,
-        description: "Precio por sesión en euros",
-        example: 60.00,
       },
       clinic_id: {
         type: "integer",
