@@ -20,10 +20,14 @@ export interface Patient {
   province: string;
 
   // Información del tratamiento
-  session_price: number;
   clinic_id: number;
   treatment_start_date: string; // "2024-01-15"
-  status: 'en curso' | 'fin del tratamiento' | 'en pausa' | 'abandono' | 'derivación';
+  status:
+    | 'en curso'
+    | 'fin del tratamiento'
+    | 'en pausa'
+    | 'abandono'
+    | 'derivación';
 
   // Campos calculados/automáticos
   is_minor: boolean;
@@ -50,7 +54,6 @@ export interface PatientLegacy {
   postal_code?: string;
   city?: string;
   province?: string;
-  session_price?: number;
   clinic_id?: string | number;
   treatment_start_date?: string;
   treatment_status?: string;
@@ -83,11 +86,19 @@ export interface PatientFilters {
   dni?: string;
   gender?: 'M' | 'F' | 'O';
   clinic_id?: number;
-  status?: 'en curso' | 'fin del tratamiento' | 'en pausa' | 'abandono' | 'derivación';
+  status?:
+    | 'en curso'
+    | 'fin del tratamiento'
+    | 'en pausa'
+    | 'abandono'
+    | 'derivación';
 }
 
 // Create patient interface (without id and timestamps)
-export type CreatePatientRequest = Omit<Patient, 'id' | 'created_at' | 'updated_at'>;
+export type CreatePatientRequest = Omit<
+  Patient,
+  'id' | 'created_at' | 'updated_at'
+>;
 
 // Update patient interface
 export type UpdatePatientRequest = Partial<Patient> & { id: number };

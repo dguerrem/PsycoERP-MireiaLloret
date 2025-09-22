@@ -12,6 +12,7 @@ import { ClinicsService } from './services/clinics.service';
 import { Clinic } from './models/clinic.model';
 import { ConfirmationModalComponent } from '../../shared/components/confirmation-modal/confirmation-modal.component';
 import { PaginationComponent } from '../../shared/components/pagination/pagination.component';
+import { SectionHeaderComponent } from '../../shared/components/section-header/section-header.component';
 import { ClinicsListComponent } from './components/clinics-list/clinics-list.component';
 import { ClinicFormComponent } from './components/clinic-form/clinic-form.component';
 
@@ -27,6 +28,7 @@ import { ClinicFormComponent } from './components/clinic-form/clinic-form.compon
     ClinicFormComponent,
     ClinicsListComponent,
     PaginationComponent,
+    SectionHeaderComponent,
   ],
 })
 export class ClinicsComponent implements OnInit {

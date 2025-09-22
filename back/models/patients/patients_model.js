@@ -155,28 +155,53 @@ const getPatientById = async (id) => {
         FROM patients
         WHERE id = ? AND is_active = true
     `;
-  
+
   const [patientRows] = await db.execute(patientQuery, [id]);
-  
+
   if (patientRows.length === 0) {
     return {
       PatientResume: null
     };
   }
 
-  // Consulta para obtener sesiones del paciente
+  // Consulta para obtener conteo de sesiones por estado (PatientSessionsStatus)
+  const sessionsStatusQuery = `
+        SELECT
+            COALESCE(SUM(CASE WHEN status = 'finalizada' THEN 1 ELSE 0 END), 0) as completed_sessions,
+            COALESCE(SUM(CASE WHEN status = 'programada' THEN 1 ELSE 0 END), 0) as scheduled_sessions,
+            COALESCE(SUM(CASE WHEN status = 'cancelada' THEN 1 ELSE 0 END), 0) as cancelled_sessions
+        FROM sessions
+        WHERE patient_id = ? AND is_active = 1
+    `;
+
+  const [sessionsStatusRows] = await db.execute(sessionsStatusQuery, [id]);
+
+  // Consulta para obtener sesiones del paciente con todos los detalles (PatientResumeSessions)
   const sessionsQuery = `
-        SELECT 
-            id as idsesion,
-            DATE_FORMAT(session_date, '%Y-%m-%d') as fecha,
+        SELECT
+            id as idsession,
+            mode as tipo,
+            DATE_FORMAT(session_date, '%d/%m/%Y') as fecha,
             price as precio,
             payment_method as metodo_pago
         FROM sessions
-        WHERE patient_id = ?
+        WHERE patient_id = ? AND is_active = 1
         ORDER BY session_date DESC
     `;
-  
+
   const [sessionsRows] = await db.execute(sessionsQuery, [id]);
+
+  // Consulta para obtener información financiera del año actual (PatientResumeInvoice)
+  const currentYear = new Date().getFullYear();
+  const invoiceQuery = `
+        SELECT
+            COALESCE(SUM(price), 0) as total_spent_current_year,
+            0 as invoices_issued
+        FROM sessions
+        WHERE patient_id = ? AND is_active = 1 AND YEAR(session_date) = ?
+    `;
+
+  const [invoiceRows] = await db.execute(invoiceQuery, [id, currentYear]);
   
   // Consulta para obtener datos detallados del paciente
   const patientDataQuery = `
@@ -232,8 +257,10 @@ const getPatientById = async (id) => {
   const [clinicalNotesRows] = await db.execute(clinicalNotesQuery, [id]);
 
   const patientResumeData = patientRows[0];
+  patientResumeData.PatientSessionsStatus = sessionsStatusRows[0];
   patientResumeData.PatientResumeSessions = sessionsRows;
-  
+  patientResumeData.PatientResumeInvoice = invoiceRows[0];
+
   return {
     PatientResume: patientResumeData,
     PatientData: patientDataRows[0] || {},
