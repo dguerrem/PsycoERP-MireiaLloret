@@ -1,110 +1,52 @@
-<!-- Main container con layout sticky -->
-<div class="h-full flex flex-col max-h-full overflow-hidden p-4 md:p-6">
+<!-- Main container following project standards -->
+<div class="p-4 sm:p-6 h-screen overflow-hidden">
+  <div class="w-full h-full flex flex-col max-h-full">
 
-  <!-- Header section (fijo) -->
-  <app-section-header title="Gestión de Clínicas" subtitle="Administra las clínicas registradas en la plataforma"
-    buttonText="Nueva Clínica" (onButtonClick)="openCreateForm()">
-  </app-section-header>
-
-  <!-- Sistema de pestañas -->
-  <div class="flex-1 overflow-hidden">
-    <div class="gap-2 h-full flex flex-col">
-      <!-- Tabs header -->
-      <div role="tablist"
-        class="bg-muted text-muted-foreground items-center justify-center rounded-lg p-[3px] grid w-full grid-cols-2 h-12 mt-6">
-        <button type="button" role="tab" [attr.aria-selected]="activeTab() === 'active'"
-          [class]="getTabClasses('active')" (click)="setActiveTab('active')">
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
-            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-            class="lucide lucide-building h-4 w-4">
-            <rect width="16" height="20" x="4" y="2" rx="2" ry="2"></rect>
-            <path d="M9 22v-4h6v4"></path>
-            <path d="M8 6h.01"></path>
-            <path d="M16 6h.01"></path>
-            <path d="M12 6h.01"></path>
-            <path d="M12 10h.01"></path>
-            <path d="M12 14h.01"></path>
-            <path d="M16 10h.01"></path>
-            <path d="M16 14h.01"></path>
-            <path d="M8 10h.01"></path>
-            <path d="M8 14h.01"></path>
-          </svg>
-          Clínicas Activas
-          <span
-            class="inline-flex items-center justify-center rounded-md border font-medium w-fit whitespace-nowrap shrink-0 gap-1 ml-1 px-2 py-0.5 text-xs bg-green-50 text-green-700 border-green-200">
-            {{ activeClinicsCount() }}
-          </span>
-        </button>
-        <button type="button" role="tab" [attr.aria-selected]="activeTab() === 'inactive'"
-          [class]="getTabClasses('inactive')" (click)="setActiveTab('inactive')">
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
-            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-            class="lucide lucide-building-2 h-4 w-4">
-            <path d="M6 22V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v18Z"></path>
-            <path d="M6 12H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h2"></path>
-            <path d="M18 9h2a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-2"></path>
-            <path d="M10 6h4"></path>
-            <path d="M10 10h4"></path>
-            <path d="M10 14h4"></path>
-            <path d="M10 18h4"></path>
-          </svg>
-          Clínicas Inactivas
-          <span
-            class="inline-flex items-center justify-center rounded-md border font-medium w-fit whitespace-nowrap shrink-0 gap-1 ml-1 px-2 py-0.5 text-xs bg-gray-50 text-gray-700 border-gray-200">
-            {{ inactiveClinicsCount() }}
-          </span>
-        </button>
+    <!-- Header -->
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4 sm:mb-6">
+      <div>
+        <h1 class="text-2xl sm:text-3xl font-black font-montserrat text-gray-900">Gestión de Clínicas</h1>
+        <p class="text-sm sm:text-base text-gray-600 mt-1 sm:mt-2">
+          Administra las clínicas registradas en la plataforma
+        </p>
       </div>
 
-      <!-- Tab content -->
-      <div class="flex-1 overflow-hidden mt-6">
-        @if (activeTab() === 'active') {
-        <div role="tabpanel" class="flex-1 outline-none h-full flex flex-col relative">
-          <div class="flex-1 overflow-y-auto pb-20">
-            <app-clinics-list [clinics]="clinicsList()" [trackByFn]="trackByClinicId" [isDeletedView]="false"
-              (onEdit)="openEditForm($event)" (onDelete)="openDeleteModal($event)"
-              (onRestore)="openRestoreModal($event)">
-            </app-clinics-list>
-          </div>
+      <!-- Header buttons -->
+      <div class="flex items-center gap-4">
+        <button
+          class="bg-primary hover:opacity-90 w-full sm:w-auto inline-flex items-center justify-center px-4 py-2 text-white rounded-md transition-opacity font-medium"
+          (click)="openCreateForm()">
+          <svg class="h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+          </svg>
+          Nueva Clínica
+        </button>
+      </div>
+    </div>
 
-          <!-- Pagination for active clinics -->
-          @if (paginationData()) {
-          <div class="absolute bottom-0 left-0 right-0">
-            <app-pagination [currentPage]="paginationData()!.currentPage" [totalPages]="paginationData()!.totalPages"
-              [totalRecords]="paginationData()!.totalRecords" [recordsPerPage]="paginationData()!.recordsPerPage"
-              [hasNextPage]="paginationData()!.hasNextPage" [hasPrevPage]="paginationData()!.hasPrevPage"
-              (onPageChange)="onPageChange($event)" (onPageSizeChange)="onPageSizeChange($event)">
-            </app-pagination>
-          </div>
-          }
+    <!-- Main content -->
+    <div class="flex-1 overflow-y-auto min-h-0">
+      <div class="h-full flex flex-col relative">
+        <div class="flex-1 overflow-y-auto pb-20">
+          <app-clinics-list [clinics]="clinicsList()" [trackByFn]="trackByClinicId" [isDeletedView]="false"
+            (onEdit)="openEditForm($event)" (onDelete)="openDeleteModal($event)"
+            (onRestore)="openRestoreModal($event)">
+          </app-clinics-list>
         </div>
-        }
 
-        @if (activeTab() === 'inactive') {
-        <div role="tabpanel" class="flex-1 outline-none h-full flex flex-col relative">
-          <div class="flex-1 overflow-y-auto pb-20">
-            <app-clinics-list [clinics]="clinicsList()" [trackByFn]="trackByClinicId" [isDeletedView]="true"
-              (onEdit)="openEditForm($event)" (onDelete)="openDeleteModal($event)"
-              (onRestore)="openRestoreModal($event)">
-            </app-clinics-list>
-          </div>
-
-          <!-- Pagination for inactive clinics -->
-          @if (paginationData()) {
-          <div class="absolute bottom-0 left-0 right-0">
-            <app-pagination [currentPage]="paginationData()!.currentPage" [totalPages]="paginationData()!.totalPages"
-              [totalRecords]="paginationData()!.totalRecords" [recordsPerPage]="paginationData()!.recordsPerPage"
-              [hasNextPage]="paginationData()!.hasNextPage" [hasPrevPage]="paginationData()!.hasPrevPage"
-              (onPageChange)="onPageChange($event)" (onPageSizeChange)="onPageSizeChange($event)">
-            </app-pagination>
-          </div>
-          }
+        <!-- Pagination -->
+        @if (paginationData()) {
+        <div class="absolute bottom-0 left-0 right-0">
+          <app-pagination [currentPage]="paginationData()!.currentPage" [totalPages]="paginationData()!.totalPages"
+            [totalRecords]="paginationData()!.totalRecords" [recordsPerPage]="paginationData()!.recordsPerPage"
+            [hasNextPage]="paginationData()!.hasNextPage" [hasPrevPage]="paginationData()!.hasPrevPage"
+            (onPageChange)="onPageChange($event)" (onPageSizeChange)="onPageSizeChange($event)">
+          </app-pagination>
         </div>
         }
       </div>
     </div>
   </div>
-
 </div>
 
 <!-- Clinic Form Modal -->

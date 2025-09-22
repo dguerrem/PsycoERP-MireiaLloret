@@ -1,32 +1,72 @@
 <!-- Confirmation Modal -->
 @if (isOpen) {
-  <div class="fixed inset-0 z-50 bg-black/80 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0">
-    <div class="fixed left-[50%] top-[50%] z-50 grid w-full max-w-lg translate-x-[-50%] translate-y-[-50%] gap-4 border bg-background p-6 shadow-lg duration-200 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[state=closed]:slide-out-to-left-1/2 data-[state=closed]:slide-out-to-top-[48%] data-[state=open]:slide-in-from-left-1/2 data-[state=open]:slide-in-from-top-[48%] sm:rounded-lg sm:max-w-md">
+  <div class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0">
+    <div [class]="'fixed left-[50%] top-[50%] z-50 grid w-full max-w-lg translate-x-[-50%] translate-y-[-50%] gap-6 border-2 p-8 shadow-2xl duration-300 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[state=closed]:slide-out-to-left-1/2 data-[state=closed]:slide-out-to-top-[48%] data-[state=open]:slide-in-from-left-1/2 data-[state=open]:slide-in-from-top-[48%] sm:rounded-2xl sm:max-w-md ' + modalThemeClasses">
+
+      <!-- Icon -->
+      <div class="flex justify-center mb-4">
+        <div [class]="iconClasses">
+          @if (isRestore) {
+            <!-- Restore Icon -->
+            <svg [class]="'w-12 h-12 ' + iconColor" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+            </svg>
+          } @else {
+            <!-- Warning Icon -->
+            <svg [class]="'w-12 h-12 ' + iconColor" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.732-.833-2.464 0L3.34 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
+            </svg>
+          }
+        </div>
+      </div>
 
       <!-- Modal Header -->
-      <div class="flex flex-col space-y-1.5 text-center sm:text-left">
-        <h2 class="text-lg font-semibold leading-none tracking-tight">{{ title }}</h2>
+      <div class="text-center space-y-2">
+        <h2 [class]="'text-2xl font-bold tracking-tight ' + titleColor">{{ title }}</h2>
+        <div [class]="'w-16 h-1 mx-auto rounded-full ' + decorativeLine"></div>
       </div>
 
       <!-- Modal Content -->
-      <div class="space-y-4">
-        <p class="text-sm text-muted-foreground">
-          {{ message }}
+      <div class="space-y-6">
+        <div class="text-center space-y-3">
+          <p class="text-gray-700 font-medium">
+            {{ message }}
+          </p>
           @if (itemName) {
-            <strong>{{ itemName }}</strong>? Esta acción no se puede deshacer.
+            <div [class]="itemBoxClasses">
+              <p [class]="itemTextClasses">{{ itemName }}</p>
+              <p [class]="itemSubtextClasses">
+                {{ isRestore ? 'Se volverá a activar el registro' : 'Esta acción no se puede deshacer' }}
+              </p>
+            </div>
           }
-        </p>
-        <div class="flex gap-2 justify-end">
+        </div>
+
+        <div class="flex gap-3 justify-center pt-4">
           <button
             type="button"
-            class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-gray-300 bg-gray-50 hover:border-gray-400 hover:bg-gray-100 h-10 px-4 py-2"
+            class="inline-flex items-center justify-center whitespace-nowrap rounded-lg text-sm font-semibold ring-offset-background transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border-2 border-gray-300 bg-white hover:border-gray-400 hover:bg-gray-50 hover:scale-105 active:scale-95 h-12 px-6 py-2 min-w-[100px]"
             (click)="handleCancel()">
+            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6m0 12L6 6"></path>
+            </svg>
             {{ cancelText }}
           </button>
           <button
             type="button"
-            [class]="confirmButtonClasses"
+            [class]="confirmButtonClasses + ' shadow-lg hover:shadow-xl transform hover:scale-105 active:scale-95 transition-all duration-200 min-w-[100px] h-12 px-6'"
             (click)="handleConfirm()">
+            @if (isRestore) {
+              <!-- Restore Icon -->
+              <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+              </svg>
+            } @else {
+              <!-- Delete Icon -->
+              <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+              </svg>
+            }
             {{ confirmText }}
           </button>
         </div>
@@ -35,10 +75,10 @@
       <!-- Close button -->
       <button
         type="button"
-        class="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none"
+        class="absolute right-6 top-6 rounded-full w-8 h-8 flex items-center justify-center opacity-70 ring-offset-background transition-all duration-200 hover:opacity-100 hover:bg-gray-100 hover:scale-110 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none"
         (click)="handleCancel()">
         <span class="sr-only">Close</span>
-        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
         </svg>
       </button>

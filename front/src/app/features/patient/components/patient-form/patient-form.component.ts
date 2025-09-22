@@ -7,6 +7,7 @@ import {
   OnChanges,
   SimpleChanges,
   ChangeDetectionStrategy,
+  ChangeDetectorRef,
 } from '@angular/core';
 import {
   FormBuilder,
@@ -19,13 +20,23 @@ import { CommonModule } from '@angular/common';
 import { Patient } from '../../../../shared/models/patient.model';
 import { Clinic } from '../../../clinics/models/clinic.model';
 import { ClinicsService } from '../../../clinics/services/clinics.service';
+import { ClinicSelectorComponent } from '../../../../shared/components/clinic-selector';
+import { ReusableModalComponent } from '../../../../shared/components/reusable-modal/reusable-modal.component';
+import { FormInputComponent } from '../../../../shared/components/form-input/form-input.component';
 
 @Component({
   selector: 'app-patient-form',
   standalone: true,
   templateUrl: './patient-form.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule, ReactiveFormsModule, FormsModule],
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    FormsModule,
+    ClinicSelectorComponent,
+    ReusableModalComponent,
+    FormInputComponent,
+  ],
 })
 export class PatientFormComponent implements OnInit, OnChanges {
   @Input() isOpen: boolean = false;
@@ -33,19 +44,32 @@ export class PatientFormComponent implements OnInit, OnChanges {
 
   // Clinic selector properties
   clinics: Clinic[] = [];
-  filteredClinics: Clinic[] = [];
-  clinicSearchTerm: string = '';
-  isClinicDropdownOpen: boolean = false;
-  selectedClinic: Clinic | null = null;
 
   @Output() onSave = new EventEmitter<Patient>();
   @Output() onCancel = new EventEmitter<void>();
 
   patientForm!: FormGroup;
 
+  // Options for selects
+  protected genderOptions = [
+    { value: 'M', label: 'Masculino' },
+    { value: 'F', label: 'Femenino' },
+    { value: 'O', label: 'Otro' },
+  ];
+
+  protected statusOptions = [
+    { value: 'en curso', label: 'En curso' },
+    { value: 'fin del tratamiento', label: 'Fin del tratamiento' },
+    { value: 'en pausa', label: 'En pausa' },
+    { value: 'abandono', label: 'Abandono' },
+    { value: 'derivación', label: 'Derivación' },
+  ];
+
+
   constructor(
     private fb: FormBuilder,
-    private clinicsService: ClinicsService
+    private clinicsService: ClinicsService,
+    private cdr: ChangeDetectorRef
   ) {
     this.initializeForm();
   }
@@ -68,8 +92,8 @@ export class PatientFormComponent implements OnInit, OnChanges {
   private initializeForm(): void {
     this.patientForm = this.fb.group({
       // Datos personales básicos
-      name: ['', [Validators.required, Validators.minLength(2)]],
-      surname: ['', [Validators.required, Validators.minLength(2)]],
+      first_name: ['', [Validators.required, Validators.minLength(2)]],
+      last_name: ['', [Validators.required, Validators.minLength(2)]],
       email: ['', [Validators.required, Validators.email]],
       phone: ['', [Validators.required, Validators.minLength(9)]],
       dni: ['', [Validators.required, Validators.minLength(8)]],
@@ -79,53 +103,47 @@ export class PatientFormComponent implements OnInit, OnChanges {
 
       // Dirección completa
       street: ['', [Validators.required]],
-      number: ['', [Validators.required]],
+      street_number: ['', [Validators.required]],
       door: [''],
-      postal_code: ['', [Validators.required, Validators.pattern(/^[0-9]{5}$/)]],
+      postal_code: [
+        '',
+        [Validators.required, Validators.pattern(/^[0-9]{5}$/)],
+      ],
       city: ['', [Validators.required]],
       province: ['', [Validators.required]],
 
       // Datos del tratamiento
-      session_price: ['', [Validators.required, Validators.min(0)]],
       clinic_id: ['', [Validators.required]],
       treatment_start_date: ['', [Validators.required]],
-      treatment_status: ['en_curso', [Validators.required]],
+      status: ['en curso', [Validators.required]],
 
       // Campos automáticos
       is_minor: [false],
-      created_at: [''],
-      updated_at: [''],
     });
   }
 
   private populateForm(): void {
     if (this.patient) {
       this.patientForm.patchValue({
-        name: this.patient.name,
-        surname: this.patient.surname || '',
-        email: this.patient.email,
-        phone: this.patient.phone,
-        dni: this.patient.dni,
-        birth_date: this.patient.birth_date,
+        first_name: this.patient.first_name || '',
+        last_name: this.patient.last_name || '',
+        email: this.patient.email || '',
+        phone: this.patient.phone || '',
+        dni: this.patient.dni || '',
+        birth_date: this.patient.birth_date || '',
         gender: this.patient.gender || '',
         occupation: this.patient.occupation || '',
         street: this.patient.street || '',
-        number: this.patient.number || '',
+        street_number: this.patient.street_number || '',
         door: this.patient.door || '',
         postal_code: this.patient.postal_code || '',
         city: this.patient.city || '',
         province: this.patient.province || '',
-        session_price: this.patient.session_price || '',
         clinic_id: this.patient.clinic_id || '',
         treatment_start_date: this.patient.treatment_start_date || '',
-        treatment_status: this.patient.treatment_status || 'en_curso',
+        status: this.patient.status || 'en curso',
         is_minor: this.patient.is_minor || false,
-        created_at: this.patient.created_at,
-        updated_at: this.patient.updated_at,
       });
-
-      // Set selected clinic for search display (if clinics are already loaded)
-      this.setSelectedClinicFromPatient();
     } else {
       this.resetForm();
     }
@@ -133,8 +151,8 @@ export class PatientFormComponent implements OnInit, OnChanges {
 
   private resetForm(): void {
     this.patientForm.reset({
-      name: '',
-      surname: '',
+      first_name: '',
+      last_name: '',
       email: '',
       phone: '',
       dni: '',
@@ -142,25 +160,16 @@ export class PatientFormComponent implements OnInit, OnChanges {
       gender: '',
       occupation: '',
       street: '',
-      number: '',
+      street_number: '',
       door: '',
       postal_code: '',
       city: '',
       province: '',
-      session_price: '',
       clinic_id: '',
       treatment_start_date: '',
-      treatment_status: 'en_curso',
+      status: 'en curso',
       is_minor: false,
-      created_at: '',
-      updated_at: '',
     });
-
-    // Reset clinic selector
-    this.selectedClinic = null;
-    this.clinicSearchTerm = '';
-    this.isClinicDropdownOpen = false;
-    this.filteredClinics = [...this.clinics];
   }
 
   get isEditing(): boolean {
@@ -168,7 +177,7 @@ export class PatientFormComponent implements OnInit, OnChanges {
   }
 
   get title(): string {
-    return this.isEditing ? 'Editar Paciente' : 'Crear Nuevo Paciente';
+    return this.isEditing ? 'Editar Paciente' : 'Crear nuevo paciente';
   }
 
   get submitButtonText(): string {
@@ -190,7 +199,10 @@ export class PatientFormComponent implements OnInit, OnChanges {
         };
         this.onSave.emit(updatedPatient);
       } else {
-        this.onSave.emit(formData);
+        // Para crear nuevo paciente, no incluir el id
+        const { id, ...createData } = formData;
+        createData.session_price = 0; // Default value
+        this.onSave.emit(createData);
       }
     }
   }
@@ -230,11 +242,28 @@ export class PatientFormComponent implements OnInit, OnChanges {
       const monthDiff = today.getMonth() - birth.getMonth();
       const dayDiff = today.getDate() - birth.getDate();
 
-      const actualAge = age - (monthDiff < 0 || (monthDiff === 0 && dayDiff < 0) ? 1 : 0);
+      const actualAge =
+        age - (monthDiff < 0 || (monthDiff === 0 && dayDiff < 0) ? 1 : 0);
       const isMinor = actualAge < 18;
 
       this.patientForm.patchValue({ is_minor: isMinor });
     }
+  }
+
+  /**
+   * Get calculated age based on birth date
+   */
+  getCalculatedAge(): number {
+    const birthDate = this.patientForm.get('birth_date')?.value;
+    if (!birthDate) return 0;
+
+    const today = new Date();
+    const birth = new Date(birthDate);
+    const age = today.getFullYear() - birth.getFullYear();
+    const monthDiff = today.getMonth() - birth.getMonth();
+    const dayDiff = today.getDate() - birth.getDate();
+
+    return age - (monthDiff < 0 || (monthDiff === 0 && dayDiff < 0) ? 1 : 0);
   }
 
   /**
@@ -246,24 +275,23 @@ export class PatientFormComponent implements OnInit, OnChanges {
 
   private getFieldLabel(fieldName: string): string {
     const labels: { [key: string]: string } = {
-      name: 'Nombre',
-      surname: 'Apellidos',
+      first_name: 'Nombre',
+      last_name: 'Apellidos',
       email: 'Email',
       phone: 'Teléfono',
       dni: 'DNI',
       birth_date: 'Fecha de nacimiento',
-      gender: 'Sexo',
-      occupation: 'Escuela/Trabajo',
+      gender: 'Género',
+      occupation: 'Ocupación',
       street: 'Calle',
-      number: 'Número',
+      street_number: 'Número',
       door: 'Puerta',
       postal_code: 'Código postal',
       city: 'Ciudad',
       province: 'Provincia',
-      session_price: 'Precio de la sesión',
       clinic_id: 'Clínica',
       treatment_start_date: 'Fecha inicio tratamiento',
-      treatment_status: 'Estado del tratamiento',
+      status: 'Estado del tratamiento',
     };
     return labels[fieldName] || fieldName;
   }
@@ -276,118 +304,13 @@ export class PatientFormComponent implements OnInit, OnChanges {
     this.clinicsService.loadActiveClinics(1, 1000).subscribe({
       next: (response) => {
         this.clinics = response.data || [];
-        this.filteredClinics = [...this.clinics];
-
-        // If we're editing and have a patient with clinic_id, set the selected clinic
-        this.setSelectedClinicFromPatient();
+        this.cdr.markForCheck(); // Trigger change detection
       },
       error: (error) => {
         console.error('Error loading clinics:', error);
         this.clinics = [];
-        this.filteredClinics = [];
-      }
+        this.cdr.markForCheck(); // Trigger change detection
+      },
     });
-  }
-
-  /**
-   * Set selected clinic from patient data
-   */
-  private setSelectedClinicFromPatient(): void {
-    if (this.patient?.clinic_id && this.clinics.length > 0) {
-      const clinic = this.clinics.find(c => c.id == this.patient?.clinic_id);
-      if (clinic) {
-        this.selectedClinic = clinic;
-        this.clinicSearchTerm = clinic.name;
-      }
-    }
-  }
-
-  /**
-   * Filter clinics based on search term
-   */
-  filterClinics(): void {
-    console.log('Filtering with term:', this.clinicSearchTerm, 'Total clinics:', this.clinics.length); // Debug log
-
-    if (!this.clinicSearchTerm || !this.clinicSearchTerm.trim()) {
-      this.filteredClinics = [...this.clinics];
-    } else {
-      const searchTerm = this.clinicSearchTerm.toLowerCase().trim();
-      this.filteredClinics = this.clinics.filter(clinic =>
-        clinic.name.toLowerCase().includes(searchTerm)
-      );
-    }
-
-    console.log('Filtered results:', this.filteredClinics.length); // Debug log
-  }
-
-  /**
-   * Select a clinic from dropdown
-   */
-  selectClinic(clinic: Clinic): void {
-    this.selectedClinic = clinic;
-    this.patientForm.patchValue({ clinic_id: clinic.id });
-    this.clinicSearchTerm = clinic.name;
-    this.isClinicDropdownOpen = false;
-
-    // Force update to show selected clinic
-    this.filterClinics();
-  }
-
-  /**
-   * Handle clinic search input (real-time)
-   */
-  onClinicSearchInput(event: Event): void {
-    const target = event.target as HTMLInputElement;
-    this.clinicSearchTerm = target.value;
-
-    console.log('Search term:', this.clinicSearchTerm); // Debug log
-    this.filterClinics();
-    this.isClinicDropdownOpen = true;
-
-    // Clear selection if user is typing something different
-    if (this.selectedClinic && this.selectedClinic.name !== this.clinicSearchTerm) {
-      this.selectedClinic = null;
-      this.patientForm.patchValue({ clinic_id: '' });
-    }
-  }
-
-  /**
-   * Clear selected clinic
-   */
-  clearSelectedClinic(): void {
-    this.selectedClinic = null;
-    this.clinicSearchTerm = '';
-    this.patientForm.patchValue({ clinic_id: '' });
-    this.filteredClinics = [...this.clinics];
-    this.isClinicDropdownOpen = false;
-  }
-
-  /**
-   * Check if a clinic is currently selected
-   */
-  isClinicSelected(clinic: Clinic): boolean {
-    return this.selectedClinic !== null &&
-           this.selectedClinic.id === clinic.id;
-  }
-
-  /**
-   * Toggle clinic dropdown
-   */
-  toggleClinicDropdown(): void {
-    this.isClinicDropdownOpen = true;
-    if (!this.clinicSearchTerm) {
-      this.filteredClinics = [...this.clinics];
-    } else {
-      this.filterClinics();
-    }
-  }
-
-  /**
-   * Close clinic dropdown when clicking outside
-   */
-  closeClinicDropdown(): void {
-    setTimeout(() => {
-      this.isClinicDropdownOpen = false;
-    }, 150);
   }
 }

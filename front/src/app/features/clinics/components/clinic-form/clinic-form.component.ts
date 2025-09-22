@@ -16,13 +16,15 @@ import {
 } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { Clinic } from '../../models/clinic.model';
+import { ReusableModalComponent } from '../../../../shared/components/reusable-modal/reusable-modal.component';
+import { FormInputComponent } from '../../../../shared/components/form-input/form-input.component';
 
 @Component({
   selector: 'app-clinica-form',
   standalone: true,
   templateUrl: './clinic-form.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, ReusableModalComponent, FormInputComponent],
 })
 export class ClinicFormComponent implements OnInit, OnChanges {
   @Input() isOpen: boolean = false;
@@ -55,17 +57,36 @@ export class ClinicFormComponent implements OnInit, OnChanges {
     this.clinicaForm = this.fb.group({
       name: ['', [Validators.required, Validators.minLength(2)]],
       clinic_color: ['#3b82f6', [Validators.required]],
+      is_online: [false],
+      address: ['', [Validators.required, Validators.minLength(5)]],
+      price: [0, [Validators.required, Validators.min(0), Validators.max(1000)]],
+      percentage: [0, [Validators.required, Validators.min(0), Validators.max(100)]],
       status: ['active'],
+    });
+
+    // Escuchar cambios en el checkbox is_online
+    this.clinicaForm.get('is_online')?.valueChanges.subscribe(isOnline => {
+      this.updateAddressValidation(isOnline);
     });
   }
 
   private populateForm(): void {
     if (this.clinica) {
+      // Determinar si es online basándose en si tiene dirección
+      const isOnline = !this.clinica.address || this.clinica.address.trim() === '';
+
       this.clinicaForm.patchValue({
         name: this.clinica.name,
         clinic_color: this.clinica.clinic_color,
+        is_online: isOnline,
+        address: this.clinica.address || '',
+        price: this.clinica.price || 0,
+        percentage: this.clinica.percentage || 0,
         status: 'active',
       });
+
+      // Aplicar la lógica de validación después de poblar el formulario
+      this.updateAddressValidation(isOnline);
     } else {
       this.resetForm();
     }
@@ -75,8 +96,32 @@ export class ClinicFormComponent implements OnInit, OnChanges {
     this.clinicaForm.reset({
       name: '',
       clinic_color: '#3b82f6',
+      is_online: false,
+      address: '',
+      price: 0,
+      percentage: 0,
       status: 'active',
     });
+
+    // Asegurar que las validaciones están correctas al resetear
+    this.updateAddressValidation(false);
+  }
+
+  private updateAddressValidation(isOnline: boolean): void {
+    const addressControl = this.clinicaForm.get('address');
+
+    if (isOnline) {
+      // Si es online, eliminar validaciones y limpiar el valor
+      addressControl?.clearValidators();
+      addressControl?.setValue('');
+      addressControl?.disable();
+    } else {
+      // Si no es online, añadir validaciones requeridas
+      addressControl?.setValidators([Validators.required, Validators.minLength(5)]);
+      addressControl?.enable();
+    }
+
+    addressControl?.updateValueAndValidity();
   }
 
   get isEditing(): boolean {
@@ -84,7 +129,7 @@ export class ClinicFormComponent implements OnInit, OnChanges {
   }
 
   get title(): string {
-    return this.isEditing ? 'Editar Clínica' : 'Crear Nueva Clínica';
+    return this.isEditing ? 'Editar Clínica' : 'Crear nueva Clínica';
   }
 
   get submitButtonText(): string {
@@ -97,7 +142,15 @@ export class ClinicFormComponent implements OnInit, OnChanges {
 
   handleSubmit(): void {
     if (this.clinicaForm.valid) {
-      const formData = this.clinicaForm.value;
+      const formData = { ...this.clinicaForm.value };
+
+      // Excluir is_online del envío ya que no se almacena en BD
+      delete formData.is_online;
+
+      // Si es online, asegurar que address esté vacío
+      if (this.clinicaForm.get('is_online')?.value) {
+        formData.address = '';
+      }
 
       if (this.isEditing && this.clinica) {
         const updatedClinic: Clinic = {
@@ -127,6 +180,14 @@ export class ClinicFormComponent implements OnInit, OnChanges {
           fieldName
         )} debe tener al menos ${minLength} caracteres`;
       }
+      if (field.errors?.['min']) {
+        const minValue = field.errors['min'].min;
+        return `${this.getFieldLabel(fieldName)} debe ser mayor o igual a ${minValue}`;
+      }
+      if (field.errors?.['max']) {
+        const maxValue = field.errors['max'].max;
+        return `${this.getFieldLabel(fieldName)} debe ser menor o igual a ${maxValue}`;
+      }
     }
     return null;
   }
@@ -135,6 +196,10 @@ export class ClinicFormComponent implements OnInit, OnChanges {
     const labels: { [key: string]: string } = {
       name: 'Nombre de la clínica',
       clinic_color: 'Color identificativo',
+      is_online: 'Clínica online',
+      address: 'Dirección',
+      price: 'Precio por sesión',
+      percentage: 'Porcentaje de comisión',
     };
     return labels[fieldName] || fieldName;
   }

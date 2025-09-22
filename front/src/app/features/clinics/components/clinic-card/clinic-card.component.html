@@ -1,14 +1,15 @@
 <div class="group relative">
   <div data-slot="card"
-    class="bg-card text-card-foreground flex flex-col gap-2 rounded-xl py-3 shadow-sm h-16 border-2 hover:shadow-xl transition-all duration-300 relative overflow-hidden"
+    class="bg-card text-card-foreground flex flex-col gap-2 rounded-xl py-3 shadow-sm h-auto min-h-[80px] border-2 hover:shadow-xl transition-all duration-300 relative overflow-hidden"
     [style.background]="getBackgroundStyle(clinic.clinic_color)"
     [style.border-color]="getBorderColor(clinic.clinic_color)">
 
     <div data-slot="card-header"
-      class="@container/card-header grid auto-rows-min grid-rows-[auto_auto] items-center gap-1.5 px-4 has-data-[slot=card-action]:grid-cols-[1fr_auto] [.border-b]:pb-6 pb-1 h-full">
+      class="@container/card-header grid auto-rows-min grid-rows-[auto_auto_auto] items-start gap-1.5 px-4 has-data-[slot=card-action]:grid-cols-[1fr_auto] [.border-b]:pb-6 pb-1 h-full">
 
-      <div class="flex items-center justify-between">
-        <div class="flex items-center gap-2">
+      <!-- Primera fila: Nombre + Precio/Porcentaje -->
+      <div class="flex items-center justify-between mb-2">
+        <div class="flex items-center gap-2 flex-1 min-w-0">
           <div class="w-4 h-4 rounded-full border-2 border-white shadow-lg ring-2 ring-white/20"
             [style.background-color]="clinic.clinic_color">
           </div>
@@ -16,18 +17,52 @@
             {{ clinic.name }}
           </div>
         </div>
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
-          stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-          class="lucide lucide-building2 h-5 w-5" [style.color]="clinic.clinic_color">
-          <path d="M6 22V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v18Z"></path>
-          <path d="M6 12H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h2"></path>
-          <path d="M18 9h2a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-2"></path>
-          <path d="M10 6h4"></path>
-          <path d="M10 10h4"></path>
-          <path d="M10 14h4"></path>
-          <path d="M10 18h4"></path>
-        </svg>
+
+        <!-- Precio y Porcentaje en la misma línea del nombre -->
+        <div class="flex items-center gap-2 text-xs text-gray-700">
+          @if (clinic.price !== null && clinic.price !== undefined) {
+            <div class="flex items-center gap-1">
+              <span class="font-medium text-gray-600">€</span>
+              <span class="font-medium">{{ clinic.price | number:'1.2-2' }}</span>
+            </div>
+          }
+
+          @if (clinic.percentage !== null && clinic.percentage !== undefined) {
+            <div class="flex items-center gap-1">
+              <span class="font-medium">{{ clinic.percentage | number:'1.1-1' }}%</span>
+            </div>
+          }
+
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+            class="lucide lucide-building2 h-5 w-5 ml-1" [style.color]="clinic.clinic_color">
+            <path d="M6 22V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v18Z"></path>
+            <path d="M6 12H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h2"></path>
+            <path d="M18 9h2a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-2"></path>
+            <path d="M10 6h4"></path>
+            <path d="M10 10h4"></path>
+            <path d="M10 14h4"></path>
+            <path d="M10 18h4"></path>
+          </svg>
+        </div>
       </div>
+
+      <!-- Información adicional: Solo dirección -->
+      @if (clinic.address) {
+        <div class="text-xs text-gray-700">
+          <div class="flex items-center gap-1">
+            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+              class="lucide lucide-map-pin flex-shrink-0">
+              <path
+                d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0">
+              </path>
+              <circle cx="12" cy="10" r="3"></circle>
+            </svg>
+            <span class="line-clamp-1">{{ clinic.address }}</span>
+          </div>
+        </div>
+      }
     </div>
 
     <!-- Hover overlay with buttons -->

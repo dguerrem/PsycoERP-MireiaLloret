@@ -10,8 +10,8 @@ import {
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { Patient } from '../../shared/models/patient.model';
-import { PatientsService, PatientFilters } from './services/patients.service';
+import { Patient, PatientFilters } from '../../shared/models/patient.model';
+import { PatientsService } from './services/patients.service';
 import { ConfirmationModalComponent } from '../../shared/components/confirmation-modal/confirmation-modal.component';
 import { SectionHeaderComponent } from '../../shared/components/section-header/section-header.component';
 import { PatientsListComponent } from './components/patients-list/patients-list.component';
@@ -158,8 +158,8 @@ export class PatientComponent implements OnInit {
       // Editar paciente existente
       this.patientsService.update(editing.id!, patientData).subscribe({
         next: () => {
-          // Reload current tab data
-          this.reloadCurrentTab();
+          // Reload both tabs to update counts and data
+          this.reloadBothTabs();
         }
       });
     } else {
@@ -221,21 +221,18 @@ export class PatientComponent implements OnInit {
   }
 
   /**
-   * Restaurar paciente (implementar según tu API)
+   * Restaurar paciente
    */
   handleRestorePatient(): void {
     const restoring = this.restoringPatient();
     if (restoring) {
-      // TODO: Implementar llamada al endpoint de restauración
-      // Por ahora simulo la llamada con un timeout
-      console.log('Restaurando paciente:', restoring);
-
-      // Simular respuesta exitosa
-      setTimeout(() => {
-        // Reload both tabs to update counts
-        this.reloadBothTabs();
+      this.patientsService.restorePatient(restoring.id!).then((success) => {
+        if (success) {
+          // Reload both tabs to update counts
+          this.reloadBothTabs();
+        }
         this.closeRestoreModal();
-      }, 500);
+      });
     }
   }
 

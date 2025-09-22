@@ -50,7 +50,7 @@ describe('ClinicFormComponent', () => {
     fixture.detectChanges();
 
     const titleElement = fixture.nativeElement.querySelector('h2');
-    expect(titleElement.textContent).toContain('Crear Nueva Clínica');
+    expect(titleElement.textContent).toContain('Crear nueva Clínica');
   });
 
   it('should show "Editar Clínica" title when editing clinic', () => {
