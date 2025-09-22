@@ -1,6 +1,6 @@
 <app-reusable-modal [isOpen]="isOpen" [title]="title" [subtitle]="'Completa todos los campos requeridos'"
-  [submitText]="submitButtonText" [isFormValid]="isFormValid" (onSubmit)="handleSubmit()"
-  (onCancel)="handleCancel()">
+  [submitText]="submitButtonText" [isFormValid]="isFormValid" [actionType]="isEditing ? 'edit' : 'create'"
+  (onSubmit)="handleSubmit()" (onCancel)="handleCancel()">
 
   <!-- Todo el contenido del formulario va aquí -->
   <form id="patient-form" [formGroup]="patientForm" (ngSubmit)="handleSubmit()" class="p-4 sm:p-6 space-y-6">

@@ -15,6 +15,7 @@ export class ReusableModalComponent {
   @Input() submitText: string = 'Guardar';
   @Input() isFormValid: boolean = false;
   @Input() showFormStatus: boolean = true;
+  @Input() actionType: 'create' | 'edit' = 'create'; // Nuevo input para determinar el icono
 
   @Output() onSubmit = new EventEmitter<void>();
   @Output() onCancel = new EventEmitter<void>();

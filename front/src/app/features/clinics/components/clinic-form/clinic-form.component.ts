@@ -16,13 +16,15 @@ import {
 } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { Clinic } from '../../models/clinic.model';
+import { ReusableModalComponent } from '../../../../shared/components/reusable-modal/reusable-modal.component';
+import { FormInputComponent } from '../../../../shared/components/form-input/form-input.component';
 
 @Component({
   selector: 'app-clinica-form',
   standalone: true,
   templateUrl: './clinic-form.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, ReusableModalComponent, FormInputComponent],
 })
 export class ClinicFormComponent implements OnInit, OnChanges {
   @Input() isOpen: boolean = false;
@@ -127,7 +129,7 @@ export class ClinicFormComponent implements OnInit, OnChanges {
   }
 
   get title(): string {
-    return this.isEditing ? 'Editar Clínica' : 'Crear Nueva Clínica';
+    return this.isEditing ? 'Editar Clínica' : 'Crear nueva Clínica';
   }
 
   get submitButtonText(): string {
