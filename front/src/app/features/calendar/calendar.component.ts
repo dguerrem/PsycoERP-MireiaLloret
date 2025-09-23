@@ -5,7 +5,7 @@ import {
   ChangeDetectionStrategy,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { SessionData, SessionUtils } from '../../shared/models/session.model';
+import { SessionData, SessionUtils, CreateSessionRequest } from '../../shared/models/session.model';
 import {
   CLINIC_CONFIGS,
   ClinicConfig,
@@ -95,13 +95,10 @@ export class CalendarComponent {
     this.showNewSessionDialog.set(false);
   }
 
-  onSessionDataCreated(
-    sessionData: Omit<
-      SessionData['SessionDetailData'],
-      'session_id' | 'created_at' | 'updated_at'
-    >
-  ): void {
-    this.calendarService.addSessionData(sessionData);
+  onSessionDataCreated(sessionData: CreateSessionRequest): void {
+    console.log('Session data received:', sessionData);
+    // Here you would typically send the data to your API
+    // this.sessionService.createSession(sessionData).subscribe(...)
     this.showNewSessionDialog.set(false);
   }
 

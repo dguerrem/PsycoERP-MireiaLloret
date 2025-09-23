@@ -4,6 +4,8 @@ import {
   EventEmitter,
   signal,
   ChangeDetectionStrategy,
+  inject,
+  OnInit,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import {
@@ -12,8 +14,12 @@ import {
   FormGroup,
   Validators,
 } from '@angular/forms';
-import { SessionData } from '../../../../shared/models/session.model';
-import { CLINIC_CONFIGS } from '../../../../shared/models/clinic-config.model';
+import { HttpClient } from '@angular/common/http';
+import { CreateSessionRequest } from '../../../../shared/models/session.model';
+import { PatientSelector } from '../../../../shared/models/patient.model';
+import { ReusableModalComponent } from '../../../../shared/components/reusable-modal/reusable-modal.component';
+import { FormInputComponent } from '../../../../shared/components/form-input/form-input.component';
+import { PatientSelectorComponent } from '../../../../shared/components/patient-selector/patient-selector.component';
 
 /**
  * Modal dialog component for creating new session appointments
@@ -35,21 +41,22 @@ import { CLINIC_CONFIGS } from '../../../../shared/models/clinic-config.model';
 @Component({
   selector: 'app-new-session-dialog',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    ReusableModalComponent,
+    FormInputComponent,
+    PatientSelectorComponent
+  ],
   templateUrl: './new-session-dialog.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class NewSessionDialogComponent {
+export class NewSessionDialogComponent implements OnInit {
   @Output() close = new EventEmitter<void>();
-  @Output() sessionDataCreated = new EventEmitter<
-    Omit<
-      SessionData['SessionDetailData'],
-      'session_id' | 'created_at' | 'updated_at'
-    >
-  >();
+  @Output() sessionDataCreated = new EventEmitter<CreateSessionRequest>();
 
-  /** Clinic configurations for dropdown options */
-  readonly clinicConfigs = CLINIC_CONFIGS;
+  private fb = inject(FormBuilder);
+  private http = inject(HttpClient);
 
   /** Loading state signal */
   readonly isLoading = signal(false);
@@ -57,114 +64,65 @@ export class NewSessionDialogComponent {
   /** Error message signal */
   readonly error = signal<string | null>(null);
 
-  /** Dropdown states for custom select components */
-  readonly dropdownStates = signal({
-    patient: false,
-    clinic: false,
-    type: false,
-    payment: false,
-    modality: false,
-  });
+  /** Patients data from API */
+  patients = signal<PatientSelector[]>([]);
+  selectedPatient = signal<PatientSelector | null>(null);
 
-  /** Available session types */
-  readonly sessionTypes = [
-    'Terapia Individual',
-    'Terapia de Pareja',
-    'Terapia Familiar',
-    'Terapia Grupal',
-    'Evaluación Psicológica',
-    'Consulta de Seguimiento',
-  ];
-
-  /** Available session modes */
-  readonly sessionModes: ('Online' | 'Presencial')[] = ['Presencial', 'Online'];
-
-  /** Available payment methods */
-  readonly paymentMethods: ('cash' | 'card' | 'transfer' | 'bizum')[] = [
-    'cash',
-    'card',
-    'transfer',
-    'bizum',
-  ];
-
-  /** Available payment statuses */
-  readonly paymentStatuses: ('pending' | 'paid' | 'partial')[] = [
-    'pending',
-    'paid',
-    'partial',
-  ];
-
-  /** Mock patient data */
-  readonly patients = [
-    { id: 101, name: 'Ana García' },
-    { id: 102, name: 'Carlos López' },
-    { id: 103, name: 'María Rodríguez' },
-    { id: 104, name: 'Juan Martínez' },
-    { id: 105, name: 'Laura Sánchez' },
-    { id: 106, name: 'Pedro González' },
+  readonly modeOptions = [
+    { value: 'presencial', label: 'Presencial' },
+    { value: 'online', label: 'Online' }
   ];
 
   /** Reactive form for session data */
-  sessionForm: FormGroup;
+  sessionForm!: FormGroup;
 
-  constructor(private fb: FormBuilder) {
-    // Set default date to today
-    const today = new Date();
-    const formattedDate = today.toISOString().split('T')[0];
+  ngOnInit(): void {
+    this.initializeForm();
+    this.loadPatients();
+  }
 
-    // Initialize reactive form
+  private initializeForm(): void {
+    const today = new Date().toISOString().split('T')[0];
+
     this.sessionForm = this.fb.group({
-      patient_id: ['', Validators.required],
-      patient_name: [''],
-      clinic_id: ['', Validators.required],
-      session_date: [formattedDate, Validators.required],
-      start_time: ['', Validators.required],
-      end_time: ['', Validators.required],
-      mode: ['Presencial', Validators.required],
-      type: ['Terapia Individual', Validators.required],
-      price: ['', [Validators.required, Validators.min(0.01)]],
-      payment_method: ['cash', Validators.required],
-      payment_status: ['pending', Validators.required],
-      completed: [false],
-      cancelled: [false],
-      no_show: [false],
-      sended: [false],
-      notes: [''],
+      patient_id: [null, [Validators.required]],
+      session_date: [today, [Validators.required]],
+      start_time: ['', [Validators.required]],
+      end_time: ['', [Validators.required]],
+      mode: ['presencial', [Validators.required]],
+      type: ['', [Validators.required]],
+      notes: ['']
+    });
+
+    // Watch for patient selection changes
+    this.sessionForm.get('patient_id')?.valueChanges.subscribe(patientId => {
+      const patient = this.patients().find(p => p.idPaciente === patientId);
+      this.selectedPatient.set(patient || null);
     });
   }
 
-  /**
-   * Handles backdrop click to close modal
-   */
-  onBackdropClick(event: Event): void {
-    if (event.target === event.currentTarget) {
-      this.onClose();
-    }
+  private loadPatients(): void {
+    this.http.get<{ data: PatientSelector[] }>('http://localhost:3000/api/patients/active-with-clinic')
+      .subscribe({
+        next: (response) => {
+          this.patients.set(response.data);
+        },
+        error: (error) => {
+          console.error('Error loading patients:', error);
+        }
+      });
   }
 
-  /**
-   * Emits close event to parent component
-   */
+
   onClose(): void {
+    this.sessionForm.reset({
+      mode: 'presencial'
+    });
+    this.selectedPatient.set(null);
     this.close.emit();
   }
 
-  /**
-   * Updates patient name when patient selection changes
-   */
-  onPatientChange(): void {
-    const patientId = this.sessionForm.get('patient_id')?.value;
-    if (patientId) {
-      const patient = this.patients.find((p) => p.id === parseInt(patientId));
-      this.sessionForm.patchValue({
-        patient_name: patient ? patient.name : '',
-      });
-    }
-  }
 
-  /**
-   * Automatically sets end time to 1 hour after start time
-   */
   onStartTimeChange(): void {
     const startTime = this.sessionForm.get('start_time')?.value;
     if (startTime) {
@@ -179,234 +137,66 @@ export class NewSessionDialogComponent {
     }
   }
 
-  /**
-   * Handles form submission with validation
-   */
   onSubmit(): void {
     this.error.set(null);
 
-    // Check form validity
     if (this.sessionForm.invalid) {
       this.sessionForm.markAllAsTouched();
       this.error.set('Por favor, completa todos los campos obligatorios.');
       return;
     }
 
-    const formData = this.sessionForm.value;
+    const formValue = this.sessionForm.value;
+    const patient = this.selectedPatient();
+
+    if (!patient) {
+      this.error.set('Debe seleccionar un paciente.');
+      return;
+    }
 
     // Validate time
-    if (formData.start_time >= formData.end_time) {
+    if (formValue.start_time >= formValue.end_time) {
       this.error.set('La hora de inicio debe ser anterior a la hora de fin.');
       return;
     }
 
     this.isLoading.set(true);
 
+    const sessionData: CreateSessionRequest = {
+      patient_id: formValue.patient_id,
+      clinic_id: patient.idClinica,
+      session_date: formValue.session_date,
+      start_time: formValue.start_time,
+      end_time: formValue.end_time,
+      mode: formValue.mode,
+      type: formValue.type,
+      status: 'programada',
+      price: this.netPrice,
+      payment_method: 'cash',
+      payment_status: 'pending',
+      notes: formValue.notes
+    };
+
     // Simulate API call
     setTimeout(() => {
-      const sessionData: Omit<
-        SessionData['SessionDetailData'],
-        'session_id' | 'created_at' | 'updated_at'
-      > = {
-        session_date: formData.session_date,
-        start_time: formData.start_time + ':00',
-        end_time: formData.end_time + ':00',
-        type: formData.type,
-        mode: formData.mode,
-        price: parseFloat(formData.price),
-        payment_method: formData.payment_method,
-        payment_status: formData.payment_status,
-        completed: formData.completed,
-        cancelled: formData.cancelled,
-        no_show: formData.no_show,
-        sended: formData.sended,
-        notes: formData.notes || undefined,
-        PatientData: {
-          id: parseInt(formData.patient_id),
-          name:
-            formData.patient_name ||
-            this.getPatientName(parseInt(formData.patient_id)),
-        },
-        ClinicDetailData: {
-          clinic_id: parseInt(formData.clinic_id),
-          clinic_name: this.getClinicName(parseInt(formData.clinic_id)),
-        },
-        MedicalRecordData: [],
-      };
-
       this.sessionDataCreated.emit(sessionData);
       this.isLoading.set(false);
+      this.onClose();
     }, 1000);
   }
 
-  /**
-   * Gets patient name by ID
-   */
-  getPatientName(patientId: number): string {
-    const patient = this.patients.find((p) => p.id === patientId);
-    return patient ? patient.name : `Paciente ${patientId}`;
+  get isFormValid(): boolean {
+    return this.sessionForm.valid;
   }
 
-  /**
-   * Gets clinic name by ID
-   */
-  getClinicName(clinicId: number): string {
-    const clinic = this.clinicConfigs.find((c: any) => c.id === clinicId);
-    return clinic ? clinic.name : `Clínica ${clinicId}`;
+  get selectedPatientData(): PatientSelector | null {
+    return this.selectedPatient();
   }
 
-  /**
-   * Converts payment method code to display text
-   */
-  getPaymentMethodText(method: 'cash' | 'card' | 'transfer' | 'bizum'): string {
-    const paymentMethodTexts = {
-      cash: 'Efectivo',
-      card: 'Tarjeta',
-      transfer: 'Transferencia',
-      bizum: 'Bizum',
-    };
-    return paymentMethodTexts[method] || method;
-  }
+  get netPrice(): number {
+    const patient = this.selectedPatient();
+    if (!patient) return 0;
 
-  /**
-   * Converts payment status code to display text
-   */
-  getPaymentStatusText(status: 'pending' | 'paid' | 'partial'): string {
-    const paymentStatusTexts = {
-      pending: 'Pendiente',
-      paid: 'Pagado',
-      partial: 'Parcial',
-    };
-    return paymentStatusTexts[status] || status;
-  }
-
-  // Form update methods for reactive forms
-  updatePatientId(value: string): void {
-    this.sessionForm.patchValue({ patient_id: value });
-    this.onPatientChange();
-  }
-
-  updateClinicId(value: string): void {
-    this.sessionForm.patchValue({ clinic_id: value });
-  }
-
-  updateSessionDate(value: string): void {
-    this.sessionForm.patchValue({ session_date: value });
-  }
-
-  updateStartTime(value: string): void {
-    this.sessionForm.patchValue({ start_time: value });
-    this.onStartTimeChange();
-  }
-
-  updateEndTime(value: string): void {
-    this.sessionForm.patchValue({ end_time: value });
-  }
-
-  updateSessionType(value: string): void {
-    this.sessionForm.patchValue({ type: value });
-  }
-
-  updateMode(value: 'Online' | 'Presencial'): void {
-    this.sessionForm.patchValue({ mode: value });
-  }
-
-  updatePrice(value: string): void {
-    this.sessionForm.patchValue({ price: value });
-  }
-
-  updatePaymentMethod(value: 'cash' | 'card' | 'transfer' | 'bizum'): void {
-    this.sessionForm.patchValue({ payment_method: value });
-  }
-
-  updatePaymentStatus(value: 'pending' | 'paid' | 'partial'): void {
-    this.sessionForm.patchValue({ payment_status: value });
-  }
-
-  updateCompleted(value: boolean): void {
-    this.sessionForm.patchValue({ completed: value });
-  }
-
-  updateNotes(value: string): void {
-    this.sessionForm.patchValue({ notes: value });
-  }
-
-  toggleDropdown(
-    dropdown: 'patient' | 'clinic' | 'type' | 'payment' | 'modality'
-  ): void {
-    this.dropdownStates.update((states) => ({
-      patient: false,
-      clinic: false,
-      type: false,
-      payment: false,
-      modality: false,
-      [dropdown]: !states[dropdown],
-    }));
-  }
-
-  selectOption(
-    dropdown: 'patient' | 'clinic' | 'type' | 'payment' | 'modality',
-    value: string
-  ): void {
-    this.dropdownStates.update((states) => ({ ...states, [dropdown]: false }));
-
-    switch (dropdown) {
-      case 'patient':
-        this.updatePatientId(value);
-        break;
-      case 'clinic':
-        this.updateClinicId(value);
-        break;
-      case 'type':
-        this.updateSessionType(value);
-        break;
-      case 'payment':
-        this.updatePaymentMethod(value as any);
-        break;
-      case 'modality':
-        this.updateMode(value as any);
-        break;
-    }
-  }
-
-  /**
-   * Gets display value for dropdown based on current form state
-   */
-  getDisplayValue(
-    dropdown: 'patient' | 'clinic' | 'type' | 'payment' | 'modality'
-  ): string {
-    const form = this.sessionForm;
-
-    switch (dropdown) {
-      case 'patient':
-        const patientId = form.get('patient_id')?.value;
-        if (patientId) {
-          const patient = this.patients.find(
-            (p) => p.id === parseInt(patientId)
-          );
-          return patient ? patient.name : 'Seleccionar paciente';
-        }
-        return 'Seleccionar paciente';
-      case 'clinic':
-        const clinicId = form.get('clinic_id')?.value;
-        if (clinicId) {
-          const clinic = this.clinicConfigs.find(
-            (c: any) => c.id === parseInt(clinicId)
-          );
-          return clinic ? clinic.name : 'Seleccionar clínica';
-        }
-        return 'Seleccionar clínica';
-      case 'type':
-        return form.get('type')?.value || 'Seleccionar tipo';
-      case 'payment':
-        const paymentMethod = form.get('payment_method')?.value;
-        return paymentMethod
-          ? this.getPaymentMethodText(paymentMethod)
-          : 'Seleccionar método';
-      case 'modality':
-        return form.get('mode')?.value || 'Seleccionar modalidad';
-      default:
-        return '';
-    }
+    return patient.precioSesion * (patient.porcentaje / 100);
   }
 }

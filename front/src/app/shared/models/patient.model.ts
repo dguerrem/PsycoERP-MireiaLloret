@@ -37,6 +37,16 @@ export interface Patient {
   updated_at?: string; // ISO string format
 }
 
+// Interface for patient selector component
+export interface PatientSelector {
+  idPaciente: number;
+  nombreCompleto: string;
+  idClinica: number;
+  nombreClinica: string;
+  precioSesion: number;
+  porcentaje: number;
+}
+
 // Backward compatibility interface for existing code
 export interface PatientLegacy {
   id?: number;

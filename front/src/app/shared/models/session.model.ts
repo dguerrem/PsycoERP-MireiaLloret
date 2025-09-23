@@ -2,6 +2,22 @@ export interface SessionResponse {
   data: SessionData[];
 }
 
+// Interface for creating a new session
+export interface CreateSessionRequest {
+  patient_id: number;
+  clinic_id: number;
+  session_date: string; // "2025-09-22"
+  start_time: string;   // "19:12:21.989Z"
+  end_time: string;     // "19:12:21.989Z"
+  mode: 'presencial' | 'online';
+  type: string;
+  status: 'programada';
+  price: number;
+  payment_method: 'cash' | 'card' | 'transfer' | 'bizum';
+  payment_status: 'pending';
+  notes: string;
+}
+
 export interface SessionData {
   SessionDetailData: {
     session_id: number;
