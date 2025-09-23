@@ -91,6 +91,7 @@ export class NewSessionDialogComponent implements OnInit {
       end_time: ['', [Validators.required]],
       mode: ['presencial', [Validators.required]],
       type: ['', [Validators.required]],
+      price: [0, [Validators.required, Validators.min(0.01)]],
       notes: ['']
     });
 
@@ -98,6 +99,13 @@ export class NewSessionDialogComponent implements OnInit {
     this.sessionForm.get('patient_id')?.valueChanges.subscribe(patientId => {
       const patient = this.patients().find(p => p.idPaciente === patientId);
       this.selectedPatient.set(patient || null);
+
+      // Update price when patient changes
+      if (patient) {
+        this.sessionForm.patchValue({
+          price: parseFloat(this.netPrice.toFixed(2))
+        });
+      }
     });
   }
 
@@ -171,7 +179,7 @@ export class NewSessionDialogComponent implements OnInit {
       mode: formValue.mode,
       type: formValue.type,
       status: 'programada',
-      price: this.netPrice,
+      price: formValue.price,
       payment_method: 'cash',
       payment_status: 'pending',
       notes: formValue.notes
