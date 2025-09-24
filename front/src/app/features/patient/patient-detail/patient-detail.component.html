@@ -1,1 +1,88 @@
-<p>patient detail works</p>
+<div class="p-4 sm:p-6 h-screen overflow-hidden">
+  <div class="w-full h-full flex flex-col max-h-full">
+    @if (isLoading()) {
+      <div class="flex items-center justify-center h-full">
+        <div class="text-muted-foreground">Cargando...</div>
+      </div>
+    } @else if (patient()) {
+      <!-- Header -->
+      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4 sm:mb-6">
+        <div class="flex items-center gap-4">
+          <button
+            (click)="onBack()"
+            class="inline-flex items-center justify-center rounded-xl px-3 py-2 text-sm font-medium transition-all border border-gray-300 bg-white hover:text-white"
+            onmouseover="this.style.backgroundColor='#0891b2'; this.style.borderColor='#0891b2'"
+            onmouseout="this.style.backgroundColor=''; this.style.borderColor='#d1d5db'">
+            <svg class="h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
+            </svg>
+            Volver
+          </button>
+          <div class="flex-1">
+            <div class="flex items-center gap-4">
+              <h1 class="text-2xl sm:text-3xl font-black font-montserrat text-gray-900">{{ patient()!.first_name }} {{ patient()!.last_name }}</h1>
+              <span
+                class="inline-flex items-center justify-center rounded-md border px-2 py-0.5 text-xs font-medium w-fit whitespace-nowrap shrink-0 focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive transition-[color,box-shadow] overflow-hidden border-transparent"
+                [class]="getStatusColor(patient()!.status)">
+                {{ getStatusLabel(patient()!.status) }}
+              </span>
+            </div>
+            <p class="text-sm sm:text-base text-gray-600 mt-1 sm:mt-2">
+              Ficha #{{ patient()!.id }} • DNI: {{ patient()!.dni }}
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tabs -->
+      <div class="flex-1 overflow-y-auto min-h-0">
+        <div class="h-full flex flex-col">
+          <div class="grid w-full grid-cols-2 gap-0">
+            <button
+              (click)="setActiveTab('summary')"
+              [class]="activeTab() === 'summary' ? 'border-b-2 border-primary bg-gray-100 text-gray-900 shadow-sm' : 'border-b-2 border-transparent'"
+              class="inline-flex items-center justify-center whitespace-nowrap rounded-sm px-3 py-1.5 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm gap-2">
+              <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+              </svg>
+              Resumen
+            </button>
+            <button
+              (click)="setActiveTab('data')"
+              [class]="activeTab() === 'data' ? 'border-b-2 border-primary bg-gray-100 text-gray-900 shadow-sm' : 'border-b-2 border-transparent'"
+              class="inline-flex items-center justify-center whitespace-nowrap rounded-sm px-3 py-1.5 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm gap-2">
+              <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+              </svg>
+              Datos
+            </button>
+          </div>
+
+          <div class="flex-1 overflow-y-auto min-h-0 mt-6">
+            @if (activeTab() === 'summary') {
+              <div class="h-full">
+                <app-patient-summary
+                  [patient]="patient()!"
+                  [sessions]="sessions()"
+                  [invoices]="invoices()"
+                  [bonuses]="bonuses()"
+                  [sessionStats]="sessionStats()"
+                  [billingInfo]="billingInfo()"
+                  [sessionType]="sessionType()">
+                </app-patient-summary>
+              </div>
+            }
+
+            @if (activeTab() === 'data') {
+              <div class="h-full">
+                <div class="text-center py-12">
+                  <p class="text-muted-foreground">Tab Datos - En desarrollo</p>
+                </div>
+              </div>
+            }
+          </div>
+        </div>
+      </div>
+    }
+  </div>
+</div>
