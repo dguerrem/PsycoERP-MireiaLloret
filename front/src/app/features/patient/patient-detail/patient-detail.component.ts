@@ -11,7 +11,6 @@ import { HttpClient } from '@angular/common/http';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Patient } from '../../../shared/models/patient.model';
 import { PatientDetailResponse, PatientDetailUtils, Session, Invoice, Bonus } from '../../../shared/models/patient-detail.model';
-import { PatientsService } from '../services/patients.service';
 import { PatientSummaryComponent } from '../components/patient-summary.component';
 
 /**
@@ -31,7 +30,6 @@ export class PatientDetailComponent implements OnInit {
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private http = inject(HttpClient);
-  private patientsService = inject(PatientsService);
 
   readonly patient = signal<Patient | null>(null);
   readonly patientDetailData = signal<PatientDetailResponse | null>(null);

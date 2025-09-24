@@ -132,7 +132,10 @@ export class PatientDetailUtils {
   }
 }
 
-// Compatible interface for existing PatientSummary component
+// Import the existing Patient interface
+import { Patient } from './patient.model';
+
+// Compatible interfaces for existing PatientSummary component
 export interface Session {
   id: string;
   patientId: number;
@@ -164,6 +167,3 @@ export interface Bonus {
   expiryDate: Date;
   status: 'active' | 'expired' | 'used';
 }
-
-// Import the existing Patient interface
-import { Patient } from './patient.model';
