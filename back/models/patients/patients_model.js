@@ -146,14 +146,19 @@ const getPatients = async (filters = {}) => {
 
 // Obtener un paciente por ID con información específica para PatientResume
 const getPatientById = async (id) => {
-  // Consulta para obtener datos básicos del paciente
+  // Consulta para obtener datos básicos del paciente con modo preferido basado en la clínica
   const patientQuery = `
         SELECT
-            id,
-            email,
-            phone
-        FROM patients
-        WHERE id = ? AND is_active = true
+            p.id,
+            p.email,
+            p.phone,
+            CASE
+                WHEN c.address IS NULL OR c.address = '' THEN 'Online'
+                ELSE 'Presencial'
+            END as preferred_mode
+        FROM patients p
+        LEFT JOIN clinics c ON p.clinic_id = c.id AND c.is_active = true
+        WHERE p.id = ? AND p.is_active = true
     `;
 
   const [patientRows] = await db.execute(patientQuery, [id]);
@@ -179,7 +184,6 @@ const getPatientById = async (id) => {
   // Consulta para obtener sesiones del paciente con todos los detalles (PatientResumeSessions)
   const sessionsQuery = `
         SELECT
-            id as idsession,
             mode as tipo,
             DATE_FORMAT(session_date, '%d/%m/%Y') as fecha,
             price as precio,
@@ -187,6 +191,7 @@ const getPatientById = async (id) => {
         FROM sessions
         WHERE patient_id = ? AND is_active = 1
         ORDER BY session_date DESC
+        LIMIT 10
     `;
 
   const [sessionsRows] = await db.execute(sessionsQuery, [id]);

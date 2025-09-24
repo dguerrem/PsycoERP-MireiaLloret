@@ -1581,6 +1581,12 @@ const definitions = {
         description: "Teléfono del paciente",
         example: "+34 666 123 456",
       },
+      preferred_mode: {
+        type: "string",
+        enum: ["Online", "Presencial"],
+        description: "Modo preferido de sesión basado en la clínica asignada. Online si la clínica no tiene dirección, Presencial si la tiene.",
+        example: "Presencial",
+      },
       PatientSessionsStatus: {
         $ref: "#/components/schemas/PatientSessionsStatus",
       },
@@ -1600,12 +1606,6 @@ const definitions = {
   PatientResumeSession: {
     type: "object",
     properties: {
-      idsession: {
-        type: "integer",
-        format: "int64",
-        description: "ID único de la sesión",
-        example: 1,
-      },
       tipo: {
         type: "string",
         enum: ["presencial", "online"],
