@@ -6,7 +6,7 @@ export const environment = {
     version: 'v1'
   },
   app: {
-    name: 'Psychology ERP (Staging)',
+    name: 'PsycoERP (Staging)',
     version: '1.0.0'
   },
   features: {
