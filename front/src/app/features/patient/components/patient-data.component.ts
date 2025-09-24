@@ -71,12 +71,16 @@ export class PatientDataComponent implements OnInit, OnChanges {
   ngOnInit() {
     if (this.patient) {
       this.loadPatientData();
+      this.patientForm.disable(); // Disable form by default
     }
   }
 
   ngOnChanges() {
     if (this.patient) {
       this.loadPatientData();
+      if (!this.isEditing()) {
+        this.patientForm.disable(); // Keep disabled when patient changes
+      }
     }
   }
 
@@ -133,19 +137,7 @@ export class PatientDataComponent implements OnInit, OnChanges {
   }
 
   getStatusLabel(status: string): string {
-    switch (status) {
-      case 'en curso':
-        return 'Activo';
-      case 'fin del tratamiento':
-        return 'Alta';
-      case 'en pausa':
-        return 'En Pausa';
-      case 'abandono':
-        return 'Abandono';
-      case 'derivación':
-        return 'Derivación';
-      default:
-        return status;
-    }
+    if (!status) return '';
+    return status.charAt(0).toUpperCase() + status.slice(1).toLowerCase();
   }
 }
