@@ -34,17 +34,6 @@ export class PatientSummaryComponent {
   @Input() billingInfo = { totalSpent: 0, invoicesIssued: 0 };
   @Input() sessionType = 'Presencial';
 
-  readonly selectedYear = signal("2025");
-  readonly dateRange = signal("all");
-
-  readonly currentYear = new Date().getFullYear();
-  readonly years = Array.from({ length: 3 }, (_, i) => (this.currentYear - i).toString());
-
-  readonly filteredSessions = computed(() => {
-    return this.sessions.filter(session =>
-      session.date.getFullYear().toString() === this.selectedYear()
-    );
-  });
 
   readonly completedSessions = computed(() => this.sessionStats.completed);
 
@@ -56,13 +45,6 @@ export class PatientSummaryComponent {
 
   readonly recentSessions = computed(() => this.sessions.slice(0, 10));
 
-  onYearChange(year: string): void {
-    this.selectedYear.set(year);
-  }
-
-  onDateRangeChange(range: string): void {
-    this.dateRange.set(range);
-  }
 
   formatPaymentMethod(method: string): string {
     const methods: Record<string, string> = {
