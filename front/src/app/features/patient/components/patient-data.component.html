@@ -1,0 +1,223 @@
+<div class="h-full overflow-y-auto">
+  <div class="bg-card text-card-foreground flex flex-col gap-6 rounded-xl border py-6 shadow-sm">
+    <!-- Card Header -->
+    <div class="@container/card-header grid auto-rows-min grid-rows-[auto_auto] items-start gap-1.5 px-6 has-data-[slot=card-action]:grid-cols-[1fr_auto] [.border-b]:pb-6 pb-3">
+      <div class="flex items-center justify-between">
+        <h3 class="text-lg font-semibold">Datos del Paciente</h3>
+        <div class="flex gap-2">
+          @if (isEditing()) {
+            <button
+              type="button"
+              (click)="onCancel()"
+              class="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-9 px-3">
+              Cancelar
+            </button>
+            <button
+              type="button"
+              (click)="onSave()"
+              class="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-9 px-3">
+              <svg class="h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+              </svg>
+              Guardar
+            </button>
+          } @else {
+            <button
+              type="button"
+              (click)="onEdit()"
+              class="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-9 px-3">
+              <svg class="h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+              </svg>
+              Editar
+            </button>
+          }
+        </div>
+      </div>
+    </div>
+
+    <!-- Form Content -->
+    <form [formGroup]="patientForm" class="px-6 space-y-6">
+      <!-- Personal Information -->
+      <div>
+        <h3 class="text-lg font-semibold mb-4">Información Personal</h3>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70" for="full_name">
+              Nombre Completo
+            </label>
+            <input
+              id="full_name"
+              formControlName="full_name"
+              class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+              [disabled]="!isEditing()"
+              type="text" />
+          </div>
+
+          <div>
+            <label class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70" for="dni">
+              DNI
+            </label>
+            <input
+              id="dni"
+              formControlName="dni"
+              class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+              [disabled]="!isEditing()"
+              type="text" />
+          </div>
+
+          <div>
+            <label class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70" for="birth_date">
+              Fecha de Nacimiento
+            </label>
+            <input
+              id="birth_date"
+              formControlName="birth_date"
+              class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+              [disabled]="!isEditing()"
+              type="date" />
+          </div>
+
+          <div>
+            <label class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+              Edad
+            </label>
+            <div class="flex h-10 w-full items-center rounded-md border border-input bg-muted px-3 py-2 text-sm text-muted-foreground">
+              {{ age() }} años
+            </div>
+          </div>
+
+          <div>
+            <label class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70" for="occupation">
+              Ocupación
+            </label>
+            <input
+              id="occupation"
+              formControlName="occupation"
+              class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+              [disabled]="!isEditing()"
+              type="text" />
+          </div>
+        </div>
+      </div>
+
+      <!-- Contact Information -->
+      <div>
+        <h3 class="text-lg font-semibold mb-4">Información de Contacto</h3>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70" for="email">
+              Email
+            </label>
+            <input
+              id="email"
+              formControlName="email"
+              class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+              [disabled]="!isEditing()"
+              type="email" />
+          </div>
+
+          <div>
+            <label class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70" for="phone">
+              Teléfono
+            </label>
+            <input
+              id="phone"
+              formControlName="phone"
+              class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+              [disabled]="!isEditing()"
+              type="tel" />
+          </div>
+
+          <div class="md:col-span-2">
+            <label class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70" for="address">
+              Dirección
+            </label>
+            <input
+              id="address"
+              formControlName="address"
+              class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+              [disabled]="!isEditing()"
+              type="text" />
+          </div>
+        </div>
+      </div>
+
+      <!-- Treatment Information -->
+      <div>
+        <h3 class="text-lg font-semibold mb-4">Información de Tratamiento</h3>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70" for="tipo_clinica">
+              Tipo de Sesión
+            </label>
+            @if (isEditing()) {
+              <select
+                id="tipo_clinica"
+                formControlName="tipo_clinica"
+                class="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50">
+                <option value="">Seleccionar...</option>
+                <option value="Online">Online</option>
+                <option value="Presencial">Presencial</option>
+              </select>
+            } @else {
+              <div class="flex h-10 w-full items-center rounded-md border border-input bg-muted px-3 py-2 text-sm text-muted-foreground">
+                {{ patientForm.get('tipo_clinica')?.value || 'No especificado' }}
+              </div>
+            }
+          </div>
+
+          <div>
+            <label class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70" for="nombre_clinica">
+              Clínica
+            </label>
+            <input
+              id="nombre_clinica"
+              formControlName="nombre_clinica"
+              class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+              [disabled]="!isEditing()"
+              type="text" />
+          </div>
+
+          <div>
+            <label class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70" for="treatment_start_date">
+              Fecha Inicio Tratamiento
+            </label>
+            <input
+              id="treatment_start_date"
+              formControlName="treatment_start_date"
+              class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+              [disabled]="!isEditing()"
+              type="date" />
+          </div>
+
+          <div>
+            <label class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70" for="status">
+              Estado del Tratamiento
+            </label>
+            @if (isEditing()) {
+              <select
+                id="status"
+                formControlName="status"
+                class="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50">
+                <option value="">Seleccionar...</option>
+                <option value="en curso">En Curso</option>
+                <option value="fin del tratamiento">Fin del Tratamiento</option>
+                <option value="en pausa">En Pausa</option>
+                <option value="abandono">Abandono</option>
+                <option value="derivación">Derivación</option>
+              </select>
+            } @else {
+              <div class="flex h-10 w-full items-center rounded-md border border-input bg-muted px-3 py-2">
+                <span class="inline-flex items-center justify-center rounded-md border px-2 py-0.5 text-xs font-medium w-fit whitespace-nowrap shrink-0 focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive transition-[color,box-shadow] overflow-hidden border-transparent"
+                      [class]="getStatusColor(patientForm.get('status')?.value || '')">
+                  {{ getStatusLabel(patientForm.get('status')?.value || '') }}
+                </span>
+              </div>
+            }
+          </div>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>

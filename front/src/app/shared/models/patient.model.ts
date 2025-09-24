@@ -29,6 +29,10 @@ export interface Patient {
     | 'abandono'
     | 'derivación';
 
+  // Información adicional de la clínica
+  nombre_clinica?: string;
+  tipo_clinica?: string;
+
   // Campos calculados/automáticos
   is_minor: boolean;
 

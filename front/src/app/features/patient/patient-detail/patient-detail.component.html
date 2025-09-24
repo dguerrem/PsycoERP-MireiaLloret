@@ -75,9 +75,7 @@
 
             @if (activeTab() === 'data') {
               <div class="h-full">
-                <div class="text-center py-12">
-                  <p class="text-muted-foreground">Tab Datos - En desarrollo</p>
-                </div>
+                <app-patient-data [patient]="patient()!"></app-patient-data>
               </div>
             }
           </div>

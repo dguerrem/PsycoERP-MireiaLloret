@@ -88,6 +88,8 @@ export class PatientDetailUtils {
       clinic_id: apiData.clinic_id,
       treatment_start_date: apiData.fecha_inicio_tratamiento,
       status: apiData.estado as 'en curso' | 'fin del tratamiento' | 'en pausa' | 'abandono' | 'derivación',
+      nombre_clinica: apiData.nombre_clinica,
+      tipo_clinica: apiData.tipo_clinica,
       is_minor: apiData.menor_edad === 1
     };
   }

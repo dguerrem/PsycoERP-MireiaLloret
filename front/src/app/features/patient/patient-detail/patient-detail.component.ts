@@ -12,6 +12,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { Patient } from '../../../shared/models/patient.model';
 import { PatientDetailResponse, PatientDetailUtils, Session, Invoice, Bonus } from '../../../shared/models/patient-detail.model';
 import { PatientSummaryComponent } from '../components/patient-summary.component';
+import { PatientDataComponent } from '../components/patient-data.component';
 
 /**
  * Patient Detail Component
@@ -22,7 +23,7 @@ import { PatientSummaryComponent } from '../components/patient-summary.component
 @Component({
   selector: 'app-patient-detail',
   standalone: true,
-  imports: [CommonModule, PatientSummaryComponent],
+  imports: [CommonModule, PatientSummaryComponent, PatientDataComponent],
   templateUrl: './patient-detail.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
