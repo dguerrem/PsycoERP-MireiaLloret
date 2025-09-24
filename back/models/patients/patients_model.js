@@ -208,23 +208,29 @@ const getPatientById = async (id) => {
 
   const [invoiceRows] = await db.execute(invoiceQuery, [id, currentYear]);
   
-  // Consulta para obtener datos detallados del paciente
+  // Consulta para obtener datos detallados del paciente con información de clínica
   const patientDataQuery = `
         SELECT
-            CONCAT(first_name, ' ', last_name) as nombre,
-            dni,
-            DATE_FORMAT(birth_date, '%Y-%m-%d') as fecha_nacimiento,
-            status as estado,
-            email,
-            phone as telefono,
-            CONCAT_WS(' ', street, street_number, door, city, province, postal_code) as direccion,
-            gender as genero,
-            occupation as ocupacion,
-            clinic_id,
-            DATE_FORMAT(treatment_start_date, '%Y-%m-%d') as fecha_inicio_tratamiento,
-            is_minor as menor_edad
-        FROM patients
-        WHERE id = ? AND is_active = true
+            CONCAT(p.first_name, ' ', p.last_name) as nombre,
+            p.dni,
+            DATE_FORMAT(p.birth_date, '%Y-%m-%d') as fecha_nacimiento,
+            p.status as estado,
+            p.email,
+            p.phone as telefono,
+            CONCAT_WS(' ', p.street, p.street_number, p.door, p.city, p.province, p.postal_code) as direccion,
+            p.gender as genero,
+            p.occupation as ocupacion,
+            p.clinic_id,
+            DATE_FORMAT(p.treatment_start_date, '%Y-%m-%d') as fecha_inicio_tratamiento,
+            p.is_minor as menor_edad,
+            c.name as nombre_clinica,
+            CASE
+                WHEN c.address IS NULL OR c.address = '' THEN 'Online'
+                ELSE 'Presencial'
+            END as tipo_clinica
+        FROM patients p
+        LEFT JOIN clinics c ON p.clinic_id = c.id AND c.is_active = true
+        WHERE p.id = ? AND p.is_active = true
     `;
   
   const [patientDataRows] = await db.execute(patientDataQuery, [id]);

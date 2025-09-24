@@ -1472,6 +1472,19 @@ const definitions = {
         description: "Indica si es menor de edad",
         example: false,
       },
+      nombre_clinica: {
+        type: "string",
+        nullable: true,
+        description: "Nombre de la clínica asignada",
+        example: "Clínica Psicológica Centro",
+      },
+      tipo_clinica: {
+        type: "string",
+        enum: ["Online", "Presencial"],
+        nullable: true,
+        description: "Tipo de clínica basado en si tiene dirección. Online si no tiene dirección, Presencial si la tiene.",
+        example: "Presencial",
+      },
     },
   },
 
