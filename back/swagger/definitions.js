@@ -53,6 +53,11 @@ const definitions = {
         description: "Porcentaje de la clínica",
         example: 15.50,
       },
+      presencial: {
+        type: "boolean",
+        description: "Indica si la clínica es presencial (tiene dirección) o no. true = Presencial, false = Online",
+        example: true,
+      },
     },
   },
 
@@ -1472,6 +1477,19 @@ const definitions = {
         description: "Indica si es menor de edad",
         example: false,
       },
+      nombre_clinica: {
+        type: "string",
+        nullable: true,
+        description: "Nombre de la clínica asignada",
+        example: "Clínica Psicológica Centro",
+      },
+      tipo_clinica: {
+        type: "string",
+        enum: ["Online", "Presencial"],
+        nullable: true,
+        description: "Tipo de clínica basado en si tiene dirección. Online si no tiene dirección, Presencial si la tiene.",
+        example: "Presencial",
+      },
     },
   },
 
@@ -1581,6 +1599,12 @@ const definitions = {
         description: "Teléfono del paciente",
         example: "+34 666 123 456",
       },
+      preferred_mode: {
+        type: "string",
+        enum: ["Online", "Presencial"],
+        description: "Modo preferido de sesión basado en la clínica asignada. Online si la clínica no tiene dirección, Presencial si la tiene.",
+        example: "Presencial",
+      },
       PatientSessionsStatus: {
         $ref: "#/components/schemas/PatientSessionsStatus",
       },
@@ -1600,12 +1624,6 @@ const definitions = {
   PatientResumeSession: {
     type: "object",
     properties: {
-      idsession: {
-        type: "integer",
-        format: "int64",
-        description: "ID único de la sesión",
-        example: 1,
-      },
       tipo: {
         type: "string",
         enum: ["presencial", "online"],
