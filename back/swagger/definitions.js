@@ -53,6 +53,11 @@ const definitions = {
         description: "Porcentaje de la clínica",
         example: 15.50,
       },
+      presencial: {
+        type: "boolean",
+        description: "Indica si la clínica es presencial (tiene dirección) o no. true = Presencial, false = Online",
+        example: true,
+      },
     },
   },
 

@@ -637,7 +637,11 @@ const getActivePatientsWithClinicInfo = async () => {
       p.clinic_id as idClinica,
       c.name as nombreClinica,
       c.price as precioSesion,
-      c.percentage as porcentaje
+      c.percentage as porcentaje,
+      CASE
+        WHEN c.address IS NULL OR c.address = '' THEN 0
+        ELSE 1
+      END as presencial
     FROM patients p
     LEFT JOIN clinics c ON p.clinic_id = c.id
     WHERE p.is_active = 1 AND p.status = 'en curso' AND c.is_active = 1
@@ -645,7 +649,12 @@ const getActivePatientsWithClinicInfo = async () => {
   `;
 
   const [rows] = await db.execute(query);
-  return rows;
+
+  // Convert presencial from 0/1 to boolean
+  return rows.map(row => ({
+    ...row,
+    presencial: Boolean(row.presencial)
+  }));
 };
 
 module.exports = {
