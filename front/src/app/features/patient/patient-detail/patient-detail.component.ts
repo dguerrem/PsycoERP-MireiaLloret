@@ -81,7 +81,9 @@ export class PatientDetailComponent implements OnInit {
     const data = this.patientDetailData();
     if (!data || !data.success) return 'Presencial';
 
-    return PatientDetailUtils.getSessionType(data.data.PatientResume.PatientResumeSessions);
+    const resume = data.data.PatientResume as any;
+    const preferredMode = resume.preferred_mode || 'presencial';
+    return preferredMode.charAt(0).toUpperCase() + preferredMode.slice(1).toLowerCase();
   });
 
   readonly invoices = computed(() => {

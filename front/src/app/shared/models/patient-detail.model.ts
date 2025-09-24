@@ -16,6 +16,7 @@ export interface PatientResume {
   id: number;
   email: string;
   phone: string;
+  preferred_mode: string;
   PatientSessionsStatus: {
     completed_sessions: string;
     scheduled_sessions: string;
@@ -29,7 +30,6 @@ export interface PatientResume {
 }
 
 export interface PatientResumeSession {
-  idsession: number;
   tipo: string;
   fecha: string; // "15/01/2025"
   precio: string;
@@ -59,6 +59,8 @@ export interface PatientData {
   clinic_id: number;
   fecha_inicio_tratamiento: string; // "2025-05-12"
   menor_edad: number; // 0 or 1
+  nombre_clinica: string;
+  tipo_clinica: string;
 }
 
 // Helper functions for data transformation
@@ -92,44 +94,33 @@ export class PatientDetailUtils {
 
   static transformResumeSessionToSession(resumeSession: PatientResumeSession): Session {
     return {
-      id: resumeSession.idsession.toString(),
-      patientId: 0, // Will be set separately
-      professionalName: 'Dr. García López', // Default for now
-      type: resumeSession.tipo,
-      date: this.parseSpanishDate(resumeSession.fecha),
-      price: parseFloat(resumeSession.precio),
-      paymentMethod: this.translatePaymentMethod(resumeSession.metodo_pago),
-      status: 'completed' // Resume sessions are completed by default
+      type: this.capitalize(resumeSession?.tipo || ''),
+      date: this.parseSpanishDate(resumeSession?.fecha || '01/01/2024'),
+      price: parseFloat(resumeSession?.precio || '0'),
+      paymentMethod: this.capitalize(resumeSession?.metodo_pago || '')
     };
   }
 
   static parseSpanishDate(dateStr: string): Date {
     // Convert "15/01/2025" to Date
-    const [day, month, year] = dateStr.split('/').map(num => parseInt(num));
+    if (!dateStr || dateStr.trim() === '') {
+      return new Date(); // Return current date as fallback
+    }
+
+    const parts = dateStr.split('/');
+    if (parts.length !== 3) {
+      return new Date(); // Return current date if format is invalid
+    }
+
+    const [day, month, year] = parts.map(num => parseInt(num));
     return new Date(year, month - 1, day);
   }
 
-  static translatePaymentMethod(method: string): string {
-    const methodMap: Record<string, string> = {
-      'efectivo': 'cash',
-      'tarjeta': 'card',
-      'transferencia': 'transfer',
-      'bizum': 'bizum',
-      'pendiente': 'pending'
-    };
-    return methodMap[method] || method;
+  static capitalize(text: string): string {
+    if (!text) return '';
+    return text.charAt(0).toUpperCase() + text.slice(1).toLowerCase();
   }
 
-  static getSessionType(resumeSessions: PatientResumeSession[]): string {
-    // Determine session type based on most common type in sessions
-    const types = resumeSessions.map(s => s.tipo);
-    const presencial = types.filter(t => t.toLowerCase().includes('presencial')).length;
-    const online = types.filter(t => t.toLowerCase().includes('online')).length;
-
-    if (presencial > online) return 'Presencial';
-    if (online > presencial) return 'Online';
-    return 'Mixta';
-  }
 }
 
 // Import the existing Patient interface
@@ -137,14 +128,10 @@ import { Patient } from './patient.model';
 
 // Compatible interfaces for existing PatientSummary component
 export interface Session {
-  id: string;
-  patientId: number;
-  professionalName: string;
   type: string;
   date: Date;
   price: number;
   paymentMethod: string;
-  status: 'completed' | 'scheduled' | 'cancelled';
 }
 
 export interface Invoice {

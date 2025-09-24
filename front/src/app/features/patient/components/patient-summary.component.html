@@ -95,7 +95,7 @@
                 </td>
               </tr>
             } @else {
-              @for (session of recentSessions(); track session.id) {
+              @for (session of recentSessions(); track $index) {
                 <tr class="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted">
                   <td class="p-4 align-middle [&:has([role=checkbox])]:pr-0">{{ formatDate(session.date) }}</td>
                   <td class="p-4 align-middle [&:has([role=checkbox])]:pr-0 capitalize">
@@ -105,7 +105,7 @@
                     </span>
                   </td>
                   <td class="p-4 align-middle [&:has([role=checkbox])]:pr-0">{{ session.price }}€</td>
-                  <td class="p-4 align-middle [&:has([role=checkbox])]:pr-0 capitalize">{{ session.paymentMethod }}</td>
+                  <td class="p-4 align-middle [&:has([role=checkbox])]:pr-0">{{ session.paymentMethod }}</td>
                 </tr>
               }
             }
