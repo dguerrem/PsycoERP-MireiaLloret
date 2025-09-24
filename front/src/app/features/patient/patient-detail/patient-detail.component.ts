@@ -13,6 +13,7 @@ import { Patient } from '../../../shared/models/patient.model';
 import { PatientDetailResponse, PatientDetailUtils, Session, Invoice, Bonus } from '../../../shared/models/patient-detail.model';
 import { PatientSummaryComponent } from '../components/patient-summary.component';
 import { PatientDataComponent } from '../components/patient-data.component';
+import { PatientClinicalHistoryComponent } from '../components/patient-clinical-history.component';
 
 /**
  * Patient Detail Component
@@ -23,7 +24,7 @@ import { PatientDataComponent } from '../components/patient-data.component';
 @Component({
   selector: 'app-patient-detail',
   standalone: true,
-  imports: [CommonModule, PatientSummaryComponent, PatientDataComponent],
+  imports: [CommonModule, PatientSummaryComponent, PatientDataComponent, PatientClinicalHistoryComponent],
   templateUrl: './patient-detail.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
