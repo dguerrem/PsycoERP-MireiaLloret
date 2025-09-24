@@ -45,23 +45,22 @@ export class PatientSummaryComponent {
 
   readonly recentSessions = computed(() => this.sessions.slice(0, 10));
 
-
-  formatPaymentMethod(method: string): string {
-    const methods: Record<string, string> = {
-      'cash': 'Efectivo',
-      'card': 'Tarjeta',
-      'transfer': 'Transferencia',
-      'bizum': 'Bizum',
-      'pending': 'Pendiente'
-    };
-    return methods[method] || method;
-  }
-
   getFullName(patient: Patient): string {
     return `${patient.first_name} ${patient.last_name}`;
   }
 
   formatDate(date: Date): string {
     return date.toLocaleDateString("es-ES");
+  }
+
+  getSessionTypeColor(type: string): string {
+    switch (type.toLowerCase()) {
+      case 'online':
+        return 'bg-blue-100 text-blue-800';
+      case 'presencial':
+        return 'bg-green-100 text-green-800';
+      default:
+        return 'bg-gray-100 text-gray-800';
+    }
   }
 }

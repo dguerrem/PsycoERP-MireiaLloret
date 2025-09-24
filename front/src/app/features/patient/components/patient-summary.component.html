@@ -26,7 +26,8 @@
         </div>
         <div>
           <p class="text-sm text-muted-foreground">Tipo de Sesión (por defecto)</p>
-          <span class="inline-flex items-center justify-center rounded-md border px-2 py-0.5 text-xs font-medium w-fit whitespace-nowrap shrink-0 focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive transition-[color,box-shadow] overflow-hidden border-transparent bg-gray-100 text-gray-800 capitalize">
+          <span class="inline-flex items-center justify-center rounded-md border px-2 py-0.5 text-xs font-medium w-fit whitespace-nowrap shrink-0 focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive transition-[color,box-shadow] overflow-hidden border-transparent"
+                [class]="getSessionTypeColor(sessionType)">
             {{ sessionType }}
           </span>
         </div>
@@ -70,7 +71,7 @@
         <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
           <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
         </svg>
-        <h3 class="text-lg font-semibold">Histórico de Sesiones</h3>
+        <h3 class="text-lg font-semibold">Histórico de Sesiones Recientes (10)</h3>
       </div>
     </div>
 
@@ -97,13 +98,14 @@
               @for (session of recentSessions(); track session.id) {
                 <tr class="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted">
                   <td class="p-4 align-middle [&:has([role=checkbox])]:pr-0">{{ formatDate(session.date) }}</td>
-                  <td class="p-4 align-middle [&:has([role=checkbox])]:pr-0">
-                    <span class="inline-flex items-center justify-center rounded-md border px-2 py-0.5 text-xs font-medium w-fit whitespace-nowrap shrink-0 focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive transition-[color,box-shadow] overflow-hidden border-transparent bg-gray-100 text-gray-800 capitalize">
+                  <td class="p-4 align-middle [&:has([role=checkbox])]:pr-0 capitalize">
+                    <span class="inline-flex items-center justify-center rounded-md border px-2 py-0.5 text-xs font-medium w-fit whitespace-nowrap shrink-0 focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive transition-[color,box-shadow] overflow-hidden border-transparent"
+                          [class]="getSessionTypeColor(session.type)">
                       {{ session.type }}
                     </span>
                   </td>
                   <td class="p-4 align-middle [&:has([role=checkbox])]:pr-0">{{ session.price }}€</td>
-                  <td class="p-4 align-middle [&:has([role=checkbox])]:pr-0 capitalize">{{ formatPaymentMethod(session.paymentMethod) }}</td>
+                  <td class="p-4 align-middle [&:has([role=checkbox])]:pr-0 capitalize">{{ session.paymentMethod }}</td>
                 </tr>
               }
             }
