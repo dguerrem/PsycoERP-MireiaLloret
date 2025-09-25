@@ -167,6 +167,11 @@ export class NewSessionDialogComponent implements OnInit {
   onSubmit(): void {
     this.error.set(null);
 
+    // Prevent double submission
+    if (this.isLoading()) {
+      return;
+    }
+
     if (this.sessionForm.invalid) {
       this.sessionForm.markAllAsTouched();
       this.error.set('Por favor, completa todos los campos obligatorios.');

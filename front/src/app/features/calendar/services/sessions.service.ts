@@ -1,5 +1,6 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
+import { HttpClient } from '@angular/common/http';
 import { BaseCrudService } from '../../../core/services/base-crud.service';
 import { CreateSessionRequest, SessionData, SessionResponse } from '../../../shared/models/session.model';
 
@@ -55,5 +56,16 @@ export class SessionsService extends BaseCrudService<SessionData> {
    */
   deleteSession(sessionId: number): Observable<void> {
     return this.delete(sessionId);
+  }
+
+  /**
+   * Gets sessions with pagination
+   * @param page - Page number (default: 1)
+   * @param limit - Number of items per page (default: 1000000)
+   * @returns Observable<SessionResponse>
+   */
+  getSessionsWithPagination(page: number = 1, limit: number = 1000000): Observable<SessionResponse> {
+    const url = `${this.apiUrl}?page=${page}&limit=${limit}`;
+    return this.http.get<SessionResponse>(url);
   }
 }

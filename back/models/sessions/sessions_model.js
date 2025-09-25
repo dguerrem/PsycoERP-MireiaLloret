@@ -29,7 +29,7 @@ const getSessions = async (filters = {}) => {
             s.payment_method,
             s.notes,
             p.id AS patient_id,
-            p.name AS patient_name,
+            CONCAT(p.first_name, ' ', p.last_name) AS patient_name,
             c.id AS clinic_id,
             c.name AS clinic_name
         FROM sessions s
@@ -272,7 +272,7 @@ const getSessionForWhatsApp = async (sessionId) => {
       s.session_date,
       s.start_time,
       s.status,
-      p.name as patient_name,
+      CONCAT(p.first_name, ' ', p.last_name) as patient_name,
       p.phone as patient_phone
     FROM sessions s
     INNER JOIN patients p ON s.patient_id = p.id AND p.is_active = true AND p.status = 'en curso'

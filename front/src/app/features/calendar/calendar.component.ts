@@ -97,8 +97,8 @@ export class CalendarComponent {
 
   onSessionDataCreated(sessionData: SessionData): void {
     console.log('Session data received:', sessionData);
-    // Add the session to the calendar service
-    this.calendarService.addSessionData(sessionData.SessionDetailData);
+    // Reload sessions from API to get the latest data
+    this.calendarService.reloadSessions();
     this.showNewSessionDialog.set(false);
   }
 
