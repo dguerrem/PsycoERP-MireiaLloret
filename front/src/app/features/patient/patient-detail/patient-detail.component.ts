@@ -10,10 +10,11 @@ import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Patient } from '../../../shared/models/patient.model';
-import { PatientDetailResponse, PatientDetailUtils, Session, Invoice, Bonus } from '../../../shared/models/patient-detail.model';
+import { PatientDetailResponse, PatientDetailUtils, Session, Invoice, Bonus, PatientSession } from '../../../shared/models/patient-detail.model';
 import { PatientSummaryComponent } from '../components/patient-summary.component';
 import { PatientDataComponent } from '../components/patient-data.component';
 import { PatientClinicalHistoryComponent } from '../components/patient-clinical-history.component';
+import { PatientSessionsComponent } from '../components/patient-sessions.component';
 
 /**
  * Patient Detail Component
@@ -24,7 +25,7 @@ import { PatientClinicalHistoryComponent } from '../components/patient-clinical-
 @Component({
   selector: 'app-patient-detail',
   standalone: true,
-  imports: [CommonModule, PatientSummaryComponent, PatientDataComponent, PatientClinicalHistoryComponent],
+  imports: [CommonModule, PatientSummaryComponent, PatientDataComponent, PatientClinicalHistoryComponent, PatientSessionsComponent],
   templateUrl: './patient-detail.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -96,6 +97,13 @@ export class PatientDetailComponent implements OnInit {
   readonly bonuses = computed(() => {
     // Empty for now - no bonus data in API
     return [] as Bonus[];
+  });
+
+  readonly patientSessions = computed(() => {
+    const data = this.patientDetailData();
+    if (!data || !data.success) return [];
+
+    return data.data.PatientSessions;
   });
 
   ngOnInit(): void {

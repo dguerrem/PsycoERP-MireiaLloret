@@ -42,6 +42,7 @@ export interface PatientSession {
   clinica: string;
   estado: 'programada' | 'finalizada' | 'cancelada';
   precio: string;
+  precio_neto: string;
   tipo_pago: string;
   notas: string;
 }
