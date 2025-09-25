@@ -237,17 +237,17 @@ const getPatientById = async (id) => {
   
   // Consulta para obtener sesiones extendidas para PatientSessions
   const patientSessionsQuery = `
-        SELECT 
-            s.id,
+        SELECT
             DATE_FORMAT(s.session_date, '%Y-%m-%d') as fecha,
             c.name as clinica,
             s.status as estado,
             s.price as precio,
+            ROUND(s.price * (c.percentage / 100), 2) as precio_neto,
             s.payment_method as tipo_pago,
             s.notes as notas
         FROM sessions s
         LEFT JOIN clinics c ON s.clinic_id = c.id
-        WHERE s.patient_id = ?
+        WHERE s.patient_id = ? AND s.is_active = 1
         ORDER BY s.session_date DESC
     `;
   

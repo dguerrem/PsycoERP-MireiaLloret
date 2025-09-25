@@ -1653,12 +1653,6 @@ const definitions = {
   PatientSession: {
     type: "object",
     properties: {
-      id: {
-        type: "integer",
-        format: "int64",
-        description: "ID único de la sesión",
-        example: 1,
-      },
       fecha: {
         type: "string",
         format: "date",
@@ -1671,28 +1665,29 @@ const definitions = {
         description: "Nombre de la clínica",
         example: "Clínica Psicológica Centro",
       },
-      tipo: {
-        type: "string",
-        description: "Tipo de sesión",
-        example: "Terapia Individual",
-      },
       estado: {
         type: "string",
-        enum: ["scheduled", "completed", "cancelled", "no-show"],
+        enum: ["programada", "finalizada", "cancelada"],
         description: "Estado de la sesión",
-        example: "completed",
+        example: "finalizada",
       },
       precio: {
         type: "number",
         format: "decimal",
-        description: "Precio de la sesión",
+        description: "Precio total de la sesión",
         example: 60.0,
+      },
+      precio_neto: {
+        type: "number",
+        format: "decimal",
+        description: "Precio neto que se lleva la psicóloga (calculado según porcentaje de la clínica)",
+        example: 48.0,
       },
       tipo_pago: {
         type: "string",
-        enum: ["cash", "card", "transfer", "insurance"],
+        enum: ["bizum", "transferencia", "tarjeta", "efectivo", "pendiente"],
         description: "Método de pago",
-        example: "card",
+        example: "tarjeta",
       },
       notas: {
         type: "string",
