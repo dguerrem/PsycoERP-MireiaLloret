@@ -53,6 +53,11 @@ const definitions = {
         description: "Porcentaje de la clínica",
         example: 15.50,
       },
+      presencial: {
+        type: "boolean",
+        description: "Indica si la clínica es presencial (tiene dirección) o no. true = Presencial, false = Online",
+        example: true,
+      },
     },
   },
 
@@ -1472,6 +1477,19 @@ const definitions = {
         description: "Indica si es menor de edad",
         example: false,
       },
+      nombre_clinica: {
+        type: "string",
+        nullable: true,
+        description: "Nombre de la clínica asignada",
+        example: "Clínica Psicológica Centro",
+      },
+      tipo_clinica: {
+        type: "string",
+        enum: ["Online", "Presencial"],
+        nullable: true,
+        description: "Tipo de clínica basado en si tiene dirección. Online si no tiene dirección, Presencial si la tiene.",
+        example: "Presencial",
+      },
     },
   },
 
@@ -1523,6 +1541,44 @@ const definitions = {
     },
   },
 
+  PatientResumeInvoice: {
+    type: "object",
+    properties: {
+      total_spent_current_year: {
+        type: "number",
+        format: "decimal",
+        description: "Total gastado en el año actual",
+        example: 720.00,
+      },
+      invoices_issued: {
+        type: "integer",
+        description: "Número de facturas emitidas",
+        example: 0,
+      },
+    },
+  },
+
+  PatientSessionsStatus: {
+    type: "object",
+    properties: {
+      completed_sessions: {
+        type: "integer",
+        description: "Número de sesiones finalizadas",
+        example: 8,
+      },
+      scheduled_sessions: {
+        type: "integer",
+        description: "Número de sesiones programadas",
+        example: 3,
+      },
+      cancelled_sessions: {
+        type: "integer",
+        description: "Número de sesiones canceladas",
+        example: 1,
+      },
+    },
+  },
+
   PatientResume: {
     type: "object",
     properties: {
@@ -1543,6 +1599,15 @@ const definitions = {
         description: "Teléfono del paciente",
         example: "+34 666 123 456",
       },
+      preferred_mode: {
+        type: "string",
+        enum: ["Online", "Presencial"],
+        description: "Modo preferido de sesión basado en la clínica asignada. Online si la clínica no tiene dirección, Presencial si la tiene.",
+        example: "Presencial",
+      },
+      PatientSessionsStatus: {
+        $ref: "#/components/schemas/PatientSessionsStatus",
+      },
       PatientResumeSessions: {
         type: "array",
         items: {
@@ -1550,23 +1615,25 @@ const definitions = {
         },
         description: "Historial de sesiones del paciente",
       },
+      PatientResumeInvoice: {
+        $ref: "#/components/schemas/PatientResumeInvoice",
+      },
     },
   },
 
   PatientResumeSession: {
     type: "object",
     properties: {
-      idsesion: {
-        type: "integer",
-        format: "int64",
-        description: "ID único de la sesión",
-        example: 1,
+      tipo: {
+        type: "string",
+        enum: ["presencial", "online"],
+        description: "Modalidad de la sesión",
+        example: "presencial",
       },
       fecha: {
         type: "string",
-        format: "date",
-        description: "Fecha de la sesión (YYYY-MM-DD)",
-        example: "2024-12-15",
+        description: "Fecha de la sesión en formato dd/mm/yyyy",
+        example: "15/12/2024",
       },
       precio: {
         type: "number",
@@ -1576,9 +1643,9 @@ const definitions = {
       },
       metodo_pago: {
         type: "string",
-        enum: ["cash", "card", "transfer", "insurance"],
+        enum: ["bizum", "transferencia", "tarjeta", "efectivo", "pendiente"],
         description: "Método de pago",
-        example: "card",
+        example: "tarjeta",
       },
     },
   },

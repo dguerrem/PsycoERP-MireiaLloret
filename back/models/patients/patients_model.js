@@ -146,55 +146,91 @@ const getPatients = async (filters = {}) => {
 
 // Obtener un paciente por ID con información específica para PatientResume
 const getPatientById = async (id) => {
-  // Consulta para obtener datos básicos del paciente
+  // Consulta para obtener datos básicos del paciente con modo preferido basado en la clínica
   const patientQuery = `
         SELECT
-            id,
-            email,
-            phone
-        FROM patients
-        WHERE id = ? AND is_active = true
+            p.id,
+            p.email,
+            p.phone,
+            CASE
+                WHEN c.address IS NULL OR c.address = '' THEN 'Online'
+                ELSE 'Presencial'
+            END as preferred_mode
+        FROM patients p
+        LEFT JOIN clinics c ON p.clinic_id = c.id AND c.is_active = true
+        WHERE p.id = ? AND p.is_active = true
     `;
-  
+
   const [patientRows] = await db.execute(patientQuery, [id]);
-  
+
   if (patientRows.length === 0) {
     return {
       PatientResume: null
     };
   }
 
-  // Consulta para obtener sesiones del paciente
+  // Consulta para obtener conteo de sesiones por estado (PatientSessionsStatus)
+  const sessionsStatusQuery = `
+        SELECT
+            COALESCE(SUM(CASE WHEN status = 'finalizada' THEN 1 ELSE 0 END), 0) as completed_sessions,
+            COALESCE(SUM(CASE WHEN status = 'programada' THEN 1 ELSE 0 END), 0) as scheduled_sessions,
+            COALESCE(SUM(CASE WHEN status = 'cancelada' THEN 1 ELSE 0 END), 0) as cancelled_sessions
+        FROM sessions
+        WHERE patient_id = ? AND is_active = 1
+    `;
+
+  const [sessionsStatusRows] = await db.execute(sessionsStatusQuery, [id]);
+
+  // Consulta para obtener sesiones del paciente con todos los detalles (PatientResumeSessions)
   const sessionsQuery = `
-        SELECT 
-            id as idsesion,
-            DATE_FORMAT(session_date, '%Y-%m-%d') as fecha,
+        SELECT
+            mode as tipo,
+            DATE_FORMAT(session_date, '%d/%m/%Y') as fecha,
             price as precio,
             payment_method as metodo_pago
         FROM sessions
-        WHERE patient_id = ?
+        WHERE patient_id = ? AND is_active = 1
         ORDER BY session_date DESC
+        LIMIT 10
     `;
-  
+
   const [sessionsRows] = await db.execute(sessionsQuery, [id]);
+
+  // Consulta para obtener información financiera del año actual (PatientResumeInvoice)
+  const currentYear = new Date().getFullYear();
+  const invoiceQuery = `
+        SELECT
+            COALESCE(SUM(price), 0) as total_spent_current_year,
+            0 as invoices_issued
+        FROM sessions
+        WHERE patient_id = ? AND is_active = 1 AND YEAR(session_date) = ?
+    `;
+
+  const [invoiceRows] = await db.execute(invoiceQuery, [id, currentYear]);
   
-  // Consulta para obtener datos detallados del paciente
+  // Consulta para obtener datos detallados del paciente con información de clínica
   const patientDataQuery = `
         SELECT
-            CONCAT(first_name, ' ', last_name) as nombre,
-            dni,
-            DATE_FORMAT(birth_date, '%Y-%m-%d') as fecha_nacimiento,
-            status as estado,
-            email,
-            phone as telefono,
-            CONCAT_WS(' ', street, street_number, door, city, province, postal_code) as direccion,
-            gender as genero,
-            occupation as ocupacion,
-            clinic_id,
-            DATE_FORMAT(treatment_start_date, '%Y-%m-%d') as fecha_inicio_tratamiento,
-            is_minor as menor_edad
-        FROM patients
-        WHERE id = ? AND is_active = true
+            CONCAT(p.first_name, ' ', p.last_name) as nombre,
+            p.dni,
+            DATE_FORMAT(p.birth_date, '%Y-%m-%d') as fecha_nacimiento,
+            p.status as estado,
+            p.email,
+            p.phone as telefono,
+            CONCAT_WS(' ', p.street, p.street_number, p.door, p.city, p.province, p.postal_code) as direccion,
+            p.gender as genero,
+            p.occupation as ocupacion,
+            p.clinic_id,
+            DATE_FORMAT(p.treatment_start_date, '%Y-%m-%d') as fecha_inicio_tratamiento,
+            p.is_minor as menor_edad,
+            c.name as nombre_clinica,
+            CASE
+                WHEN c.address IS NULL OR c.address = '' THEN 'Online'
+                ELSE 'Presencial'
+            END as tipo_clinica
+        FROM patients p
+        LEFT JOIN clinics c ON p.clinic_id = c.id AND c.is_active = true
+        WHERE p.id = ? AND p.is_active = true
     `;
   
   const [patientDataRows] = await db.execute(patientDataQuery, [id]);
@@ -232,8 +268,10 @@ const getPatientById = async (id) => {
   const [clinicalNotesRows] = await db.execute(clinicalNotesQuery, [id]);
 
   const patientResumeData = patientRows[0];
+  patientResumeData.PatientSessionsStatus = sessionsStatusRows[0];
   patientResumeData.PatientResumeSessions = sessionsRows;
-  
+  patientResumeData.PatientResumeInvoice = invoiceRows[0];
+
   return {
     PatientResume: patientResumeData,
     PatientData: patientDataRows[0] || {},
@@ -599,7 +637,11 @@ const getActivePatientsWithClinicInfo = async () => {
       p.clinic_id as idClinica,
       c.name as nombreClinica,
       c.price as precioSesion,
-      c.percentage as porcentaje
+      c.percentage as porcentaje,
+      CASE
+        WHEN c.address IS NULL OR c.address = '' THEN 0
+        ELSE 1
+      END as presencial
     FROM patients p
     LEFT JOIN clinics c ON p.clinic_id = c.id
     WHERE p.is_active = 1 AND p.status = 'en curso' AND c.is_active = 1
@@ -607,7 +649,12 @@ const getActivePatientsWithClinicInfo = async () => {
   `;
 
   const [rows] = await db.execute(query);
-  return rows;
+
+  // Convert presencial from 0/1 to boolean
+  return rows.map(row => ({
+    ...row,
+    presencial: Boolean(row.presencial)
+  }));
 };
 
 module.exports = {
