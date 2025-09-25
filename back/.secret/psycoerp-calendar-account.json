@@ -1,0 +1,13 @@
+{
+  "type": "service_account",
+  "project_id": "erp-psicologia-meet",
+  "private_key_id": "0175feddcd1053b9c8e2d725a49b2c8d5cf53af0",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQCibn8Fx7Cjf33V\nMLRJOJXa6JW3iw4jbhwXtTd0CdMN0ErO7k0BLulWRjWl6/L64l64m3hc5hWGXBpy\nNboGuK6iy5TtxtusgMUBYAI+ptKQgJWRH28G+eUeID6mofiUQvYH4maVu5cj1EL3\n/3TrR+W5AzW/gx5UL2g8a2uIsH7YZ5GoIWN9ajmUy+qtRD5cFts6soQ4XtVf8onz\nv0w4ShHV30BRrylMs42Bi8L391u6HuSQObxkXczCzWWpX3Mry/tTruWYraQwtcFY\nrWX3bj/8CNlb5M9GgdGnuJce6klkku6vR6zmJNcMplwzCb3SF7JcCFOD0HYRIBuv\nMnoNWteHAgMBAAECggEAGh3tI5dHkgpaR7CUlF9aTP/vrrrXk5/NOYykNW6s9kAi\n/yG21PVfhEU2tA57m5ZRR5qL4FgIZvmhMPLtjc4dGkTkldTPFm3//ygaREubeKuM\nIPDub683hUAHAtDxQJmBqKPg/btTYmnrOKfk+z2stLJM7pWdB0k2F9znxesnAhFn\nOM9Kg0WKAKpReh8mpV+guy/4u2p8zvYGUA4H4YWNoU/G48t/o1gkSQ7SMHM0XlRP\nqjRVK0iii4eY68uyjl68iivRW7i12Z9HVBhtvqWKqbkDiNce6b/ELZYzkj0o1Ik8\n/K1PIlqQIvFKNVZtP0XLAJqFcIV1iIPx5Qrz+4ZdDQKBgQDelgqjFqwL0ea/k74Z\n1XANrjiSNmaD9Q8OFpjX9VYDeeKmXtE3ROd4q+5ymDDtYZBsYeiuaenZ1tOB0EmX\n+vJ404fRqYvGBnNdLZ4CzXYQVlxiGu0CcBJKBf5GR8XZf74B5NhSQbXd+ume/IKA\nMZ90OlHzpJgXwNwcYdH8u8cqdQKBgQC60Lmcqb63/YJfYdtZGRccxs1Ah3xKbygC\n1ydB5f5EosUlHb+5n4gp8PR81ooysNM43rFGWaRun7BdaBP9Oa+E+xjKy6Yiw4c6\n5Tt8NZyQsi5P4F7ZlUY4JQ2OVJeHdFkVtEicA5bKlQyUCxx9cVy/RRvD5vj1kdxG\ngkHE115iiwKBgDrLSS4BDBrnK9tIzDsIrNuAPIMqiXOrpHllMKRCsqCibmLhwsOl\nmLrAN3DfkHTzg3GNfyeq5FFdNGsiuH3DlI6j2UlhToFVLN3c8dLtsJTqKubjE93D\n+qDA6oRn6vPjkS3w487+emqTH2iWbGYuNV8/FGyV+nKzx7BbilsGwroNAoGAOtRL\n/ze9JXehvKO2TYKHMrqwHCgOTepfMTXL2QayYa7YYm3R2ISSfpKwizeMYZYpjfki\n3kKQc326Lk/+K3ok+b2Q+xvSf5QPW86gQucnHLHfv6uqct59NGUGtdGRvkg3XYxe\naTMAI194jI5LNH2kdV8v9SshL0P1mAag63ne8S0CgYEAyMEmo7E0l6XdllUXSNKO\nMtgufvclYeWpsMj2OtH+EiLvkXsR1rfJtJ3qehPBWStZbs3Mou3IHidOPgYtY0yN\nNCw3Sg08Ijt5n/moZhNHZYaUIC+qDhgeBtYftqFJIhM/c4p9wTXfTQDP/UtI2RjB\nlf5pyIESRaGyQKBbKIXEteg=\n-----END PRIVATE KEY-----\n",
+  "client_email": "erp-psicologia-meet-service@erp-psicologia-meet.iam.gserviceaccount.com",
+  "client_id": "113151303587623902743",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/erp-psicologia-meet-service%40erp-psicologia-meet.iam.gserviceaccount.com",
+  "universe_domain": "googleapis.com"
+}
