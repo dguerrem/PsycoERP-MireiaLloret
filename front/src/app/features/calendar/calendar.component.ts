@@ -95,10 +95,10 @@ export class CalendarComponent {
     this.showNewSessionDialog.set(false);
   }
 
-  onSessionDataCreated(sessionData: CreateSessionRequest): void {
+  onSessionDataCreated(sessionData: SessionData): void {
     console.log('Session data received:', sessionData);
-    // Here you would typically send the data to your API
-    // this.sessionService.createSession(sessionData).subscribe(...)
+    // Add the session to the calendar service
+    this.calendarService.addSessionData(sessionData.SessionDetailData);
     this.showNewSessionDialog.set(false);
   }
 

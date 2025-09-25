@@ -15,8 +15,9 @@ import {
   Validators,
 } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
-import { CreateSessionRequest } from '../../../../shared/models/session.model';
+import { CreateSessionRequest, SessionData } from '../../../../shared/models/session.model';
 import { PatientSelector } from '../../../../shared/models/patient.model';
+import { SessionsService } from '../../services/sessions.service';
 import { ReusableModalComponent } from '../../../../shared/components/reusable-modal/reusable-modal.component';
 import { FormInputComponent } from '../../../../shared/components/form-input/form-input.component';
 import { PatientSelectorComponent } from '../../../../shared/components/patient-selector/patient-selector.component';
@@ -53,10 +54,11 @@ import { PatientSelectorComponent } from '../../../../shared/components/patient-
 })
 export class NewSessionDialogComponent implements OnInit {
   @Output() close = new EventEmitter<void>();
-  @Output() sessionDataCreated = new EventEmitter<CreateSessionRequest>();
+  @Output() sessionDataCreated = new EventEmitter<SessionData>();
 
   private fb = inject(FormBuilder);
   private http = inject(HttpClient);
+  private sessionsService = inject(SessionsService);
 
   /** Loading state signal */
   readonly isLoading = signal(false);
@@ -145,6 +147,14 @@ export class NewSessionDialogComponent implements OnInit {
     }
   }
 
+  private convertTimeToISO(time: string): string {
+    // Convert HH:mm to HH:mm:ss.sssZ format
+    const [hours, minutes] = time.split(':');
+    const now = new Date();
+    now.setHours(parseInt(hours), parseInt(minutes), 0, 0);
+    return now.toISOString().split('T')[1]; // Get only the time part
+  }
+
   onSubmit(): void {
     this.error.set(null);
 
@@ -174,23 +184,29 @@ export class NewSessionDialogComponent implements OnInit {
       patient_id: formValue.patient_id,
       clinic_id: patient.idClinica,
       session_date: formValue.session_date,
-      start_time: formValue.start_time,
-      end_time: formValue.end_time,
+      start_time: this.convertTimeToISO(formValue.start_time),
+      end_time: this.convertTimeToISO(formValue.end_time),
       mode: formValue.mode,
       type: formValue.type,
       status: 'programada',
       price: formValue.price,
       payment_method: 'cash',
       payment_status: 'pending',
-      notes: formValue.notes
+      notes: formValue.notes || null
     };
 
-    // Simulate API call
-    setTimeout(() => {
-      this.sessionDataCreated.emit(sessionData);
-      this.isLoading.set(false);
-      this.onClose();
-    }, 1000);
+    this.sessionsService.createSession(sessionData).subscribe({
+      next: (createdSession) => {
+        this.sessionDataCreated.emit(createdSession);
+        this.isLoading.set(false);
+        this.onClose();
+      },
+      error: (error) => {
+        console.error('Error creating session:', error);
+        this.error.set('Error al crear la sesión. Por favor, intenta de nuevo.');
+        this.isLoading.set(false);
+      }
+    });
   }
 
   get isFormValid(): boolean {
