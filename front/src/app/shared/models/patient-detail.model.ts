@@ -10,6 +10,7 @@ export interface PatientDetailData {
   PatientMedicalRecord: any[];
   PatientSessions: PatientSession[];
   PatientInvoice: any[];
+  PatientDocuments: PatientDocument[];
 }
 
 export interface PatientResume {
@@ -156,4 +157,15 @@ export interface Bonus {
   remaining: number;
   expiryDate: Date;
   status: 'active' | 'expired' | 'used';
+}
+
+export interface PatientDocument {
+  id: number;
+  name: string;
+  type: string;
+  size: string;
+  upload_date: string;
+  description?: string;
+  file_url?: string;
+  patient_id: number;
 }

@@ -161,9 +161,10 @@
 
             @if (activeTab() === 'documentation') {
               <div class="h-full">
-                <div class="text-center py-12">
-                  <p class="text-muted-foreground">Tab Documentación - En desarrollo</p>
-                </div>
+                <app-patient-documentation
+                  [patient]="patient()!"
+                  [documents]="patientDocuments()">
+                </app-patient-documentation>
               </div>
             }
           </div>

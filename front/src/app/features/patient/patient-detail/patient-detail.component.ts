@@ -10,11 +10,12 @@ import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Patient } from '../../../shared/models/patient.model';
-import { PatientDetailResponse, PatientDetailUtils, Session, Invoice, Bonus, PatientSession } from '../../../shared/models/patient-detail.model';
+import { PatientDetailResponse, PatientDetailUtils, Session, Invoice, Bonus, PatientSession, PatientDocument } from '../../../shared/models/patient-detail.model';
 import { PatientSummaryComponent } from '../components/patient-summary.component';
 import { PatientDataComponent } from '../components/patient-data.component';
 import { PatientClinicalHistoryComponent } from '../components/patient-clinical-history.component';
 import { PatientSessionsComponent } from '../components/patient-sessions.component';
+import { PatientDocumentationComponent } from '../components/patient-documentation.component';
 
 /**
  * Patient Detail Component
@@ -25,7 +26,7 @@ import { PatientSessionsComponent } from '../components/patient-sessions.compone
 @Component({
   selector: 'app-patient-detail',
   standalone: true,
-  imports: [CommonModule, PatientSummaryComponent, PatientDataComponent, PatientClinicalHistoryComponent, PatientSessionsComponent],
+  imports: [CommonModule, PatientSummaryComponent, PatientDataComponent, PatientClinicalHistoryComponent, PatientSessionsComponent, PatientDocumentationComponent],
   templateUrl: './patient-detail.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -104,6 +105,13 @@ export class PatientDetailComponent implements OnInit {
     if (!data || !data.success) return [];
 
     return data.data.PatientSessions;
+  });
+
+  readonly patientDocuments = computed(() => {
+    const data = this.patientDetailData();
+    if (!data || !data.success) return [];
+
+    return data.data.PatientDocuments || [];
   });
 
   ngOnInit(): void {
