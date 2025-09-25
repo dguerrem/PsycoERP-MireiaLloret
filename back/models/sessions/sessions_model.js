@@ -194,7 +194,7 @@ const createSession = async (sessionData) => {
       payment_method,
       payment_status,
       notes
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   `;
 
   const params = [
@@ -204,7 +204,6 @@ const createSession = async (sessionData) => {
     start_time,
     end_time,
     mode,
-    type,
     status,
     price,
     payment_method,

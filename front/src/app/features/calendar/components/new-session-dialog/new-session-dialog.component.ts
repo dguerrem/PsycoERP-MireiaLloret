@@ -109,6 +109,13 @@ export class NewSessionDialogComponent implements OnInit {
         });
       }
     });
+
+    // Watch for start time changes and automatically update end time
+    this.sessionForm.get('start_time')?.valueChanges.subscribe(startTime => {
+      if (startTime) {
+        this.updateEndTime(startTime);
+      }
+    });
   }
 
   private loadPatients(): void {
@@ -136,23 +143,25 @@ export class NewSessionDialogComponent implements OnInit {
   onStartTimeChange(): void {
     const startTime = this.sessionForm.get('start_time')?.value;
     if (startTime) {
-      const [hours, minutes] = startTime.split(':').map(Number);
-      const endDate = new Date();
-      endDate.setHours(hours + 1, minutes, 0);
-      const endTime = endDate.toTimeString().slice(0, 5);
-
-      this.sessionForm.patchValue({
-        end_time: endTime,
-      });
+      this.updateEndTime(startTime);
     }
   }
 
-  private convertTimeToISO(time: string): string {
-    // Convert HH:mm to HH:mm:ss.sssZ format
+  private updateEndTime(startTime: string): void {
+    const [hours, minutes] = startTime.split(':').map(Number);
+    const endDate = new Date();
+    endDate.setHours(hours + 1, minutes, 0);
+    const endTime = endDate.toTimeString().slice(0, 5);
+
+    this.sessionForm.patchValue({
+      end_time: endTime,
+    }, { emitEvent: false }); // emitEvent: false para evitar loops infinitos
+  }
+
+  private convertTimeToMySQL(time: string): string {
+    // Convert HH:mm to HH:mm:ss format for MySQL TIME column
     const [hours, minutes] = time.split(':');
-    const now = new Date();
-    now.setHours(parseInt(hours), parseInt(minutes), 0, 0);
-    return now.toISOString().split('T')[1]; // Get only the time part
+    return `${hours.padStart(2, '0')}:${minutes.padStart(2, '0')}:00`;
   }
 
   onSubmit(): void {
@@ -184,13 +193,13 @@ export class NewSessionDialogComponent implements OnInit {
       patient_id: formValue.patient_id,
       clinic_id: patient.idClinica,
       session_date: formValue.session_date,
-      start_time: this.convertTimeToISO(formValue.start_time),
-      end_time: this.convertTimeToISO(formValue.end_time),
+      start_time: this.convertTimeToMySQL(formValue.start_time),
+      end_time: this.convertTimeToMySQL(formValue.end_time),
       mode: formValue.mode,
       type: formValue.type,
       status: 'programada',
       price: formValue.price,
-      payment_method: 'cash',
+      payment_method: 'efectivo',
       payment_status: 'pending',
       notes: formValue.notes || null
     };

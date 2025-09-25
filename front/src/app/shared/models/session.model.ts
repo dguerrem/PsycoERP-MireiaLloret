@@ -13,7 +13,7 @@ export interface CreateSessionRequest {
   type: string;
   status: 'programada';
   price: number;
-  payment_method: 'cash' | 'card' | 'transfer' | 'bizum';
+  payment_method: 'bizum' | 'transferencia' | 'tarjeta' | 'efectivo' | 'pendiente';
   payment_status: 'pending';
   notes: string;
 }
@@ -27,7 +27,7 @@ export interface SessionData {
     type: string;         // "Terapia Individual"
     mode: 'Online' | 'Presencial'; // Added mode to new DTO
     price: number;        // 60
-    payment_method: 'cash' | 'card' | 'transfer' | 'bizum';
+    payment_method: 'bizum' | 'transferencia' | 'tarjeta' | 'efectivo' | 'pendiente';
     payment_status: 'pending' | 'paid' | 'partial'; // Added payment status
     completed: boolean;     // true/false
     cancelled: boolean;     // true/false - to handle cancelled sessions
@@ -93,10 +93,11 @@ export class SessionUtils {
 
   static formatPaymentMethod(method: string): string {
     const methods = {
-      'cash': 'Efectivo',
-      'card': 'Tarjeta',
-      'transfer': 'Transferencia',
-      'bizum': 'Bizum'
+      'efectivo': 'Efectivo',
+      'tarjeta': 'Tarjeta',
+      'transferencia': 'Transferencia',
+      'bizum': 'Bizum',
+      'pendiente': 'Pendiente'
     };
     return methods[method as keyof typeof methods] || method;
   }

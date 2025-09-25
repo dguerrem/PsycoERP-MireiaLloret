@@ -57,10 +57,11 @@ export class SessionPopupComponent {
   ];
 
   readonly paymentMethods = [
-    { value: 'cash' as const, label: 'Efectivo' },
-    { value: 'card' as const, label: 'Tarjeta' },
-    { value: 'transfer' as const, label: 'Transferencia' },
+    { value: 'efectivo' as const, label: 'Efectivo' },
+    { value: 'tarjeta' as const, label: 'Tarjeta' },
+    { value: 'transferencia' as const, label: 'Transferencia' },
     { value: 'bizum' as const, label: 'Bizum' },
+    { value: 'pendiente' as const, label: 'Pendiente' },
   ];
 
   /**
@@ -328,7 +329,7 @@ export class SessionPopupComponent {
   /**
    * Updates payment method
    */
-  updatePaymentMethod(method: 'cash' | 'card' | 'transfer' | 'bizum'): void {
+  updatePaymentMethod(method: 'bizum' | 'transferencia' | 'tarjeta' | 'efectivo' | 'pendiente'): void {
     this.sessionData.SessionDetailData.payment_method = method;
     this.toggleDropdown('paymentMethod');
   }
