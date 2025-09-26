@@ -40,6 +40,9 @@ export class CalendarComponent {
   readonly pendingReminderSession = signal<SessionData | null>(null);
   readonly clinicConfigs = CLINIC_CONFIGS;
 
+  // Data to prefill when creating new session from calendar
+  prefilledSessionData: { date: string; startTime: string | null } | null = null;
+
   readonly weekDays = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
   readonly monthNames = [
     'Enero',
@@ -86,6 +89,24 @@ export class CalendarComponent {
     this.showNewSessionDialog.set(true);
   }
 
+  onNewSessionClickForDateTime(date: Date, hour: string): void {
+    // Pre-fill the form with the selected date and hour
+    this.prefilledSessionData = {
+      date: date.toISOString().split('T')[0],
+      startTime: hour
+    };
+    this.showNewSessionDialog.set(true);
+  }
+
+  onNewSessionClickForDate(date: Date): void {
+    // Pre-fill the form with the selected date
+    this.prefilledSessionData = {
+      date: date.toISOString().split('T')[0],
+      startTime: null
+    };
+    this.showNewSessionDialog.set(true);
+  }
+
   onCloseSessionPopup(): void {
     this.showSessionPopup.set(false);
     this.calendarService.setSelectedSessionData(null);
@@ -93,13 +114,18 @@ export class CalendarComponent {
 
   onCloseNewSessionDialog(): void {
     this.showNewSessionDialog.set(false);
+    this.prefilledSessionData = null;
   }
 
   onSessionDataCreated(sessionData: SessionData): void {
     console.log('Session data received:', sessionData);
-    // Reload sessions from API to get the latest data
-    this.calendarService.reloadSessions();
     this.showNewSessionDialog.set(false);
+    this.prefilledSessionData = null;
+
+    // Wait a moment for the API to process, then reload sessions
+    setTimeout(() => {
+      this.calendarService.reloadSessions();
+    }, 100);
   }
 
   getClinicConfig(clinicId: number): ClinicConfig {

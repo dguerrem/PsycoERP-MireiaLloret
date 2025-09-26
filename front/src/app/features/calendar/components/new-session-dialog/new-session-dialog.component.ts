@@ -1,5 +1,6 @@
 import {
   Component,
+  Input,
   Output,
   EventEmitter,
   signal,
@@ -53,6 +54,7 @@ import { PatientSelectorComponent } from '../../../../shared/components/patient-
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class NewSessionDialogComponent implements OnInit {
+  @Input() prefilledData: { date: string; startTime: string | null } | null = null;
   @Output() close = new EventEmitter<void>();
   @Output() sessionDataCreated = new EventEmitter<SessionData>();
 
@@ -84,18 +86,23 @@ export class NewSessionDialogComponent implements OnInit {
   }
 
   private initializeForm(): void {
-    const today = new Date().toISOString().split('T')[0];
+    const defaultDate = this.prefilledData?.date || new Date().toISOString().split('T')[0];
+    const defaultStartTime = this.prefilledData?.startTime || '';
 
     this.sessionForm = this.fb.group({
       patient_id: [null, [Validators.required]],
-      session_date: [today, [Validators.required]],
-      start_time: ['', [Validators.required]],
+      session_date: [defaultDate, [Validators.required]],
+      start_time: [defaultStartTime, [Validators.required]],
       end_time: ['', [Validators.required]],
       mode: ['presencial', [Validators.required]],
-      type: ['', [Validators.required]],
       price: [0, [Validators.required, Validators.min(0.01)]],
       notes: ['']
     });
+
+    // If start time is prefilled, calculate end time automatically
+    if (defaultStartTime) {
+      this.updateEndTime(defaultStartTime);
+    }
 
     // Watch for patient selection changes
     this.sessionForm.get('patient_id')?.valueChanges.subscribe(patientId => {
@@ -164,6 +171,7 @@ export class NewSessionDialogComponent implements OnInit {
     return `${hours.padStart(2, '0')}:${minutes.padStart(2, '0')}:00`;
   }
 
+
   onSubmit(): void {
     this.error.set(null);
 
@@ -201,7 +209,6 @@ export class NewSessionDialogComponent implements OnInit {
       start_time: this.convertTimeToMySQL(formValue.start_time),
       end_time: this.convertTimeToMySQL(formValue.end_time),
       mode: formValue.mode,
-      type: formValue.type,
       status: 'programada',
       price: formValue.price,
       payment_method: 'efectivo',

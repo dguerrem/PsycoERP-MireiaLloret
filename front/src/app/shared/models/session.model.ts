@@ -10,7 +10,6 @@ export interface CreateSessionRequest {
   start_time: string;   // "19:12:21.989Z"
   end_time: string;     // "19:12:21.989Z"
   mode: 'presencial' | 'online';
-  type: string;
   status: 'programada';
   price: number;
   payment_method: 'bizum' | 'transferencia' | 'tarjeta' | 'efectivo' | 'pendiente';

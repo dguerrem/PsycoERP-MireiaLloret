@@ -6,6 +6,8 @@ const dbConfig = {
   user: process.env.DB_USER,
   password: process.env.DB_PASSWORD,
   database: process.env.DB_NAME,
+  timezone: '+00:00', // UTC para evitar conversiones automáticas
+  dateStrings: true, // Mantener fechas como strings para evitar conversiones
 };
 
 // Crear el pool de conexiones

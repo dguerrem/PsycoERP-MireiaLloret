@@ -98,57 +98,62 @@ const getSessions = async (filters = {}) => {
   // Agregar ordenamiento y paginación solo a la query de datos
   dataQuery += " ORDER BY s.session_date DESC, s.start_time DESC";
   dataQuery += " LIMIT ? OFFSET ?";
-  
+
   // Ejecutar ambas queries
   const [countResult] = await db.execute(countQuery, params);
   const totalRecords = countResult[0].total;
-  
+
   const [rows] = await db.execute(dataQuery, [...params, limit, offset]);
-  
+
   // Transformar datos a estructura organizada
-  const transformedData = await Promise.all(rows.map(async (row) => {
-    // Obtener notas clínicas del paciente (solo si el paciente está activo)
-    const [medicalRecords] = await db.execute(`
+  const transformedData = await Promise.all(
+    rows.map(async (row) => {
+      // Obtener notas clínicas del paciente (solo si el paciente está activo)
+      const [medicalRecords] = await db.execute(
+        `
       SELECT cn.title, cn.content, cn.created_at 
       FROM clinical_notes cn
       INNER JOIN patients p ON cn.patient_id = p.id
       WHERE cn.patient_id = ? AND p.is_active = true
       ORDER BY cn.created_at DESC
-    `, [row.patient_id]);
+    `,
+        [row.patient_id]
+      );
 
-    return {
-      SessionDetailData: {
-        session_id: row.session_id,
-        session_date: row.session_date,
-        start_time: row.start_time,
-        end_time: row.end_time,
-        mode: row.mode,
-        status: row.status,
-        price: row.price,
-        payment_method: row.payment_method,
-        notes: row.notes,
-        PatientData: {
-          id: row.patient_id,
-          name: row.patient_name
+      return {
+        SessionDetailData: {
+          session_id: row.session_id,
+          session_date: row.session_date,
+          start_time: row.start_time,
+          end_time: row.end_time,
+          mode: row.mode,
+          status: row.status,
+          price: row.price,
+          payment_method: row.payment_method,
+          notes: row.notes,
+          PatientData: {
+            id: row.patient_id,
+            name: row.patient_name,
+          },
+          ClinicDetailData: {
+            clinic_id: row.clinic_id,
+            clinic_name: row.clinic_name,
+          },
+          MedicalRecordData: medicalRecords.map((record) => ({
+            title: record.title,
+            content: record.content,
+            date: record.created_at,
+          })),
         },
-        ClinicDetailData: {
-          clinic_id: row.clinic_id,
-          clinic_name: row.clinic_name
-        },
-        MedicalRecordData: medicalRecords.map(record => ({
-          title: record.title,
-          content: record.content,
-          date: record.created_at
-        }))
-      }
-    };
-  }));
+      };
+    })
+  );
 
   // Calcular información de paginación
   const totalPages = Math.ceil(totalRecords / limit);
   const hasNextPage = page < totalPages;
   const hasPrevPage = page > 1;
-  
+
   return {
     data: transformedData,
     pagination: {
@@ -159,8 +164,8 @@ const getSessions = async (filters = {}) => {
       hasNextPage: hasNextPage,
       hasPrevPage: hasPrevPage,
       nextPage: hasNextPage ? page + 1 : null,
-      prevPage: hasPrevPage ? page - 1 : null
-    }
+      prevPage: hasPrevPage ? page - 1 : null,
+    },
   };
 };
 
@@ -173,7 +178,6 @@ const createSession = async (sessionData) => {
     start_time,
     end_time,
     mode,
-    type,
     status,
     price,
     payment_method,
@@ -230,14 +234,14 @@ const updateSession = async (sessionId, updateData) => {
   const setClause = fields.map((field) => `${field} = ?`).join(", ");
 
   const query = `
-    UPDATE sessions 
+    UPDATE sessions
     SET ${setClause}
     WHERE id = ? AND is_active = true
   `;
 
   // Crear array de parámetros: valores + ID al final
   const params = [...Object.values(updateData), sessionId];
-  
+
   await db.execute(query, params);
 
   // Retornar la sesión actualizada
@@ -253,7 +257,7 @@ const updateSession = async (sessionId, updateData) => {
 const deleteSession = async (sessionId) => {
   // Realizar soft delete marcando is_active = false
   const [result] = await db.execute(
-    "UPDATE sessions SET is_active = false WHERE id = ? AND is_active = true", 
+    "UPDATE sessions SET is_active = false WHERE id = ? AND is_active = true",
     [sessionId]
   );
 
@@ -278,13 +282,13 @@ const getSessionForWhatsApp = async (sessionId) => {
     INNER JOIN patients p ON s.patient_id = p.id AND p.is_active = true AND p.status = 'en curso'
     WHERE s.id = ? AND s.is_active = true
   `;
-  
+
   const [rows] = await db.execute(query, [sessionId]);
-  
+
   if (rows.length === 0) {
     return null;
   }
-  
+
   return rows[0];
 };
 

@@ -89,7 +89,6 @@ const crearSesion = async (req, res) => {
       start_time,
       end_time,
       mode,
-      type,
       status = "scheduled",
       price = 0.0,
       payment_method = "cash",
@@ -104,8 +103,7 @@ const crearSesion = async (req, res) => {
       !session_date ||
       !start_time ||
       !end_time ||
-      !mode ||
-      !type
+      !mode
     ) {
       return res.status(400).json({
         success: false,
@@ -117,7 +115,6 @@ const crearSesion = async (req, res) => {
           "start_time",
           "end_time",
           "mode",
-          "type",
         ],
       });
     }
@@ -129,7 +126,6 @@ const crearSesion = async (req, res) => {
       start_time,
       end_time,
       mode,
-      type,
       status,
       price,
       payment_method,
@@ -162,7 +158,6 @@ const actualizarSesion = async (req, res) => {
       start_time,
       end_time,
       mode,
-      type,
       status,
       price,
       payment_method,
@@ -186,7 +181,6 @@ const actualizarSesion = async (req, res) => {
     if (start_time) updateData.start_time = start_time;
     if (end_time) updateData.end_time = end_time;
     if (mode) updateData.mode = mode;
-    if (type) updateData.type = type;
     if (status) updateData.status = status;
     if (price) updateData.price = price;
     if (payment_method) updateData.payment_method = payment_method;
