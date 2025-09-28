@@ -10,10 +10,10 @@ export interface CreateSessionRequest {
   start_time: string;   // "19:12:21.989Z"
   end_time: string;     // "19:12:21.989Z"
   mode: 'presencial' | 'online';
-  status: 'programada';
+  status: 'programada' | 'finalizada' | 'cancelada';
   price: number;
   payment_method: 'bizum' | 'transferencia' | 'tarjeta' | 'efectivo' | 'pendiente';
-  payment_status: 'pending';
+  payment_status: 'pending' | 'paid' | 'partial';
   notes: string;
 }
 
@@ -24,10 +24,11 @@ export interface SessionData {
     start_time: string;   // "09:00:00"
     end_time: string;     // "10:00:00"
     type: string;         // "Terapia Individual"
-    mode: 'Online' | 'Presencial'; // Added mode to new DTO
+    mode: 'online' | 'presencial'; // Added mode to new DTO
     price: number;        // 60
     payment_method: 'bizum' | 'transferencia' | 'tarjeta' | 'efectivo' | 'pendiente';
-    payment_status: 'pending' | 'paid' | 'partial'; // Added payment status
+    payment_status: 'pending' | 'paid' | 'partially_paid'; // Added payment status
+    status: 'programada' | 'finalizada' | 'cancelada'; // Added unified status field
     completed: boolean;     // true/false
     cancelled: boolean;     // true/false - to handle cancelled sessions
     no_show: boolean;       // true/false - to handle no-show sessions

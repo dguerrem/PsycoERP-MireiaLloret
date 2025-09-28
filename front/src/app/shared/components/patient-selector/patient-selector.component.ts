@@ -28,6 +28,10 @@ export class PatientSelectorComponent {
   @Input() label: string = 'Paciente';
   @Input() required: boolean = false;
 
+  get isDisabled(): boolean {
+    return this.control?.disabled || false;
+  }
+
   // Internal signals
   private searchTerm = signal<string>('');
   private isModalOpen = signal<boolean>(false);

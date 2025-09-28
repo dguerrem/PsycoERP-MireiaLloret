@@ -5,19 +5,22 @@ import {
   ChangeDetectionStrategy,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { SessionData, SessionUtils, CreateSessionRequest } from '../../shared/models/session.model';
+import {
+  SessionData,
+  SessionUtils,
+  CreateSessionRequest,
+} from '../../shared/models/session.model';
 import {
   CLINIC_CONFIGS,
   ClinicConfig,
 } from '../../shared/models/clinic-config.model';
 import { CalendarService } from './services/calendar.service';
-import { SessionPopupComponent } from './components/session-popup/session-popup.component';
-import { NewSessionDialogComponent } from './components/new-session-dialog/new-session-dialog.component';
+import { NewSessionFormComponent } from './components/new-sesion-dialog/new-session-form.component';
 
 @Component({
   selector: 'app-calendar',
   standalone: true,
-  imports: [CommonModule, SessionPopupComponent, NewSessionDialogComponent],
+  imports: [CommonModule, NewSessionFormComponent],
   templateUrl: './calendar.component.html',
   styleUrl: './calendar.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -41,7 +44,8 @@ export class CalendarComponent {
   readonly clinicConfigs = CLINIC_CONFIGS;
 
   // Data to prefill when creating new session from calendar
-  prefilledSessionData: { date: string; startTime: string | null } | null = null;
+  prefilledSessionData: { date: string; startTime: string | null; sessionData?: SessionData } | null =
+    null;
 
   readonly weekDays = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
   readonly monthNames = [
@@ -81,8 +85,13 @@ export class CalendarComponent {
   }
 
   onSessionClick(sessionData: SessionData): void {
-    this.calendarService.setSelectedSessionData(sessionData);
-    this.showSessionPopup.set(true);
+    // Open the session form in edit mode instead of showing popup
+    this.prefilledSessionData = {
+      date: sessionData.SessionDetailData.session_date,
+      startTime: sessionData.SessionDetailData.start_time.substring(0, 5),
+      sessionData: sessionData // Add the full session data for editing
+    };
+    this.showNewSessionDialog.set(true);
   }
 
   onNewSessionClick(): void {
@@ -93,7 +102,7 @@ export class CalendarComponent {
     // Pre-fill the form with the selected date and hour
     this.prefilledSessionData = {
       date: date.toISOString().split('T')[0],
-      startTime: hour
+      startTime: hour,
     };
     this.showNewSessionDialog.set(true);
   }
@@ -102,7 +111,7 @@ export class CalendarComponent {
     // Pre-fill the form with the selected date
     this.prefilledSessionData = {
       date: date.toISOString().split('T')[0],
-      startTime: null
+      startTime: null,
     };
     this.showNewSessionDialog.set(true);
   }

@@ -49,6 +49,7 @@ export interface PatientSelector {
   nombreClinica: string;
   precioSesion: number;
   porcentaje: number;
+  presencial?: boolean; // Added to handle mode selection
 }
 
 // Backward compatibility interface for existing code
