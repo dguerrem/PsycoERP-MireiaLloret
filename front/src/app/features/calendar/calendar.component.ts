@@ -272,4 +272,40 @@ export class CalendarComponent {
   isSessionCancelled(sessionData: SessionData): boolean {
     return sessionData.SessionDetailData.status === 'cancelada' || sessionData.SessionDetailData.cancelled;
   }
+
+  hasActiveSessionInSlot(date: Date, hour: string): boolean {
+    const sessions = this.getSessionDataForDateAndHour(date, hour);
+    return sessions.some(session => !this.isSessionCancelled(session));
+  }
+
+  hasActiveSessionInDate(date: Date): boolean {
+    const sessions = this.getSessionDataForDate(date);
+    return sessions.some(session => !this.isSessionCancelled(session));
+  }
+
+  getSortedSessionDataForDateAndHour(date: Date, hour: string): SessionData[] {
+    const sessions = this.getSessionDataForDateAndHour(date, hour);
+    return sessions.sort((a, b) => {
+      const aIsCancelled = this.isSessionCancelled(a);
+      const bIsCancelled = this.isSessionCancelled(b);
+
+      // Active sessions (not cancelled) come first
+      if (!aIsCancelled && bIsCancelled) return -1;
+      if (aIsCancelled && !bIsCancelled) return 1;
+      return 0; // Same status, maintain original order
+    });
+  }
+
+  getSortedSessionDataForDate(date: Date): SessionData[] {
+    const sessions = this.getSessionDataForDate(date);
+    return sessions.sort((a, b) => {
+      const aIsCancelled = this.isSessionCancelled(a);
+      const bIsCancelled = this.isSessionCancelled(b);
+
+      // Active sessions (not cancelled) come first
+      if (!aIsCancelled && bIsCancelled) return -1;
+      if (aIsCancelled && !bIsCancelled) return 1;
+      return 0; // Same status, maintain original order
+    });
+  }
 }
