@@ -144,11 +144,6 @@ export class CalendarComponent {
     );
   }
 
-  getClinicConfigFromSessionData(sessionData: SessionData): ClinicConfig {
-    return this.getClinicConfig(
-      sessionData.SessionDetailData.ClinicDetailData.clinic_id
-    );
-  }
 
   getSessionDataForDate(date: Date): SessionData[] {
     return this.calendarService.getSessionDataForDate(date);
@@ -267,5 +262,14 @@ export class CalendarComponent {
 
   getFormattedSessionTime(sessionData: SessionData): string {
     return sessionData.SessionDetailData.start_time.substring(0, 5);
+  }
+
+  getClinicConfigFromSessionData(sessionData: SessionData): ClinicConfig {
+    const clinicId = sessionData.SessionDetailData.ClinicDetailData.clinic_id;
+    return this.clinicConfigs.find(config => config.id === clinicId) || this.clinicConfigs[0];
+  }
+
+  isSessionCancelled(sessionData: SessionData): boolean {
+    return sessionData.SessionDetailData.status === 'cancelada' || sessionData.SessionDetailData.cancelled;
   }
 }
