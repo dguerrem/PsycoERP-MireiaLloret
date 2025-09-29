@@ -2,6 +2,21 @@ export interface SessionResponse {
   data: SessionData[];
 }
 
+// Interface for creating a new session
+export interface CreateSessionRequest {
+  patient_id: number;
+  clinic_id: number;
+  session_date: string; // "2025-09-22"
+  start_time: string;   // "19:12:21.989Z"
+  end_time: string;     // "19:12:21.989Z"
+  mode: 'presencial' | 'online';
+  status: 'programada' | 'finalizada' | 'cancelada';
+  price: number;
+  payment_method: 'bizum' | 'transferencia' | 'tarjeta' | 'efectivo' | 'pendiente';
+  payment_status: 'pending' | 'paid' | 'partial';
+  notes: string;
+}
+
 export interface SessionData {
   SessionDetailData: {
     session_id: number;
@@ -9,10 +24,11 @@ export interface SessionData {
     start_time: string;   // "09:00:00"
     end_time: string;     // "10:00:00"
     type: string;         // "Terapia Individual"
-    mode: 'Online' | 'Presencial'; // Added mode to new DTO
+    mode: 'online' | 'presencial'; // Added mode to new DTO
     price: number;        // 60
-    payment_method: 'cash' | 'card' | 'transfer' | 'bizum';
-    payment_status: 'pending' | 'paid' | 'partial'; // Added payment status
+    payment_method: 'bizum' | 'transferencia' | 'tarjeta' | 'efectivo' | 'pendiente';
+    payment_status: 'pending' | 'paid' | 'partially_paid'; // Added payment status
+    status: 'programada' | 'finalizada' | 'cancelada'; // Added unified status field
     completed: boolean;     // true/false
     cancelled: boolean;     // true/false - to handle cancelled sessions
     no_show: boolean;       // true/false - to handle no-show sessions
@@ -77,10 +93,11 @@ export class SessionUtils {
 
   static formatPaymentMethod(method: string): string {
     const methods = {
-      'cash': 'Efectivo',
-      'card': 'Tarjeta',
-      'transfer': 'Transferencia',
-      'bizum': 'Bizum'
+      'efectivo': 'Efectivo',
+      'tarjeta': 'Tarjeta',
+      'transferencia': 'Transferencia',
+      'bizum': 'Bizum',
+      'pendiente': 'Pendiente'
     };
     return methods[method as keyof typeof methods] || method;
   }

@@ -5,19 +5,22 @@ import {
   ChangeDetectionStrategy,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { SessionData, SessionUtils } from '../../shared/models/session.model';
+import {
+  SessionData,
+  SessionUtils,
+  CreateSessionRequest,
+} from '../../shared/models/session.model';
 import {
   CLINIC_CONFIGS,
   ClinicConfig,
 } from '../../shared/models/clinic-config.model';
 import { CalendarService } from './services/calendar.service';
-import { SessionPopupComponent } from './components/session-popup/session-popup.component';
-import { NewSessionDialogComponent } from './components/new-session-dialog/new-session-dialog.component';
+import { NewSessionFormComponent } from './components/new-sesion-dialog/new-session-form.component';
 
 @Component({
   selector: 'app-calendar',
   standalone: true,
-  imports: [CommonModule, SessionPopupComponent, NewSessionDialogComponent],
+  imports: [CommonModule, NewSessionFormComponent],
   templateUrl: './calendar.component.html',
   styleUrl: './calendar.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -39,6 +42,10 @@ export class CalendarComponent {
   readonly showReminderConfirmModal = signal(false);
   readonly pendingReminderSession = signal<SessionData | null>(null);
   readonly clinicConfigs = CLINIC_CONFIGS;
+
+  // Data to prefill when creating new session from calendar
+  prefilledSessionData: { date: string; startTime: string | null; sessionData?: SessionData } | null =
+    null;
 
   readonly weekDays = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
   readonly monthNames = [
@@ -78,11 +85,34 @@ export class CalendarComponent {
   }
 
   onSessionClick(sessionData: SessionData): void {
-    this.calendarService.setSelectedSessionData(sessionData);
-    this.showSessionPopup.set(true);
+    // Open the session form in edit mode instead of showing popup
+    this.prefilledSessionData = {
+      date: sessionData.SessionDetailData.session_date,
+      startTime: sessionData.SessionDetailData.start_time.substring(0, 5),
+      sessionData: sessionData // Add the full session data for editing
+    };
+    this.showNewSessionDialog.set(true);
   }
 
   onNewSessionClick(): void {
+    this.showNewSessionDialog.set(true);
+  }
+
+  onNewSessionClickForDateTime(date: Date, hour: string): void {
+    // Pre-fill the form with the selected date and hour
+    this.prefilledSessionData = {
+      date: date.toISOString().split('T')[0],
+      startTime: hour,
+    };
+    this.showNewSessionDialog.set(true);
+  }
+
+  onNewSessionClickForDate(date: Date): void {
+    // Pre-fill the form with the selected date
+    this.prefilledSessionData = {
+      date: date.toISOString().split('T')[0],
+      startTime: null,
+    };
     this.showNewSessionDialog.set(true);
   }
 
@@ -93,16 +123,18 @@ export class CalendarComponent {
 
   onCloseNewSessionDialog(): void {
     this.showNewSessionDialog.set(false);
+    this.prefilledSessionData = null;
   }
 
-  onSessionDataCreated(
-    sessionData: Omit<
-      SessionData['SessionDetailData'],
-      'session_id' | 'created_at' | 'updated_at'
-    >
-  ): void {
-    this.calendarService.addSessionData(sessionData);
+  onSessionDataCreated(sessionData: SessionData): void {
+    console.log('Session data received:', sessionData);
     this.showNewSessionDialog.set(false);
+    this.prefilledSessionData = null;
+
+    // Wait a moment for the API to process, then reload sessions
+    setTimeout(() => {
+      this.calendarService.reloadSessions();
+    }, 100);
   }
 
   getClinicConfig(clinicId: number): ClinicConfig {
@@ -112,11 +144,6 @@ export class CalendarComponent {
     );
   }
 
-  getClinicConfigFromSessionData(sessionData: SessionData): ClinicConfig {
-    return this.getClinicConfig(
-      sessionData.SessionDetailData.ClinicDetailData.clinic_id
-    );
-  }
 
   getSessionDataForDate(date: Date): SessionData[] {
     return this.calendarService.getSessionDataForDate(date);
@@ -235,5 +262,50 @@ export class CalendarComponent {
 
   getFormattedSessionTime(sessionData: SessionData): string {
     return sessionData.SessionDetailData.start_time.substring(0, 5);
+  }
+
+  getClinicConfigFromSessionData(sessionData: SessionData): ClinicConfig {
+    const clinicId = sessionData.SessionDetailData.ClinicDetailData.clinic_id;
+    return this.clinicConfigs.find(config => config.id === clinicId) || this.clinicConfigs[0];
+  }
+
+  isSessionCancelled(sessionData: SessionData): boolean {
+    return sessionData.SessionDetailData.status === 'cancelada' || sessionData.SessionDetailData.cancelled;
+  }
+
+  hasActiveSessionInSlot(date: Date, hour: string): boolean {
+    const sessions = this.getSessionDataForDateAndHour(date, hour);
+    return sessions.some(session => !this.isSessionCancelled(session));
+  }
+
+  hasActiveSessionInDate(date: Date): boolean {
+    const sessions = this.getSessionDataForDate(date);
+    return sessions.some(session => !this.isSessionCancelled(session));
+  }
+
+  getSortedSessionDataForDateAndHour(date: Date, hour: string): SessionData[] {
+    const sessions = this.getSessionDataForDateAndHour(date, hour);
+    return sessions.sort((a, b) => {
+      const aIsCancelled = this.isSessionCancelled(a);
+      const bIsCancelled = this.isSessionCancelled(b);
+
+      // Active sessions (not cancelled) come first
+      if (!aIsCancelled && bIsCancelled) return -1;
+      if (aIsCancelled && !bIsCancelled) return 1;
+      return 0; // Same status, maintain original order
+    });
+  }
+
+  getSortedSessionDataForDate(date: Date): SessionData[] {
+    const sessions = this.getSessionDataForDate(date);
+    return sessions.sort((a, b) => {
+      const aIsCancelled = this.isSessionCancelled(a);
+      const bIsCancelled = this.isSessionCancelled(b);
+
+      // Active sessions (not cancelled) come first
+      if (!aIsCancelled && bIsCancelled) return -1;
+      if (aIsCancelled && !bIsCancelled) return 1;
+      return 0; // Same status, maintain original order
+    });
   }
 }

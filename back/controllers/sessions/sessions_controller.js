@@ -4,8 +4,10 @@ const {
   updateSession,
   deleteSession,
   getSessionForWhatsApp,
+  checkDuplicateSession,
 } = require("../../models/sessions/sessions_model");
 
+const { db } = require("../../config/db");
 const { getRandomTemplate } = require("../../constants/whatsapp-templates");
 
 const obtenerSesiones = async (req, res) => {
@@ -17,7 +19,6 @@ const obtenerSesiones = async (req, res) => {
       session_date,
       fecha_desde,
       fecha_hasta,
-      payment_status,
       payment_method,
       page,
       limit,
@@ -47,7 +48,6 @@ const obtenerSesiones = async (req, res) => {
     if (patient_id) filters.patient_id = patient_id;
     if (status) filters.status = status;
     if (clinic_id) filters.clinic_id = clinic_id;
-    if (payment_status) filters.payment_status = payment_status;
     if (payment_method) filters.payment_method = payment_method;
 
     // Parámetros de paginación
@@ -89,11 +89,9 @@ const crearSesion = async (req, res) => {
       start_time,
       end_time,
       mode,
-      type,
-      status = "scheduled",
+      status = "programada",
       price = 0.0,
-      payment_method = "cash",
-      payment_status = "pending",
+      payment_method = "tarjeta",
       notes,
     } = req.body;
 
@@ -104,8 +102,7 @@ const crearSesion = async (req, res) => {
       !session_date ||
       !start_time ||
       !end_time ||
-      !mode ||
-      !type
+      !mode
     ) {
       return res.status(400).json({
         success: false,
@@ -117,8 +114,21 @@ const crearSesion = async (req, res) => {
           "start_time",
           "end_time",
           "mode",
-          "type",
         ],
+      });
+    }
+
+    // Verificar si ya existe una sesión para este paciente en la misma fecha y hora
+    const existingSession = await checkDuplicateSession(patient_id, session_date, start_time);
+
+    if (existingSession) {
+      return res.status(409).json({
+        success: false,
+        error: "Ya existe una sesión programada para este paciente en la misma fecha y hora",
+        conflicting_session: {
+          id: existingSession.id,
+          status: existingSession.status,
+        },
       });
     }
 
@@ -129,11 +139,9 @@ const crearSesion = async (req, res) => {
       start_time,
       end_time,
       mode,
-      type,
       status,
       price,
       payment_method,
-      payment_status,
       notes,
     });
 
@@ -162,11 +170,9 @@ const actualizarSesion = async (req, res) => {
       start_time,
       end_time,
       mode,
-      type,
       status,
       price,
       payment_method,
-      payment_status,
       notes,
     } = req.body;
 
@@ -186,11 +192,9 @@ const actualizarSesion = async (req, res) => {
     if (start_time) updateData.start_time = start_time;
     if (end_time) updateData.end_time = end_time;
     if (mode) updateData.mode = mode;
-    if (type) updateData.type = type;
     if (status) updateData.status = status;
     if (price) updateData.price = price;
     if (payment_method) updateData.payment_method = payment_method;
-    if (payment_status) updateData.payment_status = payment_status;
     if (notes) updateData.notes = notes;
 
     // Verificar que se envió al menos un campo para actualizar
@@ -199,6 +203,46 @@ const actualizarSesion = async (req, res) => {
         success: false,
         error: "No se proporcionaron campos para actualizar",
       });
+    }
+
+    // Si se está actualizando patient_id, session_date o start_time, verificar duplicados
+    if (patient_id || session_date || start_time) {
+      // Obtener sesión actual para tener todos los datos
+      const [currentSession] = await db.execute(
+        "SELECT patient_id, session_date, start_time FROM sessions WHERE id = ? AND is_active = true",
+        [parseInt(id)]
+      );
+
+      if (currentSession.length === 0) {
+        return res.status(404).json({
+          success: false,
+          error: "Sesión no encontrada",
+        });
+      }
+
+      // Usar los valores nuevos si se proporcionan, o los actuales si no
+      const finalPatientId = patient_id || currentSession[0].patient_id;
+      const finalSessionDate = session_date || currentSession[0].session_date;
+      const finalStartTime = start_time || currentSession[0].start_time;
+
+      // Verificar duplicados excluyendo la sesión actual
+      const existingSession = await checkDuplicateSession(
+        finalPatientId,
+        finalSessionDate,
+        finalStartTime,
+        parseInt(id)
+      );
+
+      if (existingSession) {
+        return res.status(409).json({
+          success: false,
+          error: "Ya existe una sesión programada para este paciente en la misma fecha y hora",
+          conflicting_session: {
+            id: existingSession.id,
+            status: existingSession.status,
+          },
+        });
+      }
     }
 
     const sesionActualizada = await updateSession(parseInt(id), updateData);

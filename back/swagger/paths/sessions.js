@@ -78,16 +78,6 @@ const sessionsPaths = {
           description: "Método de pago",
         },
         {
-          name: "payment_status",
-          in: "query",
-          required: false,
-          schema: {
-            type: "string",
-            enum: ["pending", "paid", "partially_paid"],
-          },
-          description: "Estado del pago",
-        },
-        {
           name: "page",
           in: "query",
           required: false,
@@ -215,12 +205,6 @@ const sessionsPaths = {
                   enum: ["cash", "card", "transfer", "insurance"],
                   default: "cash",
                   description: "Método de pago",
-                },
-                payment_status: {
-                  type: "string",
-                  enum: ["pending", "paid", "partially_paid"],
-                  default: "pending",
-                  description: "Estado del pago",
                 },
                 notes: {
                   type: "string",
@@ -352,11 +336,6 @@ const sessionsPaths = {
                   type: "string",
                   enum: ["cash", "card", "transfer", "insurance"],
                   description: "Método de pago",
-                },
-                payment_status: {
-                  type: "string",
-                  enum: ["pending", "paid", "partially_paid"],
-                  description: "Estado del pago",
                 },
                 notes: {
                   type: "string",
