@@ -1,4 +1,74 @@
 const clinicalNotesPaths = {
+  "/api/clinical-notes/patient/{patient_id}": {
+    get: {
+      tags: ["Clinical Notes"],
+      summary: "Obtener notas clínicas por ID de paciente",
+      description:
+        "Obtiene todas las notas clínicas de un paciente específico, ordenadas por fecha de creación (más recientes primero).",
+      parameters: [
+        {
+          name: "patient_id",
+          in: "path",
+          required: true,
+          schema: {
+            type: "integer",
+            format: "int64",
+          },
+          description: "ID del paciente",
+          example: 123,
+        },
+      ],
+      responses: {
+        200: {
+          description: "Notas clínicas obtenidas exitosamente",
+          content: {
+            "application/json": {
+              schema: {
+                type: "object",
+                properties: {
+                  success: {
+                    type: "boolean",
+                    example: true,
+                  },
+                  total: {
+                    type: "integer",
+                    description: "Número total de notas encontradas",
+                    example: 5,
+                  },
+                  data: {
+                    type: "array",
+                    items: {
+                      $ref: "#/definitions/ClinicalNoteSimple",
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+        400: {
+          description: "ID de paciente inválido",
+          content: {
+            "application/json": {
+              schema: {
+                $ref: "#/definitions/ErrorResponse",
+              },
+            },
+          },
+        },
+        500: {
+          description: "Error interno del servidor",
+          content: {
+            "application/json": {
+              schema: {
+                $ref: "#/definitions/ErrorResponse",
+              },
+            },
+          },
+        },
+      },
+    },
+  },
   "/api/clinical-notes": {
     post: {
       tags: ["Clinical Notes"],
