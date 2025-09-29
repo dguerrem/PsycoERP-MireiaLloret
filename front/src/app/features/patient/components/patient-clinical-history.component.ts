@@ -112,6 +112,14 @@ export class PatientClinicalHistoryComponent implements OnInit, OnChanges {
     return this.filteredNotes().sort((a, b) => b.date.getTime() - a.date.getTime());
   });
 
+  // Computed para validación del formulario
+  isFormValid = computed(() => {
+    const note = this.newNote();
+    const hasTitle = (note.title?.trim().length ?? 0) > 0;
+    const hasValidContent = (note.content?.trim().length ?? 0) >= 10;
+    return hasTitle && hasValidContent;
+  });
+
   onSearchChange(event: Event) {
     const target = event.target as HTMLInputElement;
     this.searchTerm.set(target.value);
@@ -152,14 +160,12 @@ export class PatientClinicalHistoryComponent implements OnInit, OnChanges {
     const note = this.newNote();
     const editingNote = this.editingNote();
 
-    // Validation
-    if (!note.title || !note.content) {
-      alert('Por favor, completa el título y el contenido de la nota.');
+    // Validation (should not happen with disabled button, but just in case)
+    if (!this.isFormValid()) {
       return;
     }
 
     if (!this.patient.id) {
-      alert('Error: No se puede guardar la nota sin un ID de paciente.');
       return;
     }
 
@@ -170,15 +176,14 @@ export class PatientClinicalHistoryComponent implements OnInit, OnChanges {
       const noteIdNumber = parseInt(editingNote.id);
 
       if (isNaN(noteIdNumber) || noteIdNumber === 0) {
-        alert('Error: ID de nota inválido para actualización.');
         this.isSaving.set(false);
         return;
       }
 
       this.clinicalNotesService.updateClinicalNote({
         id: noteIdNumber,
-        title: note.title,
-        content: note.content
+        title: note.title || '',
+        content: note.content || ''
       }).subscribe({
         next: (response) => {
           this.isSaving.set(false);
@@ -196,8 +201,8 @@ export class PatientClinicalHistoryComponent implements OnInit, OnChanges {
       // Create new note
       this.clinicalNotesService.createClinicalNote({
         patient_id: this.patient.id,
-        title: note.title,
-        content: note.content
+        title: note.title || '',
+        content: note.content || ''
       }).subscribe({
         next: (response) => {
           this.isSaving.set(false);
