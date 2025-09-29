@@ -328,7 +328,6 @@ export class NewSessionFormComponent implements OnInit {
       status: formValue.status,
       price: formValue.price,
       payment_method: formValue.payment_method,
-      payment_status: formValue.payment_method === 'pendiente' ? 'pending' : 'paid',
       notes: formValue.notes || null
     };
 

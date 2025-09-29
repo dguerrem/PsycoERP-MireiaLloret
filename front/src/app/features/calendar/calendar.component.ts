@@ -44,8 +44,11 @@ export class CalendarComponent {
   readonly clinicConfigs = CLINIC_CONFIGS;
 
   // Data to prefill when creating new session from calendar
-  prefilledSessionData: { date: string; startTime: string | null; sessionData?: SessionData } | null =
-    null;
+  prefilledSessionData: {
+    date: string;
+    startTime: string | null;
+    sessionData?: SessionData;
+  } | null = null;
 
   readonly weekDays = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
   readonly monthNames = [
@@ -89,7 +92,7 @@ export class CalendarComponent {
     this.prefilledSessionData = {
       date: sessionData.SessionDetailData.session_date,
       startTime: sessionData.SessionDetailData.start_time.substring(0, 5),
-      sessionData: sessionData // Add the full session data for editing
+      sessionData: sessionData, // Add the full session data for editing
     };
     this.showNewSessionDialog.set(true);
   }
@@ -143,7 +146,6 @@ export class CalendarComponent {
       this.clinicConfigs[0]
     );
   }
-
 
   getSessionDataForDate(date: Date): SessionData[] {
     return this.calendarService.getSessionDataForDate(date);
@@ -228,32 +230,6 @@ export class CalendarComponent {
     this.showReminderConfirmModal.set(true);
   }
 
-  onConfirmSendReminder(): void {
-    const sessionData = this.pendingReminderSession();
-    if (sessionData) {
-      this.calendarService.openWhatsAppReminder(sessionData);
-      this.calendarService.sendReminder(
-        sessionData.SessionDetailData.session_id
-      );
-    }
-    this.onCloseReminderConfirmModal();
-  }
-
-  onCloseReminderConfirmModal(): void {
-    this.showReminderConfirmModal.set(false);
-    this.pendingReminderSession.set(null);
-  }
-
-  canSendReminder(sessionData: SessionData): boolean {
-    const detail = sessionData.SessionDetailData;
-    return (
-      !detail.sended &&
-      !detail.completed &&
-      !detail.cancelled &&
-      !detail.no_show
-    );
-  }
-
   getFormattedSessionDate(sessionData: SessionData): string {
     return new Date(
       sessionData.SessionDetailData.session_date
@@ -266,21 +242,27 @@ export class CalendarComponent {
 
   getClinicConfigFromSessionData(sessionData: SessionData): ClinicConfig {
     const clinicId = sessionData.SessionDetailData.ClinicDetailData.clinic_id;
-    return this.clinicConfigs.find(config => config.id === clinicId) || this.clinicConfigs[0];
+    return (
+      this.clinicConfigs.find((config) => config.id === clinicId) ||
+      this.clinicConfigs[0]
+    );
   }
 
   isSessionCancelled(sessionData: SessionData): boolean {
-    return sessionData.SessionDetailData.status === 'cancelada' || sessionData.SessionDetailData.cancelled;
+    return (
+      sessionData.SessionDetailData.status === 'cancelada' ||
+      sessionData.SessionDetailData.cancelled
+    );
   }
 
   hasActiveSessionInSlot(date: Date, hour: string): boolean {
     const sessions = this.getSessionDataForDateAndHour(date, hour);
-    return sessions.some(session => !this.isSessionCancelled(session));
+    return sessions.some((session) => !this.isSessionCancelled(session));
   }
 
   hasActiveSessionInDate(date: Date): boolean {
     const sessions = this.getSessionDataForDate(date);
-    return sessions.some(session => !this.isSessionCancelled(session));
+    return sessions.some((session) => !this.isSessionCancelled(session));
   }
 
   getSortedSessionDataForDateAndHour(date: Date, hour: string): SessionData[] {

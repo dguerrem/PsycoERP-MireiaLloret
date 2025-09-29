@@ -29,7 +29,6 @@ export class CalendarService {
             ...session.SessionDetailData,
             // Add missing properties with default values
             type: session.SessionDetailData.type || 'Sesión', // Default type
-            payment_status: session.SessionDetailData.payment_status || 'pending',
             completed: session.SessionDetailData.completed || false,
             cancelled: session.SessionDetailData.cancelled || false,
             no_show: session.SessionDetailData.no_show || false,

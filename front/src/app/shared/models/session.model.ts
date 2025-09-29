@@ -13,7 +13,6 @@ export interface CreateSessionRequest {
   status: 'programada' | 'finalizada' | 'cancelada';
   price: number;
   payment_method: 'bizum' | 'transferencia' | 'tarjeta' | 'efectivo' | 'pendiente';
-  payment_status: 'pending' | 'paid' | 'partial';
   notes: string;
 }
 
@@ -27,7 +26,6 @@ export interface SessionData {
     mode: 'online' | 'presencial'; // Added mode to new DTO
     price: number;        // 60
     payment_method: 'bizum' | 'transferencia' | 'tarjeta' | 'efectivo' | 'pendiente';
-    payment_status: 'pending' | 'paid' | 'partially_paid'; // Added payment status
     status: 'programada' | 'finalizada' | 'cancelada'; // Added unified status field
     completed: boolean;     // true/false
     cancelled: boolean;     // true/false - to handle cancelled sessions
