@@ -7,10 +7,16 @@ export interface PatientDetailResponse {
 export interface PatientDetailData {
   PatientResume: PatientResume;
   PatientData: PatientData;
-  PatientMedicalRecord: any[];
+  PatientMedicalRecord: PatientMedicalRecord[];
   PatientSessions: PatientSession[];
   PatientInvoice: any[];
   PatientDocuments: PatientDocument[];
+}
+
+export interface PatientMedicalRecord {
+  titulo: string;
+  contenido: string;
+  fecha: string; // "2025-08-26 07:48:17"
 }
 
 export interface PatientResume {

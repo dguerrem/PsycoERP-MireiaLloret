@@ -137,7 +137,10 @@
 
             @if (activeTab() === 'clinical') {
               <div class="h-full">
-                <app-patient-clinical-history [patient]="patient()!"></app-patient-clinical-history>
+                <app-patient-clinical-history
+                  [patient]="patient()!"
+                  [medicalRecords]="patientMedicalRecord()">
+                </app-patient-clinical-history>
               </div>
             }
 

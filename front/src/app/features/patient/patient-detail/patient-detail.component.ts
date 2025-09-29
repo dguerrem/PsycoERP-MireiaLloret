@@ -114,6 +114,13 @@ export class PatientDetailComponent implements OnInit {
     return data.data.PatientDocuments || [];
   });
 
+  readonly patientMedicalRecord = computed(() => {
+    const data = this.patientDetailData();
+    if (!data || !data.success) return [];
+
+    return data.data.PatientMedicalRecord || [];
+  });
+
   ngOnInit(): void {
     const patientId = this.route.snapshot.paramMap.get('id');
 

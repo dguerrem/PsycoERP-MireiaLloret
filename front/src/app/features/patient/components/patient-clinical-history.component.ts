@@ -1,8 +1,9 @@
-import { Component, Input, signal, computed, ChangeDetectionStrategy } from '@angular/core';
+import { Component, Input, signal, computed, ChangeDetectionStrategy, OnChanges, SimpleChanges } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ClinicalNote, CreateClinicalNoteRequest, UpdateClinicalNoteRequest } from '../models/clinical-note.interface';
 import { Patient } from '../../../shared/models/patient.model';
+import { PatientMedicalRecord } from '../../../shared/models/patient-detail.model';
 
 @Component({
   selector: 'app-patient-clinical-history',
@@ -11,32 +12,12 @@ import { Patient } from '../../../shared/models/patient.model';
   templateUrl: './patient-clinical-history.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class PatientClinicalHistoryComponent {
+export class PatientClinicalHistoryComponent implements OnChanges {
   @Input({ required: true }) patient!: Patient;
+  @Input({ required: true }) medicalRecords!: PatientMedicalRecord[];
 
-  // Mock data - en producción vendría de un servicio
-  private mockNotes = signal<ClinicalNote[]>([
-    {
-      id: '1',
-      title: 'Primera sesión de evaluación',
-      content: 'El paciente presenta síntomas de ansiedad generalizada. Se observa nerviosismo, preocupación excesiva por situaciones cotidianas y dificultad para relajarse. Se recomienda iniciar terapia cognitivo-conductual.',
-      date: new Date('2024-01-15'),
-      tags: [],
-      sessionId: '001',
-      createdBy: 'Dr. García',
-      updatedAt: new Date('2024-01-15')
-    },
-    {
-      id: '2',
-      title: 'Progreso en técnicas de relajación',
-      content: 'El paciente ha mostrado mejoras significativas en la aplicación de técnicas de respiración profunda. Ha logrado implementar estas técnicas en situaciones de estrés laboral con buenos resultados.',
-      date: new Date('2024-01-22'),
-      tags: [],
-      sessionId: '003',
-      createdBy: 'Dr. García',
-      updatedAt: new Date('2024-01-22')
-    }
-  ]);
+  // Notes transformed from medical records
+  private notes = signal<ClinicalNote[]>([]);
 
   // Señales para el estado local
   searchTerm = signal('');
@@ -53,9 +34,32 @@ export class PatientClinicalHistoryComponent {
   private mediaRecorder: MediaRecorder | null = null;
   private recognition: any = null;
 
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['medicalRecords'] && this.medicalRecords) {
+      // Transform medicalRecords to ClinicalNote format
+      const transformed = this.medicalRecords.map((record, index) => ({
+        id: `mr-${index}`,
+        title: record.titulo,
+        content: record.contenido,
+        date: this.parseDateString(record.fecha),
+        tags: [],
+        sessionId: '',
+        createdBy: 'Sistema',
+        updatedAt: this.parseDateString(record.fecha)
+      }));
+      this.notes.set(transformed);
+    }
+  }
+
+  private parseDateString(dateStr: string): Date {
+    // Parse "2025-08-26 07:48:17" format
+    const [datePart] = dateStr.split(' ');
+    return new Date(datePart);
+  }
+
   // Computed para notas filtradas
   filteredNotes = computed(() => {
-    const notes = this.mockNotes();
+    const notes = this.notes();
     const search = this.searchTerm().toLowerCase();
 
     if (!search) return notes;
