@@ -124,10 +124,12 @@ const crearSesion = async (req, res) => {
     if (existingSession) {
       return res.status(409).json({
         success: false,
-        error: "Ya existe una sesión programada para este paciente en la misma fecha y hora",
+        error: "Ya existe una sesión programada en esta fecha y hora. No se pueden agendar dos citas simultáneas.",
         conflicting_session: {
           id: existingSession.id,
           status: existingSession.status,
+          patient_id: existingSession.patient_id,
+          patient_name: existingSession.patient_name,
         },
       });
     }
@@ -236,10 +238,12 @@ const actualizarSesion = async (req, res) => {
       if (existingSession) {
         return res.status(409).json({
           success: false,
-          error: "Ya existe una sesión programada para este paciente en la misma fecha y hora",
+          error: "Ya existe una sesión programada en esta fecha y hora. No se pueden agendar dos citas simultáneas.",
           conflicting_session: {
             id: existingSession.id,
             status: existingSession.status,
+            patient_id: existingSession.patient_id,
+            patient_name: existingSession.patient_name,
           },
         });
       }

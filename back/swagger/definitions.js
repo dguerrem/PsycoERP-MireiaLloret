@@ -506,6 +506,40 @@ const definitions = {
     },
   },
 
+  ClinicalNoteSimple: {
+    type: "object",
+    properties: {
+      id: {
+        type: "integer",
+        format: "int64",
+        description: "ID único de la nota clínica",
+        example: 1,
+      },
+      title: {
+        type: "string",
+        description: "Título de la nota clínica",
+        example: "Sesión inicial de evaluación",
+      },
+      content: {
+        type: "string",
+        description: "Contenido completo de la nota clínica",
+        example: "El paciente se muestra colaborativo durante la primera sesión. Se observa ansiedad leve relacionada con el trabajo.",
+      },
+      created_at: {
+        type: "string",
+        format: "date-time",
+        description: "Fecha de creación",
+        example: "2024-12-15 14:30:00",
+      },
+      updated_at: {
+        type: "string",
+        format: "date-time",
+        description: "Fecha de última actualización",
+        example: "2024-12-15 14:30:00",
+      },
+    },
+  },
+
   ClinicalNotesResponse: {
     type: "object",
     properties: {

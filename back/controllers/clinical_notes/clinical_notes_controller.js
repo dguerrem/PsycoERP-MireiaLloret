@@ -1,8 +1,39 @@
 const {
+  getClinicalNotesByPatientId,
   createClinicalNote,
   updateClinicalNote,
   deleteClinicalNote,
 } = require("../../models/clinical_notes/clinical_notes_model");
+
+// Obtener notas clínicas por ID de paciente
+const obtenerNotasClinicasPorPaciente = async (req, res) => {
+  try {
+    const { patient_id } = req.params;
+
+    // Validar patient_id
+    const patientId = parseInt(patient_id);
+    if (!patientId || patientId <= 0) {
+      return res.status(400).json({
+        success: false,
+        error: "ID de paciente inválido",
+      });
+    }
+
+    const notasClinicas = await getClinicalNotesByPatientId(patientId);
+
+    res.json({
+      success: true,
+      total: notasClinicas.length,
+      data: notasClinicas,
+    });
+  } catch (err) {
+    console.error("Error al obtener notas clínicas:", err.message);
+    res.status(500).json({
+      success: false,
+      error: "Error al obtener las notas clínicas",
+    });
+  }
+};
 
 // Crear nueva nota clínica
 const crearNotaClinica = async (req, res) => {
@@ -187,6 +218,7 @@ const eliminarNotaClinica = async (req, res) => {
 };
 
 module.exports = {
+  obtenerNotasClinicasPorPaciente,
   crearNotaClinica,
   actualizarNotaClinica,
   eliminarNotaClinica,

@@ -1,5 +1,24 @@
 const { db } = require("../../config/db");
 
+// Obtener notas clínicas por ID de paciente
+const getClinicalNotesByPatientId = async (patientId) => {
+  const query = `
+    SELECT
+      cn.id,
+      cn.title,
+      cn.content,
+      DATE_FORMAT(cn.created_at, '%Y-%m-%d %H:%i:%s') as created_at,
+      DATE_FORMAT(cn.updated_at, '%Y-%m-%d %H:%i:%s') as updated_at
+    FROM clinical_notes cn
+    INNER JOIN patients p ON cn.patient_id = p.id
+    WHERE cn.patient_id = ? AND p.is_active = true
+    ORDER BY cn.created_at DESC
+  `;
+
+  const [rows] = await db.execute(query, [patientId]);
+  return rows;
+};
+
 // Crear nueva nota clínica
 const createClinicalNote = async (clinicalNoteData) => {
   const { patient_id, title, content } = clinicalNoteData;
@@ -83,6 +102,7 @@ const deleteClinicalNote = async (noteId) => {
 };
 
 module.exports = {
+  getClinicalNotesByPatientId,
   createClinicalNote,
   updateClinicalNote,
   deleteClinicalNote,
