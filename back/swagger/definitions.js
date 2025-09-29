@@ -1311,6 +1311,34 @@ const definitions = {
     },
   },
 
+  PatientMedicalRecordItem: {
+    type: "object",
+    properties: {
+      id: {
+        type: "integer",
+        format: "int64",
+        description: "ID único de la nota clínica",
+        example: 15,
+      },
+      titulo: {
+        type: "string",
+        description: "Título de la nota clínica",
+        example: "Sesión inicial de evaluación",
+      },
+      contenido: {
+        type: "string",
+        description: "Contenido de la nota clínica",
+        example: "El paciente muestra signos de ansiedad. Se recomienda seguimiento semanal.",
+      },
+      fecha: {
+        type: "string",
+        format: "date-time",
+        description: "Fecha de creación de la nota (YYYY-MM-DD HH:mm:ss)",
+        example: "2024-12-15 14:30:00",
+      },
+    },
+  },
+
   PatientBonusDetail: {
     type: "object",
     properties: {
@@ -1553,7 +1581,7 @@ const definitions = {
           PatientMedicalRecord: {
             type: "array",
             items: {
-              $ref: "#/components/schemas/ClinicalNote",
+              $ref: "#/definitions/PatientMedicalRecordItem",
             },
             description: "Historial de notas clínicas del paciente",
           },

@@ -14,6 +14,7 @@ export interface PatientDetailData {
 }
 
 export interface PatientMedicalRecord {
+  id?: number;
   titulo: string;
   contenido: string;
   fecha: string; // "2025-08-26 07:48:17"

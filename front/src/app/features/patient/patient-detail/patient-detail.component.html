@@ -139,7 +139,8 @@
               <div class="h-full">
                 <app-patient-clinical-history
                   [patient]="patient()!"
-                  [medicalRecords]="patientMedicalRecord()">
+                  [medicalRecords]="patientMedicalRecord()"
+                  (dataChanged)="onClinicalNotesChanged()">
                 </app-patient-clinical-history>
               </div>
             }

@@ -256,13 +256,15 @@ const getPatientById = async (id) => {
 
   // Consulta para obtener notas clínicas del paciente
   const clinicalNotesQuery = `
-        SELECT 
-            title as titulo,
-            content as contenido,
-            DATE_FORMAT(created_at, '%Y-%m-%d %H:%i:%s') as fecha
-        FROM clinical_notes
-        WHERE patient_id = ?
-        ORDER BY created_at DESC
+        SELECT
+            cn.id,
+            cn.title as titulo,
+            cn.content as contenido,
+            DATE_FORMAT(cn.created_at, '%Y-%m-%d %H:%i:%s') as fecha
+        FROM clinical_notes cn
+        INNER JOIN patients p ON cn.patient_id = p.id
+        WHERE cn.patient_id = ? AND p.is_active = true
+        ORDER BY cn.created_at DESC
     `;
   
   const [clinicalNotesRows] = await db.execute(clinicalNotesQuery, [id]);

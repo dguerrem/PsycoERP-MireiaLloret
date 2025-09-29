@@ -199,4 +199,12 @@ export class PatientDetailComponent implements OnInit {
   private getFullName(patient: Patient): string {
     return `${patient.first_name} ${patient.last_name}`;
   }
+
+  onClinicalNotesChanged(): void {
+    // Reload patient detail data when clinical notes change
+    const patientId = this.patient()?.id;
+    if (patientId) {
+      this.loadPatientDetail(patientId);
+    }
+  }
 }

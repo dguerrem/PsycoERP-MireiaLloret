@@ -1,10 +1,29 @@
-import { Component, Input, signal, computed, ChangeDetectionStrategy, OnChanges, SimpleChanges } from '@angular/core';
+import { Component, Input, Output, EventEmitter, signal, computed, ChangeDetectionStrategy, OnChanges, SimpleChanges, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ClinicalNote, CreateClinicalNoteRequest, UpdateClinicalNoteRequest } from '../models/clinical-note.interface';
 import { Patient } from '../../../shared/models/patient.model';
 import { PatientMedicalRecord } from '../../../shared/models/patient-detail.model';
+import { ClinicalNotesService } from '../services/clinical-notes.service';
 
+/**
+ * Patient Clinical History Component
+ *
+ * Manages patient clinical notes with create/update operations.
+ * Receives initial data from parent and handles POST/PUT to API.
+ *
+ * Usage:
+ *    <app-patient-clinical-history
+ *      [patient]="patient"
+ *      [medicalRecords]="patientMedicalRecord()">
+ *    </app-patient-clinical-history>
+ *
+ * Features:
+ * - Create and update clinical notes via API
+ * - Search/filter notes
+ * - Voice recording for note content
+ * - Emits events when data changes to refresh parent
+ */
 @Component({
   selector: 'app-patient-clinical-history',
   standalone: true,
@@ -12,12 +31,17 @@ import { PatientMedicalRecord } from '../../../shared/models/patient-detail.mode
   templateUrl: './patient-clinical-history.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class PatientClinicalHistoryComponent implements OnChanges {
+export class PatientClinicalHistoryComponent implements OnInit, OnChanges {
+  private clinicalNotesService = inject(ClinicalNotesService);
+
   @Input({ required: true }) patient!: Patient;
   @Input({ required: true }) medicalRecords!: PatientMedicalRecord[];
+  @Output() dataChanged = new EventEmitter<void>();
 
   // Notes transformed from medical records
   private notes = signal<ClinicalNote[]>([]);
+  isLoading = signal(false);
+  isSaving = signal(false);
 
   // Señales para el estado local
   searchTerm = signal('');
@@ -34,11 +58,29 @@ export class PatientClinicalHistoryComponent implements OnChanges {
   private mediaRecorder: MediaRecorder | null = null;
   private recognition: any = null;
 
+  ngOnInit(): void {
+    // Transform initial data
+    if (this.medicalRecords) {
+      this.transformMedicalRecords(this.medicalRecords);
+    }
+  }
+
   ngOnChanges(changes: SimpleChanges): void {
+    // Update when parent data changes
     if (changes['medicalRecords'] && this.medicalRecords) {
-      // Transform medicalRecords to ClinicalNote format
-      const transformed = this.medicalRecords.map((record, index) => ({
-        id: `mr-${index}`,
+      this.transformMedicalRecords(this.medicalRecords);
+    }
+  }
+
+  private transformMedicalRecords(records: PatientMedicalRecord[]): void {
+    console.log('📥 Received medical records from parent:', records);
+
+    const transformed = records.map((record) => {
+      const noteId = record.id ? record.id.toString() : `temp-${Date.now()}`;
+      console.log('🔄 Transforming record ID:', record.id, '→', noteId);
+
+      return {
+        id: noteId,
         title: record.titulo,
         content: record.contenido,
         date: this.parseDateString(record.fecha),
@@ -46,9 +88,11 @@ export class PatientClinicalHistoryComponent implements OnChanges {
         sessionId: '',
         createdBy: 'Sistema',
         updatedAt: this.parseDateString(record.fecha)
-      }));
-      this.notes.set(transformed);
-    }
+      };
+    });
+
+    console.log('✅ Transformed notes:', transformed);
+    this.notes.set(transformed);
   }
 
   private parseDateString(dateStr: string): Date {
@@ -91,6 +135,9 @@ export class PatientClinicalHistoryComponent implements OnChanges {
   }
 
   onEditNote(note: ClinicalNote) {
+    console.log('✏️ Editing note - Full object:', note);
+    console.log('📌 Note ID:', note.id, '(type:', typeof note.id, ')');
+
     this.editingNote.set(note);
     this.isCreatingNote.set(false);
     this.newNote.set({
@@ -115,15 +162,78 @@ export class PatientClinicalHistoryComponent implements OnChanges {
     const note = this.newNote();
     const editingNote = this.editingNote();
 
-    if (editingNote) {
-      console.log('Updating note:', editingNote.id, note);
-      // Aquí iría la llamada al servicio para actualizar
-    } else {
-      console.log('Creating note:', note);
-      // Aquí iría la llamada al servicio para crear
+    // Validation
+    if (!note.title || !note.content) {
+      alert('Por favor, completa el título y el contenido de la nota.');
+      return;
     }
 
-    this.onCancelEdit();
+    if (!this.patient.id) {
+      alert('Error: No se puede guardar la nota sin un ID de paciente.');
+      return;
+    }
+
+    this.isSaving.set(true);
+
+    if (editingNote) {
+      // Update existing note
+      console.log('💾 Saving edited note - editingNote.id:', editingNote.id);
+
+      const noteIdNumber = parseInt(editingNote.id);
+      console.log('🔢 Parsed ID:', noteIdNumber, '(isNaN:', isNaN(noteIdNumber), ')');
+
+      if (isNaN(noteIdNumber) || noteIdNumber === 0) {
+        console.error('❌ Invalid note ID. editingNote:', editingNote);
+        alert('Error: ID de nota inválido para actualización. ID: ' + editingNote.id);
+        this.isSaving.set(false);
+        return;
+      }
+
+      console.log('📤 Calling API PUT with:', {
+        id: noteIdNumber,
+        title: note.title,
+        content: note.content?.substring(0, 30)
+      });
+
+      this.clinicalNotesService.updateClinicalNote({
+        id: noteIdNumber,
+        title: note.title,
+        content: note.content
+      }).subscribe({
+        next: (response) => {
+          console.log('✅ Note updated successfully:', response);
+          this.isSaving.set(false);
+          this.onCancelEdit();
+          // Notify parent to reload data
+          this.dataChanged.emit();
+        },
+        error: (error) => {
+          console.error('❌ Error updating note:', error);
+          alert('Error al actualizar la nota. Por favor, intenta de nuevo.');
+          this.isSaving.set(false);
+        }
+      });
+    } else {
+      // Create new note
+      this.clinicalNotesService.createClinicalNote({
+        patient_id: this.patient.id,
+        title: note.title,
+        content: note.content
+      }).subscribe({
+        next: (response) => {
+          console.log('✅ Note created successfully:', response);
+          this.isSaving.set(false);
+          this.onCancelEdit();
+          // Notify parent to reload data
+          this.dataChanged.emit();
+        },
+        error: (error) => {
+          console.error('❌ Error creating note:', error);
+          alert('Error al crear la nota. Por favor, intenta de nuevo.');
+          this.isSaving.set(false);
+        }
+      });
+    }
   }
 
   onCancelEdit() {
