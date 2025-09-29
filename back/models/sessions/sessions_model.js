@@ -286,19 +286,22 @@ const getSessionForWhatsApp = async (sessionId) => {
   return rows[0];
 };
 
-// Verificar si existe una sesión duplicada para el mismo paciente, fecha y hora
+// Verificar si existe una sesión conflictiva en el mismo slot de tiempo
+// Verifica conflictos independientemente del paciente (control de horarios del psicólogo)
 const checkDuplicateSession = async (patient_id, session_date, start_time, excludeSessionId = null) => {
   let query = `
-    SELECT id, status
-    FROM sessions
-    WHERE patient_id = ? AND session_date = ? AND start_time = ? AND is_active = true
+    SELECT s.id, s.status, s.patient_id, CONCAT(p.first_name, ' ', p.last_name) as patient_name
+    FROM sessions s
+    LEFT JOIN patients p ON s.patient_id = p.id
+    WHERE s.session_date = ? AND s.start_time = ?
+    AND s.is_active = true AND s.status != 'cancelada'
   `;
 
-  const params = [patient_id, session_date, start_time];
+  const params = [session_date, start_time];
 
   // Si estamos actualizando, excluir la sesión actual
   if (excludeSessionId) {
-    query += " AND id != ?";
+    query += " AND s.id != ?";
     params.push(excludeSessionId);
   }
 
