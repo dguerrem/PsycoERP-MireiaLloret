@@ -17,7 +17,6 @@ const obtenerSesiones = async (req, res) => {
       session_date,
       fecha_desde,
       fecha_hasta,
-      payment_status,
       payment_method,
       page,
       limit,
@@ -47,7 +46,6 @@ const obtenerSesiones = async (req, res) => {
     if (patient_id) filters.patient_id = patient_id;
     if (status) filters.status = status;
     if (clinic_id) filters.clinic_id = clinic_id;
-    if (payment_status) filters.payment_status = payment_status;
     if (payment_method) filters.payment_method = payment_method;
 
     // Parámetros de paginación
@@ -89,10 +87,9 @@ const crearSesion = async (req, res) => {
       start_time,
       end_time,
       mode,
-      status = "scheduled",
+      status = "programada",
       price = 0.0,
-      payment_method = "cash",
-      payment_status = "pending",
+      payment_method = "tarjeta",
       notes,
     } = req.body;
 
@@ -129,7 +126,6 @@ const crearSesion = async (req, res) => {
       status,
       price,
       payment_method,
-      payment_status,
       notes,
     });
 
@@ -161,7 +157,6 @@ const actualizarSesion = async (req, res) => {
       status,
       price,
       payment_method,
-      payment_status,
       notes,
     } = req.body;
 
@@ -184,7 +179,6 @@ const actualizarSesion = async (req, res) => {
     if (status) updateData.status = status;
     if (price) updateData.price = price;
     if (payment_method) updateData.payment_method = payment_method;
-    if (payment_status) updateData.payment_status = payment_status;
     if (notes) updateData.notes = notes;
 
     // Verificar que se envió al menos un campo para actualizar

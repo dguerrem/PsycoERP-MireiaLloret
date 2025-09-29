@@ -60,11 +60,6 @@ const getSessions = async (filters = {}) => {
     params.push(filters.session_date);
   }
 
-  if (filters.payment_status) {
-    conditions.push("s.payment_status = ?");
-    params.push(filters.payment_status);
-  }
-
   if (filters.payment_method) {
     conditions.push("s.payment_method = ?");
     params.push(filters.payment_method);
@@ -181,7 +176,6 @@ const createSession = async (sessionData) => {
     status,
     price,
     payment_method,
-    payment_status,
     notes,
   } = sessionData;
 
@@ -196,9 +190,8 @@ const createSession = async (sessionData) => {
       status,
       price,
       payment_method,
-      payment_status,
       notes
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   `;
 
   const params = [
@@ -211,7 +204,6 @@ const createSession = async (sessionData) => {
     status,
     price,
     payment_method,
-    payment_status,
     notes,
   ];
 

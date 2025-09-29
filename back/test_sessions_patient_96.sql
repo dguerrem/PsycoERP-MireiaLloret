@@ -12,7 +12,6 @@ INSERT INTO sessions (
     status,
     price,
     payment_method,
-    payment_status,
     notes
 ) VALUES (
     96,
@@ -39,7 +38,6 @@ INSERT INTO sessions (
     status,
     price,
     payment_method,
-    payment_status,
     notes
 ) VALUES (
     96,
@@ -66,7 +64,6 @@ INSERT INTO sessions (
     status,
     price,
     payment_method,
-    payment_status,
     notes
 ) VALUES (
     96,
@@ -93,7 +90,6 @@ INSERT INTO sessions (
     status,
     price,
     payment_method,
-    payment_status,
     notes
 ) VALUES (
     96,
@@ -120,7 +116,6 @@ INSERT INTO sessions (
     status,
     price,
     payment_method,
-    payment_status,
     notes
 ) VALUES (
     96,
@@ -147,7 +142,6 @@ INSERT INTO sessions (
     status,
     price,
     payment_method,
-    payment_status,
     notes
 ) VALUES (
     96,
@@ -174,7 +168,6 @@ INSERT INTO sessions (
     status,
     price,
     payment_method,
-    payment_status,
     notes
 ) VALUES (
     96,
@@ -201,7 +194,6 @@ INSERT INTO sessions (
     status,
     price,
     payment_method,
-    payment_status,
     notes
 ) VALUES (
     96,

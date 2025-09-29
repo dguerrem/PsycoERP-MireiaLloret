@@ -1941,12 +1941,6 @@ const definitions = {
         description: "Método de pago",
         example: "card",
       },
-      payment_status: {
-        type: "string",
-        enum: ["pending", "paid", "partially_paid"],
-        description: "Estado del pago",
-        example: "pending",
-      },
       notes: {
         type: "string",
         description: "Notas adicionales",
