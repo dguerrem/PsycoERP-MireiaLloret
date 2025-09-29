@@ -47,6 +47,7 @@ export class PatientClinicalHistoryComponent implements OnInit, OnChanges {
   searchTerm = signal('');
   isCreatingNote = signal(false);
   editingNote = signal<ClinicalNote | null>(null);
+  deletingNoteId = signal<string | null>(null);
   newNote = signal<Partial<CreateClinicalNoteRequest>>({
     title: '',
     content: '',
@@ -228,6 +229,31 @@ export class PatientClinicalHistoryComponent implements OnInit, OnChanges {
       year: 'numeric',
       month: '2-digit',
       day: '2-digit'
+    });
+  }
+
+  onDeleteNote(event: Event, note: ClinicalNote) {
+    // Prevent triggering edit when clicking delete
+    event.stopPropagation();
+
+    const noteIdNumber = parseInt(note.id);
+
+    if (isNaN(noteIdNumber) || noteIdNumber === 0) {
+      return;
+    }
+
+    this.deletingNoteId.set(note.id);
+
+    this.clinicalNotesService.deleteClinicalNote(noteIdNumber).subscribe({
+      next: (response) => {
+        this.deletingNoteId.set(null);
+        // Notify parent to reload data
+        this.dataChanged.emit();
+      },
+      error: (error) => {
+        console.error('Error deleting note:', error);
+        this.deletingNoteId.set(null);
+      }
     });
   }
 
