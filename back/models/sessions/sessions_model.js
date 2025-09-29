@@ -286,10 +286,31 @@ const getSessionForWhatsApp = async (sessionId) => {
   return rows[0];
 };
 
+// Verificar si existe una sesión duplicada para el mismo paciente, fecha y hora
+const checkDuplicateSession = async (patient_id, session_date, start_time, excludeSessionId = null) => {
+  let query = `
+    SELECT id, status
+    FROM sessions
+    WHERE patient_id = ? AND session_date = ? AND start_time = ? AND is_active = true
+  `;
+
+  const params = [patient_id, session_date, start_time];
+
+  // Si estamos actualizando, excluir la sesión actual
+  if (excludeSessionId) {
+    query += " AND id != ?";
+    params.push(excludeSessionId);
+  }
+
+  const [rows] = await db.execute(query, params);
+  return rows.length > 0 ? rows[0] : null;
+};
+
 module.exports = {
   getSessions,
   createSession,
   updateSession,
   deleteSession,
   getSessionForWhatsApp,
+  checkDuplicateSession,
 };
