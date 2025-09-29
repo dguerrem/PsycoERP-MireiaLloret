@@ -31,7 +31,8 @@ const getSessions = async (filters = {}) => {
             p.id AS patient_id,
             CONCAT(p.first_name, ' ', p.last_name) AS patient_name,
             c.id AS clinic_id,
-            c.name AS clinic_name
+            c.name AS clinic_name,
+            c.clinic_color
         FROM sessions s
         LEFT JOIN patients p ON s.patient_id = p.id AND p.is_active = true AND p.status = 'en curso'
         LEFT JOIN clinics c ON s.clinic_id = c.id AND c.is_active = true
@@ -133,6 +134,7 @@ const getSessions = async (filters = {}) => {
           ClinicDetailData: {
             clinic_id: row.clinic_id,
             clinic_name: row.clinic_name,
+            clinic_color: row.clinic_color,
           },
           MedicalRecordData: medicalRecords.map((record) => ({
             title: record.title,
