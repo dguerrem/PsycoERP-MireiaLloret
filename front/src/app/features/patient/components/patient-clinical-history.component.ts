@@ -73,25 +73,17 @@ export class PatientClinicalHistoryComponent implements OnInit, OnChanges {
   }
 
   private transformMedicalRecords(records: PatientMedicalRecord[]): void {
-    console.log('📥 Received medical records from parent:', records);
+    const transformed = records.map((record) => ({
+      id: record.id ? record.id.toString() : `temp-${Date.now()}`,
+      title: record.titulo,
+      content: record.contenido,
+      date: this.parseDateString(record.fecha),
+      tags: [],
+      sessionId: '',
+      createdBy: 'Sistema',
+      updatedAt: this.parseDateString(record.fecha)
+    }));
 
-    const transformed = records.map((record) => {
-      const noteId = record.id ? record.id.toString() : `temp-${Date.now()}`;
-      console.log('🔄 Transforming record ID:', record.id, '→', noteId);
-
-      return {
-        id: noteId,
-        title: record.titulo,
-        content: record.contenido,
-        date: this.parseDateString(record.fecha),
-        tags: [],
-        sessionId: '',
-        createdBy: 'Sistema',
-        updatedAt: this.parseDateString(record.fecha)
-      };
-    });
-
-    console.log('✅ Transformed notes:', transformed);
     this.notes.set(transformed);
   }
 
@@ -135,9 +127,6 @@ export class PatientClinicalHistoryComponent implements OnInit, OnChanges {
   }
 
   onEditNote(note: ClinicalNote) {
-    console.log('✏️ Editing note - Full object:', note);
-    console.log('📌 Note ID:', note.id, '(type:', typeof note.id, ')');
-
     this.editingNote.set(note);
     this.isCreatingNote.set(false);
     this.newNote.set({
@@ -177,23 +166,13 @@ export class PatientClinicalHistoryComponent implements OnInit, OnChanges {
 
     if (editingNote) {
       // Update existing note
-      console.log('💾 Saving edited note - editingNote.id:', editingNote.id);
-
       const noteIdNumber = parseInt(editingNote.id);
-      console.log('🔢 Parsed ID:', noteIdNumber, '(isNaN:', isNaN(noteIdNumber), ')');
 
       if (isNaN(noteIdNumber) || noteIdNumber === 0) {
-        console.error('❌ Invalid note ID. editingNote:', editingNote);
-        alert('Error: ID de nota inválido para actualización. ID: ' + editingNote.id);
+        alert('Error: ID de nota inválido para actualización.');
         this.isSaving.set(false);
         return;
       }
-
-      console.log('📤 Calling API PUT with:', {
-        id: noteIdNumber,
-        title: note.title,
-        content: note.content?.substring(0, 30)
-      });
 
       this.clinicalNotesService.updateClinicalNote({
         id: noteIdNumber,
@@ -201,14 +180,13 @@ export class PatientClinicalHistoryComponent implements OnInit, OnChanges {
         content: note.content
       }).subscribe({
         next: (response) => {
-          console.log('✅ Note updated successfully:', response);
           this.isSaving.set(false);
           this.onCancelEdit();
           // Notify parent to reload data
           this.dataChanged.emit();
         },
         error: (error) => {
-          console.error('❌ Error updating note:', error);
+          console.error('Error updating note:', error);
           alert('Error al actualizar la nota. Por favor, intenta de nuevo.');
           this.isSaving.set(false);
         }
@@ -221,14 +199,13 @@ export class PatientClinicalHistoryComponent implements OnInit, OnChanges {
         content: note.content
       }).subscribe({
         next: (response) => {
-          console.log('✅ Note created successfully:', response);
           this.isSaving.set(false);
           this.onCancelEdit();
           // Notify parent to reload data
           this.dataChanged.emit();
         },
         error: (error) => {
-          console.error('❌ Error creating note:', error);
+          console.error('Error creating note:', error);
           alert('Error al crear la nota. Por favor, intenta de nuevo.');
           this.isSaving.set(false);
         }

@@ -201,10 +201,30 @@ export class PatientDetailComponent implements OnInit {
   }
 
   onClinicalNotesChanged(): void {
-    // Reload patient detail data when clinical notes change
+    // Reload only clinical notes data when changed
     const patientId = this.patient()?.id;
     if (patientId) {
-      this.loadPatientDetail(patientId);
+      this.http.get<PatientDetailResponse>(`http://localhost:3000/api/patients/${patientId}`)
+        .subscribe({
+          next: (response) => {
+            if (response.success && response.data) {
+              // Update only the PatientMedicalRecord part
+              const currentData = this.patientDetailData();
+              if (currentData) {
+                this.patientDetailData.set({
+                  ...currentData,
+                  data: {
+                    ...currentData.data,
+                    PatientMedicalRecord: response.data.PatientMedicalRecord
+                  }
+                });
+              }
+            }
+          },
+          error: (error) => {
+            console.error('Error reloading clinical notes:', error);
+          }
+        });
     }
   }
 }
