@@ -4,7 +4,7 @@ require("dotenv").config();
 const getDBConfig = (hostname) => {
   if (hostname && hostname.includes("test.")) {
     return {
-      host: process.env.DB_TEST_HOST || "localhost",
+      host: process.env.DB_TEST_HOST,
       user: process.env.DB_TEST_USER,
       password: process.env.DB_TEST_PASSWORD,
       database: process.env.DB_TEST_NAME,
@@ -14,7 +14,7 @@ const getDBConfig = (hostname) => {
   }
 
   return {
-    host: process.env.DB_PROD_HOST || "localhost",
+    host: process.env.DB_PROD_HOST,
     user: process.env.DB_PROD_USER,
     password: process.env.DB_PROD_PASSWORD,
     database: process.env.DB_PROD_NAME,
@@ -44,7 +44,7 @@ const dbMiddleware = (req, res, next) => {
   let hostname = req.hostname;
 
   // Localhost siempre usa TEST
-  if (hostname === "localhost" || hostname === "127.0.0.1") {
+  if (hostname === "127.0.0.1") {
     hostname = "test.millopsicologia.com";
   }
 
