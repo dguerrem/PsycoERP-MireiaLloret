@@ -7,7 +7,7 @@ const { crearSesionGoogleMeet } = require("../../utils/googleMeetUtils");
 
 const obtenerRecordatoriosPendientes = async (req, res) => {
   try {
-    const result = await getPendingReminders();
+    const result = await getPendingReminders(req.db);
 
     // Determinar el día de la semana actual para el mensaje
     const today = new Date();
@@ -54,7 +54,7 @@ const crearRecordatorio = async (req, res) => {
       });
     }
 
-    const reminderData = await createReminder(parseInt(session_id));
+    const reminderData = await createReminder(req.db, parseInt(session_id));
 
     // Generar mensaje de WhatsApp personalizado
     const whatsappMessage = await generarMensajeWhatsApp(reminderData);

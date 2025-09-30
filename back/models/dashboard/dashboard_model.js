@@ -1,7 +1,5 @@
-const { db } = require("../../config/db");
-
 // Obtener KPIs reales del dashboard (OPTIMIZADO: 5 consultas en lugar de 16)
-const getDashboardKPIs = async () => {
+const getDashboardKPIs = async (db) => {
   try {
     // Fechas para las consultas
     const now = new Date();

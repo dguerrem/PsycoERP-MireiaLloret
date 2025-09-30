@@ -506,6 +506,40 @@ const definitions = {
     },
   },
 
+  ClinicalNoteSimple: {
+    type: "object",
+    properties: {
+      id: {
+        type: "integer",
+        format: "int64",
+        description: "ID único de la nota clínica",
+        example: 1,
+      },
+      title: {
+        type: "string",
+        description: "Título de la nota clínica",
+        example: "Sesión inicial de evaluación",
+      },
+      content: {
+        type: "string",
+        description: "Contenido completo de la nota clínica",
+        example: "El paciente se muestra colaborativo durante la primera sesión. Se observa ansiedad leve relacionada con el trabajo.",
+      },
+      created_at: {
+        type: "string",
+        format: "date-time",
+        description: "Fecha de creación",
+        example: "2024-12-15 14:30:00",
+      },
+      updated_at: {
+        type: "string",
+        format: "date-time",
+        description: "Fecha de última actualización",
+        example: "2024-12-15 14:30:00",
+      },
+    },
+  },
+
   ClinicalNotesResponse: {
     type: "object",
     properties: {
@@ -1277,6 +1311,34 @@ const definitions = {
     },
   },
 
+  PatientMedicalRecordItem: {
+    type: "object",
+    properties: {
+      id: {
+        type: "integer",
+        format: "int64",
+        description: "ID único de la nota clínica",
+        example: 15,
+      },
+      titulo: {
+        type: "string",
+        description: "Título de la nota clínica",
+        example: "Sesión inicial de evaluación",
+      },
+      contenido: {
+        type: "string",
+        description: "Contenido de la nota clínica",
+        example: "El paciente muestra signos de ansiedad. Se recomienda seguimiento semanal.",
+      },
+      fecha: {
+        type: "string",
+        format: "date-time",
+        description: "Fecha de creación de la nota (YYYY-MM-DD HH:mm:ss)",
+        example: "2024-12-15 14:30:00",
+      },
+    },
+  },
+
   PatientBonusDetail: {
     type: "object",
     properties: {
@@ -1519,7 +1581,7 @@ const definitions = {
           PatientMedicalRecord: {
             type: "array",
             items: {
-              $ref: "#/components/schemas/ClinicalNote",
+              $ref: "#/definitions/PatientMedicalRecordItem",
             },
             description: "Historial de notas clínicas del paciente",
           },
@@ -1653,12 +1715,6 @@ const definitions = {
   PatientSession: {
     type: "object",
     properties: {
-      id: {
-        type: "integer",
-        format: "int64",
-        description: "ID único de la sesión",
-        example: 1,
-      },
       fecha: {
         type: "string",
         format: "date",
@@ -1671,28 +1727,29 @@ const definitions = {
         description: "Nombre de la clínica",
         example: "Clínica Psicológica Centro",
       },
-      tipo: {
-        type: "string",
-        description: "Tipo de sesión",
-        example: "Terapia Individual",
-      },
       estado: {
         type: "string",
-        enum: ["scheduled", "completed", "cancelled", "no-show"],
+        enum: ["programada", "finalizada", "cancelada"],
         description: "Estado de la sesión",
-        example: "completed",
+        example: "finalizada",
       },
       precio: {
         type: "number",
         format: "decimal",
-        description: "Precio de la sesión",
+        description: "Precio total de la sesión",
         example: 60.0,
+      },
+      precio_neto: {
+        type: "number",
+        format: "decimal",
+        description: "Precio neto que se lleva la psicóloga (calculado según porcentaje de la clínica)",
+        example: 48.0,
       },
       tipo_pago: {
         type: "string",
-        enum: ["cash", "card", "transfer", "insurance"],
+        enum: ["bizum", "transferencia", "tarjeta", "efectivo", "pendiente"],
         description: "Método de pago",
-        example: "card",
+        example: "tarjeta",
       },
       notas: {
         type: "string",

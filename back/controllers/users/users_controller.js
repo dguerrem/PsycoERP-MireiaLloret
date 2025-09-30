@@ -16,7 +16,7 @@ const obtenerUsuarioPorId = async (req, res) => {
       });
     }
 
-    const user = await getUserById(parseInt(id));
+    const user = await getUserById(req.db, parseInt(id));
 
     if (!user) {
       return res.status(404).json({
@@ -75,7 +75,7 @@ const actualizarUsuario = async (req, res) => {
       });
     }
 
-    const updatedUser = await updateUser(parseInt(id), userData);
+    const updatedUser = await updateUser(req.db, parseInt(id), userData);
 
     if (!updatedUser) {
       return res.status(404).json({

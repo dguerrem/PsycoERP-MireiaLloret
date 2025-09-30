@@ -23,6 +23,7 @@ import { ReusableModalComponent } from '../../../../shared/components/reusable-m
 import { FormInputComponent } from '../../../../shared/components/form-input/form-input.component';
 import { PatientSelectorComponent } from '../../../../shared/components/patient-selector/patient-selector.component';
 import { ConfirmationModalComponent } from '../../../../shared/components/confirmation-modal/confirmation-modal.component';
+import { environment } from '../../../../../environments/environment';
 
 /**
  * Modal dialog component for creating new session appointments
@@ -186,7 +187,7 @@ export class NewSessionFormComponent implements OnInit {
   }
 
   private loadPatients(): void {
-    this.http.get<{ data: PatientSelector[] }>('http://localhost:3000/api/patients/active-with-clinic')
+    this.http.get<{ data: PatientSelector[] }>(`${environment.api.baseUrl}/patients/active-with-clinic`)
       .subscribe({
         next: (response) => {
           this.patients.set(response.data);

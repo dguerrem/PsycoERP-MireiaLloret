@@ -1,8 +1,39 @@
 const {
+  getClinicalNotesByPatientId,
   createClinicalNote,
   updateClinicalNote,
   deleteClinicalNote,
 } = require("../../models/clinical_notes/clinical_notes_model");
+
+// Obtener notas clínicas por ID de paciente
+const obtenerNotasClinicasPorPaciente = async (req, res) => {
+  try {
+    const { patient_id } = req.params;
+
+    // Validar patient_id
+    const patientId = parseInt(patient_id);
+    if (!patientId || patientId <= 0) {
+      return res.status(400).json({
+        success: false,
+        error: "ID de paciente inválido",
+      });
+    }
+
+    const notasClinicas = await getClinicalNotesByPatientId(req.db, patientId);
+
+    res.json({
+      success: true,
+      total: notasClinicas.length,
+      data: notasClinicas,
+    });
+  } catch (err) {
+    console.error("Error al obtener notas clínicas:", err.message);
+    res.status(500).json({
+      success: false,
+      error: "Error al obtener las notas clínicas",
+    });
+  }
+};
 
 // Crear nueva nota clínica
 const crearNotaClinica = async (req, res) => {
@@ -50,7 +81,7 @@ const crearNotaClinica = async (req, res) => {
       });
     }
 
-    const nuevaNotaClinica = await createClinicalNote({
+    const nuevaNotaClinica = await createClinicalNote(req.db, {
       patient_id,
       title: title.trim(),
       content: content.trim(),
@@ -126,7 +157,7 @@ const actualizarNotaClinica = async (req, res) => {
       });
     }
 
-    const notaActualizada = await updateClinicalNote(noteId, updateData);
+    const notaActualizada = await updateClinicalNote(req.db, noteId, updateData);
 
     if (!notaActualizada) {
       return res.status(404).json({
@@ -163,7 +194,7 @@ const eliminarNotaClinica = async (req, res) => {
       });
     }
 
-    await deleteClinicalNote(noteId);
+    await deleteClinicalNote(req.db, noteId);
 
     res.json({
       success: true,
@@ -187,6 +218,7 @@ const eliminarNotaClinica = async (req, res) => {
 };
 
 module.exports = {
+  obtenerNotasClinicasPorPaciente,
   crearNotaClinica,
   actualizarNotaClinica,
   eliminarNotaClinica,

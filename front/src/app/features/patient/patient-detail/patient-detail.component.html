@@ -137,15 +137,20 @@
 
             @if (activeTab() === 'clinical') {
               <div class="h-full">
-                <app-patient-clinical-history [patient]="patient()!"></app-patient-clinical-history>
+                <app-patient-clinical-history
+                  [patient]="patient()!"
+                  [medicalRecords]="patientMedicalRecord()"
+                  (dataChanged)="onClinicalNotesChanged()">
+                </app-patient-clinical-history>
               </div>
             }
 
             @if (activeTab() === 'sessions') {
               <div class="h-full">
-                <div class="text-center py-12">
-                  <p class="text-muted-foreground">Tab Sesiones - En desarrollo</p>
-                </div>
+                <app-patient-sessions
+                  [patient]="patient()!"
+                  [sessions]="patientSessions()">
+                </app-patient-sessions>
               </div>
             }
 
@@ -160,9 +165,10 @@
 
             @if (activeTab() === 'documentation') {
               <div class="h-full">
-                <div class="text-center py-12">
-                  <p class="text-muted-foreground">Tab Documentación - En desarrollo</p>
-                </div>
+                <app-patient-documentation
+                  [patient]="patient()!"
+                  [documents]="patientDocuments()">
+                </app-patient-documentation>
               </div>
             }
           </div>

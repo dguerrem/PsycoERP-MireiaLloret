@@ -1,7 +1,5 @@
-const { db } = require("../../config/db");
-
 // Obtener todos los bonuses con filtros opcionales y paginación
-const getBonuses = async (filters = {}) => {
+const getBonuses = async (db, filters = {}) => {
   // Extraer parámetros de paginación
   const page = parseInt(filters.page) || 1;
   const limit = parseInt(filters.limit) || 10;
@@ -92,7 +90,7 @@ const getBonuses = async (filters = {}) => {
 };
 
 // Obtener bonuses por patient_id con KPIs y detalles
-const getBonusesByPatientId = async (patientId) => {
+const getBonusesByPatientId = async (db, patientId) => {
   // Consulta para obtener KPIs
   const kpisQuery = `
         SELECT 
@@ -138,7 +136,7 @@ const getBonusesByPatientId = async (patientId) => {
 };
 
 // Obtener historial completo de un bono por ID
-const getBonusHistoryById = async (bonusId) => {
+const getBonusHistoryById = async (db, bonusId) => {
   // Consulta principal del bono con KPIs calculados
   const bonusQuery = `
     SELECT 
@@ -194,7 +192,7 @@ const getBonusHistoryById = async (bonusId) => {
 };
 
 // Registrar uso de una sesión del bonus
-const useBonusSession = async (bonusId) => {
+const useBonusSession = async (db, bonusId) => {
   const connection = await db.getConnection();
 
   try {
@@ -267,7 +265,7 @@ const useBonusSession = async (bonusId) => {
 };
 
 // Crear un nuevo bonus
-const createBonus = async (bonusData) => {
+const createBonus = async (db, bonusData) => {
   // Calcular fecha de expiración (1 año desde la compra por defecto)
   const purchaseDate = new Date();
   const expiryDate = new Date(purchaseDate);

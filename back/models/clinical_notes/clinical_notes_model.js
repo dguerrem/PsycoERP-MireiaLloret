@@ -1,7 +1,24 @@
-const { db } = require("../../config/db");
+// Obtener notas clínicas por ID de paciente
+const getClinicalNotesByPatientId = async (db, patientId) => {
+  const query = `
+    SELECT
+      cn.id,
+      cn.title,
+      cn.content,
+      DATE_FORMAT(cn.created_at, '%Y-%m-%d %H:%i:%s') as created_at,
+      DATE_FORMAT(cn.updated_at, '%Y-%m-%d %H:%i:%s') as updated_at
+    FROM clinical_notes cn
+    INNER JOIN patients p ON cn.patient_id = p.id
+    WHERE cn.patient_id = ? AND p.is_active = true
+    ORDER BY cn.created_at DESC
+  `;
+
+  const [rows] = await db.execute(query, [patientId]);
+  return rows;
+};
 
 // Crear nueva nota clínica
-const createClinicalNote = async (clinicalNoteData) => {
+const createClinicalNote = async (db, clinicalNoteData) => {
   const { patient_id, title, content } = clinicalNoteData;
 
   const query = `
@@ -34,7 +51,7 @@ const createClinicalNote = async (clinicalNoteData) => {
 };
 
 // Actualizar nota clínica
-const updateClinicalNote = async (noteId, updateData) => {
+const updateClinicalNote = async (db, noteId, updateData) => {
   const fields = Object.keys(updateData);
   const setClause = fields.map((field) => `${field} = ?`).join(", ");
 
@@ -69,7 +86,7 @@ const updateClinicalNote = async (noteId, updateData) => {
 };
 
 // Eliminar nota clínica
-const deleteClinicalNote = async (noteId) => {
+const deleteClinicalNote = async (db, noteId) => {
   const [result] = await db.execute(
     "DELETE FROM clinical_notes WHERE id = ?",
     [noteId]
@@ -83,6 +100,7 @@ const deleteClinicalNote = async (noteId) => {
 };
 
 module.exports = {
+  getClinicalNotesByPatientId,
   createClinicalNote,
   updateClinicalNote,
   deleteClinicalNote,

@@ -17,7 +17,7 @@ const obtenerClinicas = async (req, res) => {
     if (page) filters.page = page;
     if (limit) filters.limit = limit;
 
-    const result = await getClinics(filters);
+    const result = await getClinics(req.db, filters);
 
     res.json({
       success: true,
@@ -108,7 +108,7 @@ const actualizarClinica = async (req, res) => {
       });
     }
 
-    await updateClinic(id, data);
+    await updateClinic(req.db, id, data);
 
     res.json({
       success: true,
@@ -142,7 +142,7 @@ const eliminarClinica = async (req, res) => {
       });
     }
 
-    const eliminada = await deleteClinic(id);
+    const eliminada = await deleteClinic(req.db, id);
 
     if (!eliminada) {
       return res.status(404).json({
@@ -214,7 +214,7 @@ const crearClinica = async (req, res) => {
       data.percentage = percentageNum;
     }
 
-    const nuevaClinica = await createClinic(data);
+    const nuevaClinica = await createClinic(req.db, data);
 
     res.status(201).json({
       success: true,

@@ -1,9 +1,29 @@
-import { Component, Input, signal, computed, ChangeDetectionStrategy } from '@angular/core';
+import { Component, Input, Output, EventEmitter, signal, computed, ChangeDetectionStrategy, OnChanges, SimpleChanges, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ClinicalNote, CreateClinicalNoteRequest, UpdateClinicalNoteRequest } from '../models/clinical-note.interface';
 import { Patient } from '../../../shared/models/patient.model';
+import { PatientMedicalRecord } from '../../../shared/models/patient-detail.model';
+import { ClinicalNotesService } from '../services/clinical-notes.service';
 
+/**
+ * Patient Clinical History Component
+ *
+ * Manages patient clinical notes with create/update operations.
+ * Receives initial data from parent and handles POST/PUT to API.
+ *
+ * Usage:
+ *    <app-patient-clinical-history
+ *      [patient]="patient"
+ *      [medicalRecords]="patientMedicalRecord()">
+ *    </app-patient-clinical-history>
+ *
+ * Features:
+ * - Create and update clinical notes via API
+ * - Search/filter notes
+ * - Voice recording for note content
+ * - Emits events when data changes to refresh parent
+ */
 @Component({
   selector: 'app-patient-clinical-history',
   standalone: true,
@@ -11,37 +31,23 @@ import { Patient } from '../../../shared/models/patient.model';
   templateUrl: './patient-clinical-history.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class PatientClinicalHistoryComponent {
-  @Input({ required: true }) patient!: Patient;
+export class PatientClinicalHistoryComponent implements OnInit, OnChanges {
+  private clinicalNotesService = inject(ClinicalNotesService);
 
-  // Mock data - en producción vendría de un servicio
-  private mockNotes = signal<ClinicalNote[]>([
-    {
-      id: '1',
-      title: 'Primera sesión de evaluación',
-      content: 'El paciente presenta síntomas de ansiedad generalizada. Se observa nerviosismo, preocupación excesiva por situaciones cotidianas y dificultad para relajarse. Se recomienda iniciar terapia cognitivo-conductual.',
-      date: new Date('2024-01-15'),
-      tags: [],
-      sessionId: '001',
-      createdBy: 'Dr. García',
-      updatedAt: new Date('2024-01-15')
-    },
-    {
-      id: '2',
-      title: 'Progreso en técnicas de relajación',
-      content: 'El paciente ha mostrado mejoras significativas en la aplicación de técnicas de respiración profunda. Ha logrado implementar estas técnicas en situaciones de estrés laboral con buenos resultados.',
-      date: new Date('2024-01-22'),
-      tags: [],
-      sessionId: '003',
-      createdBy: 'Dr. García',
-      updatedAt: new Date('2024-01-22')
-    }
-  ]);
+  @Input({ required: true }) patient!: Patient;
+  @Input({ required: true }) medicalRecords!: PatientMedicalRecord[];
+  @Output() dataChanged = new EventEmitter<void>();
+
+  // Notes transformed from medical records
+  private notes = signal<ClinicalNote[]>([]);
+  isLoading = signal(false);
+  isSaving = signal(false);
 
   // Señales para el estado local
   searchTerm = signal('');
   isCreatingNote = signal(false);
   editingNote = signal<ClinicalNote | null>(null);
+  deletingNoteId = signal<string | null>(null);
   newNote = signal<Partial<CreateClinicalNoteRequest>>({
     title: '',
     content: '',
@@ -53,9 +59,44 @@ export class PatientClinicalHistoryComponent {
   private mediaRecorder: MediaRecorder | null = null;
   private recognition: any = null;
 
+  ngOnInit(): void {
+    // Transform initial data
+    if (this.medicalRecords) {
+      this.transformMedicalRecords(this.medicalRecords);
+    }
+  }
+
+  ngOnChanges(changes: SimpleChanges): void {
+    // Update when parent data changes
+    if (changes['medicalRecords'] && this.medicalRecords) {
+      this.transformMedicalRecords(this.medicalRecords);
+    }
+  }
+
+  private transformMedicalRecords(records: PatientMedicalRecord[]): void {
+    const transformed = records.map((record) => ({
+      id: record.id ? record.id.toString() : `temp-${Date.now()}`,
+      title: record.titulo,
+      content: record.contenido,
+      date: this.parseDateString(record.fecha),
+      tags: [],
+      sessionId: '',
+      createdBy: 'Sistema',
+      updatedAt: this.parseDateString(record.fecha)
+    }));
+
+    this.notes.set(transformed);
+  }
+
+  private parseDateString(dateStr: string): Date {
+    // Parse "2025-08-26 07:48:17" format
+    const [datePart] = dateStr.split(' ');
+    return new Date(datePart);
+  }
+
   // Computed para notas filtradas
   filteredNotes = computed(() => {
-    const notes = this.mockNotes();
+    const notes = this.notes();
     const search = this.searchTerm().toLowerCase();
 
     if (!search) return notes;
@@ -69,6 +110,14 @@ export class PatientClinicalHistoryComponent {
   // Computed para notas ordenadas
   sortedNotes = computed(() => {
     return this.filteredNotes().sort((a, b) => b.date.getTime() - a.date.getTime());
+  });
+
+  // Computed para validación del formulario
+  isFormValid = computed(() => {
+    const note = this.newNote();
+    const hasTitle = (note.title?.trim().length ?? 0) > 0;
+    const hasValidContent = (note.content?.trim().length ?? 0) >= 10;
+    return hasTitle && hasValidContent;
   });
 
   onSearchChange(event: Event) {
@@ -111,15 +160,63 @@ export class PatientClinicalHistoryComponent {
     const note = this.newNote();
     const editingNote = this.editingNote();
 
-    if (editingNote) {
-      console.log('Updating note:', editingNote.id, note);
-      // Aquí iría la llamada al servicio para actualizar
-    } else {
-      console.log('Creating note:', note);
-      // Aquí iría la llamada al servicio para crear
+    // Validation (should not happen with disabled button, but just in case)
+    if (!this.isFormValid()) {
+      return;
     }
 
-    this.onCancelEdit();
+    if (!this.patient.id) {
+      return;
+    }
+
+    this.isSaving.set(true);
+
+    if (editingNote) {
+      // Update existing note
+      const noteIdNumber = parseInt(editingNote.id);
+
+      if (isNaN(noteIdNumber) || noteIdNumber === 0) {
+        this.isSaving.set(false);
+        return;
+      }
+
+      this.clinicalNotesService.updateClinicalNote({
+        id: noteIdNumber,
+        title: note.title || '',
+        content: note.content || ''
+      }).subscribe({
+        next: (response) => {
+          this.isSaving.set(false);
+          this.onCancelEdit();
+          // Notify parent to reload data
+          this.dataChanged.emit();
+        },
+        error: (error) => {
+          console.error('Error updating note:', error);
+          alert('Error al actualizar la nota. Por favor, intenta de nuevo.');
+          this.isSaving.set(false);
+        }
+      });
+    } else {
+      // Create new note
+      this.clinicalNotesService.createClinicalNote({
+        patient_id: this.patient.id,
+        title: note.title || '',
+        content: note.content || ''
+      }).subscribe({
+        next: (response) => {
+          this.isSaving.set(false);
+          this.onCancelEdit();
+          // Notify parent to reload data
+          this.dataChanged.emit();
+        },
+        error: (error) => {
+          console.error('Error creating note:', error);
+          alert('Error al crear la nota. Por favor, intenta de nuevo.');
+          this.isSaving.set(false);
+        }
+      });
+    }
   }
 
   onCancelEdit() {
@@ -137,6 +234,31 @@ export class PatientClinicalHistoryComponent {
       year: 'numeric',
       month: '2-digit',
       day: '2-digit'
+    });
+  }
+
+  onDeleteNote(event: Event, note: ClinicalNote) {
+    // Prevent triggering edit when clicking delete
+    event.stopPropagation();
+
+    const noteIdNumber = parseInt(note.id);
+
+    if (isNaN(noteIdNumber) || noteIdNumber === 0) {
+      return;
+    }
+
+    this.deletingNoteId.set(note.id);
+
+    this.clinicalNotesService.deleteClinicalNote(noteIdNumber).subscribe({
+      next: (response) => {
+        this.deletingNoteId.set(null);
+        // Notify parent to reload data
+        this.dataChanged.emit();
+      },
+      error: (error) => {
+        console.error('Error deleting note:', error);
+        this.deletingNoteId.set(null);
+      }
     });
   }
 

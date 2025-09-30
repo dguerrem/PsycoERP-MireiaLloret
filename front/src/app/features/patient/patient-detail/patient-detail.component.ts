@@ -10,10 +10,13 @@ import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Patient } from '../../../shared/models/patient.model';
-import { PatientDetailResponse, PatientDetailUtils, Session, Invoice, Bonus } from '../../../shared/models/patient-detail.model';
+import { PatientDetailResponse, PatientDetailUtils, Session, Invoice, Bonus, PatientSession, PatientDocument } from '../../../shared/models/patient-detail.model';
 import { PatientSummaryComponent } from '../components/patient-summary.component';
 import { PatientDataComponent } from '../components/patient-data.component';
 import { PatientClinicalHistoryComponent } from '../components/patient-clinical-history.component';
+import { PatientSessionsComponent } from '../components/patient-sessions.component';
+import { PatientDocumentationComponent } from '../components/patient-documentation.component';
+import { environment } from '../../../../environments/environment';
 
 /**
  * Patient Detail Component
@@ -24,7 +27,7 @@ import { PatientClinicalHistoryComponent } from '../components/patient-clinical-
 @Component({
   selector: 'app-patient-detail',
   standalone: true,
-  imports: [CommonModule, PatientSummaryComponent, PatientDataComponent, PatientClinicalHistoryComponent],
+  imports: [CommonModule, PatientSummaryComponent, PatientDataComponent, PatientClinicalHistoryComponent, PatientSessionsComponent, PatientDocumentationComponent],
   templateUrl: './patient-detail.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -98,6 +101,27 @@ export class PatientDetailComponent implements OnInit {
     return [] as Bonus[];
   });
 
+  readonly patientSessions = computed(() => {
+    const data = this.patientDetailData();
+    if (!data || !data.success) return [];
+
+    return data.data.PatientSessions;
+  });
+
+  readonly patientDocuments = computed(() => {
+    const data = this.patientDetailData();
+    if (!data || !data.success) return [];
+
+    return data.data.PatientDocuments || [];
+  });
+
+  readonly patientMedicalRecord = computed(() => {
+    const data = this.patientDetailData();
+    if (!data || !data.success) return [];
+
+    return data.data.PatientMedicalRecord || [];
+  });
+
   ngOnInit(): void {
     const patientId = this.route.snapshot.paramMap.get('id');
 
@@ -111,7 +135,7 @@ export class PatientDetailComponent implements OnInit {
   private loadPatientDetail(patientId: number): void {
     this.isLoading.set(true);
 
-    this.http.get<PatientDetailResponse>(`http://localhost:3000/api/patients/${patientId}`)
+    this.http.get<PatientDetailResponse>(`${environment.api.baseUrl}/patients/${patientId}`)
       .subscribe({
         next: (response) => {
           this.patientDetailData.set(response);
@@ -175,5 +199,33 @@ export class PatientDetailComponent implements OnInit {
 
   private getFullName(patient: Patient): string {
     return `${patient.first_name} ${patient.last_name}`;
+  }
+
+  onClinicalNotesChanged(): void {
+    // Reload only clinical notes data when changed
+    const patientId = this.patient()?.id;
+    if (patientId) {
+      this.http.get<PatientDetailResponse>(`${environment.api.baseUrl}/patients/${patientId}`)
+        .subscribe({
+          next: (response) => {
+            if (response.success && response.data) {
+              // Update only the PatientMedicalRecord part
+              const currentData = this.patientDetailData();
+              if (currentData) {
+                this.patientDetailData.set({
+                  ...currentData,
+                  data: {
+                    ...currentData.data,
+                    PatientMedicalRecord: response.data.PatientMedicalRecord
+                  }
+                });
+              }
+            }
+          },
+          error: (error) => {
+            console.error('Error reloading clinical notes:', error);
+          }
+        });
+    }
   }
 }
