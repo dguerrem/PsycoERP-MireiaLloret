@@ -39,8 +39,9 @@ export interface SessionData {
       name: string;         // "Juan Pérez García"
     };
     ClinicDetailData: {
-      clinic_id: number;    // 1
-      clinic_name: string;  // "Clínica Psicológica Centro"
+      clinic_id: number | null;    // 1
+      clinic_name: string | null;  // "Clínica Psicológica Centro"
+      clinic_color: string | null; // Color for clinic display
     };
     MedicalRecordData: Array<{
       title: string;        // "Sesión inicial de evaluación"

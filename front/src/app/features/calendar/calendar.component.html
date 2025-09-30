@@ -124,8 +124,9 @@
                   <div (click)="onSessionClick(sessionData)"
                     [class]="isSessionCancelled(sessionData) ?
                     'bg-gray-100 border-l-4 border-gray-400 rounded-sm px-2 py-1.5 text-xs cursor-pointer transition-all duration-200 text-gray-500 opacity-60 hover:opacity-80 relative line-through' :
-                    'border-l-4 rounded-sm p-2 text-xs cursor-pointer hover:shadow-md transition-all duration-200 ' + getClinicConfigFromSessionData(sessionData).backgroundColor + ' ' + getClinicConfigFromSessionData(sessionData).color + (getSessionStatusBadgeClass(sessionData).includes('green') ? ' ring-2 ring-green-500 ring-opacity-50' : '')"
-                    [style.border-left-color]="isSessionCancelled(sessionData) ? '#9ca3af' : getClinicConfigFromSessionData(sessionData).borderColor"
+                    'border-l-4 rounded-sm p-2 text-xs cursor-pointer hover:shadow-md transition-all duration-200 text-white ' + (!getClinicConfigFromSessionData(sessionData).hasCustomColor ? getClinicConfigFromSessionData(sessionData).backgroundColor : '') + (getSessionStatusBadgeClass(sessionData).includes('green') ? ' ring-2 ring-green-500 ring-opacity-50' : '')"
+                    [style.background-color]="!isSessionCancelled(sessionData) && getClinicConfigFromSessionData(sessionData).hasCustomColor ? getClinicColorFromSessionData(sessionData) : ''"
+                    [style.border-left-color]="isSessionCancelled(sessionData) ? '#9ca3af' : (getClinicConfigFromSessionData(sessionData).hasCustomColor ? getClinicColorFromSessionData(sessionData) : getClinicConfigFromSessionData(sessionData).borderColor)"
                     class="min-h-[45px] flex flex-col justify-between relative group flex-shrink-0">
                     <!-- Indicador de completado -->
                     @if (sessionData.SessionDetailData.completed && !isSessionCancelled(sessionData)) {
@@ -219,7 +220,8 @@
             <div (click)="onSessionClick(sessionData)"
               [class]="isSessionCancelled(sessionData) ?
                 'bg-gradient-to-r from-gray-50/30 to-white rounded px-1 sm:px-2 py-0.5 sm:py-1 text-xs cursor-pointer transition-all duration-200 bg-gray-200 text-gray-500 opacity-60 hover:opacity-80 relative before:absolute before:inset-0 before:bg-gray-300 before:opacity-30 before:rounded after:absolute after:top-1/2 after:left-0 after:right-0 after:h-0.5 after:bg-gray-600 after:transform after:-rotate-12 line-through flex flex-col' :
-                getClinicConfigFromSessionData(sessionData).backgroundColor + ' ' + getClinicConfigFromSessionData(sessionData).color + (getSessionStatusBadgeClass(sessionData).includes('green') ? ' opacity-75 border-2 border-green-500' : '') + ' rounded p-1 sm:p-2 text-xs cursor-pointer hover:opacity-90 transition-opacity flex flex-col'"
+                'text-white ' + (!getClinicConfigFromSessionData(sessionData).hasCustomColor ? getClinicConfigFromSessionData(sessionData).backgroundColor : '') + (getSessionStatusBadgeClass(sessionData).includes('green') ? ' opacity-75 border-2 border-green-500' : '') + ' rounded p-1 sm:p-2 text-xs cursor-pointer hover:opacity-90 transition-opacity flex flex-col'"
+              [style.background-color]="!isSessionCancelled(sessionData) && getClinicConfigFromSessionData(sessionData).hasCustomColor ? getClinicColorFromSessionData(sessionData) : ''"
               class="relative">
               <!-- Indicador de completado -->
               @if (sessionData.SessionDetailData.completed && !isSessionCancelled(sessionData)) {

@@ -8,7 +8,6 @@ import { CommonModule } from '@angular/common';
 import {
   SessionData,
   SessionUtils,
-  CreateSessionRequest,
 } from '../../shared/models/session.model';
 import {
   CLINIC_CONFIGS,
@@ -164,7 +163,7 @@ export class CalendarComponent {
   }
 
   getClinicNameFromSessionData(sessionData: SessionData): string {
-    return sessionData.SessionDetailData.ClinicDetailData.clinic_name;
+    return sessionData.SessionDetailData.ClinicDetailData.clinic_name || 'Sin clínica';
   }
 
   formatDate(date: Date): string {
@@ -240,12 +239,33 @@ export class CalendarComponent {
     return sessionData.SessionDetailData.start_time.substring(0, 5);
   }
 
-  getClinicConfigFromSessionData(sessionData: SessionData): ClinicConfig {
-    const clinicId = sessionData.SessionDetailData.ClinicDetailData.clinic_id;
-    return (
-      this.clinicConfigs.find((config) => config.id === clinicId) ||
-      this.clinicConfigs[0]
-    );
+  getClinicConfigFromSessionData(sessionData: SessionData): ClinicConfig & { hasCustomColor: boolean } {
+    const clinicData = sessionData.SessionDetailData.ClinicDetailData;
+    const clinicId = clinicData.clinic_id;
+    const apiColor = clinicData.clinic_color;
+
+    // If we have a color from the API, use it
+    if (apiColor) {
+      return {
+        id: clinicId || 0,
+        name: clinicData.clinic_name || 'Sin clínica',
+        color: 'text-white',
+        backgroundColor: '', // We'll use inline styles for custom colors
+        borderColor: '',
+        hasCustomColor: true
+      };
+    }
+
+    // Fallback to hardcoded configs if no color from API
+    const config = this.clinicConfigs.find((config) => config.id === clinicId) || this.clinicConfigs[0];
+    return {
+      ...config,
+      hasCustomColor: false
+    };
+  }
+
+  getClinicColorFromSessionData(sessionData: SessionData): string | null {
+    return sessionData.SessionDetailData.ClinicDetailData.clinic_color;
   }
 
   isSessionCancelled(sessionData: SessionData): boolean {
