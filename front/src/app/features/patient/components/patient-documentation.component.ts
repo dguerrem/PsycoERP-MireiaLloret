@@ -2,6 +2,8 @@ import {
   Component,
   ChangeDetectionStrategy,
   Input,
+  Output,
+  EventEmitter,
   signal,
   inject
 } from '@angular/core';
@@ -9,21 +11,29 @@ import { CommonModule } from '@angular/common';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { Patient } from '../../../shared/models/patient.model';
 import { PatientDocument } from '../../../shared/models/patient-detail.model';
+import { ReusableModalComponent } from '../../../shared/components/reusable-modal/reusable-modal.component';
+import { PatientDocumentsService } from '../services/patient-documents.service';
 
 @Component({
   selector: 'app-patient-documentation',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, ReusableModalComponent],
   templateUrl: './patient-documentation.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class PatientDocumentationComponent {
   private sanitizer = inject(DomSanitizer);
+  private documentsService = inject(PatientDocumentsService);
 
   @Input({ required: true }) patient!: Patient;
   @Input() documents: PatientDocument[] = [];
+  @Output() documentsChanged = new EventEmitter<void>();
 
   readonly viewingDocument = signal<PatientDocument | null>(null);
+  readonly isUploadModalOpen = signal(false);
+  readonly selectedFile = signal<File | null>(null);
+  readonly description = signal('');
+  readonly isDragging = signal(false);
 
   getFileIcon(type: string): string {
     const normalizedType = this.normalizeFileType(type);
@@ -82,20 +92,81 @@ export class PatientDocumentationComponent {
     this.viewingDocument.set(null);
   }
 
+  openUploadModal(): void {
+    this.isUploadModalOpen.set(true);
+  }
+
+  closeUploadModal(): void {
+    this.isUploadModalOpen.set(false);
+    this.selectedFile.set(null);
+    this.description.set('');
+  }
+
   onFileSelected(event: Event): void {
     const input = event.target as HTMLInputElement;
     const files = input.files;
 
     if (files && files.length > 0) {
-      console.log('Archivos seleccionados:', files);
-
-      // Mostrar información de los archivos seleccionados
-      const fileNames = Array.from(files).map(file => `${file.name} (${this.formatFileSize(file.size)})`);
-      alert(`Archivos seleccionados:\n${fileNames.join('\n')}\n\nEn una aplicación real, estos archivos se subirían al servidor.`);
-
-      // Limpiar el input para permitir seleccionar los mismos archivos nuevamente
+      this.selectedFile.set(files[0]);
       input.value = '';
     }
+  }
+
+  onFileDrop(event: DragEvent): void {
+    event.preventDefault();
+    event.stopPropagation();
+    this.isDragging.set(false);
+
+    const files = event.dataTransfer?.files;
+    if (files && files.length > 0) {
+      this.selectedFile.set(files[0]);
+    }
+  }
+
+  onDragOver(event: DragEvent): void {
+    event.preventDefault();
+    event.stopPropagation();
+    this.isDragging.set(true);
+  }
+
+  onDragLeave(event: DragEvent): void {
+    event.preventDefault();
+    event.stopPropagation();
+    this.isDragging.set(false);
+  }
+
+  removeSelectedFile(): void {
+    this.selectedFile.set(null);
+  }
+
+  onDescriptionChange(event: Event): void {
+    const input = event.target as HTMLTextAreaElement;
+    this.description.set(input.value);
+  }
+
+  async handleUploadSubmit(): Promise<void> {
+    const file = this.selectedFile();
+    const desc = this.description();
+
+    if (!file || !desc.trim() || !this.patient.id) {
+      return;
+    }
+
+    const uploadedDocument = await this.documentsService.uploadDocument({
+      patient_id: this.patient.id,
+      description: desc.trim(),
+      file: file
+    });
+
+    if (uploadedDocument) {
+      // Notify parent component to reload documents
+      this.documentsChanged.emit();
+      this.closeUploadModal();
+    }
+  }
+
+  get isUploadFormValid(): boolean {
+    return !!this.selectedFile() && this.description().trim().length > 0;
   }
 
   formatFileSize(bytes: number): string {
@@ -106,14 +177,33 @@ export class PatientDocumentationComponent {
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
   }
 
-  handleDownloadDocument(document: PatientDocument): void {
-    // TODO: Implementar descarga de documentos
-    console.log('Descargando documento:', document.name);
+  async handleDownloadDocument(document: PatientDocument): Promise<void> {
+    if (!this.patient.id) return;
+
+    await this.documentsService.downloadDocument(
+      this.patient.id,
+      document.id,
+      document.name
+    );
   }
 
-  handleDeleteDocument(document: PatientDocument): void {
-    // TODO: Implementar eliminación de documentos
-    console.log('Eliminando documento:', document.name);
+  async handleDeleteDocument(document: PatientDocument): Promise<void> {
+    if (!this.patient.id) return;
+
+    // Ask for confirmation
+    if (!confirm(`¿Estás seguro de que deseas eliminar el documento "${document.name}"?`)) {
+      return;
+    }
+
+    const success = await this.documentsService.deleteDocument(
+      this.patient.id,
+      document.id
+    );
+
+    if (success) {
+      // Notify parent component to reload documents
+      this.documentsChanged.emit();
+    }
   }
 
   formatDate(dateStr: string): string {
