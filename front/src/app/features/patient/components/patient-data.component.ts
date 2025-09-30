@@ -6,10 +6,15 @@ import {
   computed,
   inject,
   OnInit,
-  OnChanges
+  OnChanges,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import {
+  ReactiveFormsModule,
+  FormBuilder,
+  FormGroup,
+  Validators,
+} from '@angular/forms';
 import { Patient } from '../../../shared/models/patient.model';
 
 /**
@@ -49,7 +54,7 @@ export class PatientDataComponent implements OnInit, OnChanges {
       tipo_clinica: [''],
       nombre_clinica: [''],
       treatment_start_date: [''],
-      status: ['']
+      status: [''],
     });
   }
 
@@ -61,7 +66,10 @@ export class PatientDataComponent implements OnInit, OnChanges {
     let age = today.getFullYear() - birthDate.getFullYear();
     const monthDiff = today.getMonth() - birthDate.getMonth();
 
-    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+    if (
+      monthDiff < 0 ||
+      (monthDiff === 0 && today.getDate() < birthDate.getDate())
+    ) {
       age--;
     }
 
@@ -92,11 +100,12 @@ export class PatientDataComponent implements OnInit, OnChanges {
       occupation: this.patient.occupation,
       email: this.patient.email,
       phone: this.patient.phone,
-      address: `${this.patient.street} ${this.patient.street_number} ${this.patient.door}, ${this.patient.city}, ${this.patient.province} ${this.patient.postal_code}`.trim(),
+      address:
+        `${this.patient.street} ${this.patient.street_number} ${this.patient.door}, ${this.patient.city}, ${this.patient.province} ${this.patient.postal_code}`.trim(),
       tipo_clinica: this.patient.tipo_clinica || '',
       nombre_clinica: this.patient.nombre_clinica || '',
       treatment_start_date: this.patient.treatment_start_date,
-      status: this.patient.status
+      status: this.patient.status,
     });
   }
 
@@ -107,8 +116,6 @@ export class PatientDataComponent implements OnInit, OnChanges {
 
   onSave() {
     if (this.patientForm.valid) {
-      // TODO: Implement save logic - call API
-      console.log('Saving patient data:', this.patientForm.value);
       this.isEditing.set(false);
       this.patientForm.disable();
     }

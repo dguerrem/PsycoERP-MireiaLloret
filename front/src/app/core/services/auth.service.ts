@@ -3,7 +3,14 @@ import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { Observable, BehaviorSubject, timer, EMPTY, lastValueFrom } from 'rxjs';
 import { catchError, switchMap, tap } from 'rxjs/operators';
-import { LoginRequest, LoginResponse, RefreshResponse, User, TokenData, ApiError } from '../models';
+import {
+  LoginRequest,
+  LoginResponse,
+  RefreshResponse,
+  User,
+  TokenData,
+  ApiError,
+} from '../models';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
@@ -21,7 +28,9 @@ export class AuthService {
   private isRefreshing = false;
 
   // Computed signals para acceso público de solo lectura
-  isAuthenticated = computed(() => this.currentUser() !== null && this.currentToken() !== null);
+  isAuthenticated = computed(
+    () => this.currentUser() !== null && this.currentToken() !== null
+  );
   isLoading = computed(() => this.loading());
   user = computed(() => this.currentUser());
   token = computed(() => this.currentToken());
@@ -189,20 +198,16 @@ export class AuthService {
         const timeUntilExpiration = expirationTime.getTime() - now.getTime();
         const refreshThreshold = this.calculateRefreshThreshold(expirationTime);
 
-        if (timeUntilExpiration <= refreshThreshold && timeUntilExpiration > 0) {
+        if (
+          timeUntilExpiration <= refreshThreshold &&
+          timeUntilExpiration > 0
+        ) {
           return this.refreshToken();
         }
 
         return EMPTY;
       })
-    ).subscribe({
-      next: () => {
-        console.log('Token renovado automáticamente');
-      },
-      error: (error) => {
-        console.error('Error en auto-refresh:', error);
-      }
-    });
+    );
   }
 
   /**
@@ -234,12 +239,11 @@ export class AuthService {
 
     // Estrategia basada en la duración total del token
     if (tokenLifetimeDays >= 7) {
-      return 24 * 60 * 60 * 1000;  // 24 horas antes para tokens de 7+ días
+      return 24 * 60 * 60 * 1000; // 24 horas antes para tokens de 7+ días
     } else if (tokenLifetimeDays >= 1) {
-      return 4 * 60 * 60 * 1000;   // 4 horas antes para tokens de 1-7 días
+      return 4 * 60 * 60 * 1000; // 4 horas antes para tokens de 1-7 días
     } else {
-      return 30 * 60 * 1000;       // 30 minutos antes para tokens cortos
+      return 30 * 60 * 1000; // 30 minutos antes para tokens cortos
     }
   }
-
 }

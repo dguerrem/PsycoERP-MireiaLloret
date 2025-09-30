@@ -3,7 +3,7 @@ import {
   ChangeDetectionStrategy,
   Input,
   signal,
-  computed
+  computed,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Patient } from '../../../shared/models/patient.model';
@@ -36,44 +36,45 @@ export class PatientDocumentationComponent {
   readonly mockDocuments: Document[] = [
     {
       id: 1,
-      name: "Consentimiento_Informado.pdf",
-      type: "pdf",
-      size: "245 KB",
-      upload_date: "2024-01-15",
-      description: "Consentimiento informado firmado para tratamiento psicológico",
-      file_url: "https://example.com/docs/consent.pdf",
-      patient_id: this.patient?.id || 1
+      name: 'Consentimiento_Informado.pdf',
+      type: 'pdf',
+      size: '245 KB',
+      upload_date: '2024-01-15',
+      description:
+        'Consentimiento informado firmado para tratamiento psicológico',
+      file_url: 'https://example.com/docs/consent.pdf',
+      patient_id: this.patient?.id || 1,
     },
     {
       id: 2,
-      name: "Informe_Medico_Derivacion.pdf",
-      type: "pdf",
-      size: "1.2 MB",
-      upload_date: "2024-01-10",
-      description: "Informe médico de derivación desde atención primaria",
-      file_url: "https://example.com/docs/medical.pdf",
-      patient_id: this.patient?.id || 1
+      name: 'Informe_Medico_Derivacion.pdf',
+      type: 'pdf',
+      size: '1.2 MB',
+      upload_date: '2024-01-10',
+      description: 'Informe médico de derivación desde atención primaria',
+      file_url: 'https://example.com/docs/medical.pdf',
+      patient_id: this.patient?.id || 1,
     },
     {
       id: 3,
-      name: "Test_Ansiedad_Beck.pdf",
-      type: "pdf",
-      size: "890 KB",
-      upload_date: "2024-01-20",
-      description: "Resultados del inventario de ansiedad de Beck",
-      file_url: "https://example.com/docs/beck.pdf",
-      patient_id: this.patient?.id || 1
+      name: 'Test_Ansiedad_Beck.pdf',
+      type: 'pdf',
+      size: '890 KB',
+      upload_date: '2024-01-20',
+      description: 'Resultados del inventario de ansiedad de Beck',
+      file_url: 'https://example.com/docs/beck.pdf',
+      patient_id: this.patient?.id || 1,
     },
     {
       id: 4,
-      name: "Radiografia_Torax.jpg",
-      type: "jpg",
-      size: "2.1 MB",
-      upload_date: "2024-01-12",
-      description: "Radiografía de tórax solicitada por médico tratante",
-      file_url: "https://example.com/docs/xray.jpg",
-      patient_id: this.patient?.id || 1
-    }
+      name: 'Radiografia_Torax.jpg',
+      type: 'jpg',
+      size: '2.1 MB',
+      upload_date: '2024-01-12',
+      description: 'Radiografía de tórax solicitada por médico tratante',
+      file_url: 'https://example.com/docs/xray.jpg',
+      patient_id: this.patient?.id || 1,
+    },
   ];
 
   readonly displayDocuments = computed(() => {
@@ -127,11 +128,15 @@ export class PatientDocumentationComponent {
     const files = input.files;
 
     if (files && files.length > 0) {
-      console.log('Archivos seleccionados:', files);
-
       // Mostrar información de los archivos seleccionados
-      const fileNames = Array.from(files).map(file => `${file.name} (${this.formatFileSize(file.size)})`);
-      alert(`Archivos seleccionados:\n${fileNames.join('\n')}\n\nEn una aplicación real, estos archivos se subirían al servidor.`);
+      const fileNames = Array.from(files).map(
+        (file) => `${file.name} (${this.formatFileSize(file.size)})`
+      );
+      alert(
+        `Archivos seleccionados:\n${fileNames.join(
+          '\n'
+        )}\n\nEn una aplicación real, estos archivos se subirían al servidor.`
+      );
 
       // Limpiar el input para permitir seleccionar los mismos archivos nuevamente
       input.value = '';
@@ -148,12 +153,10 @@ export class PatientDocumentationComponent {
 
   handleDownloadDocument(document: Document): void {
     // TODO: Implementar descarga de documentos
-    console.log('Descargando documento:', document.name);
   }
 
   handleDeleteDocument(document: Document): void {
     // TODO: Implementar eliminación de documentos
-    console.log('Eliminando documento:', document.name);
   }
 
   formatDate(dateStr: string): string {

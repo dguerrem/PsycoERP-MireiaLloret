@@ -1,4 +1,11 @@
-import { Component, ChangeDetectionStrategy, inject, OnInit, computed, signal } from '@angular/core';
+import {
+  Component,
+  ChangeDetectionStrategy,
+  inject,
+  OnInit,
+  computed,
+  signal,
+} from '@angular/core';
 import { FormBuilder, Validators, ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { UserService } from '../../core/services/user.service';
@@ -21,7 +28,9 @@ export class ConfigurationComponent implements OnInit {
 
   // Computed signals para el template
   protected isLoading = computed(() => this.userService.isLoading());
-  protected isUpdating = computed(() => this.userService.isUpdating() || this.saveInProgress());
+  protected isUpdating = computed(
+    () => this.userService.isUpdating() || this.saveInProgress()
+  );
   protected userProfile = computed(() => this.userService.profile());
 
   public configurationForm = this.fb.group({
@@ -72,7 +81,7 @@ export class ConfigurationComponent implements OnInit {
             door: user.door || '',
             city: user.city || '',
             province: user.province || '',
-            postal_code: user.postal_code || ''
+            postal_code: user.postal_code || '',
           });
         }
       }
@@ -92,13 +101,13 @@ export class ConfigurationComponent implements OnInit {
         const userId = this.userService.getUserIdFromStorage();
 
         if (userId) {
-          const formData = this.configurationForm.value as UpdateUserProfileRequest;
+          const formData = this.configurationForm
+            .value as UpdateUserProfileRequest;
 
-          const updatedUser = await this.userService.updateUserProfileAsync(userId, formData);
-
-          if (updatedUser) {
-            console.log('Usuario actualizado correctamente:', updatedUser);
-          }
+          const updatedUser = await this.userService.updateUserProfileAsync(
+            userId,
+            formData
+          );
         }
       } catch (error) {
         console.error('Error saving user profile:', error);

@@ -323,7 +323,6 @@ export class PatientsService extends BaseCrudService<Patient> {
   selectPatient(patient: Patient | null): void {
     // This method is kept for compatibility with existing code
     // In the new API pattern, we don't need to track selected patient in service
-    console.log('Selected patient:', patient);
   }
 
   /**

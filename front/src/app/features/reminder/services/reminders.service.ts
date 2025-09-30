@@ -1,7 +1,12 @@
 import { Injectable, signal, inject } from '@angular/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { lastValueFrom } from 'rxjs';
-import { Reminder, PendingReminderFromAPI, PendingRemindersResponse, SendReminderResponse } from '../models/reminder.model';
+import {
+  Reminder,
+  PendingReminderFromAPI,
+  PendingRemindersResponse,
+  SendReminderResponse,
+} from '../models/reminder.model';
 import { WhatsAppService } from '../../../core/services/whatsapp.service';
 
 @Injectable({ providedIn: 'root' })
@@ -37,7 +42,7 @@ export class RemindersService {
       patientName: apiData.patient_name,
       startTime: apiData.start_time,
       endTime: apiData.end_time,
-      sent: apiData.reminder_sent
+      sent: apiData.reminder_sent,
     };
   }
 
@@ -51,7 +56,9 @@ export class RemindersService {
       );
 
       if (response.data) {
-        const mappedReminders = response.data.map(item => this.mapReminderFromAPI(item));
+        const mappedReminders = response.data.map((item) =>
+          this.mapReminderFromAPI(item)
+        );
         this.reminders.set(mappedReminders);
       } else {
         this.errorState.set('Error loading reminders');
@@ -59,9 +66,10 @@ export class RemindersService {
       }
     } catch (error) {
       console.error('Error loading reminders:', error);
-      const errorMessage = error instanceof HttpErrorResponse
-        ? `Error ${error.status}: ${error.message}`
-        : 'Connection error';
+      const errorMessage =
+        error instanceof HttpErrorResponse
+          ? `Error ${error.status}: ${error.message}`
+          : 'Connection error';
       this.errorState.set(errorMessage);
       this.reminders.set([]);
     } finally {
@@ -70,32 +78,32 @@ export class RemindersService {
   }
 
   async sendReminder(id: string): Promise<void> {
-    this.sendingReminder.update(set => new Set([...set, id]));
+    this.sendingReminder.update((set) => new Set([...set, id]));
     this.errorState.set(null);
 
     try {
       const response = await lastValueFrom(
         this.http.post<SendReminderResponse>('/reminders', {
-          session_id: parseInt(id)
+          session_id: parseInt(id),
         })
       );
 
       if (response.data) {
         // Update local state
-        this.reminders.update(reminders =>
-          reminders.map(reminder =>
+        this.reminders.update((reminders) =>
+          reminders.map((reminder) =>
             reminder.id === id ? { ...reminder, sent: true } : reminder
           )
         );
 
         // Try to open WhatsApp Desktop first, fallback to web if it doesn't work
-        this.whatsAppService.openWhatsAppDesktopOnly(response.data.whatsapp_deeplink)
-          .then(success => {
+        this.whatsAppService
+          .openWhatsAppDesktopOnly(response.data.whatsapp_deeplink)
+          .then((success) => {
             if (!success) {
-              console.log('WhatsApp Desktop not available, using web method');
-              this.whatsAppService.openWhatsApp(response.data.whatsapp_deeplink);
-            } else {
-              console.log('WhatsApp Desktop opened successfully');
+              this.whatsAppService.openWhatsApp(
+                response.data.whatsapp_deeplink
+              );
             }
           });
       } else {
@@ -103,15 +111,16 @@ export class RemindersService {
       }
     } catch (error) {
       console.error('Error sending reminder:', error);
-      const errorMessage = error instanceof HttpErrorResponse
-        ? `Error ${error.status}: ${error.message}`
-        : error instanceof Error
-        ? error.message
-        : 'Connection error';
+      const errorMessage =
+        error instanceof HttpErrorResponse
+          ? `Error ${error.status}: ${error.message}`
+          : error instanceof Error
+          ? error.message
+          : 'Connection error';
       this.errorState.set(errorMessage);
       throw error;
     } finally {
-      this.sendingReminder.update(set => {
+      this.sendingReminder.update((set) => {
         const newSet = new Set(set);
         newSet.delete(id);
         return newSet;

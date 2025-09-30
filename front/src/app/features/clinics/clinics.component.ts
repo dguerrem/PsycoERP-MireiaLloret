@@ -171,7 +171,6 @@ export class ClinicsComponent implements OnInit {
     const restoring = this.restoringClinic();
     if (restoring) {
       // TODO: Implement restore functionality in service
-      console.log('Restaurando clínica:', restoring);
 
       // Simulate restore by changing status to active
       const updatedClinic = { ...restoring, status: 'active' };

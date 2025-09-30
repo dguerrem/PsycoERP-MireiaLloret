@@ -129,7 +129,6 @@ export class CalendarComponent {
   }
 
   onSessionDataCreated(sessionData: SessionData): void {
-    console.log('Session data received:', sessionData);
     this.showNewSessionDialog.set(false);
     this.prefilledSessionData = null;
 
