@@ -18,10 +18,37 @@ export class CalendarService {
   }
 
   /**
-   * Loads sessions from the API
+   * Loads sessions from the API with date filtering based on current view
    */
   private loadSessions(): void {
-    this.sessionsService.getSessionsWithPagination(1, 100).subscribe({
+    const currentDate = this._currentDate();
+    const currentView = this._currentView();
+
+    let fechaDesde: string;
+    let fechaHasta: string;
+
+    if (currentView === 'week') {
+      // For week view, calculate the week start and end dates
+      const startOfWeek = new Date(currentDate);
+      const day = startOfWeek.getDay();
+      const diff = startOfWeek.getDate() - day + (day === 0 ? -6 : 1);
+      startOfWeek.setDate(diff);
+
+      const endOfWeek = new Date(startOfWeek);
+      endOfWeek.setDate(startOfWeek.getDate() + 6);
+
+      fechaDesde = startOfWeek.toISOString().split('T')[0];
+      fechaHasta = endOfWeek.toISOString().split('T')[0];
+    } else {
+      // For month view, use first and last day of the month
+      const firstDayOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
+      const lastDayOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0);
+
+      fechaDesde = firstDayOfMonth.toISOString().split('T')[0];
+      fechaHasta = lastDayOfMonth.toISOString().split('T')[0];
+    }
+
+    this.sessionsService.getSessionsWithDateFilter(fechaDesde, fechaHasta, 1, 1000).subscribe({
       next: (response: SessionResponse) => {
         // Transform API data to match expected structure
         const transformedData = response.data.map(session => ({
@@ -137,6 +164,7 @@ export class CalendarService {
 
   setCurrentView(view: 'week' | 'month'): void {
     this._currentView.set(view);
+    this.loadSessions(); // Reload sessions when view changes
   }
 
   setSelectedSessionData(sessionData: SessionData | null): void {
@@ -145,6 +173,7 @@ export class CalendarService {
 
   navigateToToday(): void {
     this._currentDate.set(new Date());
+    this.loadSessions(); // Reload sessions when navigating to today
   }
 
   navigatePrevious(): void {
@@ -160,6 +189,7 @@ export class CalendarService {
       newDate.setMonth(current.getMonth() - 1);
       this._currentDate.set(newDate);
     }
+    this.loadSessions(); // Reload sessions after navigation
   }
 
   navigateNext(): void {
@@ -175,6 +205,7 @@ export class CalendarService {
       newDate.setMonth(current.getMonth() + 1);
       this._currentDate.set(newDate);
     }
+    this.loadSessions(); // Reload sessions after navigation
   }
 
   getSessionDataForDate(date: Date): SessionData[] {

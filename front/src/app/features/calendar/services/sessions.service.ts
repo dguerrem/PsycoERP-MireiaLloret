@@ -69,4 +69,22 @@ export class SessionsService extends BaseCrudService<SessionData> {
     const url = `${this.apiUrl}?page=${page}&limit=${limit}`;
     return this.http.get<SessionResponse>(url);
   }
+
+  /**
+   * Gets sessions with date range filtering and pagination
+   * @param fechaDesde - Start date of the period in YYYY-MM-DD format
+   * @param fechaHasta - End date of the period in YYYY-MM-DD format
+   * @param page - Page number (default: 1)
+   * @param limit - Number of items per page (default: 1000)
+   * @returns Observable<SessionResponse>
+   */
+  getSessionsWithDateFilter(
+    fechaDesde: string,
+    fechaHasta: string,
+    page: number = 1,
+    limit: number = 1000
+  ): Observable<SessionResponse> {
+    const url = `${this.apiUrl}?fecha_desde=${fechaDesde}&fecha_hasta=${fechaHasta}&page=${page}&limit=${limit}`;
+    return this.http.get<SessionResponse>(url);
+  }
 }

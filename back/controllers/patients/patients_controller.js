@@ -30,7 +30,7 @@ const obtenerPacientes = async (req, res) => {
 
     // Validar parámetros de paginación
     const pageNum = parseInt(page) || 1;
-    const limitNum = parseInt(limit) || 10;
+    const limitNum = parseInt(limit) || 10000;
 
     // Validaciones de límites
     if (pageNum < 1) {
@@ -40,10 +40,10 @@ const obtenerPacientes = async (req, res) => {
       });
     }
 
-    if (limitNum < 1 || limitNum > 100) {
+    if (limitNum < 1) {
       return res.status(400).json({
         success: false,
-        error: "El límite debe estar entre 1 y 100 registros",
+        error: "El límite debe ser mayor a 0",
       });
     }
     
@@ -149,7 +149,7 @@ const obtenerPacientesInactivos = async (req, res) => {
 
     // Validar parámetros de paginación
     const pageNum = parseInt(page) || 1;
-    const limitNum = parseInt(limit) || 10;
+    const limitNum = parseInt(limit) || 10000;
 
     // Validaciones de límites
     if (pageNum < 1) {
@@ -159,10 +159,10 @@ const obtenerPacientesInactivos = async (req, res) => {
       });
     }
 
-    if (limitNum < 1 || limitNum > 100) {
+    if (limitNum < 1) {
       return res.status(400).json({
         success: false,
-        error: "El límite debe estar entre 1 y 100 registros",
+        error: "El límite debe ser mayor a 0",
       });
     }
 
