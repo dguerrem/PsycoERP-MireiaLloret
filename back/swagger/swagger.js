@@ -23,12 +23,24 @@ const swaggerDefinition = {
       email: "dev@psicologia.com",
     },
   },
-  servers: [
-    {
-      url: "/api",
-      description: "API Server",
-    },
-  ],
+  servers:
+    process.env.NODE_ENV === "production"
+      ? [
+          {
+            url: "https://test.millopsicologia.com",
+            description: "Test Environment",
+          },
+          {
+            url: "https://millopsicologia.com",
+            description: "Production Environment",
+          },
+        ]
+      : [
+          {
+            url: "http://localhost:3000",
+            description: "Local Development",
+          },
+        ],
   components: {
     schemas: definitions,
     securitySchemes: {
