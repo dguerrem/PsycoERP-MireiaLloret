@@ -28,11 +28,11 @@ const swaggerDefinition = {
       ? [
           {
             url: "https://test.millopsicologia.com",
-            description: "Test Environment",
+            description: "Test Environment (TEST)",
           },
           {
             url: "https://millopsicologia.com",
-            description: "Production Environment",
+            description: "Production Environment (PROD)",
           },
         ]
       : [
