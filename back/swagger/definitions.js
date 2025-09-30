@@ -1658,6 +1658,13 @@ const definitions = {
             },
             description: "Sesiones detalladas del paciente",
           },
+          PatientDocuments: {
+            type: "array",
+            items: {
+              $ref: "#/components/schemas/Document",
+            },
+            description: "Documents associated with the patient (medical reports, prescriptions, etc.)",
+          },
           PatientInvoice: {
             type: "array",
             items: {},
