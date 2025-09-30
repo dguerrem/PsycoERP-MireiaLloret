@@ -167,7 +167,8 @@
               <div class="h-full">
                 <app-patient-documentation
                   [patient]="patient()!"
-                  [documents]="patientDocuments()">
+                  [documents]="patientDocuments()"
+                  (documentsChanged)="onDocumentsChanged()">
                 </app-patient-documentation>
               </div>
             }

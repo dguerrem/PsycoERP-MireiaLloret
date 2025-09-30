@@ -228,4 +228,32 @@ export class PatientDetailComponent implements OnInit {
         });
     }
   }
+
+  onDocumentsChanged(): void {
+    // Reload only documents data when changed
+    const patientId = this.patient()?.id;
+    if (patientId) {
+      this.http.get<PatientDetailResponse>(`${environment.api.baseUrl}/patients/${patientId}`)
+        .subscribe({
+          next: (response) => {
+            if (response.success && response.data) {
+              // Update only the PatientDocuments part
+              const currentData = this.patientDetailData();
+              if (currentData) {
+                this.patientDetailData.set({
+                  ...currentData,
+                  data: {
+                    ...currentData.data,
+                    PatientDocuments: response.data.PatientDocuments
+                  }
+                });
+              }
+            }
+          },
+          error: (error) => {
+            console.error('Error reloading documents:', error);
+          }
+        });
+    }
+  }
 }

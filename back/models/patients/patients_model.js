@@ -1,3 +1,5 @@
+const { getDocumentsByPatientId } = require("../documents/documents_model");
+
 // Obtener todos los pacientes con filtros opcionales y paginación
 const getPatients = async (db, filters = {}) => {
   // Extraer parámetros de paginación
@@ -267,6 +269,9 @@ const getPatientById = async (db, id) => {
   
   const [clinicalNotesRows] = await db.execute(clinicalNotesQuery, [id]);
 
+  // Obtener documentos del paciente
+  const patientDocuments = await getDocumentsByPatientId(db, id);
+
   const patientResumeData = patientRows[0];
   patientResumeData.PatientSessionsStatus = sessionsStatusRows[0];
   patientResumeData.PatientResumeSessions = sessionsRows;
@@ -276,7 +281,8 @@ const getPatientById = async (db, id) => {
     PatientResume: patientResumeData,
     PatientData: patientDataRows[0] || {},
     PatientMedicalRecord: clinicalNotesRows,
-    PatientSessions: patientSessionsRows
+    PatientSessions: patientSessionsRows,
+    PatientDocuments: patientDocuments
   };
 };
 

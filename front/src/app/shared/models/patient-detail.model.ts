@@ -174,5 +174,4 @@ export interface PatientDocument {
   upload_date: string;
   description?: string;
   file_url?: string;
-  patient_id: number;
 }
