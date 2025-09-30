@@ -2,6 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { PatientMedicalRecord } from '../../../shared/models/patient-detail.model';
+import { environment } from '../../../../environments/environment';
 
 export interface CreateClinicalNoteDto {
   patient_id: number;
@@ -30,7 +31,7 @@ export interface ClinicalNoteResponse {
 })
 export class ClinicalNotesService {
   private http = inject(HttpClient);
-  private apiUrl = 'http://localhost:3000/api';
+  private apiUrl = environment.api.baseUrl;
 
   /**
    * Get all clinical notes for a patient

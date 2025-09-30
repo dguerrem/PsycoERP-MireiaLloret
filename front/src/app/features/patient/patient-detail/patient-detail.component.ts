@@ -16,6 +16,7 @@ import { PatientDataComponent } from '../components/patient-data.component';
 import { PatientClinicalHistoryComponent } from '../components/patient-clinical-history.component';
 import { PatientSessionsComponent } from '../components/patient-sessions.component';
 import { PatientDocumentationComponent } from '../components/patient-documentation.component';
+import { environment } from '../../../../environments/environment';
 
 /**
  * Patient Detail Component
@@ -134,7 +135,7 @@ export class PatientDetailComponent implements OnInit {
   private loadPatientDetail(patientId: number): void {
     this.isLoading.set(true);
 
-    this.http.get<PatientDetailResponse>(`http://localhost:3000/api/patients/${patientId}`)
+    this.http.get<PatientDetailResponse>(`${environment.api.baseUrl}/patients/${patientId}`)
       .subscribe({
         next: (response) => {
           this.patientDetailData.set(response);
@@ -204,7 +205,7 @@ export class PatientDetailComponent implements OnInit {
     // Reload only clinical notes data when changed
     const patientId = this.patient()?.id;
     if (patientId) {
-      this.http.get<PatientDetailResponse>(`http://localhost:3000/api/patients/${patientId}`)
+      this.http.get<PatientDetailResponse>(`${environment.api.baseUrl}/patients/${patientId}`)
         .subscribe({
           next: (response) => {
             if (response.success && response.data) {

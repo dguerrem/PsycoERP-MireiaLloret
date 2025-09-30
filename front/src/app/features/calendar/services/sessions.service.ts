@@ -3,6 +3,7 @@ import { Observable } from 'rxjs';
 import { HttpClient } from '@angular/common/http';
 import { BaseCrudService } from '../../../core/services/base-crud.service';
 import { CreateSessionRequest, SessionData, SessionResponse } from '../../../shared/models/session.model';
+import { environment } from '../../../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
@@ -10,7 +11,7 @@ import { CreateSessionRequest, SessionData, SessionResponse } from '../../../sha
 export class SessionsService extends BaseCrudService<SessionData> {
 
   constructor() {
-    super('http://localhost:3000/api/sessions', 'Sesión');
+    super(`${environment.api.baseUrl}/sessions`, 'Sesión');
   }
 
   /**

@@ -1,7 +1,7 @@
 export const environment = {
   production: true,
   api: {
-    baseUrl: '/api',
+    baseUrl: 'https://millopsicologia.com/api',
     timeout: 30000,
     version: 'v1',
   },
