@@ -9,7 +9,7 @@
         </div>
         <div class="flex items-center gap-4">
           <span class="inline-flex items-center justify-center rounded-md border px-2 py-0.5 text-xs font-medium w-fit whitespace-nowrap shrink-0 border-transparent bg-secondary text-secondary-foreground">
-            {{ displayDocuments().length }} documento(s)
+            {{ documents.length }} documento(s)
           </span>
           <input
             #fileInput
@@ -33,7 +33,7 @@
 
     <div class="px-6">
       <div class="flex-1 overflow-y-auto min-h-0">
-        @if (displayDocuments().length > 0) {
+        @if (documents.length > 0) {
           <table class="w-full">
             <thead class="sticky top-0 bg-card z-10">
               <tr class="border-b">
@@ -45,7 +45,7 @@
               </tr>
             </thead>
             <tbody>
-              @for (document of displayDocuments(); track document.id) {
+              @for (document of documents; track document.id) {
                 <tr class="border-b hover:bg-muted/50">
                   <td class="p-2">
                     <div class="flex items-center gap-3">
