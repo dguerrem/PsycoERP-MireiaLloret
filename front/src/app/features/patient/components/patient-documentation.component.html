@@ -34,35 +34,40 @@
     <div class="px-6">
       <div class="flex-1 overflow-y-auto min-h-0">
         @if (documents.length > 0) {
-          <table class="w-full">
-            <thead class="sticky top-0 bg-card z-10">
-              <tr class="border-b">
-                <th class="text-left p-2 text-sm font-medium">Documento</th>
-                <th class="text-left p-2 text-sm font-medium">Tamaño</th>
-                <th class="text-left p-2 text-sm font-medium">Fecha de Subida</th>
-                <th class="text-left p-2 text-sm font-medium">Descripción</th>
-                <th class="text-left p-2 text-sm font-medium">Acciones</th>
-              </tr>
-            </thead>
-            <tbody>
-              @for (document of documents; track document.id) {
-                <tr class="border-b hover:bg-muted/50">
-                  <td class="p-2">
-                    <div class="flex items-center gap-3">
-                      <svg class="h-4 w-4" [class]="getFileIcon(document.type)" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" [innerHTML]="getFileIconSvg(document.type)">
-                      </svg>
-                      <span class="font-medium text-sm">{{ document.name }}</span>
-                    </div>
-                  </td>
-                  <td class="p-2 text-sm text-muted-foreground">{{ document.size }}</td>
-                  <td class="p-2 text-sm text-muted-foreground">{{ formatDate(document.upload_date) }}</td>
-                  <td class="p-2 max-w-xs">
-                    <span class="text-sm text-muted-foreground truncate">
-                      {{ document.description || 'Sin descripción' }}
-                    </span>
-                  </td>
-                  <td class="p-2">
-                    <div class="flex items-center gap-2">
+          <div class="overflow-x-auto">
+            <table class="w-full table-fixed">
+              <colgroup>
+                <col class="w-[30%]">
+                <col class="w-[10%]">
+                <col class="w-[50%]">
+                <col class="w-[10%]">
+              </colgroup>
+              <thead class="sticky top-0 bg-card z-10">
+                <tr class="border-b">
+                  <th class="text-left p-2 text-sm font-medium">Documento</th>
+                  <th class="text-left p-2 text-sm font-medium">Fecha</th>
+                  <th class="text-left p-2 text-sm font-medium">Descripción</th>
+                  <th class="text-left p-2 text-sm font-medium">Acciones</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (document of documents; track document.id) {
+                  <tr class="border-b hover:bg-muted/50">
+                    <td class="p-2">
+                      <div class="flex items-center gap-3 min-w-0">
+                        <svg class="h-4 w-4 flex-shrink-0" [class]="getFileIcon(document.type)" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" [innerHTML]="getFileIconSvg(document.type)">
+                        </svg>
+                        <span class="font-medium text-sm truncate">{{ document.name }}</span>
+                      </div>
+                    </td>
+                    <td class="p-2 text-sm text-muted-foreground whitespace-nowrap">{{ formatDate(document.upload_date) }}</td>
+                    <td class="p-2">
+                      <div class="text-sm text-muted-foreground overflow-x-auto whitespace-nowrap max-w-full scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
+                        {{ document.description || 'Sin descripción' }}
+                      </div>
+                    </td>
+                    <td class="p-2">
+                      <div class="flex items-center gap-2 justify-end">
                       <button
                         (click)="handleViewDocument(document)"
                         class="inline-flex items-center justify-center rounded-md px-2 py-1 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground">
@@ -91,6 +96,7 @@
               }
             </tbody>
           </table>
+          </div>
         } @else {
           <div class="text-center py-12">
             <svg class="h-12 w-12 mx-auto mb-4 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
@@ -145,8 +151,7 @@
                   </svg>
                   <h3 class="text-lg font-semibold mb-2">{{ viewingDocument()!.name }}</h3>
                   <p class="text-muted-foreground mb-4">{{ viewingDocument()!.description }}</p>
-                  <div class="text-sm text-muted-foreground space-y-1">
-                    <p>Tamaño: {{ viewingDocument()!.size }}</p>
+                  <div class="text-sm text-muted-foreground">
                     <p>Fecha: {{ formatDate(viewingDocument()!.upload_date) }}</p>
                   </div>
                 </div>
@@ -164,8 +169,7 @@
                   </svg>
                   <h3 class="text-lg font-semibold mb-2">{{ viewingDocument()!.name }}</h3>
                   <p class="text-muted-foreground mb-4">{{ viewingDocument()!.description }}</p>
-                  <div class="text-sm text-muted-foreground space-y-1">
-                    <p>Tamaño: {{ viewingDocument()!.size }}</p>
+                  <div class="text-sm text-muted-foreground">
                     <p>Fecha: {{ formatDate(viewingDocument()!.upload_date) }}</p>
                   </div>
                 </div>
