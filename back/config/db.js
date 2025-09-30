@@ -44,7 +44,7 @@ const dbMiddleware = (req, res, next) => {
   let hostname = req.hostname;
 
   // Localhost siempre usa TEST
-  if (hostname === "127.0.0.1") {
+  if (hostname === "127.0.0.1" || hostname === "localhost") {
     hostname = "test.millopsicologia.com";
   }
 
