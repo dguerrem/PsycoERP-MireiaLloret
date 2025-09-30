@@ -80,9 +80,14 @@
             Neto
             <span class="text-red-500">*</span>
           </label>
-          <input type="number" formControlName="price" step="0.01" min="0" placeholder="0.00"
-            class="block w-full h-10 px-3 py-2 text-sm border border-gray-300 rounded-lg bg-white placeholder:text-gray-400 hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary disabled:cursor-not-allowed disabled:opacity-50 transition-all duration-200"
-            [class.border-red-500]="sessionForm.get('price')?.invalid && (sessionForm.get('price')?.dirty || sessionForm.get('price')?.touched)">
+          <div class="relative">
+            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <span class="text-gray-500 text-sm">€</span>
+            </div>
+            <input type="number" formControlName="price" step="0.01" min="0" placeholder="0.00"
+              class="block w-full h-10 pl-8 pr-3 py-2 text-sm border border-gray-300 rounded-lg bg-white placeholder:text-gray-400 hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary disabled:cursor-not-allowed disabled:opacity-50 transition-all duration-200"
+              [class.border-red-500]="sessionForm.get('price')?.invalid && (sessionForm.get('price')?.dirty || sessionForm.get('price')?.touched)">
+          </div>
 
           @if (sessionForm.get('price')?.invalid && (sessionForm.get('price')?.dirty ||
           sessionForm.get('price')?.touched)) {

@@ -268,6 +268,62 @@ export class CalendarComponent {
     return sessionData.SessionDetailData.ClinicDetailData.clinic_color;
   }
 
+  getVisibleClinics(): Array<{ id: number | null; name: string; color: string; hasCustomColor: boolean }> {
+    const sessions = this.sessionDataForCurrentPeriod();
+    const clinicsMap = new Map<number | null, { id: number | null; name: string; color: string; hasCustomColor: boolean }>();
+
+    sessions.forEach(session => {
+      const clinicData = session.SessionDetailData.ClinicDetailData;
+      const clinicId = clinicData.clinic_id;
+      const clinicName = clinicData.clinic_name || 'Sin clínica';
+      const clinicColor = clinicData.clinic_color;
+
+      if (!clinicsMap.has(clinicId)) {
+        if (clinicColor) {
+          // Clinic with custom color from API
+          clinicsMap.set(clinicId, {
+            id: clinicId,
+            name: clinicName,
+            color: clinicColor,
+            hasCustomColor: true
+          });
+        } else {
+          // Fallback to hardcoded config
+          const config = this.clinicConfigs.find(c => c.id === clinicId) || this.clinicConfigs[0];
+          const colorMatch = config.backgroundColor.match(/bg-\[([^\]]+)\]|bg-(\w+-\d+)/);
+          let hexColor = '#0891b2'; // default color
+
+          if (colorMatch) {
+            const colorValue = colorMatch[1] || colorMatch[2];
+            // Simple mapping for common Tailwind colors to hex
+            const colorMap: Record<string, string> = {
+              'green-500': '#10b981',
+              'purple-500': '#8b5cf6',
+              'orange-500': '#f97316',
+              'pink-500': '#ec4899',
+              'yellow-500': '#eab308',
+              'blue-500': '#3b82f6'
+            };
+            hexColor = colorMap[colorValue] || colorValue.startsWith('#') ? colorValue : hexColor;
+          }
+
+          clinicsMap.set(clinicId, {
+            id: clinicId,
+            name: clinicName,
+            color: hexColor,
+            hasCustomColor: false
+          });
+        }
+      }
+    });
+
+    return Array.from(clinicsMap.values()).sort((a, b) => {
+      if (a.id === null) return 1;
+      if (b.id === null) return -1;
+      return (a.id || 0) - (b.id || 0);
+    });
+  }
+
   isSessionCancelled(sessionData: SessionData): boolean {
     return (
       sessionData.SessionDetailData.status === 'cancelada' ||

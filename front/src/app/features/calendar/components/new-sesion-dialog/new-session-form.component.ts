@@ -151,7 +151,7 @@ export class NewSessionFormComponent implements OnInit {
       session_date: [formValues.session_date, [Validators.required]],
       start_time: [formValues.start_time, [Validators.required]],
       end_time: [formValues.end_time, [Validators.required]],
-      mode: [{value: formValues.mode, disabled: true}, [Validators.required]],
+      mode: [{value: formValues.mode, disabled: false}, [Validators.required]],
       price: [formValues.price, [Validators.required, Validators.min(0.01)]],
       payment_method: [{value: formValues.payment_method, disabled: !isEditMode}, [Validators.required]],
       status: [{value: formValues.status, disabled: !isEditMode}, [Validators.required]],
