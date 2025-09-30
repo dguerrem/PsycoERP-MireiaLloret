@@ -7,7 +7,6 @@ const {
   checkDuplicateSession,
 } = require("../../models/sessions/sessions_model");
 
-const { db } = require("../../config/db");
 const { getRandomTemplate } = require("../../constants/whatsapp-templates");
 
 const obtenerSesiones = async (req, res) => {
@@ -64,7 +63,7 @@ const obtenerSesiones = async (req, res) => {
       if (fecha_hasta) filters.fecha_hasta = fecha_hasta;
     }
 
-    const result = await getSessions(filters);
+    const result = await getSessions(req.db, filters);
 
     res.json({
       success: true,
@@ -119,7 +118,7 @@ const crearSesion = async (req, res) => {
     }
 
     // Verificar si ya existe una sesión para este paciente en la misma fecha y hora
-    const existingSession = await checkDuplicateSession(patient_id, session_date, start_time);
+    const existingSession = await checkDuplicateSession(req.db, patient_id, session_date, start_time);
 
     if (existingSession) {
       return res.status(409).json({
@@ -134,7 +133,7 @@ const crearSesion = async (req, res) => {
       });
     }
 
-    const nuevaSesion = await createSession({
+    const nuevaSesion = await createSession(req.db, {
       patient_id,
       clinic_id,
       session_date,
@@ -210,7 +209,7 @@ const actualizarSesion = async (req, res) => {
     // Si se está actualizando patient_id, session_date o start_time, verificar duplicados
     if (patient_id || session_date || start_time) {
       // Obtener sesión actual para tener todos los datos
-      const [currentSession] = await db.execute(
+      const [currentSession] = await req.db.execute(
         "SELECT patient_id, session_date, start_time FROM sessions WHERE id = ? AND is_active = true",
         [parseInt(id)]
       );
@@ -229,6 +228,7 @@ const actualizarSesion = async (req, res) => {
 
       // Verificar duplicados excluyendo la sesión actual
       const existingSession = await checkDuplicateSession(
+        req.db,
         finalPatientId,
         finalSessionDate,
         finalStartTime,
@@ -249,7 +249,7 @@ const actualizarSesion = async (req, res) => {
       }
     }
 
-    const sesionActualizada = await updateSession(parseInt(id), updateData);
+    const sesionActualizada = await updateSession(req.db, parseInt(id), updateData);
 
     res.json({
       success: true,
@@ -277,7 +277,7 @@ const eliminarSesion = async (req, res) => {
       });
     }
 
-    await deleteSession(parseInt(id));
+    await deleteSession(req.db, parseInt(id));
 
     res.json({
       success: true,
@@ -313,7 +313,7 @@ const obtenerEnlaceWhatsApp = async (req, res) => {
     }
 
     // Obtener datos de la sesión con paciente
-    const sessionData = await getSessionForWhatsApp(parseInt(id));
+    const sessionData = await getSessionForWhatsApp(req.db, parseInt(id));
 
     if (!sessionData) {
       return res.status(404).json({

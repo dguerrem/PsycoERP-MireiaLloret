@@ -1,6 +1,4 @@
-const { db } = require("../../config/db");
-
-const getPendingReminders = async () => {
+const getPendingReminders = async (db) => {
   // Calcular la fecha objetivo según la lógica especial de días
   const today = new Date();
   const dayOfWeek = today.getDay(); // 0 = Domingo, 1 = Lunes, ..., 6 = Sábado
@@ -51,7 +49,7 @@ const getPendingReminders = async () => {
   };
 };
 
-const createReminder = async (sessionId) => {
+const createReminder = async (db, sessionId) => {
   // Verificar que no existe ya un reminder para esta sesión y obtener datos de la sesión
   const checkSessionQuery = `
     SELECT

@@ -4,7 +4,7 @@ const {
 
 const obtenerDashboardKPIs = async (req, res) => {
   try {
-    const rapidKPIData = await getDashboardKPIs();
+    const rapidKPIData = await getDashboardKPIs(req.db);
 
     res.json({
       success: true,

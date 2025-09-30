@@ -1,7 +1,5 @@
-const { db } = require("../../config/db");
-
 // Obtener todas las sesiones con filtros opcionales y paginación
-const getSessions = async (filters = {}) => {
+const getSessions = async (db, filters = {}) => {
   // Extraer parámetros de paginación
   const page = parseInt(filters.page) || 1;
   const limit = parseInt(filters.limit) || 10;
@@ -167,7 +165,7 @@ const getSessions = async (filters = {}) => {
 };
 
 // Crear nueva sesión
-const createSession = async (sessionData) => {
+const createSession = async (db, sessionData) => {
   const {
     patient_id,
     clinic_id,
@@ -220,7 +218,7 @@ const createSession = async (sessionData) => {
 };
 
 // Actualizar sesión existente
-const updateSession = async (sessionId, updateData) => {
+const updateSession = async (db, sessionId, updateData) => {
   // Construir query dinámicamente basado en los campos recibidos
   const fields = Object.keys(updateData);
 
@@ -248,7 +246,7 @@ const updateSession = async (sessionId, updateData) => {
 };
 
 // Eliminar sesión (soft delete)
-const deleteSession = async (sessionId) => {
+const deleteSession = async (db, sessionId) => {
   // Realizar soft delete marcando is_active = false
   const [result] = await db.execute(
     "UPDATE sessions SET is_active = false WHERE id = ? AND is_active = true",
@@ -263,7 +261,7 @@ const deleteSession = async (sessionId) => {
 };
 
 // Obtener datos de sesión con paciente para WhatsApp
-const getSessionForWhatsApp = async (sessionId) => {
+const getSessionForWhatsApp = async (db, sessionId) => {
   const query = `
     SELECT
       s.id,
@@ -288,7 +286,7 @@ const getSessionForWhatsApp = async (sessionId) => {
 
 // Verificar si existe una sesión conflictiva en el mismo slot de tiempo
 // Verifica conflictos independientemente del paciente (control de horarios del psicólogo)
-const checkDuplicateSession = async (patient_id, session_date, start_time, excludeSessionId = null) => {
+const checkDuplicateSession = async (db, patient_id, session_date, start_time, excludeSessionId = null) => {
   let query = `
     SELECT s.id, s.status, s.patient_id, CONCAT(p.first_name, ' ', p.last_name) as patient_name
     FROM sessions s

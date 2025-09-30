@@ -13,7 +13,7 @@ const obtenerBonuses = async (req, res) => {
     if (page) filters.page = page;
     if (limit) filters.limit = limit;
 
-    const result = await getBonuses(filters);
+    const result = await getBonuses(req.db, filters);
 
     res.json({
       success: true,
@@ -40,7 +40,7 @@ const obtenerBonusesPorPaciente = async (req, res) => {
       });
     }
 
-    const bonusesData = await getBonusesByPatientId(patient_id);
+    const bonusesData = await getBonusesByPatientId(req.db, patient_id);
 
     res.json({
       success: true,
@@ -69,7 +69,7 @@ const obtenerHistorialBonus = async (req, res) => {
       });
     }
 
-    const bonusHistory = await getBonusHistoryById(id);
+    const bonusHistory = await getBonusHistoryById(req.db, id);
 
     if (!bonusHistory) {
       return res.status(404).json({
@@ -102,7 +102,7 @@ const registrarSesionBonus = async (req, res) => {
       });
     }
 
-    const result = await useBonusSession(id);
+    const result = await useBonusSession(req.db, id);
 
     res.status(201).json({
       success: true,
@@ -178,10 +178,10 @@ const crearBonus = async (req, res) => {
       total_price
     };
 
-    const bonusId = await createBonus(bonusData);
+    const bonusId = await createBonus(req.db, bonusData);
 
     // Obtener el bonus recién creado para devolverlo
-    const nuevoBonus = await getBonusesByPatientId(patient_id);
+    const nuevoBonus = await getBonusesByPatientId(req.db, patient_id);
     const bonusCreado = nuevoBonus.bonuses.find(bonus => bonus.idBono === bonusId);
 
     res.status(201).json({

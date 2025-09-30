@@ -19,7 +19,7 @@ const obtenerNotasClinicasPorPaciente = async (req, res) => {
       });
     }
 
-    const notasClinicas = await getClinicalNotesByPatientId(patientId);
+    const notasClinicas = await getClinicalNotesByPatientId(req.db, patientId);
 
     res.json({
       success: true,
@@ -81,7 +81,7 @@ const crearNotaClinica = async (req, res) => {
       });
     }
 
-    const nuevaNotaClinica = await createClinicalNote({
+    const nuevaNotaClinica = await createClinicalNote(req.db, {
       patient_id,
       title: title.trim(),
       content: content.trim(),
@@ -157,7 +157,7 @@ const actualizarNotaClinica = async (req, res) => {
       });
     }
 
-    const notaActualizada = await updateClinicalNote(noteId, updateData);
+    const notaActualizada = await updateClinicalNote(req.db, noteId, updateData);
 
     if (!notaActualizada) {
       return res.status(404).json({
@@ -194,7 +194,7 @@ const eliminarNotaClinica = async (req, res) => {
       });
     }
 
-    await deleteClinicalNote(noteId);
+    await deleteClinicalNote(req.db, noteId);
 
     res.json({
       success: true,

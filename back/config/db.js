@@ -1,27 +1,75 @@
 const mysql = require("mysql2/promise");
 require("dotenv").config();
 
-const dbConfig = {
-  host: process.env.DB_HOST,
-  user: process.env.DB_USER,
-  password: process.env.DB_PASSWORD,
-  database: process.env.DB_NAME,
-  timezone: '+00:00', // UTC para evitar conversiones automáticas
-  dateStrings: true, // Mantener fechas como strings para evitar conversiones
+const getDBConfig = (hostname) => {
+  if (hostname && hostname.includes("test.")) {
+    return {
+      host: process.env.DB_TEST_HOST || "localhost",
+      user: process.env.DB_TEST_USER,
+      password: process.env.DB_TEST_PASSWORD,
+      database: process.env.DB_TEST_NAME,
+      timezone: "+00:00",
+      dateStrings: true,
+    };
+  }
+
+  return {
+    host: process.env.DB_PROD_HOST || "localhost",
+    user: process.env.DB_PROD_USER,
+    password: process.env.DB_PROD_PASSWORD,
+    database: process.env.DB_PROD_NAME,
+    timezone: "+00:00",
+    dateStrings: true,
+  };
 };
 
-// Crear el pool de conexiones
-const db = mysql.createPool(dbConfig);
+let prodPool = null;
+let testPool = null;
 
-// Función para probar la conexión
+const getPool = (hostname) => {
+  if (hostname && hostname.includes("test.")) {
+    if (!testPool) {
+      testPool = mysql.createPool(getDBConfig(hostname));
+    }
+    return testPool;
+  }
+
+  if (!prodPool) {
+    prodPool = mysql.createPool(getDBConfig());
+  }
+  return prodPool;
+};
+
+const dbMiddleware = (req, res, next) => {
+  let hostname = req.hostname;
+
+  // Localhost siempre usa TEST
+  if (hostname === "localhost" || hostname === "127.0.0.1") {
+    hostname = "test.millopsicologia.com";
+  }
+
+  req.db = getPool(hostname);
+  next();
+};
+
 const testConnection = async () => {
   try {
-    const connection = await db.getConnection();
-    console.log("✅ Conexión a MariaDB establecida correctamente");
-    connection.release();
+    const prodConfig = getDBConfig();
+    const prodTestPool = mysql.createPool(prodConfig);
+    const prodConnection = await prodTestPool.getConnection();
+    console.log("✅ Conexión a MariaDB PROD establecida correctamente");
+    prodConnection.release();
+    await prodTestPool.end();
+
+    const testConfig = getDBConfig("test.millopsicologia.com");
+    const testTestPool = mysql.createPool(testConfig);
+    const testConnection = await testTestPool.getConnection();
+    console.log("✅ Conexión a MariaDB TEST establecida correctamente");
+    testConnection.release();
+    await testTestPool.end();
   } catch (error) {
     console.error("❌ Error al conectar con MariaDB:", error.message);
   }
 };
 
-module.exports = { db, testConnection };
+module.exports = { getPool, dbMiddleware, testConnection };

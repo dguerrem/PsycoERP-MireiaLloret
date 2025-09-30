@@ -1,6 +1,4 @@
-const { db } = require("../../config/db");
-
-const getClinics = async (filters = {}) => {
+const getClinics = async (db, filters = {}) => {
   // Extraer parámetros de paginación
   const page = parseInt(filters.page) || 1;
   const limit = parseInt(filters.limit) || 10;
@@ -60,7 +58,7 @@ const getClinics = async (filters = {}) => {
   };
 };
 
-const updateClinic = async (id, data) => {
+const updateClinic = async (db, id, data) => {
   const { name, clinic_color, address, price, percentage } = data;
 
   const fields = [];
@@ -109,7 +107,7 @@ const updateClinic = async (id, data) => {
 };
 
 // Soft delete de una clínica (actualizar is_active = false)
-const deleteClinic = async (id) => {
+const deleteClinic = async (db, id) => {
   const query = `
     UPDATE clinics 
     SET is_active = false
@@ -121,7 +119,7 @@ const deleteClinic = async (id) => {
 };
 
 
-const createClinic = async (data) => {
+const createClinic = async (db, data) => {
   const { name, clinic_color, address, price, percentage } = data;
 
   if (!name) {

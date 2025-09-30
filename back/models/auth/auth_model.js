@@ -1,6 +1,4 @@
-const { db } = require("../../config/db");
-
-const getUserByEmail = async (email) => {
+const getUserByEmail = async (db, email) => {
   try {
     const [rows] = await db.execute(
       "SELECT id, email, password_hash, name, is_active FROM users WHERE email = ?",
@@ -12,7 +10,7 @@ const getUserByEmail = async (email) => {
   }
 };
 
-const updateLastLogin = async (userId) => {
+const updateLastLogin = async (db, userId) => {
   try {
     await db.execute(
       "UPDATE users SET last_login = CURRENT_TIMESTAMP WHERE id = ?",
@@ -23,7 +21,7 @@ const updateLastLogin = async (userId) => {
   }
 };
 
-const getUserById = async (userId) => {
+const getUserById = async (db, userId) => {
   try {
     const [rows] = await db.execute(
       "SELECT id, email, name, last_login, is_active FROM users WHERE id = ?",

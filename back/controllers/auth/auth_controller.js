@@ -18,7 +18,7 @@ const loginUser = async (req, res) => {
     }
 
     // Buscar el usuario por email
-    const user = await getUserByEmail(email);
+    const user = await getUserByEmail(req.db, email);
 
     if (!user) {
       return res.status(404).json({
@@ -46,7 +46,7 @@ const loginUser = async (req, res) => {
     }
 
     // Actualizar la fecha de último login
-    await updateLastLogin(user.id);
+    await updateLastLogin(req.db, user.id);
 
     // Generar JWT token usando los datos ya obtenidos
     const tokenPayload = {
@@ -126,7 +126,7 @@ const refreshToken = async (req, res) => {
 
     // Verificar que el usuario existe y está activo
     const { getUserById } = require("../../models/auth/auth_model");
-    const user = await getUserById(decoded.userId);
+    const user = await getUserById(req.db, decoded.userId);
     
     if (!user) {
       return res.status(404).json({

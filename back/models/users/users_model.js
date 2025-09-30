@@ -1,6 +1,4 @@
-const { db } = require("../../config/db");
-
-const getUserById = async (userId) => {
+const getUserById = async (db, userId) => {
   const query = `
     SELECT 
       id,
@@ -25,7 +23,7 @@ const getUserById = async (userId) => {
   return rows[0];
 };
 
-const updateUser = async (userId, userData) => {
+const updateUser = async (db, userId, userData) => {
   const fields = [];
   const values = [];
 
@@ -81,7 +79,7 @@ const updateUser = async (userId, userData) => {
     return null;
   }
 
-  return await getUserById(userId);
+  return await getUserById(db, userId);
 };
 
 module.exports = {

@@ -1,7 +1,5 @@
-const { db } = require("../../config/db");
-
 // Obtener todos los pacientes con filtros opcionales y paginación
-const getPatients = async (filters = {}) => {
+const getPatients = async (db, filters = {}) => {
   // Extraer parámetros de paginación
   const page = parseInt(filters.page) || 1;
   const limit = parseInt(filters.limit) || 10;
@@ -145,7 +143,7 @@ const getPatients = async (filters = {}) => {
 };
 
 // Obtener un paciente por ID con información específica para PatientResume
-const getPatientById = async (id) => {
+const getPatientById = async (db, id) => {
   // Consulta para obtener datos básicos del paciente con modo preferido basado en la clínica
   const patientQuery = `
         SELECT
@@ -283,7 +281,7 @@ const getPatientById = async (id) => {
 };
 
 // Obtener pacientes inactivos (status != 'en curso') con filtros opcionales y paginación
-const getInactivePatients = async (filters = {}) => {
+const getInactivePatients = async (db, filters = {}) => {
   // Extraer parámetros de paginación
   const page = parseInt(filters.page) || 1;
   const limit = parseInt(filters.limit) || 10;
@@ -427,7 +425,7 @@ const getInactivePatients = async (filters = {}) => {
 };
 
 // Soft delete de un paciente (actualizar is_active = false)
-const deletePatient = async (id) => {
+const deletePatient = async (db, id) => {
   const query = `
     UPDATE patients 
     SET is_active = false, updated_at = CURRENT_TIMESTAMP 
@@ -439,7 +437,7 @@ const deletePatient = async (id) => {
 };
 
 // Crear un nuevo paciente
-const createPatient = async (patientData) => {
+const createPatient = async (db, patientData) => {
   const {
     first_name,
     last_name,
@@ -541,7 +539,7 @@ const createPatient = async (patientData) => {
 };
 
 // Restaurar un paciente (activar cambiando status a "en curso")
-const restorePatient = async (id) => {
+const restorePatient = async (db, id) => {
   // Primero verificar si el paciente existe y su status actual
   const checkQuery = `
     SELECT id, status, is_active
@@ -574,7 +572,7 @@ const restorePatient = async (id) => {
 };
 
 // Actualizar un paciente existente
-const updatePatient = async (id, updateData) => {
+const updatePatient = async (db, id, updateData) => {
   // Verificar que hay campos para actualizar
   if (Object.keys(updateData).length === 0) {
     throw new Error("No hay campos para actualizar");
@@ -631,7 +629,7 @@ const updatePatient = async (id, updateData) => {
 };
 
 // Obtener pacientes activos con información de clínica
-const getActivePatientsWithClinicInfo = async () => {
+const getActivePatientsWithClinicInfo = async (db) => {
   const query = `
     SELECT
       p.id as idPaciente,

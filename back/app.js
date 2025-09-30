@@ -6,7 +6,7 @@ const { google } = require("googleapis");
 const fs = require("fs");
 const path = require("path");
 
-const { testConnection } = require("./config/db");
+const { testConnection, dbMiddleware } = require("./config/db");
 const {
   swaggerUi,
   swaggerDefinition,
@@ -31,6 +31,9 @@ const usersRoutes = require("./routes/users/users_routes");
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+// Middleware para inyectar el pool de BD correcto según hostname
+app.use(dbMiddleware);
 
 // Configuración de credenciales de Google OAuth 2.0
 const CREDENTIALS_PATH = path.join(__dirname, ".secret", "credentials.json");

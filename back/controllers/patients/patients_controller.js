@@ -73,7 +73,7 @@ const obtenerPacientes = async (req, res) => {
       if (fecha_hasta) filters.fecha_hasta = fecha_hasta;
     }
 
-    const result = await getPatients(filters);
+    const result = await getPatients(req.db, filters);
 
     res.json({
       success: true,
@@ -100,7 +100,7 @@ const obtenerPacientePorId = async (req, res) => {
       });
     }
 
-    const pacienteData = await getPatientById(id);
+    const pacienteData = await getPatientById(req.db, id);
 
     if (!pacienteData.PatientResume) {
       return res.status(404).json({
@@ -192,7 +192,7 @@ const obtenerPacientesInactivos = async (req, res) => {
       if (fecha_hasta) filters.fecha_hasta = fecha_hasta;
     }
 
-    const result = await getInactivePatients(filters);
+    const result = await getInactivePatients(req.db, filters);
 
     res.json({
       success: true,
@@ -219,7 +219,7 @@ const eliminarPaciente = async (req, res) => {
       });
     }
 
-    const eliminado = await deletePatient(id);
+    const eliminado = await deletePatient(req.db, id);
 
     if (!eliminado) {
       return res.status(404).json({
@@ -336,7 +336,7 @@ const crearPaciente = async (req, res) => {
       is_minor,
     };
 
-    const nuevoPaciente = await createPatient(patientData);
+    const nuevoPaciente = await createPatient(req.db, patientData);
 
     res.status(201).json({
       success: true,
@@ -388,7 +388,7 @@ const restaurarPaciente = async (req, res) => {
       });
     }
 
-    const restaurado = await restorePatient(id);
+    const restaurado = await restorePatient(req.db, id);
 
     if (!restaurado) {
       return res.status(500).json({
@@ -524,7 +524,7 @@ const actualizarPaciente = async (req, res) => {
       });
     }
 
-    const pacienteActualizado = await updatePatient(parseInt(id), updateData);
+    const pacienteActualizado = await updatePatient(req.db, parseInt(id), updateData);
 
     if (!pacienteActualizado) {
       return res.status(404).json({
@@ -566,7 +566,7 @@ const actualizarPaciente = async (req, res) => {
 
 const obtenerPacientesActivosConClinica = async (req, res) => {
   try {
-    const datos = await getActivePatientsWithClinicInfo();
+    const datos = await getActivePatientsWithClinicInfo(req.db);
 
     res.json({
       success: true,

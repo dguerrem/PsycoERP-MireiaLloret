@@ -17,7 +17,7 @@ const authenticateToken = async (req, res, next) => {
     const decoded = verifyToken(token);
 
     // Verificar que el usuario existe y está activo
-    const user = await getUserById(decoded.userId);
+    const user = await getUserById(req.db, decoded.userId);
 
     if (!user) {
       return res.status(401).json({
