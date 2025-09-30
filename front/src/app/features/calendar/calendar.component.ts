@@ -103,7 +103,7 @@ export class CalendarComponent {
   onNewSessionClickForDateTime(date: Date, hour: string): void {
     // Pre-fill the form with the selected date and hour
     this.prefilledSessionData = {
-      date: date.toISOString().split('T')[0],
+      date: this.formatDateForInput(date),
       startTime: hour,
     };
     this.showNewSessionDialog.set(true);
@@ -112,10 +112,18 @@ export class CalendarComponent {
   onNewSessionClickForDate(date: Date): void {
     // Pre-fill the form with the selected date
     this.prefilledSessionData = {
-      date: date.toISOString().split('T')[0],
+      date: this.formatDateForInput(date),
       startTime: null,
     };
     this.showNewSessionDialog.set(true);
+  }
+
+  private formatDateForInput(date: Date): string {
+    // Format date in local timezone to avoid timezone offset issues
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
   }
 
   onCloseSessionPopup(): void {
@@ -362,7 +370,11 @@ export class CalendarComponent {
       // Active sessions (not cancelled) come first
       if (!aIsCancelled && bIsCancelled) return -1;
       if (aIsCancelled && !bIsCancelled) return 1;
-      return 0; // Same status, maintain original order
+
+      // If same status (both active or both cancelled), sort by start time
+      const aStartTime = a.SessionDetailData.start_time;
+      const bStartTime = b.SessionDetailData.start_time;
+      return aStartTime.localeCompare(bStartTime);
     });
   }
 }
