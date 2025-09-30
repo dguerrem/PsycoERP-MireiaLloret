@@ -7,6 +7,7 @@ const bonusesPaths = require("./paths/bonuses");
 const clinicalNotesPaths = require("./paths/clinical_notes");
 const clinicsPaths = require("./paths/clinics");
 const dashboardPaths = require("./paths/dashboard");
+const documentsPaths = require("./paths/documents");
 const patientsPaths = require("./paths/patients");
 const remindersPaths = require("./paths/reminders");
 const sessionsPaths = require("./paths/sessions");
@@ -63,6 +64,7 @@ const swaggerDefinition = {
     ...clinicalNotesPaths,
     ...clinicsPaths,
     ...dashboardPaths,
+    ...documentsPaths,
     ...patientsPaths,
     ...remindersPaths,
     ...sessionsPaths,
@@ -88,6 +90,10 @@ const swaggerDefinition = {
     {
       name: "Dashboard",
       description: "KPIs y métricas del dashboard",
+    },
+    {
+      name: "Documents",
+      description: "Patient document management",
     },
     {
       name: "Patients",

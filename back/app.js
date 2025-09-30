@@ -24,6 +24,7 @@ const bonusesRoutes = require("./routes/bonuses/bonuses_routes");
 const clinicsRoutes = require("./routes/clinics/clinics_routes");
 const dashboardRoutes = require("./routes/dashboard/dashboard_routes");
 const clinicalNotesRoutes = require("./routes/clinical_notes/clinical_notes_routes");
+const documentsRoutes = require("./routes/documents/documents_routes");
 const remindersRoutes = require("./routes/reminders/reminders_routes");
 const usersRoutes = require("./routes/users/users_routes");
 
@@ -92,6 +93,7 @@ app.get("/", (req, res) => {
       clinics: "/api/clinics",
       dashboard: "/api/dashboard",
       clinical_notes: "/api/clinical-notes",
+      documents: "/api/documents",
       reminders: "/api/reminders",
       users: "/api/users",
     },
@@ -111,6 +113,7 @@ app.use("/api/bonuses", bonusesRoutes);
 app.use("/api/clinics", clinicsRoutes);
 app.use("/api/dashboard", dashboardRoutes);
 app.use("/api/clinical-notes", clinicalNotesRoutes);
+app.use("/api/documents", documentsRoutes);
 app.use("/api/reminders", remindersRoutes);
 app.use("/api/users", usersRoutes);
 

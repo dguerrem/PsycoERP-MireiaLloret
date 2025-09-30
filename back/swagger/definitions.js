@@ -965,6 +965,72 @@ const definitions = {
     },
   },
 
+  Document: {
+    type: "object",
+    properties: {
+      id: {
+        type: "integer",
+        format: "int64",
+        description: "Unique document identifier",
+        example: 1,
+      },
+      name: {
+        type: "string",
+        description: "File name",
+        example: "medical_report.pdf",
+      },
+      type: {
+        type: "string",
+        description: "File type/extension",
+        example: "pdf",
+      },
+      size: {
+        type: "string",
+        description: "Formatted file size",
+        example: "1.2 MB",
+      },
+      upload_date: {
+        type: "string",
+        format: "date",
+        description: "Upload date in ISO format (YYYY-MM-DD)",
+        example: "2024-01-15",
+      },
+      description: {
+        type: "string",
+        nullable: true,
+        description: "Optional document description",
+        example: "Annual medical report for patient evaluation",
+      },
+      file_url: {
+        type: "string",
+        format: "uri",
+        description: "File URL for download/viewing",
+        example: "https://sftp.example.com/documents/medical_report.pdf",
+      },
+    },
+  },
+
+  DocumentsResponse: {
+    type: "object",
+    properties: {
+      success: {
+        type: "boolean",
+        example: true,
+      },
+      total: {
+        type: "integer",
+        description: "Total number of documents found",
+        example: 3,
+      },
+      data: {
+        type: "array",
+        items: {
+          $ref: "#/components/schemas/Document",
+        },
+      },
+    },
+  },
+
   DashboardKPIsResponse: {
     type: "object",
     properties: {
