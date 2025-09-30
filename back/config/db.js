@@ -49,9 +49,6 @@ const dbMiddleware = (req, res, next) => {
   }
 
   req.db = getPool(hostname);
-  console.log(
-    `🔍 BD seleccionada: ${hostname.includes("test.") ? "TEST" : "PROD"}`
-  ); // LOG TEMPORAL
 
   next();
 };
