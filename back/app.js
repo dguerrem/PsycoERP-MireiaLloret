@@ -30,8 +30,8 @@ const usersRoutes = require("./routes/users/users_routes");
 
 // Middlewares globales
 app.use(cors());
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(express.json({ limit: '50mb' })); // Aumentar límite para archivos grandes
+app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 
 // Middleware para inyectar el pool de BD correcto según hostname
 app.use(dbMiddleware);

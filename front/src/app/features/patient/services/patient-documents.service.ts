@@ -24,7 +24,7 @@ export class PatientDocumentsService {
   private toast = inject(ToastService);
   private loadingService = inject(LoadingService);
 
-  private readonly apiUrl = `${environment.api.baseUrl}/patients`;
+  private readonly apiUrl = `${environment.api.baseUrl}/documents`;
 
   /**
    * Upload a document for a patient
@@ -44,7 +44,7 @@ export class PatientDocumentsService {
 
       const response = await lastValueFrom(
         this.http.post<UploadDocumentResponse>(
-          `${this.apiUrl}/${request.patient_id}/documents`,
+          `${this.apiUrl}`,
           formData
         )
       );

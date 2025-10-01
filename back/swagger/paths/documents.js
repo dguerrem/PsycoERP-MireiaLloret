@@ -89,6 +89,137 @@ const documentsPaths = {
       },
     },
   },
+  "/api/documents": {
+    post: {
+      tags: ["Documents"],
+      summary: "Subir documento de paciente",
+      description: "Permite subir un documento (PDF, JPG, PNG, DOC, DOCX) asociado a un paciente específico. El archivo debe ser menor a 10MB.",
+      requestBody: {
+        required: true,
+        content: {
+          "multipart/form-data": {
+            schema: {
+              type: "object",
+              required: ["file", "patient_id", "description"],
+              properties: {
+                file: {
+                  type: "string",
+                  format: "binary",
+                  description: "Archivo a subir (PDF, JPG, PNG, DOC, DOCX)",
+                },
+                patient_id: {
+                  type: "integer",
+                  description: "ID del paciente",
+                  example: 1,
+                },
+                description: {
+                  type: "string",
+                  description: "Descripción del documento",
+                  example: "Informe inicial de evaluación psicológica",
+                },
+              },
+            },
+          },
+        },
+      },
+      responses: {
+        201: {
+          description: "Documento subido correctamente",
+          content: {
+            "application/json": {
+              schema: {
+                type: "object",
+                properties: {
+                  success: {
+                    type: "boolean",
+                    example: true,
+                  },
+                  message: {
+                    type: "string",
+                    example: "Documento subido correctamente",
+                  },
+                  data: {
+                    $ref: "#/components/schemas/Document",
+                  },
+                },
+              },
+            },
+          },
+        },
+        400: {
+          description: "Validación fallida (archivo no proporcionado, descripción vacía, tipo no permitido, o archivo mayor a 10MB)",
+          content: {
+            "application/json": {
+              schema: {
+                $ref: "#/components/schemas/ErrorResponse",
+              },
+              examples: {
+                no_patient_id: {
+                  summary: "Sin patient_id",
+                  value: {
+                    success: false,
+                    error: "El patient_id es obligatorio",
+                  },
+                },
+                no_file: {
+                  summary: "Sin archivo",
+                  value: {
+                    success: false,
+                    error: "No se proporcionó ningún archivo",
+                  },
+                },
+                no_description: {
+                  summary: "Sin descripción",
+                  value: {
+                    success: false,
+                    error: "La descripción es obligatoria",
+                  },
+                },
+                invalid_type: {
+                  summary: "Tipo de archivo inválido",
+                  value: {
+                    success: false,
+                    error: "Tipo de archivo no permitido. Solo PDF, JPG, PNG, DOC, DOCX son aceptados.",
+                  },
+                },
+                file_too_large: {
+                  summary: "Archivo muy grande",
+                  value: {
+                    success: false,
+                    error: "El archivo excede el tamaño máximo permitido de 10MB",
+                  },
+                },
+              },
+            },
+          },
+        },
+        404: {
+          description: "Paciente no encontrado",
+          content: {
+            "application/json": {
+              schema: {
+                $ref: "#/components/schemas/ErrorResponse",
+              },
+              example: {
+                success: false,
+                error: "Paciente no encontrado",
+              },
+            },
+          },
+        },
+        500: {
+          description: "Error interno del servidor",
+          content: {
+            "application/json": {
+              schema: {
+                $ref: "#/components/schemas/ErrorResponse",
+              },
+            },
+          },
+        },
+      },
+    },
+  },
 };
 
 module.exports = documentsPaths;

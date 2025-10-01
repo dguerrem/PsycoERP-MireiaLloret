@@ -40,6 +40,62 @@ const getDocumentsByPatientId = async (db, patientId) => {
   return formattedRows;
 };
 
+// Upload document
+const uploadDocument = async (db, documentData) => {
+  const { patient_id, name, type, size, description, file_url } = documentData;
+
+  const query = `
+    INSERT INTO documents (
+      patient_id,
+      name,
+      type,
+      size,
+      description,
+      url
+    ) VALUES (?, ?, ?, ?, ?, ?)
+  `;
+
+  const params = [patient_id, name, type, size, description, file_url];
+
+  const [result] = await db.execute(query, params);
+
+  // Return the created document
+  const [newDocument] = await db.execute(
+    `SELECT
+      id,
+      name,
+      type,
+      size,
+      DATE_FORMAT(uploaded_at, '%Y-%m-%d') as upload_date,
+      description,
+      url as file_url
+    FROM documents
+    WHERE id = ?`,
+    [result.insertId]
+  );
+
+  // Format size
+  const doc = newDocument[0];
+  const sizeInBytes = doc.size;
+  let formattedSize;
+
+  if (sizeInBytes < 1024) {
+    formattedSize = `${sizeInBytes} B`;
+  } else if (sizeInBytes < 1024 * 1024) {
+    formattedSize = `${(sizeInBytes / 1024).toFixed(1)} KB`;
+  } else if (sizeInBytes < 1024 * 1024 * 1024) {
+    formattedSize = `${(sizeInBytes / (1024 * 1024)).toFixed(1)} MB`;
+  } else {
+    formattedSize = `${(sizeInBytes / (1024 * 1024 * 1024)).toFixed(1)} GB`;
+  }
+
+  return {
+    ...doc,
+    size: formattedSize,
+  };
+};
+
 module.exports = {
   getDocumentsByPatientId,
+  uploadDocument,
 };

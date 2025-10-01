@@ -1,4 +1,12 @@
-const { getDocumentsByPatientId } = require("../../models/documents/documents_model");
+const {
+  getDocumentsByPatientId,
+  uploadDocument
+} = require("../../models/documents/documents_model");
+
+const { getPatientById } = require("../../models/patients/patients_model");
+
+const multer = require("multer");
+const path = require("path");
 
 const obtenerDocumentosPorPaciente = async (req, res) => {
   try {
@@ -36,6 +44,131 @@ const obtenerDocumentosPorPaciente = async (req, res) => {
   }
 };
 
+// Configuración de multer para validación de archivos
+const storage = multer.memoryStorage(); // Guardamos en memoria temporalmente
+
+const fileFilter = (req, file, cb) => {
+  const allowedTypes = [
+    "application/pdf",
+    "image/jpeg",
+    "image/jpg",
+    "image/png",
+    "application/msword",
+    "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+  ];
+
+  if (allowedTypes.includes(file.mimetype)) {
+    cb(null, true);
+  } else {
+    cb(
+      new Error(
+        "Tipo de archivo no permitido. Solo PDF, JPG, PNG, DOC, DOCX son aceptados."
+      ),
+      false
+    );
+  }
+};
+
+const upload = multer({
+  storage: storage,
+  fileFilter: fileFilter,
+  limits: {
+    fileSize: 10 * 1024 * 1024, // 10MB en bytes
+  },
+});
+
+const subirDocumento = async (req, res) => {
+  try {
+    const { patient_id, description } = req.body;
+
+    // Validar patient_id
+    if (!patient_id) {
+      return res.status(400).json({
+        success: false,
+        error: "El patient_id es obligatorio",
+      });
+    }
+
+    // Validar que el paciente existe
+    const patient = await getPatientById(req.db, parseInt(patient_id));
+    if (!patient) {
+      return res.status(404).json({
+        success: false,
+        error: "Paciente no encontrado",
+      });
+    }
+
+    // Validar que se subió un archivo
+    if (!req.file) {
+      return res.status(400).json({
+        success: false,
+        error: "No se proporcionó ningún archivo",
+      });
+    }
+
+    // Validar descripción
+    if (!description || description.trim() === "") {
+      return res.status(400).json({
+        success: false,
+        error: "La descripción es obligatoria",
+      });
+    }
+
+    // Generar nombre único para el archivo
+    const timestamp = Date.now();
+    const fileExtension = path.extname(req.file.originalname);
+    const sanitizedName = req.file.originalname
+      .replace(fileExtension, "")
+      .replace(/[^a-zA-Z0-9_-]/g, "_")
+      .toLowerCase();
+    const uniqueFileName = `${sanitizedName}_${timestamp}${fileExtension}`;
+
+    // URL mockeada (posteriormente será reemplazada por la ruta del SFTP)
+    const mockFileUrl = `/documents/patients/${patient_id}/${uniqueFileName}`;
+
+    // Guardar documento en la base de datos (size en bytes)
+    const documentData = {
+      patient_id: parseInt(patient_id),
+      name: req.file.originalname,
+      type: req.file.mimetype,
+      size: req.file.size, // Guardamos en bytes
+      description: description.trim(),
+      file_url: mockFileUrl,
+    };
+
+    const newDocument = await uploadDocument(req.db, documentData);
+
+    res.status(201).json({
+      success: true,
+      message: "Documento subido correctamente",
+      data: newDocument,
+    });
+  } catch (err) {
+    console.error("Error al subir documento:", err.message);
+
+    // Manejar errores específicos de multer
+    if (err instanceof multer.MulterError) {
+      if (err.code === "LIMIT_FILE_SIZE") {
+        return res.status(400).json({
+          success: false,
+          error: "El archivo excede el tamaño máximo permitido de 10MB",
+        });
+      }
+      return res.status(400).json({
+        success: false,
+        error: `Error al procesar el archivo: ${err.message}`,
+      });
+    }
+
+    res.status(500).json({
+      success: false,
+      error: "Error al subir el documento",
+    });
+  }
+};
+
 module.exports = {
   obtenerDocumentosPorPaciente,
+  subirDocumento,
+  upload, // Exportar el middleware de multer
 };
