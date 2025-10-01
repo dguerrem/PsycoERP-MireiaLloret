@@ -130,7 +130,7 @@
               <!-- Slots horarios -->
               @for (hour of hours; track hour) {
               <div class="h-16 sm:h-20 border-b border-gray-200 p-1 hover:bg-gray-50 transition-colors relative group">
-                <div [class]="getSortedSessionDataForDateAndHour(date, hour).length === 1 && hasActiveSessionInSlot(date, hour) ? 'h-full overflow-y-auto overflow-x-hidden' : 'h-full overflow-y-auto overflow-x-hidden space-y-1'">
+                <div [class]="getSortedSessionDataForDateAndHour(date, hour).length === 1 ? 'h-full overflow-y-auto overflow-x-hidden' : 'h-full overflow-y-auto overflow-x-hidden space-y-1'">
                   @for (sessionData of getSortedSessionDataForDateAndHour(date, hour); track
                   sessionData.SessionDetailData.session_id) {
                   <div (click)="onSessionClick(sessionData)"
@@ -139,7 +139,7 @@
                     'border-l-4 rounded-sm p-2 text-xs cursor-pointer hover:shadow-md transition-all duration-200 text-white ' + (!getClinicConfigFromSessionData(sessionData).hasCustomColor ? getClinicConfigFromSessionData(sessionData).backgroundColor : '') + (getSessionStatusBadgeClass(sessionData).includes('green') ? ' ring-2 ring-green-500 ring-opacity-50' : '')"
                     [style.background-color]="!isSessionCancelled(sessionData) && getClinicConfigFromSessionData(sessionData).hasCustomColor ? getClinicColorFromSessionData(sessionData) : ''"
                     [style.border-left-color]="isSessionCancelled(sessionData) ? '#9ca3af' : (getClinicConfigFromSessionData(sessionData).hasCustomColor ? getClinicColorFromSessionData(sessionData) : getClinicConfigFromSessionData(sessionData).borderColor)"
-                    [style.height]="getSortedSessionDataForDateAndHour(date, hour).length === 1 && hasActiveSessionInSlot(date, hour) && !isSessionCancelled(sessionData) ? '100%' : ''"
+                    [style.height]="getSortedSessionDataForDateAndHour(date, hour).length === 1 ? '100%' : ''"
                     class="min-h-[45px] flex flex-col justify-between relative group flex-shrink-0">
                     <!-- Indicador de completado -->
                     @if (sessionData.SessionDetailData.completed && !isSessionCancelled(sessionData)) {

@@ -231,7 +231,7 @@ export class CalendarService {
   }
 
   getSessionDataForDate(date: Date): SessionData[] {
-    const dateString = date.toISOString().split('T')[0];
+    const dateString = this.formatDateLocal(date);
     return this._sessionData().filter(data => {
       const apiDateString = data.SessionDetailData.session_date.split('T')[0];
       return apiDateString === dateString;

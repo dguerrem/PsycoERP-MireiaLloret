@@ -28,6 +28,7 @@ import { ConfirmationModalComponent } from '../../../../shared/components/confir
 import { ClinicalNotesService } from '../../../patient/services/clinical-notes.service';
 import { environment } from '../../../../../environments/environment';
 import { ToastService } from '../../../../core/services/toast.service';
+import { SpinnerComponent } from '../../../../shared/components/spinner/spinner.component';
 
 /**
  * Modal dialog component for creating new session appointments
@@ -55,7 +56,8 @@ import { ToastService } from '../../../../core/services/toast.service';
     ReusableModalComponent,
     FormInputComponent,
     PatientSelectorComponent,
-    ConfirmationModalComponent
+    ConfirmationModalComponent,
+    SpinnerComponent
   ],
   templateUrl: './new-session-form.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
