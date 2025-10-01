@@ -79,6 +79,10 @@ export class NewSessionFormComponent implements OnInit {
   readonly showCancelConfirmation = signal<boolean>(false);
   private pendingCancelAction: (() => void) | null = null;
 
+  /** Delete note confirmation modal state */
+  readonly showDeleteNoteConfirmation = signal<boolean>(false);
+  private pendingDeleteNote: { id: string; title: string; content: string; date: Date } | null = null;
+
   /** Patients data from API */
   patients = signal<PatientSelector[]>([]);
   selectedPatient = signal<PatientSelector | null>(null);
@@ -87,7 +91,7 @@ export class NewSessionFormComponent implements OnInit {
   activeTab = signal<'details' | 'clinical-notes'>('details');
 
   /** Clinical Notes state */
-  private notes = signal<Array<{ id: string; title: string; content: string; date: Date }>>([]);
+  notes = signal<Array<{ id: string; title: string; content: string; date: Date }>>([]);
   private notesLoadedWithIds = signal(false);
   searchTerm = signal('');
   isCreatingNote = signal(false);
@@ -100,13 +104,6 @@ export class NewSessionFormComponent implements OnInit {
   isRecording = signal(false);
   private recognition: any = null;
 
-  /** Medical records from session data */
-  medicalRecords = computed(() => {
-    const sessionData = this.prefilledData?.sessionData;
-    if (!sessionData) return [];
-    return sessionData.SessionDetailData.MedicalRecordData || [];
-  });
-
   /** Computed filtered notes */
   filteredNotes = computed(() => {
     const notesArray = this.notes();
@@ -114,10 +111,21 @@ export class NewSessionFormComponent implements OnInit {
 
     if (!search) return notesArray;
 
-    return notesArray.filter(note =>
-      note.title.toLowerCase().includes(search) ||
-      note.content.toLowerCase().includes(search)
-    );
+    return notesArray.filter(note => {
+      // Search in title and content
+      const matchesText = note.title.toLowerCase().includes(search) ||
+                          note.content.toLowerCase().includes(search);
+
+      // Search in date (format: DD/MM/YYYY)
+      const formattedDate = this.formatDate(note.date).toLowerCase();
+      const matchesDate = formattedDate.includes(search);
+
+      // Also search in date parts (day, month, year)
+      const dateParts = formattedDate.split('/');
+      const matchesDateParts = dateParts.some(part => part.includes(search));
+
+      return matchesText || matchesDate || matchesDateParts;
+    });
   });
 
   /** Computed sorted notes */
@@ -178,46 +186,46 @@ export class NewSessionFormComponent implements OnInit {
   ngOnInit(): void {
     this.loadPatients();
     this.initializeForm();
-    this.loadClinicalNotes();
+
+    // Load clinical notes if in edit mode
+    if (this.isEditMode) {
+      this.loadClinicalNotes();
+    }
   }
 
   private loadClinicalNotes(): void {
-    const records = this.medicalRecords();
-    const transformed = records.map((record) => ({
-      id: '', // No ID needed for display initially
-      title: record.title,
-      content: record.content,
-      date: this.parseDateString(record.date)
-    }));
-    this.notes.set(transformed);
-  }
-
-  private loadClinicalNotesWithIds(): void {
     const sessionData = this.prefilledData?.sessionData;
     if (!sessionData) return;
 
     const patientId = sessionData.SessionDetailData.PatientData.id;
 
-    // Load clinical notes from API to get full data including IDs
+    // Load clinical notes from API
     this.clinicalNotesService.getClinicalNotes(patientId).subscribe({
-      next: (records) => {
-        const transformed = records.map((record) => ({
+      next: (response: any) => {
+        // Handle both array response and object with data property
+        const records = Array.isArray(response) ? response : (response.data || []);
+        const transformed = records.map((record: any) => ({
           id: record.id ? record.id.toString() : '',
-          title: record.titulo,
-          content: record.contenido,
-          date: this.parseDateString(record.fecha)
+          title: record.title || record.titulo || '',
+          content: record.content || record.contenido || '',
+          date: this.parseDateString(record.created_at || record.fecha || new Date().toISOString())
         }));
         this.notes.set(transformed);
         this.notesLoadedWithIds.set(true);
       },
       error: (error) => {
-        console.error('Error loading clinical notes with IDs:', error);
+        console.error('Error loading clinical notes:', error);
       }
     });
   }
 
+  private loadClinicalNotesWithIds(): void {
+    // Load clinical notes when switching to the tab
+    this.loadClinicalNotes();
+  }
+
   private parseDateString(dateStr: string): Date {
-    // Parse "2024-12-15 14:30:00" format
+    // Parse "2024-12-15 14:30:00" or "2025-10-01 07:32:06" format
     const [datePart] = dateStr.split(' ');
     return new Date(datePart);
   }
@@ -586,23 +594,43 @@ export class NewSessionFormComponent implements OnInit {
       return;
     }
 
-    if (!confirm('¿Estás seguro de que deseas eliminar esta nota?')) {
+    // Store the note to delete and show confirmation modal
+    this.pendingDeleteNote = note;
+    this.showDeleteNoteConfirmation.set(true);
+  }
+
+  onConfirmDeleteNote(): void {
+    if (!this.pendingDeleteNote) return;
+
+    const noteIdNumber = parseInt(this.pendingDeleteNote.id);
+
+    if (isNaN(noteIdNumber) || noteIdNumber === 0) {
+      this.showDeleteNoteConfirmation.set(false);
+      this.pendingDeleteNote = null;
       return;
     }
 
-    this.deletingNoteId.set(note.id);
+    this.deletingNoteId.set(this.pendingDeleteNote.id);
+    this.showDeleteNoteConfirmation.set(false);
 
     this.clinicalNotesService.deleteClinicalNote(noteIdNumber).subscribe({
       next: () => {
         this.deletingNoteId.set(null);
+        this.pendingDeleteNote = null;
         this.reloadSessionData();
       },
       error: (error) => {
         console.error('Error deleting note:', error);
         alert('Error al eliminar la nota. Por favor, intenta de nuevo.');
         this.deletingNoteId.set(null);
+        this.pendingDeleteNote = null;
       }
     });
+  }
+
+  onCancelDeleteNote(): void {
+    this.showDeleteNoteConfirmation.set(false);
+    this.pendingDeleteNote = null;
   }
 
   formatDate(date: Date): string {

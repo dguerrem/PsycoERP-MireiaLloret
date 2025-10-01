@@ -19,8 +19,8 @@ export class ClinicalNotesService {
   /**
    * Get all clinical notes for a patient
    */
-  getClinicalNotes(patientId: number): Observable<PatientMedicalRecord[]> {
-    return this.http.get<PatientMedicalRecord[]>(`${this.apiUrl}/patients/${patientId}/clinical-notes`);
+  getClinicalNotes(patientId: number): Observable<any> {
+    return this.http.get<any>(`${this.apiUrl}/clinical-notes/patient/${patientId}`);
   }
 
   /**
