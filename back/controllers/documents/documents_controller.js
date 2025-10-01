@@ -1,6 +1,7 @@
 const {
   getDocumentsByPatientId,
-  uploadDocument
+  uploadDocument,
+  getDocumentById,
 } = require("../../models/documents/documents_model");
 
 const { getPatientById } = require("../../models/patients/patients_model");
@@ -165,8 +166,39 @@ const subirDocumento = async (req, res) => {
   }
 };
 
+const descargarDocumento = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    if (!id) {
+      return res
+        .status(400)
+        .json({ success: false, error: "El ID es obligatorio" });
+    }
+
+    const document = await getDocumentById(req.db, id);
+
+    if (!document) {
+      return res
+        .status(404)
+        .json({ success: false, error: "Documento no encontrado" });
+    }
+
+    return res.json({
+      success: true,
+      file_url: document.file_url,
+    });
+  } catch (err) {
+    console.error("Error al descargar documento:", err.message);
+    res
+      .status(500)
+      .json({ success: false, error: "Error al descargar el documento" });
+  }
+};
+
 module.exports = {
   obtenerDocumentosPorPaciente,
   subirDocumento,
   upload, // Exportar el middleware de multer
+  descargarDocumento,
 };

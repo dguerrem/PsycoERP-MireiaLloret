@@ -178,13 +178,13 @@ export class PatientDocumentationComponent {
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
   }
 
-  async handleDownloadDocument(document: PatientDocument): Promise<void> {
+  async handleDownloadDocument(doc: PatientDocument): Promise<void> {
     if (!this.patient.id) return;
 
     await this.documentsService.downloadDocument(
       this.patient.id,
-      document.id,
-      document.name
+      doc.id,
+      doc.name
     );
   }
 

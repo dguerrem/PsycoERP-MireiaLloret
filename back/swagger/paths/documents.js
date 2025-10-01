@@ -93,7 +93,8 @@ const documentsPaths = {
     post: {
       tags: ["Documents"],
       summary: "Subir documento de paciente",
-      description: "Permite subir un documento (PDF, JPG, PNG, DOC, DOCX) asociado a un paciente específico. El archivo debe ser menor a 10MB.",
+      description:
+        "Permite subir un documento (PDF, JPG, PNG, DOC, DOCX) asociado a un paciente específico. El archivo debe ser menor a 10MB.",
       requestBody: {
         required: true,
         content: {
@@ -147,7 +148,8 @@ const documentsPaths = {
           },
         },
         400: {
-          description: "Validación fallida (archivo no proporcionado, descripción vacía, tipo no permitido, o archivo mayor a 10MB)",
+          description:
+            "Validación fallida (archivo no proporcionado, descripción vacía, tipo no permitido, o archivo mayor a 10MB)",
           content: {
             "application/json": {
               schema: {
@@ -179,14 +181,16 @@ const documentsPaths = {
                   summary: "Tipo de archivo inválido",
                   value: {
                     success: false,
-                    error: "Tipo de archivo no permitido. Solo PDF, JPG, PNG, DOC, DOCX son aceptados.",
+                    error:
+                      "Tipo de archivo no permitido. Solo PDF, JPG, PNG, DOC, DOCX son aceptados.",
                   },
                 },
                 file_too_large: {
                   summary: "Archivo muy grande",
                   value: {
                     success: false,
-                    error: "El archivo excede el tamaño máximo permitido de 10MB",
+                    error:
+                      "El archivo excede el tamaño máximo permitido de 10MB",
                   },
                 },
               },
@@ -214,6 +218,79 @@ const documentsPaths = {
               schema: {
                 $ref: "#/components/schemas/ErrorResponse",
               },
+            },
+          },
+        },
+      },
+    },
+  },
+  "/api/documents/{id}/download": {
+    get: {
+      tags: ["Documents"],
+      summary: "Obtener URL de descarga de un documento",
+      description:
+        "Devuelve la URL pública del archivo en el VPS para poder descargarlo.",
+      parameters: [
+        {
+          name: "id",
+          in: "path",
+          required: true,
+          schema: {
+            type: "integer",
+            format: "int64",
+          },
+          description: "ID del documento",
+          example: 42,
+        },
+      ],
+      responses: {
+        200: {
+          description: "URL de descarga obtenida exitosamente",
+          content: {
+            "application/json": {
+              schema: {
+                type: "object",
+                properties: {
+                  success: { type: "boolean", example: true },
+                  file_url: {
+                    type: "string",
+                    example:
+                      "https://midominio.com/uploads/paciente42/documento.pdf",
+                  },
+                },
+              },
+            },
+          },
+        },
+        400: {
+          description: "ID inválido",
+          content: {
+            "application/json": {
+              schema: { $ref: "#/components/schemas/ErrorResponse" },
+              example: {
+                success: false,
+                error: "El ID es obligatorio",
+              },
+            },
+          },
+        },
+        404: {
+          description: "Documento no encontrado",
+          content: {
+            "application/json": {
+              schema: { $ref: "#/components/schemas/ErrorResponse" },
+              example: {
+                success: false,
+                error: "Documento no encontrado",
+              },
+            },
+          },
+        },
+        500: {
+          description: "Error interno del servidor",
+          content: {
+            "application/json": {
+              schema: { $ref: "#/components/schemas/ErrorResponse" },
             },
           },
         },

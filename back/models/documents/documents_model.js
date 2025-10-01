@@ -95,7 +95,24 @@ const uploadDocument = async (db, documentData) => {
   };
 };
 
+// Obtener documento por ID
+const getDocumentById = async (db, documentId) => {
+  const query = `
+    SELECT
+      id,
+      name,
+      type,
+      size,
+      url as file_url
+    FROM documents
+    WHERE id = ? AND is_active = true
+  `;
+  const [rows] = await db.execute(query, [documentId]);
+  return rows[0] || null;
+};
+
 module.exports = {
   getDocumentsByPatientId,
   uploadDocument,
+  getDocumentById
 };

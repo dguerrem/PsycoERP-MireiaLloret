@@ -101,7 +101,7 @@ export class PatientDocumentsService {
 
       const response = await lastValueFrom(
         this.http.get(
-          `${this.apiUrl}/${patientId}/documents/${documentId}/download`,
+          `${this.apiUrl}/${documentId}/download`,
           { responseType: 'blob' }
         )
       );
