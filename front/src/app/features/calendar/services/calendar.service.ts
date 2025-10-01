@@ -18,6 +18,42 @@ export class CalendarService {
   }
 
   /**
+   * Calculate month dates - only days of the current month with null for empty slots
+   */
+  private calculateMonthDates(currentDate: Date): Array<Date | null> {
+    const firstDay = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
+    const lastDay = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0);
+
+    // Calculate empty cells at the beginning
+    const startDay = firstDay.getDay();
+    const emptyCellsAtStart = startDay === 0 ? 6 : startDay - 1; // Monday = 0 empty cells
+
+    const dates: Array<Date | null> = [];
+
+    // Add empty cells for days before the month starts
+    for (let i = 0; i < emptyCellsAtStart; i++) {
+      dates.push(null);
+    }
+
+    // Add all days of the month
+    for (let day = 1; day <= lastDay.getDate(); day++) {
+      dates.push(new Date(currentDate.getFullYear(), currentDate.getMonth(), day));
+    }
+
+    return dates;
+  }
+
+  /**
+   * Helper method to format date as YYYY-MM-DD in local timezone
+   */
+  private formatDateLocal(date: Date): string {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  }
+
+  /**
    * Loads sessions from the API with date filtering based on current view
    */
   private loadSessions(): void {
@@ -37,15 +73,15 @@ export class CalendarService {
       const endOfWeek = new Date(startOfWeek);
       endOfWeek.setDate(startOfWeek.getDate() + 6);
 
-      fechaDesde = startOfWeek.toISOString().split('T')[0];
-      fechaHasta = endOfWeek.toISOString().split('T')[0];
+      fechaDesde = this.formatDateLocal(startOfWeek);
+      fechaHasta = this.formatDateLocal(endOfWeek);
     } else {
-      // For month view, use first and last day of the month
+      // For month view, use first and last day of the month only
       const firstDayOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
       const lastDayOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0);
 
-      fechaDesde = firstDayOfMonth.toISOString().split('T')[0];
-      fechaHasta = lastDayOfMonth.toISOString().split('T')[0];
+      fechaDesde = this.formatDateLocal(firstDayOfMonth);
+      fechaHasta = this.formatDateLocal(lastDayOfMonth);
     }
 
     this.sessionsService.getSessionsWithDateFilter(fechaDesde, fechaHasta, 1, 1000).subscribe({
@@ -104,22 +140,7 @@ export class CalendarService {
 
   readonly monthDates = computed(() => {
     const current = this._currentDate();
-    const firstDay = new Date(current.getFullYear(), current.getMonth(), 1);
-    const lastDay = new Date(current.getFullYear(), current.getMonth() + 1, 0);
-
-    const startDate = new Date(firstDay);
-    const startDay = firstDay.getDay();
-    startDate.setDate(firstDay.getDate() - (startDay === 0 ? 6 : startDay - 1));
-
-    const dates = [];
-    const current_date = new Date(startDate);
-
-    for (let i = 0; i < 42; i++) {
-      dates.push(new Date(current_date));
-      current_date.setDate(current_date.getDate() + 1);
-    }
-
-    return dates;
+    return this.calculateMonthDates(current);
   });
 
   readonly sessionDataForCurrentPeriod = computed(() => {
@@ -145,13 +166,14 @@ export class CalendarService {
 
       return filtered;
     } else {
-      const monthDates = this.monthDates();
-      const startDate = monthDates[0];
-      const endDate = monthDates[41];
+      // For month view, filter by current month only
+      const currentDate = this._currentDate();
+      const firstDay = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
+      const lastDay = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0);
 
       const filtered = sessionData.filter(data => {
         const sessionDate = new Date(data.SessionDetailData.session_date);
-        return sessionDate >= startDate && sessionDate <= endDate;
+        return sessionDate >= firstDay && sessionDate <= lastDay;
       });
 
       return filtered;
