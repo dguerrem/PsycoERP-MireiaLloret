@@ -2,10 +2,11 @@ const {
   getDocumentsByPatientId,
   uploadDocument,
   getDocumentById,
+  deleteDocumentById,
 } = require("../../models/documents/documents_model");
 
 const { getPatientById } = require("../../models/patients/patients_model");
-const { uploadFileToVPS } = require("../../utils/sftp");
+const { uploadFileToVPS, deleteFileFromVPS } = require("../../utils/sftp");
 
 const multer = require("multer");
 const path = require("path");
@@ -196,9 +197,61 @@ const descargarDocumento = async (req, res) => {
   }
 };
 
+const eliminarDocumento = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    // Validar ID
+    if (!id) {
+      return res.status(400).json({
+        success: false,
+        error: "El ID es obligatorio",
+      });
+    }
+
+    // Validar que el ID sea un número
+    if (isNaN(id)) {
+      return res.status(400).json({
+        success: false,
+        error: "El ID debe ser un número válido",
+      });
+    }
+
+    // Obtener documento antes de eliminarlo para tener la URL del archivo
+    const document = await getDocumentById(req.db, id);
+
+    if (!document) {
+      return res.status(404).json({
+        success: false,
+        error: "Documento no encontrado",
+      });
+    }
+
+    // Eliminar archivo del SFTP/VPS
+    console.log(`🗑️ Eliminando archivo del VPS: ${document.file_url}`);
+    await deleteFileFromVPS(document.file_url);
+    console.log(`✅ Archivo eliminado exitosamente del VPS`);
+
+    // Soft delete en la base de datos
+    await deleteDocumentById(req.db, id);
+
+    res.json({
+      success: true,
+      message: "Documento eliminado correctamente",
+    });
+  } catch (err) {
+    console.error("Error al eliminar documento:", err.message);
+    res.status(500).json({
+      success: false,
+      error: "Error al eliminar el documento",
+    });
+  }
+};
+
 module.exports = {
   obtenerDocumentosPorPaciente,
   subirDocumento,
   upload, // Exportar el middleware de multer
   descargarDocumento,
+  eliminarDocumento,
 };

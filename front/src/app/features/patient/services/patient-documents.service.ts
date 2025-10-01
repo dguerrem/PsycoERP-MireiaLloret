@@ -63,17 +63,16 @@ export class PatientDocumentsService {
   /**
    * Delete a document
    *
-   * @param patientId - ID of the patient
    * @param documentId - ID of the document to delete
    * @returns Promise with success status
    */
-  async deleteDocument(patientId: number, documentId: number): Promise<boolean> {
+  async deleteDocument(documentId: number): Promise<boolean> {
     try {
       this.loadingService.show();
 
       await lastValueFrom(
         this.http.delete(
-          `${this.apiUrl}/${patientId}/documents/${documentId}`
+          `${this.apiUrl}/${documentId}`
         )
       );
 

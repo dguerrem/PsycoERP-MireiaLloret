@@ -297,6 +297,97 @@ const documentsPaths = {
       },
     },
   },
+  "/api/documents/{id}": {
+    delete: {
+      tags: ["Documents"],
+      summary: "Eliminar documento",
+      description:
+        "Elimina un documento de la base de datos (soft delete) y el archivo físico del VPS via SFTP.",
+      parameters: [
+        {
+          name: "id",
+          in: "path",
+          required: true,
+          schema: {
+            type: "integer",
+            format: "int64",
+          },
+          description: "ID del documento a eliminar",
+          example: 42,
+        },
+      ],
+      responses: {
+        200: {
+          description: "Documento eliminado correctamente",
+          content: {
+            "application/json": {
+              schema: {
+                type: "object",
+                properties: {
+                  success: {
+                    type: "boolean",
+                    example: true,
+                  },
+                  message: {
+                    type: "string",
+                    example: "Documento eliminado correctamente",
+                  },
+                },
+              },
+            },
+          },
+        },
+        400: {
+          description: "ID inválido o no proporcionado",
+          content: {
+            "application/json": {
+              schema: { $ref: "#/components/schemas/ErrorResponse" },
+              examples: {
+                missing_id: {
+                  summary: "ID no proporcionado",
+                  value: {
+                    success: false,
+                    error: "El ID es obligatorio",
+                  },
+                },
+                invalid_id: {
+                  summary: "ID inválido",
+                  value: {
+                    success: false,
+                    error: "El ID debe ser un número válido",
+                  },
+                },
+              },
+            },
+          },
+        },
+        404: {
+          description: "Documento no encontrado",
+          content: {
+            "application/json": {
+              schema: { $ref: "#/components/schemas/ErrorResponse" },
+              example: {
+                success: false,
+                error: "Documento no encontrado",
+              },
+            },
+          },
+        },
+        500: {
+          description: "Error interno del servidor",
+          content: {
+            "application/json": {
+              schema: { $ref: "#/components/schemas/ErrorResponse" },
+              example: {
+                success: false,
+                error: "Error al eliminar el documento",
+              },
+            },
+          },
+        },
+      },
+    },
+  },
 };
 
 module.exports = documentsPaths;

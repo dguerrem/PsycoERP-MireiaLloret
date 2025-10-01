@@ -126,8 +126,48 @@ const uploadFileToVPS = async (fileBuffer, originalFilename, patientId) => {
   }
 };
 
+/**
+ * Elimina un archivo del VPS via SFTP
+ * @param {string} fileUrl - URL pública del archivo (ej: https://example.com/uploads/123/file.pdf)
+ * @returns {Promise<boolean>} True si se eliminó correctamente
+ */
+const deleteFileFromVPS = async (fileUrl) => {
+  const sftp = new SftpClient();
+
+  try {
+    // Conectar al servidor SFTP
+    await sftp.connect(sftpConfig);
+
+    // Extraer la ruta relativa desde la URL pública
+    // Ejemplo: https://example.com/uploads/123/file.pdf -> 123/file.pdf
+    const relativePath = fileUrl.replace(SFTP_PUBLIC_URL + "/", "");
+    const remoteFilePath = `${SFTP_BASE_PATH}/${relativePath}`;
+
+    // Verificar que el archivo existe antes de intentar eliminarlo
+    const exists = await sftp.exists(remoteFilePath);
+    if (!exists) {
+      console.warn(`⚠️ El archivo no existe en el VPS: ${remoteFilePath}`);
+      await sftp.end();
+      return false;
+    }
+
+    // Eliminar el archivo
+    await sftp.delete(remoteFilePath);
+
+    // Cerrar conexión
+    await sftp.end();
+
+    return true;
+  } catch (error) {
+    console.error("❌ Error al eliminar archivo del SFTP:", error.message);
+    await sftp.end(); // Asegurar cierre de conexión
+    throw new Error(`Error al eliminar archivo del VPS: ${error.message}`);
+  }
+};
+
 module.exports = {
   uploadFileToVPS,
+  deleteFileFromVPS,
   normalizeFilename,
   findAvailableFilename,
 };

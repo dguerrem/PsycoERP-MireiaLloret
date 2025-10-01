@@ -111,8 +111,21 @@ const getDocumentById = async (db, documentId) => {
   return rows[0] || null;
 };
 
+// Eliminar documento (soft delete)
+const deleteDocumentById = async (db, documentId) => {
+  const query = `
+    UPDATE documents
+    SET is_active = false
+    WHERE id = ? AND is_active = true
+  `;
+
+  const [result] = await db.execute(query, [documentId]);
+  return result.affectedRows > 0;
+};
+
 module.exports = {
   getDocumentsByPatientId,
   uploadDocument,
-  getDocumentById
+  getDocumentById,
+  deleteDocumentById,
 };
