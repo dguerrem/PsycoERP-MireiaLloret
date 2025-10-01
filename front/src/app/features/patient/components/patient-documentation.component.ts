@@ -152,6 +152,9 @@ export class PatientDocumentationComponent {
       return;
     }
 
+    // Close modal immediately to show loading in parent component
+    this.closeUploadModal();
+
     const uploadedDocument = await this.documentsService.uploadDocument({
       patient_id: this.patient.id,
       description: desc.trim(),
@@ -161,7 +164,6 @@ export class PatientDocumentationComponent {
     if (uploadedDocument) {
       // Notify parent component to reload documents
       this.documentsChanged.emit();
-      this.closeUploadModal();
     }
   }
 
