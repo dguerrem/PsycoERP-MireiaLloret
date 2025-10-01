@@ -315,8 +315,7 @@ const getSessionsKPIs = async (db) => {
       COUNT(*) as total_sessions,
       SUM(CASE WHEN status = 'finalizada' THEN 1 ELSE 0 END) as completed_sessions,
       SUM(CASE WHEN status = 'programada' THEN 1 ELSE 0 END) as scheduled_sessions,
-      SUM(CASE WHEN status = 'cancelada' THEN 1 ELSE 0 END) as cancelled_sessions,
-      COALESCE(SUM(CASE WHEN status = 'finalizada' THEN price ELSE 0 END), 0) as total_revenue
+      SUM(CASE WHEN status = 'cancelada' THEN 1 ELSE 0 END) as cancelled_sessions
     FROM sessions
     WHERE is_active = 1
   `;
@@ -327,8 +326,7 @@ const getSessionsKPIs = async (db) => {
     total_sessions: parseInt(rows[0].total_sessions) || 0,
     completed_sessions: parseInt(rows[0].completed_sessions) || 0,
     scheduled_sessions: parseInt(rows[0].scheduled_sessions) || 0,
-    cancelled_sessions: parseInt(rows[0].cancelled_sessions) || 0,
-    total_revenue: parseFloat(rows[0].total_revenue) || 0,
+    cancelled_sessions: parseInt(rows[0].cancelled_sessions) || 0
   };
 };
 

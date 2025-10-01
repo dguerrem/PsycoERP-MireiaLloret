@@ -438,13 +438,7 @@ const definitions = {
         format: "decimal",
         description: "Precio promedio por sesión en euros",
         example: 62.50,
-      },
-      total_revenue: {
-        type: "number",
-        format: "decimal",
-        description: "Ingresos totales generados por esta clínica",
-        example: 2812.50,
-      },
+      }
     },
   },
 

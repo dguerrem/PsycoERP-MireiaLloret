@@ -73,7 +73,7 @@ const sessionsPaths = {
           required: false,
           schema: {
             type: "string",
-            enum: ["cash", "card", "transfer", "insurance"],
+            enum: ["pendiente", "transferencia", "bizum", "efectivo", "tarjeta"],
           },
           description: "Método de pago",
         },
@@ -202,8 +202,8 @@ const sessionsPaths = {
                 },
                 payment_method: {
                   type: "string",
-                  enum: ["cash", "card", "transfer", "insurance"],
-                  default: "cash",
+                  enum: ["pendiente", "transferencia", "bizum", "efectivo", "tarjeta"],
+                  default: "pendiente",
                   description: "Método de pago",
                 },
                 notes: {
@@ -334,7 +334,7 @@ const sessionsPaths = {
                 },
                 payment_method: {
                   type: "string",
-                  enum: ["cash", "card", "transfer", "insurance"],
+                  enum: ["pendiente", "transferencia", "bizum", "efectivo", "tarjeta"],
                   description: "Método de pago",
                 },
                 notes: {
@@ -668,13 +668,7 @@ const sessionsPaths = {
                         type: "integer",
                         description: "Número de sesiones canceladas",
                         example: 15,
-                      },
-                      total_revenue: {
-                        type: "number",
-                        format: "decimal",
-                        description: "Ingresos totales de sesiones finalizadas en euros",
-                        example: 6000.00,
-                      },
+                      }
                     },
                   },
                 },
