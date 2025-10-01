@@ -4,6 +4,8 @@ import {
   Output,
   EventEmitter,
   signal,
+  computed,
+  effect,
   ChangeDetectionStrategy,
   inject,
   OnInit,
@@ -23,6 +25,7 @@ import { ReusableModalComponent } from '../../../../shared/components/reusable-m
 import { FormInputComponent } from '../../../../shared/components/form-input/form-input.component';
 import { PatientSelectorComponent } from '../../../../shared/components/patient-selector/patient-selector.component';
 import { ConfirmationModalComponent } from '../../../../shared/components/confirmation-modal/confirmation-modal.component';
+import { ClinicalNotesService } from '../../../patient/services/clinical-notes.service';
 import { environment } from '../../../../../environments/environment';
 
 /**
@@ -64,6 +67,7 @@ export class NewSessionFormComponent implements OnInit {
   private fb = inject(FormBuilder);
   private http = inject(HttpClient);
   private sessionsService = inject(SessionsService);
+  private clinicalNotesService = inject(ClinicalNotesService);
 
   /** Loading state signal */
   readonly isLoading = signal(false);
@@ -78,6 +82,66 @@ export class NewSessionFormComponent implements OnInit {
   /** Patients data from API */
   patients = signal<PatientSelector[]>([]);
   selectedPatient = signal<PatientSelector | null>(null);
+
+  /** Tab state */
+  activeTab = signal<'details' | 'clinical-notes'>('details');
+
+  /** Clinical Notes state */
+  private notes = signal<Array<{ id: string; title: string; content: string; date: Date }>>([]);
+  private notesLoadedWithIds = signal(false);
+  searchTerm = signal('');
+  isCreatingNote = signal(false);
+  editingNote = signal<{ id: string; title: string; content: string; date: Date } | null>(null);
+  deletingNoteId = signal<string | null>(null);
+  isSavingNote = signal(false);
+  newNote = signal<{ title: string; content: string }>({ title: '', content: '' });
+
+  /** Voice recording state */
+  isRecording = signal(false);
+  private recognition: any = null;
+
+  /** Medical records from session data */
+  medicalRecords = computed(() => {
+    const sessionData = this.prefilledData?.sessionData;
+    if (!sessionData) return [];
+    return sessionData.SessionDetailData.MedicalRecordData || [];
+  });
+
+  /** Computed filtered notes */
+  filteredNotes = computed(() => {
+    const notesArray = this.notes();
+    const search = this.searchTerm().toLowerCase();
+
+    if (!search) return notesArray;
+
+    return notesArray.filter(note =>
+      note.title.toLowerCase().includes(search) ||
+      note.content.toLowerCase().includes(search)
+    );
+  });
+
+  /** Computed sorted notes */
+  sortedNotes = computed(() => {
+    return this.filteredNotes().sort((a, b) => b.date.getTime() - a.date.getTime());
+  });
+
+  /** Computed form validation for clinical notes */
+  isFormValidNote = computed(() => {
+    const note = this.newNote();
+    const hasTitle = (note.title?.trim().length ?? 0) > 0;
+    const hasValidContent = (note.content?.trim().length ?? 0) >= 10;
+    return hasTitle && hasValidContent;
+  });
+
+  constructor() {
+    // Effect to load notes with IDs when switching to clinical notes tab
+    effect(() => {
+      const tab = this.activeTab();
+      if (tab === 'clinical-notes' && this.isEditMode && !this.notesLoadedWithIds()) {
+        this.loadClinicalNotesWithIds();
+      }
+    });
+  }
 
   readonly modeOptions = [
     { value: 'presencial', label: 'Presencial' },
@@ -114,6 +178,48 @@ export class NewSessionFormComponent implements OnInit {
   ngOnInit(): void {
     this.loadPatients();
     this.initializeForm();
+    this.loadClinicalNotes();
+  }
+
+  private loadClinicalNotes(): void {
+    const records = this.medicalRecords();
+    const transformed = records.map((record) => ({
+      id: '', // No ID needed for display initially
+      title: record.title,
+      content: record.content,
+      date: this.parseDateString(record.date)
+    }));
+    this.notes.set(transformed);
+  }
+
+  private loadClinicalNotesWithIds(): void {
+    const sessionData = this.prefilledData?.sessionData;
+    if (!sessionData) return;
+
+    const patientId = sessionData.SessionDetailData.PatientData.id;
+
+    // Load clinical notes from API to get full data including IDs
+    this.clinicalNotesService.getClinicalNotes(patientId).subscribe({
+      next: (records) => {
+        const transformed = records.map((record) => ({
+          id: record.id ? record.id.toString() : '',
+          title: record.titulo,
+          content: record.contenido,
+          date: this.parseDateString(record.fecha)
+        }));
+        this.notes.set(transformed);
+        this.notesLoadedWithIds.set(true);
+      },
+      error: (error) => {
+        console.error('Error loading clinical notes with IDs:', error);
+      }
+    });
+  }
+
+  private parseDateString(dateStr: string): Date {
+    // Parse "2024-12-15 14:30:00" format
+    const [datePart] = dateStr.split(' ');
+    return new Date(datePart);
   }
 
   private initializeForm(): void {
@@ -376,5 +482,214 @@ export class NewSessionFormComponent implements OnInit {
     if (!patient) return 0;
 
     return patient.precioSesion * (patient.porcentaje / 100);
+  }
+
+  // Clinical Notes Methods
+  onSearchChange(event: Event): void {
+    const target = event.target as HTMLInputElement;
+    this.searchTerm.set(target.value);
+  }
+
+  onCreateNote(): void {
+    this.isCreatingNote.set(true);
+    this.editingNote.set(null);
+    this.newNote.set({ title: '', content: '' });
+  }
+
+  onEditNote(note: { id: string; title: string; content: string; date: Date }): void {
+    this.editingNote.set(note);
+    this.isCreatingNote.set(false);
+    this.newNote.set({ title: note.title, content: note.content });
+  }
+
+  onTitleChange(event: Event): void {
+    const target = event.target as HTMLInputElement;
+    this.newNote.update(note => ({ ...note, title: target.value }));
+  }
+
+  onContentChange(event: Event): void {
+    const target = event.target as HTMLTextAreaElement;
+    this.newNote.update(note => ({ ...note, content: target.value }));
+  }
+
+  onSaveNote(): void {
+    const note = this.newNote();
+    const editingNote = this.editingNote();
+    const sessionData = this.prefilledData?.sessionData;
+
+    if (!this.isFormValidNote() || !sessionData) {
+      return;
+    }
+
+    const patientId = sessionData.SessionDetailData.PatientData.id;
+
+    this.isSavingNote.set(true);
+
+    if (editingNote && editingNote.id) {
+      // Update existing note
+      const noteIdNumber = parseInt(editingNote.id);
+
+      if (isNaN(noteIdNumber) || noteIdNumber === 0) {
+        this.isSavingNote.set(false);
+        return;
+      }
+
+      this.clinicalNotesService.updateClinicalNote({
+        id: noteIdNumber,
+        title: note.title,
+        content: note.content
+      }).subscribe({
+        next: () => {
+          this.isSavingNote.set(false);
+          this.onCancelEdit();
+          this.reloadSessionData();
+        },
+        error: (error) => {
+          console.error('Error updating note:', error);
+          alert('Error al actualizar la nota. Por favor, intenta de nuevo.');
+          this.isSavingNote.set(false);
+        }
+      });
+    } else {
+      // Create new note
+      this.clinicalNotesService.createClinicalNote({
+        patient_id: patientId,
+        title: note.title,
+        content: note.content
+      }).subscribe({
+        next: () => {
+          this.isSavingNote.set(false);
+          this.onCancelEdit();
+          this.reloadSessionData();
+        },
+        error: (error) => {
+          console.error('Error creating note:', error);
+          alert('Error al crear la nota. Por favor, intenta de nuevo.');
+          this.isSavingNote.set(false);
+        }
+      });
+    }
+  }
+
+  onCancelEdit(): void {
+    this.isCreatingNote.set(false);
+    this.editingNote.set(null);
+    this.newNote.set({ title: '', content: '' });
+  }
+
+  onDeleteNote(event: Event, note: { id: string; title: string; content: string; date: Date }): void {
+    event.stopPropagation();
+
+    const noteIdNumber = parseInt(note.id);
+
+    if (isNaN(noteIdNumber) || noteIdNumber === 0) {
+      return;
+    }
+
+    if (!confirm('¿Estás seguro de que deseas eliminar esta nota?')) {
+      return;
+    }
+
+    this.deletingNoteId.set(note.id);
+
+    this.clinicalNotesService.deleteClinicalNote(noteIdNumber).subscribe({
+      next: () => {
+        this.deletingNoteId.set(null);
+        this.reloadSessionData();
+      },
+      error: (error) => {
+        console.error('Error deleting note:', error);
+        alert('Error al eliminar la nota. Por favor, intenta de nuevo.');
+        this.deletingNoteId.set(null);
+      }
+    });
+  }
+
+  formatDate(date: Date): string {
+    return date.toLocaleDateString('es-ES', {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit'
+    });
+  }
+
+  toggleRecording(event: Event): void {
+    event.preventDefault();
+    event.stopPropagation();
+
+    if (this.isRecording()) {
+      this.stopRecording();
+    } else {
+      this.startRecording();
+    }
+  }
+
+  private async startRecording(): Promise<void> {
+    try {
+      const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+
+      if (!SpeechRecognition) {
+        alert('Tu navegador no soporta reconocimiento de voz. Usa Chrome, Edge o Safari.');
+        return;
+      }
+
+      this.recognition = new SpeechRecognition();
+      this.recognition.continuous = true;
+      this.recognition.interimResults = true;
+      this.recognition.lang = 'es-ES';
+
+      let finalTranscript = '';
+      const currentContent = this.newNote().content || '';
+
+      this.recognition.onresult = (event: any) => {
+        let interimTranscript = '';
+
+        for (let i = event.resultIndex; i < event.results.length; i++) {
+          const transcript = event.results[i][0].transcript;
+          if (event.results[i].isFinal) {
+            finalTranscript += transcript + ' ';
+          } else {
+            interimTranscript += transcript;
+          }
+        }
+
+        const newContent = currentContent + finalTranscript + interimTranscript;
+        this.newNote.update(note => ({ ...note, content: newContent }));
+      };
+
+      this.recognition.onerror = (event: any) => {
+        console.error('Error en reconocimiento de voz:', event.error);
+        this.isRecording.set(false);
+
+        if (event.error === 'not-allowed') {
+          alert('Permiso de micrófono denegado. Por favor, permite el acceso al micrófono.');
+        }
+      };
+
+      this.recognition.onend = () => {
+        this.isRecording.set(false);
+      };
+
+      this.recognition.start();
+      this.isRecording.set(true);
+
+    } catch (error) {
+      console.error('Error iniciando grabación:', error);
+      alert('Error al acceder al micrófono. Verifica los permisos.');
+    }
+  }
+
+  private stopRecording(): void {
+    if (this.recognition) {
+      this.recognition.stop();
+      this.recognition = null;
+    }
+    this.isRecording.set(false);
+  }
+
+  private reloadSessionData(): void {
+    // Reload clinical notes with IDs after create/update/delete
+    this.notesLoadedWithIds.set(false);
+    this.loadClinicalNotesWithIds();
   }
 }
