@@ -16,9 +16,14 @@ export const apiInterceptor: HttpInterceptorFn = (req: HttpRequest<unknown>, nex
 
   // Preparar headers básicos
   const headers: Record<string, string> = {
-    'Content-Type': 'application/json',
     'Accept': 'application/json'
   };
+
+  // Solo agregar Content-Type si no es FormData
+  // FormData necesita que el navegador establezca automáticamente el Content-Type con el boundary
+  if (!(req.body instanceof FormData)) {
+    headers['Content-Type'] = 'application/json';
+  }
 
   // Añadir token de autorización si existe y no es una petición de login
   const token = authService.token();

@@ -30,8 +30,8 @@ const usersRoutes = require("./routes/users/users_routes");
 
 // Middlewares globales
 app.use(cors());
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(express.json({ limit: "50mb" })); // Aumentar límite para archivos grandes
+app.use(express.urlencoded({ extended: true, limit: "50mb" }));
 
 // Middleware para inyectar el pool de BD correcto según hostname
 app.use(dbMiddleware);
@@ -62,8 +62,7 @@ app.get("/oauth2callback", async (req, res) => {
 
     // Guarda el token para futuros usos
     fs.writeFileSync(TOKEN_PATH, JSON.stringify(tokens));
-    console.log("Token de acceso y actualización guardados.");
-
+    
     res.send(
       "Autenticación con Google completada con éxito. Ya puedes cerrar esta ventana."
     );

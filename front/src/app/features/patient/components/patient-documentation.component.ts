@@ -8,16 +8,18 @@ import {
   inject
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
+import { DomSanitizer, SafeHtml, SafeResourceUrl } from '@angular/platform-browser';
 import { Patient } from '../../../shared/models/patient.model';
 import { PatientDocument } from '../../../shared/models/patient-detail.model';
 import { ReusableModalComponent } from '../../../shared/components/reusable-modal/reusable-modal.component';
+import { ConfirmationModalComponent } from '../../../shared/components/confirmation-modal/confirmation-modal.component';
 import { PatientDocumentsService } from '../services/patient-documents.service';
+import { environment } from '../../../../environments/environment';
 
 @Component({
   selector: 'app-patient-documentation',
   standalone: true,
-  imports: [CommonModule, ReusableModalComponent],
+  imports: [CommonModule, ReusableModalComponent, ConfirmationModalComponent],
   templateUrl: './patient-documentation.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -29,11 +31,12 @@ export class PatientDocumentationComponent {
   @Input() documents: PatientDocument[] = [];
   @Output() documentsChanged = new EventEmitter<void>();
 
-  readonly viewingDocument = signal<PatientDocument | null>(null);
   readonly isUploadModalOpen = signal(false);
   readonly selectedFile = signal<File | null>(null);
   readonly description = signal('');
   readonly isDragging = signal(false);
+  readonly isDeleteModalOpen = signal(false);
+  readonly documentToDelete = signal<PatientDocument | null>(null);
 
   getFileIcon(type: string): string {
     const normalizedType = this.normalizeFileType(type);
@@ -85,11 +88,10 @@ export class PatientDocumentationComponent {
   }
 
   handleViewDocument(document: PatientDocument): void {
-    this.viewingDocument.set(document);
-  }
+    if (!document.file_url) return;
 
-  closeDocumentView(): void {
-    this.viewingDocument.set(null);
+    // Open document in new tab
+    window.open(document.file_url, '_blank');
   }
 
   openUploadModal(): void {
@@ -152,6 +154,9 @@ export class PatientDocumentationComponent {
       return;
     }
 
+    // Close modal immediately to show loading in parent component
+    this.closeUploadModal();
+
     const uploadedDocument = await this.documentsService.uploadDocument({
       patient_id: this.patient.id,
       description: desc.trim(),
@@ -161,7 +166,6 @@ export class PatientDocumentationComponent {
     if (uploadedDocument) {
       // Notify parent component to reload documents
       this.documentsChanged.emit();
-      this.closeUploadModal();
     }
   }
 
@@ -177,28 +181,34 @@ export class PatientDocumentationComponent {
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
   }
 
-  async handleDownloadDocument(document: PatientDocument): Promise<void> {
+  async handleDownloadDocument(doc: PatientDocument): Promise<void> {
     if (!this.patient.id) return;
 
     await this.documentsService.downloadDocument(
       this.patient.id,
-      document.id,
-      document.name
+      doc.id,
+      doc.name
     );
   }
 
-  async handleDeleteDocument(document: PatientDocument): Promise<void> {
-    if (!this.patient.id) return;
+  openDeleteModal(document: PatientDocument): void {
+    this.documentToDelete.set(document);
+    this.isDeleteModalOpen.set(true);
+  }
 
-    // Ask for confirmation
-    if (!confirm(`¿Estás seguro de que deseas eliminar el documento "${document.name}"?`)) {
-      return;
-    }
+  closeDeleteModal(): void {
+    this.isDeleteModalOpen.set(false);
+    this.documentToDelete.set(null);
+  }
 
-    const success = await this.documentsService.deleteDocument(
-      this.patient.id,
-      document.id
-    );
+  async confirmDeleteDocument(): Promise<void> {
+    const document = this.documentToDelete();
+    if (!document) return;
+
+    // Close modal immediately to show loading in parent
+    this.closeDeleteModal();
+
+    const success = await this.documentsService.deleteDocument(document.id);
 
     if (success) {
       // Notify parent component to reload documents

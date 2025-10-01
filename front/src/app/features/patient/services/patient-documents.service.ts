@@ -24,7 +24,7 @@ export class PatientDocumentsService {
   private toast = inject(ToastService);
   private loadingService = inject(LoadingService);
 
-  private readonly apiUrl = `${environment.api.baseUrl}/patients`;
+  private readonly apiUrl = `${environment.api.baseUrl}/documents`;
 
   /**
    * Upload a document for a patient
@@ -44,7 +44,7 @@ export class PatientDocumentsService {
 
       const response = await lastValueFrom(
         this.http.post<UploadDocumentResponse>(
-          `${this.apiUrl}/${request.patient_id}/documents`,
+          `${this.apiUrl}`,
           formData
         )
       );
@@ -63,17 +63,16 @@ export class PatientDocumentsService {
   /**
    * Delete a document
    *
-   * @param patientId - ID of the patient
    * @param documentId - ID of the document to delete
    * @returns Promise with success status
    */
-  async deleteDocument(patientId: number, documentId: number): Promise<boolean> {
+  async deleteDocument(documentId: number): Promise<boolean> {
     try {
       this.loadingService.show();
 
       await lastValueFrom(
         this.http.delete(
-          `${this.apiUrl}/${patientId}/documents/${documentId}`
+          `${this.apiUrl}/${documentId}`
         )
       );
 
@@ -101,7 +100,7 @@ export class PatientDocumentsService {
 
       const response = await lastValueFrom(
         this.http.get(
-          `${this.apiUrl}/${patientId}/documents/${documentId}/download`,
+          `${this.apiUrl}/${documentId}/download`,
           { responseType: 'blob' }
         )
       );
