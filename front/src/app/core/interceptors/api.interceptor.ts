@@ -49,7 +49,6 @@ export const apiInterceptor: HttpInterceptorFn = (req: HttpRequest<unknown>, nex
             if (newToken) {
               const retryReq = modifiedReq.clone({
                 setHeaders: {
-                  ...headers,
                   'Authorization': `Bearer ${newToken}`
                 }
               });
