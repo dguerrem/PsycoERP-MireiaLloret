@@ -27,6 +27,7 @@ import { PatientSelectorComponent } from '../../../../shared/components/patient-
 import { ConfirmationModalComponent } from '../../../../shared/components/confirmation-modal/confirmation-modal.component';
 import { ClinicalNotesService } from '../../../patient/services/clinical-notes.service';
 import { environment } from '../../../../../environments/environment';
+import { ToastService } from '../../../../core/services/toast.service';
 
 /**
  * Modal dialog component for creating new session appointments
@@ -68,6 +69,7 @@ export class NewSessionFormComponent implements OnInit {
   private http = inject(HttpClient);
   private sessionsService = inject(SessionsService);
   private clinicalNotesService = inject(ClinicalNotesService);
+  private toastService = inject(ToastService);
 
   /** Loading state signal */
   readonly isLoading = signal(false);
@@ -550,11 +552,12 @@ export class NewSessionFormComponent implements OnInit {
         next: () => {
           this.isSavingNote.set(false);
           this.onCancelEdit();
+          this.toastService.showSuccess('Nota clínica actualizada correctamente');
           this.reloadSessionData();
         },
         error: (error) => {
           console.error('Error updating note:', error);
-          alert('Error al actualizar la nota. Por favor, intenta de nuevo.');
+          this.toastService.showError('Error al actualizar la nota. Por favor, intenta de nuevo.');
           this.isSavingNote.set(false);
         }
       });
@@ -568,11 +571,12 @@ export class NewSessionFormComponent implements OnInit {
         next: () => {
           this.isSavingNote.set(false);
           this.onCancelEdit();
+          this.toastService.showSuccess('Nota clínica creada correctamente');
           this.reloadSessionData();
         },
         error: (error) => {
           console.error('Error creating note:', error);
-          alert('Error al crear la nota. Por favor, intenta de nuevo.');
+          this.toastService.showError('Error al crear la nota. Por favor, intenta de nuevo.');
           this.isSavingNote.set(false);
         }
       });
@@ -617,11 +621,12 @@ export class NewSessionFormComponent implements OnInit {
       next: () => {
         this.deletingNoteId.set(null);
         this.pendingDeleteNote = null;
+        this.toastService.showSuccess('Nota clínica eliminada correctamente');
         this.reloadSessionData();
       },
       error: (error) => {
         console.error('Error deleting note:', error);
-        alert('Error al eliminar la nota. Por favor, intenta de nuevo.');
+        this.toastService.showError('Error al eliminar la nota. Por favor, intenta de nuevo.');
         this.deletingNoteId.set(null);
         this.pendingDeleteNote = null;
       }
