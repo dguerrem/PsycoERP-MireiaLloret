@@ -58,14 +58,12 @@ const testConnection = async () => {
     const prodConfig = getDBConfig();
     const prodTestPool = mysql.createPool(prodConfig);
     const prodConnection = await prodTestPool.getConnection();
-    console.log("✅ Conexión a MariaDB PROD establecida correctamente");
     prodConnection.release();
     await prodTestPool.end();
 
     const testConfig = getDBConfig("test.millopsicologia.com");
     const testTestPool = mysql.createPool(testConfig);
     const testConnection = await testTestPool.getConnection();
-    console.log("✅ Conexión a MariaDB TEST establecida correctamente");
     testConnection.release();
     await testTestPool.end();
   } catch (error) {

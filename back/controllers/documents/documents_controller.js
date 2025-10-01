@@ -4,6 +4,7 @@ const {
 } = require("../../models/documents/documents_model");
 
 const { getPatientById } = require("../../models/patients/patients_model");
+const { uploadFileToVPS } = require("../../utils/sftp");
 
 const multer = require("multer");
 const path = require("path");
@@ -114,17 +115,14 @@ const subirDocumento = async (req, res) => {
       });
     }
 
-    // Generar nombre único para el archivo
-    const timestamp = Date.now();
-    const fileExtension = path.extname(req.file.originalname);
-    const sanitizedName = req.file.originalname
-      .replace(fileExtension, "")
-      .replace(/[^a-zA-Z0-9_-]/g, "_")
-      .toLowerCase();
-    const uniqueFileName = `${sanitizedName}_${timestamp}${fileExtension}`;
-
-    // URL mockeada (posteriormente será reemplazada por la ruta del SFTP)
-    const mockFileUrl = `/documents/patients/${patient_id}/${uniqueFileName}`;
+    // Subir archivo al VPS via SFTP
+    console.log(`📤 Subiendo archivo al VPS para paciente ${patient_id}...`);
+    const fileUrl = await uploadFileToVPS(
+      req.file.buffer,
+      req.file.originalname,
+      parseInt(patient_id)
+    );
+    console.log(`✅ Archivo subido exitosamente: ${fileUrl}`);
 
     // Guardar documento en la base de datos (size en bytes)
     const documentData = {
@@ -133,7 +131,7 @@ const subirDocumento = async (req, res) => {
       type: req.file.mimetype,
       size: req.file.size, // Guardamos en bytes
       description: description.trim(),
-      file_url: mockFileUrl,
+      file_url: fileUrl, // URL real del VPS
     };
 
     const newDocument = await uploadDocument(req.db, documentData);
