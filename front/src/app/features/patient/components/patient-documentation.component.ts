@@ -8,11 +8,12 @@ import {
   inject
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
+import { DomSanitizer, SafeHtml, SafeResourceUrl } from '@angular/platform-browser';
 import { Patient } from '../../../shared/models/patient.model';
 import { PatientDocument } from '../../../shared/models/patient-detail.model';
 import { ReusableModalComponent } from '../../../shared/components/reusable-modal/reusable-modal.component';
 import { PatientDocumentsService } from '../services/patient-documents.service';
+import { environment } from '../../../../environments/environment';
 
 @Component({
   selector: 'app-patient-documentation',
@@ -29,7 +30,6 @@ export class PatientDocumentationComponent {
   @Input() documents: PatientDocument[] = [];
   @Output() documentsChanged = new EventEmitter<void>();
 
-  readonly viewingDocument = signal<PatientDocument | null>(null);
   readonly isUploadModalOpen = signal(false);
   readonly selectedFile = signal<File | null>(null);
   readonly description = signal('');
@@ -85,11 +85,10 @@ export class PatientDocumentationComponent {
   }
 
   handleViewDocument(document: PatientDocument): void {
-    this.viewingDocument.set(document);
-  }
+    if (!document.file_url) return;
 
-  closeDocumentView(): void {
-    this.viewingDocument.set(null);
+    // Open document in new tab
+    window.open(document.file_url, '_blank');
   }
 
   openUploadModal(): void {
