@@ -73,7 +73,7 @@ const sessionsPaths = {
           required: false,
           schema: {
             type: "string",
-            enum: ["cash", "card", "transfer", "insurance"],
+            enum: ["pendiente", "transferencia", "bizum", "efectivo", "tarjeta"],
           },
           description: "Método de pago",
         },
@@ -202,8 +202,8 @@ const sessionsPaths = {
                 },
                 payment_method: {
                   type: "string",
-                  enum: ["cash", "card", "transfer", "insurance"],
-                  default: "cash",
+                  enum: ["pendiente", "transferencia", "bizum", "efectivo", "tarjeta"],
+                  default: "pendiente",
                   description: "Método de pago",
                 },
                 notes: {
@@ -334,7 +334,7 @@ const sessionsPaths = {
                 },
                 payment_method: {
                   type: "string",
-                  enum: ["cash", "card", "transfer", "insurance"],
+                  enum: ["pendiente", "transferencia", "bizum", "efectivo", "tarjeta"],
                   description: "Método de pago",
                 },
                 notes: {
@@ -612,6 +612,66 @@ const sessionsPaths = {
               example: {
                 success: false,
                 error: "Sesión no encontrada o paciente inactivo",
+              },
+            },
+          },
+        },
+        500: {
+          description: "Error interno del servidor",
+          content: {
+            "application/json": {
+              schema: {
+                $ref: "#/components/schemas/ErrorResponse",
+              },
+            },
+          },
+        },
+      },
+    },
+  },
+  "/api/sessions/kpis": {
+    get: {
+      tags: ["Sessions"],
+      summary: "Obtener KPIs globales de sesiones",
+      description: "Obtiene los indicadores clave de rendimiento (KPIs) globales de todas las sesiones activas: total de sesiones, completadas, programadas, canceladas e ingresos totales.",
+      responses: {
+        200: {
+          description: "KPIs obtenidos exitosamente",
+          content: {
+            "application/json": {
+              schema: {
+                type: "object",
+                properties: {
+                  success: {
+                    type: "boolean",
+                    example: true,
+                  },
+                  data: {
+                    type: "object",
+                    properties: {
+                      total_sessions: {
+                        type: "integer",
+                        description: "Número total de sesiones activas",
+                        example: 150,
+                      },
+                      completed_sessions: {
+                        type: "integer",
+                        description: "Número de sesiones finalizadas",
+                        example: 100,
+                      },
+                      scheduled_sessions: {
+                        type: "integer",
+                        description: "Número de sesiones programadas",
+                        example: 35,
+                      },
+                      cancelled_sessions: {
+                        type: "integer",
+                        description: "Número de sesiones canceladas",
+                        example: 15,
+                      }
+                    },
+                  },
+                },
               },
             },
           },

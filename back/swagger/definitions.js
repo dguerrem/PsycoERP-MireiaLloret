@@ -438,13 +438,7 @@ const definitions = {
         format: "decimal",
         description: "Precio promedio por sesión en euros",
         example: 62.50,
-      },
-      total_revenue: {
-        type: "number",
-        format: "decimal",
-        description: "Ingresos totales generados por esta clínica",
-        example: 2812.50,
-      },
+      }
     },
   },
 
@@ -1152,6 +1146,12 @@ const definitions = {
   MedicalRecord: {
     type: "object",
     properties: {
+      id: {
+        type: "integer",
+        format: "int64",
+        description: "ID único de la nota clínica",
+        example: 42,
+      },
       title: {
         type: "string",
         description: "Título de la nota clínica",

@@ -105,7 +105,7 @@ const getSessions = async (db, filters = {}) => {
       // Obtener notas clínicas del paciente (solo si el paciente está activo)
       const [medicalRecords] = await db.execute(
         `
-      SELECT cn.title, cn.content, cn.created_at 
+      SELECT cn.id, cn.title, cn.content, cn.created_at
       FROM clinical_notes cn
       INNER JOIN patients p ON cn.patient_id = p.id
       WHERE cn.patient_id = ? AND p.is_active = true
@@ -135,6 +135,7 @@ const getSessions = async (db, filters = {}) => {
             clinic_color: row.clinic_color,
           },
           MedicalRecordData: medicalRecords.map((record) => ({
+            id: record.id,
             title: record.title,
             content: record.content,
             date: record.created_at,
@@ -307,6 +308,28 @@ const checkDuplicateSession = async (db, patient_id, session_date, start_time, e
   return rows.length > 0 ? rows[0] : null;
 };
 
+// Obtener KPIs globales de sesiones
+const getSessionsKPIs = async (db) => {
+  const query = `
+    SELECT
+      COUNT(*) as total_sessions,
+      SUM(CASE WHEN status = 'finalizada' THEN 1 ELSE 0 END) as completed_sessions,
+      SUM(CASE WHEN status = 'programada' THEN 1 ELSE 0 END) as scheduled_sessions,
+      SUM(CASE WHEN status = 'cancelada' THEN 1 ELSE 0 END) as cancelled_sessions
+    FROM sessions
+    WHERE is_active = 1
+  `;
+
+  const [rows] = await db.execute(query);
+
+  return {
+    total_sessions: parseInt(rows[0].total_sessions) || 0,
+    completed_sessions: parseInt(rows[0].completed_sessions) || 0,
+    scheduled_sessions: parseInt(rows[0].scheduled_sessions) || 0,
+    cancelled_sessions: parseInt(rows[0].cancelled_sessions) || 0
+  };
+};
+
 module.exports = {
   getSessions,
   createSession,
@@ -314,4 +337,5 @@ module.exports = {
   deleteSession,
   getSessionForWhatsApp,
   checkDuplicateSession,
+  getSessionsKPIs,
 };
