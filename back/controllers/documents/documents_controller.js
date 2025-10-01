@@ -118,13 +118,11 @@ const subirDocumento = async (req, res) => {
     }
 
     // Subir archivo al VPS via SFTP
-    console.log(`📤 Subiendo archivo al VPS para paciente ${patient_id}...`);
     const fileUrl = await uploadFileToVPS(
       req.file.buffer,
       req.file.originalname,
       parseInt(patient_id)
     );
-    console.log(`✅ Archivo subido exitosamente: ${fileUrl}`);
 
     // Guardar documento en la base de datos (size en bytes)
     const documentData = {
@@ -228,9 +226,7 @@ const eliminarDocumento = async (req, res) => {
     }
 
     // Eliminar archivo del SFTP/VPS
-    console.log(`🗑️ Eliminando archivo del VPS: ${document.file_url}`);
     await deleteFileFromVPS(document.file_url);
-    console.log(`✅ Archivo eliminado exitosamente del VPS`);
 
     // Soft delete en la base de datos
     await deleteDocumentById(req.db, id);
