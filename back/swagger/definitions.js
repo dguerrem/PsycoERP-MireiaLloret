@@ -1152,6 +1152,12 @@ const definitions = {
   MedicalRecord: {
     type: "object",
     properties: {
+      id: {
+        type: "integer",
+        format: "int64",
+        description: "ID único de la nota clínica",
+        example: 42,
+      },
       title: {
         type: "string",
         description: "Título de la nota clínica",

@@ -105,7 +105,7 @@ const getSessions = async (db, filters = {}) => {
       // Obtener notas clínicas del paciente (solo si el paciente está activo)
       const [medicalRecords] = await db.execute(
         `
-      SELECT cn.title, cn.content, cn.created_at 
+      SELECT cn.id, cn.title, cn.content, cn.created_at
       FROM clinical_notes cn
       INNER JOIN patients p ON cn.patient_id = p.id
       WHERE cn.patient_id = ? AND p.is_active = true
@@ -135,6 +135,7 @@ const getSessions = async (db, filters = {}) => {
             clinic_color: row.clinic_color,
           },
           MedicalRecordData: medicalRecords.map((record) => ({
+            id: record.id,
             title: record.title,
             content: record.content,
             date: record.created_at,
