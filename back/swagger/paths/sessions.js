@@ -629,6 +629,72 @@ const sessionsPaths = {
       },
     },
   },
+  "/api/sessions/kpis": {
+    get: {
+      tags: ["Sessions"],
+      summary: "Obtener KPIs globales de sesiones",
+      description: "Obtiene los indicadores clave de rendimiento (KPIs) globales de todas las sesiones activas: total de sesiones, completadas, programadas, canceladas e ingresos totales.",
+      responses: {
+        200: {
+          description: "KPIs obtenidos exitosamente",
+          content: {
+            "application/json": {
+              schema: {
+                type: "object",
+                properties: {
+                  success: {
+                    type: "boolean",
+                    example: true,
+                  },
+                  data: {
+                    type: "object",
+                    properties: {
+                      total_sessions: {
+                        type: "integer",
+                        description: "Número total de sesiones activas",
+                        example: 150,
+                      },
+                      completed_sessions: {
+                        type: "integer",
+                        description: "Número de sesiones finalizadas",
+                        example: 100,
+                      },
+                      scheduled_sessions: {
+                        type: "integer",
+                        description: "Número de sesiones programadas",
+                        example: 35,
+                      },
+                      cancelled_sessions: {
+                        type: "integer",
+                        description: "Número de sesiones canceladas",
+                        example: 15,
+                      },
+                      total_revenue: {
+                        type: "number",
+                        format: "decimal",
+                        description: "Ingresos totales de sesiones finalizadas en euros",
+                        example: 6000.00,
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+        500: {
+          description: "Error interno del servidor",
+          content: {
+            "application/json": {
+              schema: {
+                $ref: "#/components/schemas/ErrorResponse",
+              },
+            },
+          },
+        },
+      },
+    },
+  },
 };
 
 module.exports = sessionsPaths;

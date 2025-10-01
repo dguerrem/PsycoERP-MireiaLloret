@@ -5,6 +5,7 @@ const {
   deleteSession,
   getSessionForWhatsApp,
   checkDuplicateSession,
+  getSessionsKPIs,
 } = require("../../models/sessions/sessions_model");
 
 const { getRandomTemplate } = require("../../constants/whatsapp-templates");
@@ -394,10 +395,28 @@ const obtenerEnlaceWhatsApp = async (req, res) => {
   }
 };
 
+const obtenerKPIsSesiones = async (req, res) => {
+  try {
+    const kpis = await getSessionsKPIs(req.db);
+
+    res.json({
+      success: true,
+      data: kpis,
+    });
+  } catch (err) {
+    console.error("Error al obtener KPIs de sesiones:", err.message);
+    res.status(500).json({
+      success: false,
+      error: "Error al obtener los KPIs de sesiones",
+    });
+  }
+};
+
 module.exports = {
   obtenerSesiones,
   crearSesion,
   actualizarSesion,
   eliminarSesion,
   obtenerEnlaceWhatsApp,
+  obtenerKPIsSesiones,
 };
