@@ -3,24 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { PatientMedicalRecord } from '../../../shared/models/patient-detail.model';
 import { environment } from '../../../../environments/environment';
-
-export interface CreateClinicalNoteDto {
-  patient_id: number;
-  title: string;
-  content: string;
-}
-
-export interface UpdateClinicalNoteDto {
-  id: number;
-  title: string;
-  content: string;
-}
-
-export interface ClinicalNoteResponse {
-  success: boolean;
-  message: string;
-  data?: PatientMedicalRecord;
-}
+import { CreateClinicalNoteDto, UpdateClinicalNoteDto, ClinicalNoteResponse } from '../../../shared/models/clinical-note.model';
 
 /**
  * Service for managing clinical notes
