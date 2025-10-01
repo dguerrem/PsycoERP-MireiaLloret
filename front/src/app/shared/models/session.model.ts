@@ -87,7 +87,7 @@ export class SessionUtils {
   }
 
   static formatPrice(price: number): string {
-    return `€${price.toFixed(2)}`;
+    return `€`;
   }
 
   static formatPaymentMethod(method: string): string {
