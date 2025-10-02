@@ -11,11 +11,11 @@ import { HttpClient } from '@angular/common/http';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Patient } from '../../../shared/models/patient.model';
 import { PatientDetailResponse, PatientDetailUtils, Session, Invoice, Bonus, PatientSession, PatientDocument } from '../../../shared/models/patient-detail.model';
-import { PatientSummaryComponent } from '../components/patient-summary.component';
-import { PatientDataComponent } from '../components/patient-data.component';
-import { PatientClinicalHistoryComponent } from '../components/patient-clinical-history.component';
-import { PatientSessionsComponent } from '../components/patient-sessions.component';
-import { PatientDocumentationComponent } from '../components/patient-documentation.component';
+import { PatientSummaryComponent } from './patient-summary/patient-summary.component';
+import { PatientDataComponent } from './patient-data/patient-data.component';
+import { PatientClinicalHistoryComponent } from './patient-clinical-history/patient-clinical-history.component';
+import { PatientSessionsComponent } from './patient-sessions/patient-sessions.component';
+import { PatientDocumentationComponent } from './patient-documentation/patient-documentation.component';
 import { environment } from '../../../../environments/environment';
 
 /**

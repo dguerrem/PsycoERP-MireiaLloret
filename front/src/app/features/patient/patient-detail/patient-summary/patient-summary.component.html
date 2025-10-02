@@ -130,13 +130,13 @@
 
     <div class="px-6">
       <div class="grid grid-cols-2 gap-4">
-        <div>
+        <div class="text-center">
+          <div class="text-2xl font-bold" style="color: #0891b2">{{ totalSpent() }}€</div>
           <p class="text-sm text-muted-foreground">Total Gastado</p>
-          <p class="text-2xl font-bold" style="color: #0891b2">{{ totalSpent() }}€</p>
         </div>
-        <div>
+        <div class="text-center">
+          <div class="text-2xl font-bold">{{ billingInfo.invoicesIssued }}</div>
           <p class="text-sm text-muted-foreground">Facturas Emitidas</p>
-          <p class="text-2xl font-bold">{{ billingInfo.invoicesIssued }}</p>
         </div>
       </div>
     </div>

@@ -17,9 +17,8 @@ import {
   FormGroup,
   Validators,
 } from '@angular/forms';
-import { Patient } from '../../../shared/models/patient.model';
-import { PatientsService } from '../services/patients.service';
-
+import { Patient } from '../../../../shared/models/patient.model';
+import { PatientsService } from '../../services/patients.service';
 /**
  * Patient Data Component
  *

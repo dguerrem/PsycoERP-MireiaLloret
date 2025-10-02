@@ -8,13 +8,12 @@ import {
   inject
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { DomSanitizer, SafeHtml, SafeResourceUrl } from '@angular/platform-browser';
-import { Patient } from '../../../shared/models/patient.model';
-import { PatientDocument } from '../../../shared/models/patient-detail.model';
-import { ReusableModalComponent } from '../../../shared/components/reusable-modal/reusable-modal.component';
-import { ConfirmationModalComponent } from '../../../shared/components/confirmation-modal/confirmation-modal.component';
-import { PatientDocumentsService } from '../services/patient-documents.service';
-import { environment } from '../../../../environments/environment';
+import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
+import { ConfirmationModalComponent } from '../../../../shared/components/confirmation-modal/confirmation-modal.component';
+import { ReusableModalComponent } from '../../../../shared/components/reusable-modal/reusable-modal.component';
+import { PatientDocument } from '../../../../shared/models/patient-detail.model';
+import { Patient } from '../../../../shared/models/patient.model';
+import { PatientDocumentsService } from '../../services/patient-documents.service';
 
 @Component({
   selector: 'app-patient-documentation',

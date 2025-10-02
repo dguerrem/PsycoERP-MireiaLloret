@@ -5,9 +5,8 @@ import {
   signal,
   computed
 } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { Patient } from '../../../shared/models/patient.model';
-import { Session, Invoice, Bonus } from '../../../shared/models/patient-detail.model';
+import { CommonModule } from '@angular/common';import { Session, Invoice, Bonus } from '../../../../shared/models/patient-detail.model';
+import { Patient } from '../../../../shared/models/patient.model';
 
 /**
  * Patient Summary Component

@@ -1,10 +1,10 @@
 import { Component, Input, Output, EventEmitter, signal, computed, ChangeDetectionStrategy, OnChanges, SimpleChanges, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { ClinicalNote, CreateClinicalNoteRequest, UpdateClinicalNoteRequest } from '../models/clinical-note.interface';
-import { Patient } from '../../../shared/models/patient.model';
-import { PatientMedicalRecord } from '../../../shared/models/patient-detail.model';
-import { ClinicalNotesService } from '../services/clinical-notes.service';
+import { PatientMedicalRecord } from '../../../../shared/models/patient-detail.model';
+import { Patient } from '../../../../shared/models/patient.model';
+import { ClinicalNote, CreateClinicalNoteRequest } from '../../models/clinical-note.interface';
+import { ClinicalNotesService } from '../../services/clinical-notes.service';
 
 /**
  * Patient Clinical History Component
