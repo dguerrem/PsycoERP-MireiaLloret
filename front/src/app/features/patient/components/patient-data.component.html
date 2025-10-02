@@ -9,6 +9,11 @@
               <path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
             </svg>
             <h3 class="text-lg font-semibold">Información Personal</h3>
+            @if (isEditing()) {
+              <span class="inline-flex items-center rounded-md bg-blue-50 px-2 py-1 text-xs font-medium text-blue-700 ring-1 ring-inset ring-blue-700/10">
+                Editando
+              </span>
+            }
           </div>
           <div class="flex gap-2">
             @if (isEditing()) {
@@ -51,7 +56,9 @@
             <input
               id="first_name"
               formControlName="first_name"
-              class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+              [class]="isEditing()
+                ? 'flex h-10 w-full rounded-md border-2 border-blue-200 bg-white px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:border-blue-500 transition-colors'
+                : 'flex h-10 w-full rounded-md border border-gray-200 bg-gray-50 px-3 py-2 text-sm text-gray-700 disabled:cursor-not-allowed'"
               type="text" />
           </div>
 
@@ -62,7 +69,9 @@
             <input
               id="last_name"
               formControlName="last_name"
-              class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+              [class]="isEditing()
+                ? 'flex h-10 w-full rounded-md border-2 border-blue-200 bg-white px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:border-blue-500 transition-colors'
+                : 'flex h-10 w-full rounded-md border border-gray-200 bg-gray-50 px-3 py-2 text-sm text-gray-700 disabled:cursor-not-allowed'"
               type="text" />
           </div>
 
@@ -73,7 +82,9 @@
             <input
               id="dni"
               formControlName="dni"
-              class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+              [class]="isEditing()
+                ? 'flex h-10 w-full rounded-md border-2 border-blue-200 bg-white px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:border-blue-500 transition-colors'
+                : 'flex h-10 w-full rounded-md border border-gray-200 bg-gray-50 px-3 py-2 text-sm text-gray-700 disabled:cursor-not-allowed'"
               type="text" />
           </div>
 
@@ -84,7 +95,9 @@
             <input
               id="birth_date"
               formControlName="birth_date"
-              class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+              [class]="isEditing()
+                ? 'flex h-10 w-full rounded-md border-2 border-blue-200 bg-white px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:border-blue-500 transition-colors'
+                : 'flex h-10 w-full rounded-md border border-gray-200 bg-gray-50 px-3 py-2 text-sm text-gray-700 disabled:cursor-not-allowed'"
               type="date" />
             <p class="text-sm text-muted-foreground mt-1 italic">Edad: {{ age() }} años</p>
           </div>
@@ -96,7 +109,9 @@
             <input
               id="occupation"
               formControlName="occupation"
-              class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+              [class]="isEditing()
+                ? 'flex h-10 w-full rounded-md border-2 border-blue-200 bg-white px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:border-blue-500 transition-colors'
+                : 'flex h-10 w-full rounded-md border border-gray-200 bg-gray-50 px-3 py-2 text-sm text-gray-700 disabled:cursor-not-allowed'"
               type="text" />
           </div>
         </div>
@@ -111,6 +126,11 @@
             <path stroke-linecap="round" stroke-linejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
           </svg>
           <h3 class="text-lg font-semibold">Información de Contacto</h3>
+          @if (isEditing()) {
+            <span class="inline-flex items-center rounded-md bg-blue-50 px-2 py-1 text-xs font-medium text-blue-700 ring-1 ring-inset ring-blue-700/10">
+              Editando
+            </span>
+          }
         </div>
       </div>
 
@@ -123,7 +143,9 @@
             <input
               id="email"
               formControlName="email"
-              class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+              [class]="isEditing()
+                ? 'flex h-10 w-full rounded-md border-2 border-blue-200 bg-white px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:border-blue-500 transition-colors'
+                : 'flex h-10 w-full rounded-md border border-gray-200 bg-gray-50 px-3 py-2 text-sm text-gray-700 disabled:cursor-not-allowed'"
               type="email" />
           </div>
 
@@ -134,7 +156,9 @@
             <input
               id="phone"
               formControlName="phone"
-              class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+              [class]="isEditing()
+                ? 'flex h-10 w-full rounded-md border-2 border-blue-200 bg-white px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:border-blue-500 transition-colors'
+                : 'flex h-10 w-full rounded-md border border-gray-200 bg-gray-50 px-3 py-2 text-sm text-gray-700 disabled:cursor-not-allowed'"
               type="tel" />
           </div>
 
@@ -150,7 +174,9 @@
                 <input
                   id="street"
                   formControlName="street"
-                  class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                  [class]="isEditing()
+                    ? 'flex h-10 w-full rounded-md border-2 border-blue-200 bg-white px-3 py-2 text-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:border-blue-500 transition-colors'
+                    : 'flex h-10 w-full rounded-md border border-gray-200 bg-gray-50 px-3 py-2 text-sm text-gray-700 disabled:cursor-not-allowed'"
                   type="text"
                   placeholder="Ej: Calle Mayor" />
               </div>
@@ -162,7 +188,9 @@
                 <input
                   id="street_number"
                   formControlName="street_number"
-                  class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                  [class]="isEditing()
+                    ? 'flex h-10 w-full rounded-md border-2 border-blue-200 bg-white px-3 py-2 text-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:border-blue-500 transition-colors'
+                    : 'flex h-10 w-full rounded-md border border-gray-200 bg-gray-50 px-3 py-2 text-sm text-gray-700 disabled:cursor-not-allowed'"
                   type="text"
                   placeholder="Ej: 101" />
               </div>
@@ -174,7 +202,9 @@
                 <input
                   id="door"
                   formControlName="door"
-                  class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                  [class]="isEditing()
+                    ? 'flex h-10 w-full rounded-md border-2 border-blue-200 bg-white px-3 py-2 text-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:border-blue-500 transition-colors'
+                    : 'flex h-10 w-full rounded-md border border-gray-200 bg-gray-50 px-3 py-2 text-sm text-gray-700 disabled:cursor-not-allowed'"
                   type="text"
                   placeholder="Ej: 1A" />
               </div>
@@ -186,7 +216,9 @@
                 <input
                   id="postal_code"
                   formControlName="postal_code"
-                  class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                  [class]="isEditing()
+                    ? 'flex h-10 w-full rounded-md border-2 border-blue-200 bg-white px-3 py-2 text-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:border-blue-500 transition-colors'
+                    : 'flex h-10 w-full rounded-md border border-gray-200 bg-gray-50 px-3 py-2 text-sm text-gray-700 disabled:cursor-not-allowed'"
                   type="text"
                   placeholder="Ej: 46002" />
               </div>
@@ -198,7 +230,9 @@
                 <input
                   id="city"
                   formControlName="city"
-                  class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                  [class]="isEditing()
+                    ? 'flex h-10 w-full rounded-md border-2 border-blue-200 bg-white px-3 py-2 text-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:border-blue-500 transition-colors'
+                    : 'flex h-10 w-full rounded-md border border-gray-200 bg-gray-50 px-3 py-2 text-sm text-gray-700 disabled:cursor-not-allowed'"
                   type="text"
                   placeholder="Ej: Valencia" />
               </div>
@@ -210,7 +244,9 @@
                 <input
                   id="province"
                   formControlName="province"
-                  class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                  [class]="isEditing()
+                    ? 'flex h-10 w-full rounded-md border-2 border-blue-200 bg-white px-3 py-2 text-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:border-blue-500 transition-colors'
+                    : 'flex h-10 w-full rounded-md border border-gray-200 bg-gray-50 px-3 py-2 text-sm text-gray-700 disabled:cursor-not-allowed'"
                   type="text"
                   placeholder="Ej: Valencia" />
               </div>
@@ -228,6 +264,11 @@
             <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v8a2 2 0 002 2h8a2 2 0 002-2V9a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
           </svg>
           <h3 class="text-lg font-semibold">Información de Tratamiento</h3>
+          @if (isEditing()) {
+            <span class="inline-flex items-center rounded-md bg-blue-50 px-2 py-1 text-xs font-medium text-blue-700 ring-1 ring-inset ring-blue-700/10">
+              Editando
+            </span>
+          }
         </div>
       </div>
 
@@ -237,7 +278,7 @@
             <label class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
               Tipo de Sesión
             </label>
-            <div class="flex h-10 w-full items-center rounded-md border border-input bg-muted px-3 py-2 text-sm text-muted-foreground">
+            <div class="flex h-10 w-full items-center rounded-md border border-gray-200 bg-gray-50 px-3 py-2 text-sm text-gray-700">
               {{ patient.tipo_clinica || 'No especificado' }}
             </div>
           </div>
@@ -246,7 +287,7 @@
             <label class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
               Clínica
             </label>
-            <div class="flex h-10 w-full items-center rounded-md border border-input bg-muted px-3 py-2 text-sm text-muted-foreground">
+            <div class="flex h-10 w-full items-center rounded-md border border-gray-200 bg-gray-50 px-3 py-2 text-sm text-gray-700">
               {{ patient.nombre_clinica || 'No especificada' }}
             </div>
           </div>
@@ -258,7 +299,9 @@
             <input
               id="treatment_start_date"
               formControlName="treatment_start_date"
-              class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+              [class]="isEditing()
+                ? 'flex h-10 w-full rounded-md border-2 border-blue-200 bg-white px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:border-blue-500 transition-colors'
+                : 'flex h-10 w-full rounded-md border border-gray-200 bg-gray-50 px-3 py-2 text-sm text-gray-700 disabled:cursor-not-allowed'"
               type="date" />
           </div>
 
@@ -270,7 +313,7 @@
               <select
                 id="status"
                 formControlName="status"
-                class="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50">
+                class="flex h-10 w-full items-center justify-between rounded-md border-2 border-blue-200 bg-white px-3 py-2 text-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:border-blue-500 transition-colors">
                 <option value="">Seleccionar...</option>
                 <option value="en curso">En Curso</option>
                 <option value="fin del tratamiento">Fin del Tratamiento</option>
@@ -279,7 +322,7 @@
                 <option value="derivación">Derivación</option>
               </select>
             } @else {
-              <div class="flex h-10 w-full items-center rounded-md border border-input bg-muted px-3 py-2">
+              <div class="flex h-10 w-full items-center rounded-md border border-gray-200 bg-gray-50 px-3 py-2">
                 <span class="inline-flex items-center justify-center rounded-md border px-2 py-0.5 text-xs font-medium w-fit whitespace-nowrap shrink-0 focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive transition-[color,box-shadow] overflow-hidden border-transparent"
                       [class]="getStatusColor(patientForm.get('status')?.value || '')">
                   {{ getStatusLabel(patientForm.get('status')?.value || '') }}
