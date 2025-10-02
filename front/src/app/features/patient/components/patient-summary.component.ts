@@ -63,4 +63,21 @@ export class PatientSummaryComponent {
         return 'bg-gray-100 text-gray-800';
     }
   }
+
+    getPaymentColor(paymentMethod: string): string {
+    switch (paymentMethod.toLowerCase()) {
+      case 'bizum':
+        return 'bg-purple-100 text-purple-800';
+      case 'transferencia':
+        return 'bg-blue-100 text-blue-800';
+      case 'tarjeta':
+        return 'bg-green-100 text-green-800';
+      case 'efectivo':
+        return 'bg-yellow-100 text-yellow-800';
+      case 'pendiente':
+        return 'bg-red-100 text-red-800';
+      default:
+        return 'bg-gray-100 text-gray-800';
+    }
+  }
 }
