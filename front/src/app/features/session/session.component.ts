@@ -233,10 +233,6 @@ export class SessionComponent implements OnInit {
     return SessionUtils.formatPaymentMethod(method);
   }
 
-  formatPrice(price: number): string {
-    return `€`;
-  }
-
   formatDate(dateStr: string): string {
     const [year, month, day] = dateStr.split('-');
     return `${day}/${month}/${year}`;
