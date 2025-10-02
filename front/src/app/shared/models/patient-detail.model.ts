@@ -57,12 +57,18 @@ export interface PatientSession {
 
 export interface PatientData {
   nombre: string;
+  apellidos: string;
   dni: string;
   fecha_nacimiento: string; // "1995-01-14"
   estado: string; // "en curso"
   email: string;
   telefono: string;
-  direccion: string; // "Calle Mayor 101 1A Valencia Valencia 46002"
+  calle: string;
+  numero: string;
+  puerta: string;
+  codigo_postal: string;
+  ciudad: string;
+  provincia: string;
   genero: 'M' | 'F' | 'O';
   ocupacion: string;
   clinic_id: number;
@@ -75,25 +81,22 @@ export interface PatientData {
 // Helper functions for data transformation
 export class PatientDetailUtils {
   static transformPatientData(apiData: PatientData): Patient {
-    // Split address into components (basic parsing)
-    const addressParts = apiData.direccion.split(' ');
-
     return {
       id: undefined, // Will be set from PatientResume
-      first_name: apiData.nombre.split(' ')[0] || '',
-      last_name: apiData.nombre.split(' ').slice(1).join(' ') || '',
+      first_name: apiData.nombre,
+      last_name: apiData.apellidos,
       email: apiData.email,
       phone: apiData.telefono,
       dni: apiData.dni,
       gender: apiData.genero,
       occupation: apiData.ocupacion,
       birth_date: apiData.fecha_nacimiento,
-      street: addressParts[0] + ' ' + addressParts[1] || '',
-      street_number: addressParts[2] || '',
-      door: addressParts[3] || '',
-      postal_code: addressParts[addressParts.length - 1] || '',
-      city: addressParts[addressParts.length - 3] || '',
-      province: addressParts[addressParts.length - 2] || '',
+      street: apiData.calle,
+      street_number: apiData.numero,
+      door: apiData.puerta,
+      postal_code: apiData.codigo_postal,
+      city: apiData.ciudad,
+      province: apiData.provincia,
       clinic_id: apiData.clinic_id,
       treatment_start_date: apiData.fecha_inicio_tratamiento,
       status: apiData.estado as 'en curso' | 'fin del tratamiento' | 'en pausa' | 'abandono' | 'derivación',

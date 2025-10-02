@@ -45,12 +45,23 @@
       <div class="px-6">
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <label class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70" for="full_name">
-              Nombre Completo
+            <label class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70" for="first_name">
+              Nombre
             </label>
             <input
-              id="full_name"
-              formControlName="full_name"
+              id="first_name"
+              formControlName="first_name"
+              class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+              type="text" />
+          </div>
+
+          <div>
+            <label class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70" for="last_name">
+              Apellidos
+            </label>
+            <input
+              id="last_name"
+              formControlName="last_name"
               class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
               type="text" />
           </div>
@@ -128,14 +139,82 @@
           </div>
 
           <div class="md:col-span-2">
-            <label class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70" for="address">
+            <label class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
               Dirección
             </label>
-            <input
-              id="address"
-              formControlName="address"
-              class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-              type="text" />
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mt-2">
+              <div class="md:col-span-2">
+                <label class="text-xs text-muted-foreground" for="street">
+                  Calle *
+                </label>
+                <input
+                  id="street"
+                  formControlName="street"
+                  class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                  type="text"
+                  placeholder="Ej: Calle Mayor" />
+              </div>
+
+              <div>
+                <label class="text-xs text-muted-foreground" for="street_number">
+                  Número *
+                </label>
+                <input
+                  id="street_number"
+                  formControlName="street_number"
+                  class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                  type="text"
+                  placeholder="Ej: 101" />
+              </div>
+
+              <div>
+                <label class="text-xs text-muted-foreground" for="door">
+                  Puerta
+                </label>
+                <input
+                  id="door"
+                  formControlName="door"
+                  class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                  type="text"
+                  placeholder="Ej: 1A" />
+              </div>
+
+              <div>
+                <label class="text-xs text-muted-foreground" for="postal_code">
+                  Código Postal *
+                </label>
+                <input
+                  id="postal_code"
+                  formControlName="postal_code"
+                  class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                  type="text"
+                  placeholder="Ej: 46002" />
+              </div>
+
+              <div class="md:col-span-2">
+                <label class="text-xs text-muted-foreground" for="city">
+                  Ciudad *
+                </label>
+                <input
+                  id="city"
+                  formControlName="city"
+                  class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                  type="text"
+                  placeholder="Ej: Valencia" />
+              </div>
+
+              <div class="md:col-span-2">
+                <label class="text-xs text-muted-foreground" for="province">
+                  Provincia *
+                </label>
+                <input
+                  id="province"
+                  formControlName="province"
+                  class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                  type="text"
+                  placeholder="Ej: Valencia" />
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -155,34 +234,21 @@
       <div class="px-6">
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <label class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70" for="tipo_clinica">
+            <label class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
               Tipo de Sesión
             </label>
-            @if (isEditing()) {
-              <select
-                id="tipo_clinica"
-                formControlName="tipo_clinica"
-                class="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50">
-                <option value="">Seleccionar...</option>
-                <option value="Online">Online</option>
-                <option value="Presencial">Presencial</option>
-              </select>
-            } @else {
-              <div class="flex h-10 w-full items-center rounded-md border border-input bg-muted px-3 py-2 text-sm text-muted-foreground">
-                {{ patientForm.get('tipo_clinica')?.value || 'No especificado' }}
-              </div>
-            }
+            <div class="flex h-10 w-full items-center rounded-md border border-input bg-muted px-3 py-2 text-sm text-muted-foreground">
+              {{ patient.tipo_clinica || 'No especificado' }}
+            </div>
           </div>
 
           <div>
-            <label class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70" for="nombre_clinica">
+            <label class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
               Clínica
             </label>
-            <input
-              id="nombre_clinica"
-              formControlName="nombre_clinica"
-              class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-              type="text" />
+            <div class="flex h-10 w-full items-center rounded-md border border-input bg-muted px-3 py-2 text-sm text-muted-foreground">
+              {{ patient.nombre_clinica || 'No especificada' }}
+            </div>
           </div>
 
           <div>

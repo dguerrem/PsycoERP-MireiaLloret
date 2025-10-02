@@ -2,6 +2,8 @@ import {
   Component,
   ChangeDetectionStrategy,
   Input,
+  Output,
+  EventEmitter,
   signal,
   computed,
   inject,
@@ -16,6 +18,7 @@ import {
   Validators,
 } from '@angular/forms';
 import { Patient } from '../../../shared/models/patient.model';
+import { PatientsService } from '../services/patients.service';
 
 /**
  * Patient Data Component
@@ -31,8 +34,10 @@ import { Patient } from '../../../shared/models/patient.model';
 })
 export class PatientDataComponent implements OnInit, OnChanges {
   @Input() patient!: Patient;
+  @Output() patientUpdated = new EventEmitter<void>();
 
   private fb = inject(FormBuilder);
+  private patientsService = inject(PatientsService);
 
   readonly isEditing = signal(false);
   readonly patientForm: FormGroup;
@@ -40,7 +45,8 @@ export class PatientDataComponent implements OnInit, OnChanges {
   constructor() {
     this.patientForm = this.fb.group({
       // Personal Information
-      full_name: ['', Validators.required],
+      first_name: ['', Validators.required],
+      last_name: ['', Validators.required],
       dni: ['', Validators.required],
       birth_date: ['', Validators.required],
       occupation: [''],
@@ -48,11 +54,14 @@ export class PatientDataComponent implements OnInit, OnChanges {
       // Contact Information
       email: ['', [Validators.required, Validators.email]],
       phone: ['', Validators.required],
-      address: [''],
+      street: ['', Validators.required],
+      street_number: ['', Validators.required],
+      door: [''],
+      postal_code: ['', Validators.required],
+      city: ['', Validators.required],
+      province: ['', Validators.required],
 
-      // Treatment Information
-      tipo_clinica: [''],
-      nombre_clinica: [''],
+      // Treatment Information (tipo_clinica and nombre_clinica are read-only, not included)
       treatment_start_date: [''],
       status: [''],
     });
@@ -94,16 +103,19 @@ export class PatientDataComponent implements OnInit, OnChanges {
 
   private loadPatientData() {
     this.patientForm.patchValue({
-      full_name: `${this.patient.first_name} ${this.patient.last_name}`,
+      first_name: this.patient.first_name,
+      last_name: this.patient.last_name,
       dni: this.patient.dni,
       birth_date: this.patient.birth_date,
       occupation: this.patient.occupation,
       email: this.patient.email,
       phone: this.patient.phone,
-      address:
-        `${this.patient.street} ${this.patient.street_number} ${this.patient.door}, ${this.patient.city}, ${this.patient.province} ${this.patient.postal_code}`.trim(),
-      tipo_clinica: this.patient.tipo_clinica || '',
-      nombre_clinica: this.patient.nombre_clinica || '',
+      street: this.patient.street,
+      street_number: this.patient.street_number,
+      door: this.patient.door,
+      postal_code: this.patient.postal_code,
+      city: this.patient.city,
+      province: this.patient.province,
       treatment_start_date: this.patient.treatment_start_date,
       status: this.patient.status,
     });
@@ -114,10 +126,38 @@ export class PatientDataComponent implements OnInit, OnChanges {
     this.patientForm.enable();
   }
 
-  onSave() {
-    if (this.patientForm.valid) {
-      this.isEditing.set(false);
-      this.patientForm.disable();
+  async onSave() {
+    if (this.patientForm.valid && this.patient.id) {
+      const formValue = this.patientForm.value;
+
+      const updatedPatient: Partial<Patient> = {
+        first_name: formValue.first_name,
+        last_name: formValue.last_name,
+        dni: formValue.dni,
+        birth_date: formValue.birth_date,
+        occupation: formValue.occupation,
+        email: formValue.email,
+        phone: formValue.phone,
+        street: formValue.street,
+        street_number: formValue.street_number,
+        door: formValue.door || '',
+        postal_code: formValue.postal_code,
+        city: formValue.city,
+        province: formValue.province,
+        treatment_start_date: formValue.treatment_start_date,
+        status: formValue.status,
+      };
+
+      const result = await this.patientsService.updatePatientAsync(
+        this.patient.id,
+        updatedPatient
+      );
+
+      if (result) {
+        this.isEditing.set(false);
+        this.patientForm.disable();
+        this.patientUpdated.emit();
+      }
     }
   }
 

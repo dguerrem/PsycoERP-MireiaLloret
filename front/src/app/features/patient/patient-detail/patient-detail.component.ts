@@ -256,4 +256,12 @@ export class PatientDetailComponent implements OnInit {
         });
     }
   }
+
+  onPatientDataUpdated(): void {
+    // Reload complete patient detail when data is updated
+    const patientId = this.patient()?.id;
+    if (patientId) {
+      this.loadPatientDetail(patientId);
+    }
+  }
 }
