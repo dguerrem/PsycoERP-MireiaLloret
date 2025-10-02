@@ -183,15 +183,40 @@ const descargarDocumento = async (req, res) => {
         .json({ success: false, error: "Documento no encontrado" });
     }
 
-    return res.json({
-      success: true,
-      file_url: document.file_url,
-    });
+    // Hacer fetch del archivo desde el VPS y hacer streaming
+    const https = require("https");
+    const http = require("http");
+
+    const protocol = document.file_url.startsWith("https") ? https : http;
+
+    protocol
+      .get(document.file_url, (fileStream) => {
+        // Configurar headers para la descarga
+        res.setHeader("Content-Type", document.type);
+        res.setHeader(
+          "Content-Disposition",
+          `attachment; filename="${encodeURIComponent(document.name)}"`
+        );
+
+        // Hacer pipe del stream al response
+        fileStream.pipe(res);
+      })
+      .on("error", (err) => {
+        console.error("Error al descargar archivo desde VPS:", err.message);
+        if (!res.headersSent) {
+          res.status(500).json({
+            success: false,
+            error: "Error al descargar el archivo desde el servidor",
+          });
+        }
+      });
   } catch (err) {
     console.error("Error al descargar documento:", err.message);
-    res
-      .status(500)
-      .json({ success: false, error: "Error al descargar el documento" });
+    if (!res.headersSent) {
+      res
+        .status(500)
+        .json({ success: false, error: "Error al descargar el documento" });
+    }
   }
 };
 
