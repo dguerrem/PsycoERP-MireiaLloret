@@ -77,10 +77,8 @@ export class PatientSessionsComponent {
 
   getStatusColor(status: string): string {
     switch (status) {
-      case 'finalizada':
+      case 'completada':
         return 'bg-green-100 text-green-800';
-      case 'programada':
-        return 'bg-blue-100 text-blue-800';
       case 'cancelada':
         return 'bg-red-100 text-red-800';
       default:
@@ -90,10 +88,8 @@ export class PatientSessionsComponent {
 
   getStatusLabel(status: string): string {
     switch (status) {
-      case 'finalizada':
-        return 'Finalizada';
-      case 'programada':
-        return 'Programada';
+      case 'completada':
+        return 'Completada';
       case 'cancelada':
         return 'Cancelada';
       default:
@@ -123,6 +119,7 @@ export class PatientSessionsComponent {
   }
 
   formatPrice(price: string | number): string {
-    return "";
+    const numPrice = typeof price === 'string' ? parseFloat(price) : price;
+    return `${numPrice.toFixed(2)}€`;
   }
 }

@@ -45,14 +45,14 @@ export interface PatientResumeSession {
 }
 
 export interface PatientSession {
-  id: number;
+  id?: number;
   fecha: string; // "2025-07-29"
   clinica: string;
-  estado: 'programada' | 'finalizada' | 'cancelada';
+  estado: 'completada' | 'cancelada';
   precio: string;
   precio_neto: string;
   tipo_pago: string;
-  notas: string;
+  notas: string | null;
 }
 
 export interface PatientData {
@@ -111,8 +111,29 @@ export class PatientDetailUtils {
       type: this.capitalize(resumeSession?.tipo || ''),
       date: this.parseSpanishDate(resumeSession?.fecha || '01/01/2024'),
       price: parseFloat(resumeSession?.precio || '0'),
-      paymentMethod: this.capitalize(resumeSession?.metodo_pago || '')
+      netPrice: 0,
+      paymentMethod: this.capitalize(resumeSession?.metodo_pago || ''),
+      status: 'completada'
     };
+  }
+
+  static transformPatientSessionToSession(patientSession: PatientSession): Session {
+    return {
+      type: '',
+      date: this.parseISODate(patientSession?.fecha || '2024-01-01'),
+      price: parseFloat(patientSession?.precio || '0'),
+      netPrice: parseFloat(patientSession?.precio_neto || '0'),
+      paymentMethod: this.capitalize(patientSession?.tipo_pago || ''),
+      status: patientSession?.estado || 'completada'
+    };
+  }
+
+  static parseISODate(dateStr: string): Date {
+    // Convert "2025-10-05" to Date
+    if (!dateStr || dateStr.trim() === '') {
+      return new Date();
+    }
+    return new Date(dateStr);
   }
 
   static parseSpanishDate(dateStr: string): Date {
@@ -145,7 +166,9 @@ export interface Session {
   type: string;
   date: Date;
   price: number;
+  netPrice: number;
   paymentMethod: string;
+  status: 'completada' | 'cancelada';
 }
 
 export interface Invoice {
