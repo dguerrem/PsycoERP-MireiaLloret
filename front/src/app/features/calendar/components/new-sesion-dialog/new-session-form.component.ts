@@ -169,8 +169,7 @@ export class NewSessionFormComponent implements OnInit {
   ];
 
   readonly statusOptions = [
-    { value: 'programada', label: 'Programada' },
-    { value: 'finalizada', label: 'Finalizada' },
+    { value: 'completada', label: 'Completada' },
     { value: 'cancelada', label: 'Cancelada' }
   ];
 
@@ -250,7 +249,7 @@ export class NewSessionFormComponent implements OnInit {
       mode: sessionData!.SessionDetailData.mode.toLowerCase(),
       price: sessionData!.SessionDetailData.price,
       payment_method: sessionData!.SessionDetailData.payment_method || 'pendiente',
-      status: sessionData!.SessionDetailData.status || 'programada',
+      status: sessionData!.SessionDetailData.status || 'completada',
       notes: sessionData!.SessionDetailData.notes || ''
     } : {
       patient_id: null,
@@ -260,7 +259,7 @@ export class NewSessionFormComponent implements OnInit {
       mode: 'presencial',
       price: 0,
       payment_method: 'pendiente',
-      status: 'programada',
+      status: 'completada',
       notes: ''
     };
 
@@ -350,7 +349,7 @@ export class NewSessionFormComponent implements OnInit {
     this.showCancelConfirmation.set(false);
     // Revert the status back to the previous value
     const currentSessionData = this.prefilledData?.sessionData;
-    const originalStatus = currentSessionData?.SessionDetailData.status || 'programada';
+    const originalStatus = currentSessionData?.SessionDetailData.status || 'completada';
     this.sessionForm.get('status')?.setValue(originalStatus, { emitEvent: false });
     this.pendingCancelAction = null;
   }
@@ -412,7 +411,7 @@ export class NewSessionFormComponent implements OnInit {
     // Check if status is 'cancelada' in edit mode and show confirmation
     if (this.isEditMode && formValue.status === 'cancelada') {
       const currentSessionData = this.prefilledData?.sessionData;
-      const originalStatus = currentSessionData?.SessionDetailData.status || 'programada';
+      const originalStatus = currentSessionData?.SessionDetailData.status || 'completada';
 
       // Only show confirmation if status is changing TO 'cancelada'
       if (originalStatus !== 'cancelada') {

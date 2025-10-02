@@ -92,13 +92,8 @@ export class SessionComponent implements OnInit {
     // Calculate stats from current page only (for display)
     sessions.forEach(session => {
       const status = this.getSessionStatus(session);
-      if (status === 'finalizada') stats.completed++;
-      if (status === 'programada') stats.scheduled++;
+      if (status === 'completada') stats.scheduled++;
       if (status === 'cancelada') stats.cancelled++;
-
-      if (status === 'finalizada') {
-        stats.totalRevenue += session.SessionDetailData.price;
-      }
     });
 
     return stats;
@@ -214,14 +209,13 @@ export class SessionComponent implements OnInit {
     this.loadSessions();
   }
 
-  getSessionStatus(session: SessionData): 'programada' | 'finalizada' | 'cancelada' {
+  getSessionStatus(session: SessionData): 'completada' | 'cancelada' {
     return session.SessionDetailData.status;
   }
 
   getStatusClass(status: string): string {
     const classes = {
-      'finalizada': 'bg-green-100 text-green-800',
-      'programada': 'bg-blue-100 text-blue-800',
+      'completada': 'bg-green-100 text-green-800',
       'cancelada': 'bg-red-100 text-red-800'
     };
     return classes[status as keyof typeof classes] || 'bg-gray-100 text-gray-800';
@@ -229,8 +223,7 @@ export class SessionComponent implements OnInit {
 
   getStatusText(status: string): string {
     const texts = {
-      'finalizada': 'Completada',
-      'programada': 'Programada',
+      'completada': 'Completada',
       'cancelada': 'Cancelada'
     };
     return texts[status as keyof typeof texts] || status;

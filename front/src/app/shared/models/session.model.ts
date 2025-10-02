@@ -10,7 +10,7 @@ export interface CreateSessionRequest {
   start_time: string;   // "19:12:21.989Z"
   end_time: string;     // "19:12:21.989Z"
   mode: 'presencial' | 'online';
-  status: 'programada' | 'finalizada' | 'cancelada';
+  status: 'completada' | 'cancelada';
   price: number;
   payment_method: 'bizum' | 'transferencia' | 'tarjeta' | 'efectivo' | 'pendiente';
   notes: string;
@@ -26,7 +26,7 @@ export interface SessionData {
     mode: 'online' | 'presencial'; // Added mode to new DTO
     price: number;        // 60
     payment_method: 'bizum' | 'transferencia' | 'tarjeta' | 'efectivo' | 'pendiente';
-    status: 'programada' | 'finalizada' | 'cancelada'; // Added unified status field
+    status: 'completada' | 'cancelada'; // Added unified status field
     completed: boolean;     // true/false
     cancelled: boolean;     // true/false - to handle cancelled sessions
     no_show: boolean;       // true/false - to handle no-show sessions
