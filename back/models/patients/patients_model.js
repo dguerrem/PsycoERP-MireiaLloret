@@ -172,8 +172,7 @@ const getPatientById = async (db, id) => {
   // Consulta para obtener conteo de sesiones por estado (PatientSessionsStatus)
   const sessionsStatusQuery = `
         SELECT
-            COALESCE(SUM(CASE WHEN status = 'finalizada' THEN 1 ELSE 0 END), 0) as completed_sessions,
-            COALESCE(SUM(CASE WHEN status = 'programada' THEN 1 ELSE 0 END), 0) as scheduled_sessions,
+            COALESCE(SUM(CASE WHEN status = 'completada' THEN 1 ELSE 0 END), 0) as completed_sessions,
             COALESCE(SUM(CASE WHEN status = 'cancelada' THEN 1 ELSE 0 END), 0) as cancelled_sessions
         FROM sessions
         WHERE patient_id = ? AND is_active = 1
@@ -211,13 +210,19 @@ const getPatientById = async (db, id) => {
   // Consulta para obtener datos detallados del paciente con información de clínica
   const patientDataQuery = `
         SELECT
-            CONCAT(p.first_name, ' ', p.last_name) as nombre,
+            p.first_name as nombre,
+            p.last_name as apellidos,
             p.dni,
             DATE_FORMAT(p.birth_date, '%Y-%m-%d') as fecha_nacimiento,
             p.status as estado,
             p.email,
             p.phone as telefono,
-            CONCAT_WS(' ', p.street, p.street_number, p.door, p.city, p.province, p.postal_code) as direccion,
+            p.street as calle,
+            p.street_number as numero,
+            p.door as puerta,
+            p.postal_code as codigo_postal,
+            p.city as ciudad,
+            p.province as provincia,
             p.gender as genero,
             p.occupation as ocupacion,
             p.clinic_id,
@@ -232,7 +237,7 @@ const getPatientById = async (db, id) => {
         LEFT JOIN clinics c ON p.clinic_id = c.id AND c.is_active = true
         WHERE p.id = ? AND p.is_active = true
     `;
-  
+
   const [patientDataRows] = await db.execute(patientDataQuery, [id]);
   
   // Consulta para obtener sesiones extendidas para PatientSessions

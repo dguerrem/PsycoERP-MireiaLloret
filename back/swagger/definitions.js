@@ -1534,8 +1534,13 @@ const definitions = {
     properties: {
       nombre: {
         type: "string",
-        description: "Nombre completo del paciente (concatenación de first_name + last_name)",
-        example: "Juan Pérez García",
+        description: "Nombre del paciente",
+        example: "Juan",
+      },
+      apellidos: {
+        type: "string",
+        description: "Apellidos del paciente",
+        example: "Pérez García",
       },
       dni: {
         type: "string",
@@ -1566,11 +1571,41 @@ const definitions = {
         description: "Teléfono del paciente",
         example: "+34 666 123 456",
       },
-      direccion: {
+      calle: {
         type: "string",
         nullable: true,
-        description: "Dirección completa del paciente (concatenación de street, street_number, door, city, province, postal_code)",
-        example: "Calle Mayor 123 2A Madrid Madrid 28001",
+        description: "Calle de la dirección del paciente",
+        example: "Calle Mayor",
+      },
+      numero: {
+        type: "string",
+        nullable: true,
+        description: "Número de la calle",
+        example: "123",
+      },
+      puerta: {
+        type: "string",
+        nullable: true,
+        description: "Puerta/piso del domicilio",
+        example: "2A",
+      },
+      codigo_postal: {
+        type: "string",
+        nullable: true,
+        description: "Código postal",
+        example: "28001",
+      },
+      ciudad: {
+        type: "string",
+        nullable: true,
+        description: "Ciudad de residencia",
+        example: "Madrid",
+      },
+      provincia: {
+        type: "string",
+        nullable: true,
+        description: "Provincia de residencia",
+        example: "Madrid",
       },
       genero: {
         type: "string",
@@ -1698,13 +1733,8 @@ const definitions = {
     properties: {
       completed_sessions: {
         type: "integer",
-        description: "Número de sesiones finalizadas",
-        example: 8,
-      },
-      scheduled_sessions: {
-        type: "integer",
-        description: "Número de sesiones programadas",
-        example: 3,
+        description: "Número de sesiones completadas (incluye anteriormente finalizadas y programadas)",
+        example: 11,
       },
       cancelled_sessions: {
         type: "integer",
@@ -1802,9 +1832,9 @@ const definitions = {
       },
       estado: {
         type: "string",
-        enum: ["programada", "finalizada", "cancelada"],
-        description: "Estado de la sesión",
-        example: "finalizada",
+        enum: ["completada", "cancelada"],
+        description: "Estado de la sesión (completada o cancelada)",
+        example: "completada",
       },
       precio: {
         type: "number",
