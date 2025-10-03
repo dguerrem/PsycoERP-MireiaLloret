@@ -62,6 +62,69 @@ const invoicesPaths = {
       },
     },
   },
+  "/api/invoices/pending": {
+    get: {
+      tags: ["Invoices"],
+      summary: "Obtener sesiones pendientes de facturar",
+      description:
+        "Obtiene las sesiones pendientes de facturar agrupadas por paciente. Incluye información del paciente, número de sesiones, total bruto y los IDs de las sesiones. Si no se especifica mes/año, usa el mes y año actual.",
+      parameters: [
+        {
+          name: "month",
+          in: "query",
+          required: false,
+          schema: {
+            type: "integer",
+            minimum: 1,
+            maximum: 12,
+          },
+          description: "Mes para filtrar (1-12). Por defecto usa el mes actual.",
+        },
+        {
+          name: "year",
+          in: "query",
+          required: false,
+          schema: {
+            type: "integer",
+            minimum: 2000,
+          },
+          description: "Año para filtrar (ej: 2025). Por defecto usa el año actual.",
+        },
+      ],
+      responses: {
+        200: {
+          description: "Sesiones pendientes obtenidas exitosamente",
+          content: {
+            "application/json": {
+              schema: {
+                $ref: "#/components/schemas/PendingInvoicesResponse",
+              },
+            },
+          },
+        },
+        400: {
+          description: "Parámetros inválidos",
+          content: {
+            "application/json": {
+              schema: {
+                $ref: "#/components/schemas/ErrorResponse",
+              },
+            },
+          },
+        },
+        500: {
+          description: "Error del servidor",
+          content: {
+            "application/json": {
+              schema: {
+                $ref: "#/components/schemas/ErrorResponse",
+              },
+            },
+          },
+        },
+      },
+    },
+  },
 };
 
 module.exports = invoicesPaths;

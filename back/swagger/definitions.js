@@ -1434,6 +1434,89 @@ const definitions = {
     },
   },
 
+  PendingInvoicesResponse: {
+    type: "object",
+    properties: {
+      success: {
+        type: "boolean",
+        example: true,
+      },
+      data: {
+        type: "object",
+        properties: {
+          filters_applied: {
+            type: "object",
+            properties: {
+              month: {
+                type: "integer",
+                description: "Mes aplicado en el filtro",
+                example: 1,
+              },
+              year: {
+                type: "integer",
+                description: "Año aplicado en el filtro",
+                example: 2025,
+              },
+            },
+          },
+          pending_invoices: {
+            type: "array",
+            items: {
+              type: "object",
+              properties: {
+                patient_id: {
+                  type: "integer",
+                  format: "int64",
+                  description: "ID del paciente",
+                  example: 123,
+                },
+                patient_full_name: {
+                  type: "string",
+                  description: "Nombre completo del paciente",
+                  example: "David García",
+                },
+                dni: {
+                  type: "string",
+                  description: "DNI del paciente",
+                  example: "12345678A",
+                },
+                email: {
+                  type: "string",
+                  description: "Email del paciente",
+                  example: "david@example.com",
+                },
+                clinic_name: {
+                  type: "string",
+                  description: "Nombre de la clínica",
+                  example: "Clínica Centro",
+                },
+                session_ids: {
+                  type: "array",
+                  items: {
+                    type: "integer",
+                  },
+                  description: "IDs de las sesiones pendientes de facturar",
+                  example: [45, 46, 47, 48],
+                },
+                pending_sessions_count: {
+                  type: "integer",
+                  description: "Número de sesiones pendientes",
+                  example: 4,
+                },
+                total_gross: {
+                  type: "number",
+                  format: "decimal",
+                  description: "Total bruto a facturar",
+                  example: 240.00,
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+  },
+
   PendingSessionDetail: {
     type: "object",
     properties: {

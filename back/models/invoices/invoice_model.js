@@ -100,6 +100,61 @@ const getInvoicesKPIs = async (db, filters = {}) => {
   };
 };
 
+// Obtener sesiones pendientes de facturar agrupadas por paciente
+const getPendingInvoices = async (db, filters = {}) => {
+  const { month, year } = filters;
+
+  // Por defecto usar mes y año actual si no se especifican
+  const currentDate = new Date();
+  const targetMonth = month || (currentDate.getMonth() + 1);
+  const targetYear = year || currentDate.getFullYear();
+
+  console.log(`Obteniendo sesiones pendientes para mes: ${targetMonth}, año: ${targetYear}`);
+
+  const [pendingSessionsResult] = await db.execute(
+    `SELECT
+       p.id as patient_id,
+       CONCAT(p.first_name, ' ', p.last_name) as patient_full_name,
+       p.dni,
+       p.email,
+       c.name as clinic_name,
+       GROUP_CONCAT(s.id ORDER BY s.session_date ASC) as session_ids,
+       COUNT(s.id) as pending_sessions_count,
+       COALESCE(SUM(s.price), 0) as total_gross
+     FROM patients p
+     INNER JOIN sessions s ON s.patient_id = p.id
+       AND s.is_active = true
+       AND s.invoiced = 0
+       AND MONTH(s.session_date) = ?
+       AND YEAR(s.session_date) = ?
+     INNER JOIN clinics c ON s.clinic_id = c.id AND c.is_active = true
+     WHERE p.is_active = true
+     GROUP BY p.id, p.first_name, p.last_name, p.dni, p.email, c.name
+     ORDER BY patient_full_name ASC`,
+    [targetMonth, targetYear]
+  );
+
+  const pendingInvoices = pendingSessionsResult.map(row => ({
+    patient_id: parseInt(row.patient_id),
+    patient_full_name: row.patient_full_name,
+    dni: row.dni || '',
+    email: row.email || '',
+    clinic_name: row.clinic_name,
+    session_ids: row.session_ids ? row.session_ids.split(',').map(id => parseInt(id)) : [],
+    pending_sessions_count: parseInt(row.pending_sessions_count),
+    total_gross: parseFloat(row.total_gross)
+  }));
+
+  return {
+    filters_applied: {
+      month: targetMonth,
+      year: targetYear
+    },
+    pending_invoices: pendingInvoices
+  };
+};
+
 module.exports = {
-  getInvoicesKPIs
+  getInvoicesKPIs,
+  getPendingInvoices
 };
