@@ -16,9 +16,11 @@ export class ReusableModalComponent {
   @Input() isFormValid: boolean = false;
   @Input() showFormStatus: boolean = true;
   @Input() actionType: 'create' | 'edit' = 'create'; // Nuevo input para determinar el icono
+  @Input() cancelButtonText: string | null = null; // New input for cancel session button
 
   @Output() onSubmit = new EventEmitter<void>();
   @Output() onCancel = new EventEmitter<void>();
+  @Output() onCancelSession = new EventEmitter<void>(); // New output for cancel session
 
   // SVG Icons for internal use
   protected readonly closeIcon = `<svg style="height: 1.25rem; width: 1.25rem;" fill="none" stroke="currentColor" viewBox="0 0 24 24">

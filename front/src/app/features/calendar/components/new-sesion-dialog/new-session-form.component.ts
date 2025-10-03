@@ -168,11 +168,6 @@ export class NewSessionFormComponent implements OnInit {
     { value: 'efectivo', label: 'Efectivo' }
   ];
 
-  readonly statusOptions = [
-    { value: 'completada', label: 'Completada' },
-    { value: 'cancelada', label: 'Cancelada' }
-  ];
-
   /** Reactive form for session data */
   sessionForm!: FormGroup;
 
@@ -249,7 +244,6 @@ export class NewSessionFormComponent implements OnInit {
       mode: sessionData!.SessionDetailData.mode.toLowerCase(),
       price: sessionData!.SessionDetailData.price,
       payment_method: sessionData!.SessionDetailData.payment_method || 'pendiente',
-      status: sessionData!.SessionDetailData.status || 'completada',
       notes: sessionData!.SessionDetailData.notes || ''
     } : {
       patient_id: null,
@@ -259,7 +253,6 @@ export class NewSessionFormComponent implements OnInit {
       mode: 'presencial',
       price: 0,
       payment_method: 'pendiente',
-      status: 'completada',
       notes: ''
     };
 
@@ -271,7 +264,6 @@ export class NewSessionFormComponent implements OnInit {
       mode: [{value: formValues.mode, disabled: false}, [Validators.required]],
       price: [formValues.price, [Validators.required, Validators.min(0.01)]],
       payment_method: [{value: formValues.payment_method, disabled: !isEditMode}, [Validators.required]],
-      status: [{value: formValues.status, disabled: !isEditMode}, [Validators.required]],
       notes: [formValues.notes]
     });
 
@@ -338,7 +330,7 @@ export class NewSessionFormComponent implements OnInit {
 
   onCancelConfirm(): void {
     this.showCancelConfirmation.set(false);
-    // Execute the pending submit action
+    // Execute the cancel session action
     if (this.pendingCancelAction) {
       this.pendingCancelAction();
       this.pendingCancelAction = null;
@@ -347,11 +339,54 @@ export class NewSessionFormComponent implements OnInit {
 
   onCancelReject(): void {
     this.showCancelConfirmation.set(false);
-    // Revert the status back to the previous value
-    const currentSessionData = this.prefilledData?.sessionData;
-    const originalStatus = currentSessionData?.SessionDetailData.status || 'completada';
-    this.sessionForm.get('status')?.setValue(originalStatus, { emitEvent: false });
     this.pendingCancelAction = null;
+  }
+
+  onCancelSession(): void {
+    // Show confirmation before cancelling
+    this.showCancelConfirmation.set(true);
+    this.pendingCancelAction = () => this.executeCancelSession();
+  }
+
+  private executeCancelSession(): void {
+    if (!this.isEditMode || !this.sessionId) {
+      return;
+    }
+
+    const formValue = this.sessionForm.getRawValue();
+    const patient = this.selectedPatient();
+
+    if (!patient) {
+      return;
+    }
+
+    this.isLoading.set(true);
+
+    const sessionData: CreateSessionRequest = {
+      patient_id: formValue.patient_id,
+      clinic_id: patient.idClinica,
+      session_date: formValue.session_date,
+      start_time: this.convertTimeToMySQL(formValue.start_time),
+      end_time: this.convertTimeToMySQL(formValue.end_time),
+      mode: formValue.mode,
+      status: 'cancelada',
+      price: formValue.price,
+      payment_method: formValue.payment_method,
+      notes: formValue.notes || null
+    };
+
+    this.sessionsService.updateSession(this.sessionId, sessionData).subscribe({
+      next: (updatedSession) => {
+        this.sessionDataCreated.emit(updatedSession);
+        this.isLoading.set(false);
+        this.onClose();
+      },
+      error: (error) => {
+        console.error('Error cancelling session:', error);
+        this.error.set('Error al cancelar la sesión. Por favor, intenta de nuevo.');
+        this.isLoading.set(false);
+      }
+    });
   }
 
 
@@ -408,20 +443,6 @@ export class NewSessionFormComponent implements OnInit {
       return;
     }
 
-    // Check if status is 'cancelada' in edit mode and show confirmation
-    if (this.isEditMode && formValue.status === 'cancelada') {
-      const currentSessionData = this.prefilledData?.sessionData;
-      const originalStatus = currentSessionData?.SessionDetailData.status || 'completada';
-
-      // Only show confirmation if status is changing TO 'cancelada'
-      if (originalStatus !== 'cancelada') {
-        this.showCancelConfirmation.set(true);
-        // Store the submit action to execute after confirmation
-        this.pendingCancelAction = () => this.executeSubmit();
-        return;
-      }
-    }
-
     this.executeSubmit();
   }
 
@@ -436,6 +457,11 @@ export class NewSessionFormComponent implements OnInit {
 
     this.isLoading.set(true);
 
+    // Get current status in edit mode, or default to 'completada' for new sessions
+    const currentStatus = this.isEditMode
+      ? this.prefilledData?.sessionData?.SessionDetailData.status || 'completada'
+      : 'completada';
+
     const sessionData: CreateSessionRequest = {
       patient_id: formValue.patient_id,
       clinic_id: patient.idClinica,
@@ -443,7 +469,7 @@ export class NewSessionFormComponent implements OnInit {
       start_time: this.convertTimeToMySQL(formValue.start_time),
       end_time: this.convertTimeToMySQL(formValue.end_time),
       mode: formValue.mode,
-      status: formValue.status,
+      status: currentStatus,
       price: formValue.price,
       payment_method: formValue.payment_method,
       notes: formValue.notes || null
