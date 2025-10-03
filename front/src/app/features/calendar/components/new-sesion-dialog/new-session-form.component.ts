@@ -83,6 +83,9 @@ export class NewSessionFormComponent implements OnInit {
   readonly showCancelConfirmation = signal<boolean>(false);
   private pendingCancelAction: (() => void) | null = null;
 
+  /** Delete confirmation modal state */
+  readonly showDeleteConfirmation = signal<boolean>(false);
+
   /** Delete note confirmation modal state */
   readonly showDeleteNoteConfirmation = signal<boolean>(false);
   private pendingDeleteNote: { id: string; title: string; content: string; date: Date } | null = null;
@@ -180,6 +183,11 @@ export class NewSessionFormComponent implements OnInit {
   get sessionId(): number | null {
     return this.prefilledData?.sessionData?.SessionDetailData.session_id || null;
   }
+
+  /** Check if session is cancelled */
+  isCancelledSession = computed(() => {
+    return this.prefilledData?.sessionData?.SessionDetailData.status === 'cancelada';
+  });
 
   ngOnInit(): void {
     this.loadPatients();
@@ -387,6 +395,39 @@ export class NewSessionFormComponent implements OnInit {
         this.isLoading.set(false);
       }
     });
+  }
+
+  onDeleteSession(): void {
+    // Show confirmation before deleting
+    this.showDeleteConfirmation.set(true);
+  }
+
+  onConfirmDeleteSession(): void {
+    if (!this.isEditMode || !this.sessionId) {
+      this.showDeleteConfirmation.set(false);
+      return;
+    }
+
+    this.isLoading.set(true);
+    this.showDeleteConfirmation.set(false);
+
+    this.sessionsService.deleteSession(this.sessionId).subscribe({
+      next: () => {
+        this.toastService.showSuccess('Sesión eliminada correctamente');
+        this.sessionDataCreated.emit();
+        this.isLoading.set(false);
+        this.onClose();
+      },
+      error: (error) => {
+        console.error('Error deleting session:', error);
+        this.toastService.showError('Error al eliminar la sesión. Por favor, intenta de nuevo.');
+        this.isLoading.set(false);
+      }
+    });
+  }
+
+  onCancelDeleteSession(): void {
+    this.showDeleteConfirmation.set(false);
   }
 
 
