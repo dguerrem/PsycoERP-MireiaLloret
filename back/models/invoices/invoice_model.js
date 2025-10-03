@@ -7,7 +7,6 @@ const getInvoicesKPIs = async (db, filters = {}) => {
   const targetMonth = month || (currentDate.getMonth() + 1);
   const targetYear = year || currentDate.getFullYear();
   
-  console.log(`Calculando KPIs para mes: ${targetMonth}, año: ${targetYear}`);
   // ============================================
   // CARD 1: Total de facturas emitidas (histórico)
   // ============================================
@@ -54,9 +53,7 @@ const getInvoicesKPIs = async (db, filters = {}) => {
        AND YEAR(s.session_date) = ?`,
     [targetMonth, targetYear]
   );
-  console.log('CARD 4 - Total Neto Raw:', totalNetFilteredResult[0].total_net_filtered);
   const totalNetFiltered = parseFloat(totalNetFilteredResult[0].total_net_filtered) || 0;
-  console.log('CARD 4 - Total Neto Parsed:', totalNetFiltered);
 
   // ============================================
   // CARD 5: Total facturado NETO por clínica (filtrado por mes/año)
@@ -109,8 +106,6 @@ const getPendingInvoices = async (db, filters = {}) => {
   const targetMonth = month || (currentDate.getMonth() + 1);
   const targetYear = year || currentDate.getFullYear();
 
-  console.log(`Obteniendo sesiones pendientes para mes: ${targetMonth}, año: ${targetYear}`);
-
   const [pendingSessionsResult] = await db.execute(
     `SELECT
        p.id as patient_id,
@@ -161,8 +156,7 @@ const createInvoice = async (db, invoiceData) => {
     invoice_date,
     patient_id,
     session_ids,
-    concept,
-    pdf_path = null
+    concept
   } = invoiceData;
 
   // Validar que existan sesiones
@@ -205,9 +199,9 @@ const createInvoice = async (db, invoiceData) => {
     // 2. Crear la factura
     const [invoiceResult] = await connection.execute(
       `INSERT INTO invoices
-       (invoice_number, invoice_date, patient_id, concept, total, pdf_path, month, year)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
-      [invoice_number, invoice_date, patient_id, concept, total, pdf_path, month, year]
+       (invoice_number, invoice_date, patient_id, concept, total, month, year)
+       VALUES (?, ?, ?, ?, ?, ?, ?)`,
+      [invoice_number, invoice_date, patient_id, concept, total, month, year]
     );
 
     const invoice_id = invoiceResult.insertId;

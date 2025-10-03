@@ -118,8 +118,7 @@ const generarFactura = async (req, res) => {
       invoice_date,
       patient_id: parseInt(patient_id),
       session_ids: session_ids.map(id => parseInt(id)),
-      concept,
-      pdf_path: null // Se generará después si es necesario
+      concept
     };
 
     const result = await createInvoice(req.db, invoiceData);
