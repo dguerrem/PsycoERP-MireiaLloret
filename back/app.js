@@ -27,6 +27,7 @@ const clinicalNotesRoutes = require("./routes/clinical_notes/clinical_notes_rout
 const documentsRoutes = require("./routes/documents/documents_routes");
 const remindersRoutes = require("./routes/reminders/reminders_routes");
 const usersRoutes = require("./routes/users/users_routes");
+const invoicesRoutes = require("./routes/invoices/invoices_routes");
 
 // Middlewares globales
 app.use(cors());
@@ -95,6 +96,7 @@ app.get("/", (req, res) => {
       documents: "/api/documents",
       reminders: "/api/reminders",
       users: "/api/users",
+      invoices: "/api/invoices",
     },
   });
 });
@@ -115,6 +117,7 @@ app.use("/api/clinical-notes", clinicalNotesRoutes);
 app.use("/api/documents", documentsRoutes);
 app.use("/api/reminders", remindersRoutes);
 app.use("/api/users", usersRoutes);
+app.use("/api/invoices", invoicesRoutes);
 
 // Iniciar servidor
 app.listen(PORT, async () => {

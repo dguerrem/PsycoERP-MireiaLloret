@@ -8,6 +8,7 @@ const clinicalNotesPaths = require("./paths/clinical_notes");
 const clinicsPaths = require("./paths/clinics");
 const dashboardPaths = require("./paths/dashboard");
 const documentsPaths = require("./paths/documents");
+const invoicesPaths = require("./paths/invoices");
 const patientsPaths = require("./paths/patients");
 const remindersPaths = require("./paths/reminders");
 const sessionsPaths = require("./paths/sessions");
@@ -65,6 +66,7 @@ const swaggerDefinition = {
     ...clinicsPaths,
     ...dashboardPaths,
     ...documentsPaths,
+    ...invoicesPaths,
     ...patientsPaths,
     ...remindersPaths,
     ...sessionsPaths,
@@ -94,6 +96,10 @@ const swaggerDefinition = {
     {
       name: "Documents",
       description: "Patient document management",
+    },
+    {
+      name: "Invoices",
+      description: "Gestión de facturación y KPIs financieros",
     },
     {
       name: "Patients",

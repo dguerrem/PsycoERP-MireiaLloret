@@ -1079,6 +1079,452 @@ const definitions = {
     },
   },
 
+  Invoice: {
+    type: "object",
+    properties: {
+      id: {
+        type: "integer",
+        format: "int64",
+        description: "ID único de la factura",
+        example: 1,
+      },
+      invoice_number: {
+        type: "string",
+        description: "Número de factura",
+        example: "2025-001",
+      },
+      invoice_date: {
+        type: "string",
+        format: "date",
+        description: "Fecha de emisión de la factura",
+        example: "2025-09-15",
+      },
+      patient_id: {
+        type: "integer",
+        format: "int64",
+        description: "ID del paciente",
+        example: 5,
+      },
+      patient_name: {
+        type: "string",
+        description: "Nombre completo del paciente",
+        example: "María García López",
+      },
+      concept: {
+        type: "string",
+        description: "Concepto o descripción del servicio",
+        example: "Sesiones de terapia - Septiembre 2025",
+      },
+      unit_price: {
+        type: "number",
+        format: "decimal",
+        description: "Precio bruto por sesión en euros",
+        example: 60.00,
+      },
+      quantity: {
+        type: "integer",
+        description: "Número de sesiones incluidas en la factura",
+        example: 4,
+      },
+      total: {
+        type: "number",
+        format: "decimal",
+        description: "Total bruto de la factura en euros",
+        example: 240.00,
+      },
+      pdf_path: {
+        type: "string",
+        nullable: true,
+        description: "Ruta del PDF de la factura",
+        example: "/invoices/2025/2025-001.pdf",
+      },
+      notes: {
+        type: "string",
+        nullable: true,
+        description: "Notas adicionales",
+        example: "Pagado por transferencia bancaria",
+      },
+      month: {
+        type: "integer",
+        description: "Mes de la factura (1-12)",
+        example: 9,
+      },
+      year: {
+        type: "integer",
+        description: "Año de la factura",
+        example: 2025,
+      },
+      created_at: {
+        type: "string",
+        format: "date-time",
+        description: "Fecha de creación del registro",
+        example: "2025-09-15T10:30:00Z",
+      },
+      updated_at: {
+        type: "string",
+        format: "date-time",
+        description: "Fecha de última actualización",
+        example: "2025-09-15T10:30:00Z",
+      },
+    },
+  },
+
+  InvoiceKPIsData: {
+    type: "object",
+    properties: {
+      filters_applied: {
+        type: "object",
+        properties: {
+          month: {
+            type: "integer",
+            description: "Mes aplicado al filtro",
+            example: 9,
+          },
+          year: {
+            type: "integer",
+            description: "Año aplicado al filtro",
+            example: 2025,
+          },
+        },
+      },
+      card1_total_invoices_issued: {
+        type: "integer",
+        description: "Card 1: Total de facturas emitidas (histórico)",
+        example: 125,
+      },
+      card2_total_gross_historic: {
+        type: "number",
+        format: "decimal",
+        description: "Card 2: Total facturado bruto histórico en euros",
+        example: 15000.00,
+      },
+      card3_total_gross_filtered: {
+        type: "number",
+        format: "decimal",
+        description: "Card 3: Total facturado bruto en el mes/año filtrado en euros",
+        example: 2400.00,
+      },
+      card4_total_net_filtered: {
+        type: "number",
+        format: "decimal",
+        description: "Card 4: Total facturado neto para la psicóloga en el mes/año filtrado en euros",
+        example: 2040.00,
+      },
+      card5_total_net_by_clinic: {
+        type: "array",
+        description: "Card 5: Total facturado neto por clínica en el mes/año filtrado",
+        items: {
+          $ref: "#/components/schemas/InvoiceNetByClinic",
+        },
+      },
+    },
+  },
+
+  InvoiceKPIsResponse: {
+    type: "object",
+    properties: {
+      success: {
+        type: "boolean",
+        example: true,
+      },
+      data: {
+        $ref: "#/components/schemas/InvoiceKPIsData",
+      },
+    },
+  },
+
+  InvoiceNetByClinic: {
+    type: "object",
+    properties: {
+      clinic_name: {
+        type: "string",
+        description: "Nombre de la clínica",
+        example: "Clínica Centro",
+      },
+      total_net: {
+        type: "number",
+        format: "decimal",
+        description: "Total neto facturado en esta clínica en euros",
+        example: 1020.00,
+      },
+    },
+  },
+
+  InvoicesResponse: {
+    type: "object",
+    properties: {
+      success: {
+        type: "boolean",
+        example: true,
+      },
+      pagination: {
+        $ref: "#/components/schemas/PaginationInfo",
+      },
+      data: {
+        type: "array",
+        items: {
+          $ref: "#/components/schemas/Invoice",
+        },
+      },
+    },
+  },
+
+  CreateInvoiceRequest: {
+    type: "object",
+    required: [
+      "invoice_number",
+      "invoice_date",
+      "patient_id",
+      "concept",
+      "unit_price",
+      "quantity",
+      "total",
+      "month",
+      "year",
+    ],
+    properties: {
+      invoice_number: {
+        type: "string",
+        description: "Número único de factura",
+        example: "2025-001",
+      },
+      invoice_date: {
+        type: "string",
+        format: "date",
+        description: "Fecha de emisión (YYYY-MM-DD)",
+        example: "2025-09-15",
+      },
+      patient_id: {
+        type: "integer",
+        format: "int64",
+        description: "ID del paciente",
+        example: 5,
+      },
+      concept: {
+        type: "string",
+        description: "Descripción del servicio facturado",
+        example: "Sesiones de terapia - Septiembre 2025",
+      },
+      unit_price: {
+        type: "number",
+        format: "decimal",
+        description: "Precio bruto por sesión",
+        example: 60.00,
+      },
+      quantity: {
+        type: "integer",
+        description: "Número de sesiones",
+        example: 4,
+      },
+      total: {
+        type: "number",
+        format: "decimal",
+        description: "Total bruto (unit_price * quantity)",
+        example: 240.00,
+      },
+      pdf_path: {
+        type: "string",
+        nullable: true,
+        description: "Ruta del PDF generado (opcional)",
+        example: "/invoices/2025/2025-001.pdf",
+      },
+      notes: {
+        type: "string",
+        nullable: true,
+        description: "Notas adicionales (opcional)",
+        example: "Pagado por transferencia",
+      },
+      month: {
+        type: "integer",
+        description: "Mes de la factura (1-12)",
+        example: 9,
+      },
+      year: {
+        type: "integer",
+        description: "Año de la factura",
+        example: 2025,
+      },
+      session_ids: {
+        type: "array",
+        items: {
+          type: "integer",
+          format: "int64",
+        },
+        description: "IDs de las sesiones a incluir en la factura (opcional)",
+        example: [12, 15, 18, 21],
+      },
+    },
+  },
+
+  CreateInvoiceResponse: {
+    type: "object",
+    properties: {
+      success: {
+        type: "boolean",
+        example: true,
+      },
+      message: {
+        type: "string",
+        example: "Factura creada exitosamente",
+      },
+      data: {
+        $ref: "#/components/schemas/Invoice",
+      },
+    },
+  },
+
+  PendingInvoiceSession: {
+    type: "object",
+    properties: {
+      patient_id: {
+        type: "integer",
+        format: "int64",
+        description: "ID del paciente",
+        example: 5,
+      },
+      patient_name: {
+        type: "string",
+        description: "Nombre completo del paciente",
+        example: "María García López",
+      },
+      pending_sessions_count: {
+        type: "integer",
+        description: "Número de sesiones pendientes de facturar",
+        example: 4,
+      },
+      total_pending_amount: {
+        type: "number",
+        format: "decimal",
+        description: "Monto total pendiente de facturar en euros",
+        example: 240.00,
+      },
+      first_session_date: {
+        type: "string",
+        format: "date",
+        description: "Fecha de la primera sesión pendiente",
+        example: "2025-09-01",
+      },
+      last_session_date: {
+        type: "string",
+        format: "date",
+        description: "Fecha de la última sesión pendiente",
+        example: "2025-09-22",
+      },
+    },
+  },
+
+  PendingInvoiceSessionsResponse: {
+    type: "object",
+    properties: {
+      success: {
+        type: "boolean",
+        example: true,
+      },
+      total: {
+        type: "integer",
+        description: "Número de pacientes con sesiones pendientes",
+        example: 8,
+      },
+      data: {
+        type: "array",
+        items: {
+          $ref: "#/components/schemas/PendingInvoiceSession",
+        },
+      },
+    },
+  },
+
+  PendingSessionDetail: {
+    type: "object",
+    properties: {
+      session_id: {
+        type: "integer",
+        format: "int64",
+        description: "ID de la sesión",
+        example: 12,
+      },
+      session_date: {
+        type: "string",
+        format: "date",
+        description: "Fecha de la sesión",
+        example: "2025-09-01",
+      },
+      start_time: {
+        type: "string",
+        format: "time",
+        description: "Hora de inicio",
+        example: "10:00:00",
+      },
+      end_time: {
+        type: "string",
+        format: "time",
+        description: "Hora de fin",
+        example: "11:00:00",
+      },
+      mode: {
+        type: "string",
+        enum: ["presencial", "online"],
+        description: "Modalidad de la sesión",
+        example: "online",
+      },
+      price: {
+        type: "number",
+        format: "decimal",
+        description: "Precio de la sesión en euros",
+        example: 60.00,
+      },
+      payment_method: {
+        type: "string",
+        enum: ["bizum", "transferencia", "tarjeta", "efectivo", "pendiente"],
+        description: "Método de pago",
+        example: "transferencia",
+      },
+      clinic_id: {
+        type: "integer",
+        format: "int64",
+        description: "ID de la clínica",
+        example: 1,
+      },
+      clinic_name: {
+        type: "string",
+        description: "Nombre de la clínica",
+        example: "Clínica Centro",
+      },
+      clinic_color: {
+        type: "string",
+        description: "Color hexadecimal de la clínica",
+        example: "#3B82F6",
+      },
+    },
+  },
+
+  PendingSessionsByPatientResponse: {
+    type: "object",
+    properties: {
+      success: {
+        type: "boolean",
+        example: true,
+      },
+      patient_id: {
+        type: "integer",
+        format: "int64",
+        description: "ID del paciente consultado",
+        example: 5,
+      },
+      total_sessions: {
+        type: "integer",
+        description: "Número total de sesiones pendientes",
+        example: 4,
+      },
+      data: {
+        type: "array",
+        items: {
+          $ref: "#/components/schemas/PendingSessionDetail",
+        },
+      },
+    },
+  },
+
   JWTToken: {
     type: "object",
     properties: {
