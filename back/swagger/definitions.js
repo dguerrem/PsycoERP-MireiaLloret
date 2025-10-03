@@ -1527,6 +1527,114 @@ const definitions = {
     },
   },
 
+  IssuedInvoicesResponse: {
+    type: "object",
+    properties: {
+      success: {
+        type: "boolean",
+        example: true,
+      },
+      data: {
+        type: "object",
+        properties: {
+          filters_applied: {
+            type: "object",
+            properties: {
+              month: {
+                type: "integer",
+                description: "Mes aplicado en el filtro",
+                example: 1,
+              },
+              year: {
+                type: "integer",
+                description: "Año aplicado en el filtro",
+                example: 2025,
+              },
+            },
+          },
+          total_invoices: {
+            type: "integer",
+            description: "Número total de facturas encontradas",
+            example: 12,
+          },
+          invoices: {
+            type: "array",
+            items: {
+              type: "object",
+              properties: {
+                id: {
+                  type: "integer",
+                  format: "int64",
+                  description: "ID de la factura",
+                  example: 1,
+                },
+                invoice_number: {
+                  type: "string",
+                  description: "Número de factura",
+                  example: "2025-001",
+                },
+                invoice_date: {
+                  type: "string",
+                  format: "date",
+                  description: "Fecha de emisión",
+                  example: "2025-01-15",
+                },
+                patient_id: {
+                  type: "integer",
+                  format: "int64",
+                  description: "ID del paciente",
+                  example: 123,
+                },
+                patient_full_name: {
+                  type: "string",
+                  description: "Nombre completo del paciente",
+                  example: "David García",
+                },
+                dni: {
+                  type: "string",
+                  description: "DNI del paciente",
+                  example: "12345678A",
+                },
+                sessions_count: {
+                  type: "integer",
+                  description: "Número de sesiones facturadas",
+                  example: 4,
+                },
+                total: {
+                  type: "number",
+                  format: "decimal",
+                  description: "Total de la factura",
+                  example: 240.00,
+                },
+                concept: {
+                  type: "string",
+                  description: "Concepto de la factura",
+                  example: "Sesiones de psicología - Enero 2025",
+                },
+                month: {
+                  type: "integer",
+                  description: "Mes de la factura",
+                  example: 1,
+                },
+                year: {
+                  type: "integer",
+                  description: "Año de la factura",
+                  example: 2025,
+                },
+                created_at: {
+                  type: "string",
+                  format: "date-time",
+                  description: "Fecha de creación",
+                  example: "2025-01-15T10:30:00Z",
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+  },
+
   PendingSessionDetail: {
     type: "object",
     properties: {

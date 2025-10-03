@@ -130,7 +130,6 @@ const getPendingInvoices = async (db, filters = {}) => {
   );
 
   const pendingInvoices = pendingSessionsResult.map(row => ({
-    patient_id: parseInt(row.patient_id),
     patient_full_name: row.patient_full_name,
     dni: row.dni || '',
     email: row.email || '',
@@ -239,8 +238,69 @@ const createInvoice = async (db, invoiceData) => {
   }
 };
 
+// Obtener listado de facturas emitidas con filtros
+const getIssuedInvoices = async (db, filters = {}) => {
+  const { month, year } = filters;
+
+  // Por defecto usar mes y año actual si no se especifican
+  const currentDate = new Date();
+  const targetMonth = month || (currentDate.getMonth() + 1);
+  const targetYear = year || currentDate.getFullYear();
+
+  const [invoicesResult] = await db.execute(
+    `SELECT
+       i.id,
+       i.invoice_number,
+       i.invoice_date,
+       i.patient_id,
+       CONCAT(p.first_name, ' ', p.last_name) as patient_full_name,
+       p.dni,
+       COUNT(ist.session_id) as sessions_count,
+       i.total,
+       i.concept,
+       i.month,
+       i.year,
+       i.created_at
+     FROM invoices i
+     INNER JOIN patients p ON i.patient_id = p.id AND p.is_active = true
+     LEFT JOIN invoice_sessions ist ON ist.invoice_id = i.id
+     WHERE i.is_active = true
+       AND i.month = ?
+       AND i.year = ?
+     GROUP BY i.id, i.invoice_number, i.invoice_date, i.patient_id, p.first_name, p.last_name, p.dni, i.total, i.concept, i.month, i.year, i.created_at
+     ORDER BY i.invoice_date DESC, i.invoice_number DESC`,
+    [targetMonth, targetYear]
+  );
+
+  const invoices = invoicesResult.map(row => {
+    // Formatear fecha a dd/mm/yyyy
+    const date = new Date(row.invoice_date);
+    const formattedDate = `${String(date.getDate()).padStart(2, '0')}/${String(date.getMonth() + 1).padStart(2, '0')}/${date.getFullYear()}`;
+
+    return {
+      id: parseInt(row.id),
+      invoice_number: row.invoice_number,
+      invoice_date: formattedDate,
+      patient_full_name: row.patient_full_name,
+      dni: row.dni || '',
+      sessions_count: parseInt(row.sessions_count) || 0,
+      total: parseFloat(row.total) || 0
+    };
+  });
+
+  return {
+    filters_applied: {
+      month: targetMonth,
+      year: targetYear
+    },
+    total_invoices: invoices.length,
+    invoices: invoices
+  };
+};
+
 module.exports = {
   getInvoicesKPIs,
   getPendingInvoices,
-  createInvoice
+  createInvoice,
+  getIssuedInvoices
 };

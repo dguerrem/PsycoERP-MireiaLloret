@@ -1,5 +1,66 @@
 const invoicesPaths = {
   "/api/invoices": {
+    get: {
+      tags: ["Invoices"],
+      summary: "Obtener facturas emitidas",
+      description:
+        "Obtiene el listado de facturas emitidas con información del paciente, número de sesiones facturadas y total. Si no se especifica mes/año, usa el mes y año actual.",
+      parameters: [
+        {
+          name: "month",
+          in: "query",
+          required: false,
+          schema: {
+            type: "integer",
+            minimum: 1,
+            maximum: 12,
+          },
+          description: "Mes para filtrar (1-12). Por defecto usa el mes actual.",
+        },
+        {
+          name: "year",
+          in: "query",
+          required: false,
+          schema: {
+            type: "integer",
+            minimum: 2000,
+          },
+          description: "Año para filtrar (ej: 2025). Por defecto usa el año actual.",
+        },
+      ],
+      responses: {
+        200: {
+          description: "Facturas obtenidas exitosamente",
+          content: {
+            "application/json": {
+              schema: {
+                $ref: "#/components/schemas/IssuedInvoicesResponse",
+              },
+            },
+          },
+        },
+        400: {
+          description: "Parámetros inválidos",
+          content: {
+            "application/json": {
+              schema: {
+                $ref: "#/components/schemas/ErrorResponse",
+              },
+            },
+          },
+        },
+        500: {
+          description: "Error del servidor",
+          content: {
+            "application/json": {
+              schema: {
+                $ref: "#/components/schemas/ErrorResponse",
+              },
+            },
+          },
+        },
+      },
+    },
     post: {
       tags: ["Invoices"],
       summary: "Generar factura",
