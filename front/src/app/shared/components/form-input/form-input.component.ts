@@ -29,6 +29,8 @@ export class FormInputComponent {
   @Input() errorMessage?: string;
   @Input() options: SelectOption[] = []; // For select fields
   @Input() selectPlaceholder: string = 'Seleccionar...';
+  @Input() min?: string; // For min attribute (time, date, number inputs)
+  @Input() max?: string; // For max attribute (time, date, number inputs)
 
   // Output events
   @Output() onChange = new EventEmitter<any>();
@@ -80,6 +82,18 @@ export class FormInputComponent {
     }
     if (errors['pattern']) {
       return `${this.label} tiene un formato inválido`;
+    }
+    if (errors['timeRange']) {
+      return 'El horario debe estar entre las 08:00 y las 21:00';
+    }
+    if (errors['timeOrder']) {
+      return 'La hora de fin debe ser posterior a la hora de inicio';
+    }
+    if (errors['maxDuration']) {
+      return 'La duración no puede superar los 60 minutos';
+    }
+    if (errors['min']) {
+      return `El valor mínimo es ${errors['min'].min}`;
     }
 
     // Return first error key as fallback

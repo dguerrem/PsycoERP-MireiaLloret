@@ -236,6 +236,76 @@ export class NewSessionFormComponent implements OnInit {
     return new Date(datePart);
   }
 
+  /**
+   * Custom validator for time range (8:00 - 21:00)
+   */
+  private timeRangeValidator(control: any) {
+    if (!control.value) {
+      return null;
+    }
+
+    const time = control.value;
+    const [hours, minutes] = time.split(':').map(Number);
+    const totalMinutes = hours * 60 + minutes;
+    const minTime = 8 * 60; // 8:00 = 480 minutes
+    const maxTime = 21 * 60; // 21:00 = 1260 minutes
+
+    if (totalMinutes < minTime || totalMinutes > maxTime) {
+      return { timeRange: true };
+    }
+
+    return null;
+  }
+
+  /**
+   * Validate time order and duration, setting errors on individual fields
+   */
+  private validateTimeOrderAndDuration(): void {
+    const startTimeControl = this.sessionForm.get('start_time');
+    const endTimeControl = this.sessionForm.get('end_time');
+
+    if (!startTimeControl || !endTimeControl) {
+      return;
+    }
+
+    const startTime = startTimeControl.value;
+    const endTime = endTimeControl.value;
+
+    if (!startTime || !endTime) {
+      return;
+    }
+
+    // Clear previous errors related to time order and duration
+    const startErrors = startTimeControl.errors || {};
+    const endErrors = endTimeControl.errors || {};
+    delete startErrors['timeOrder'];
+    delete endErrors['timeOrder'];
+    delete endErrors['maxDuration'];
+
+    // Check if start_time is before end_time
+    if (startTime >= endTime) {
+      endTimeControl.setErrors({ ...endErrors, timeOrder: true });
+      return;
+    }
+
+    // Check if duration is not more than 60 minutes
+    const [startHours, startMinutes] = startTime.split(':').map(Number);
+    const [endHours, endMinutes] = endTime.split(':').map(Number);
+
+    const startTotalMinutes = startHours * 60 + startMinutes;
+    const endTotalMinutes = endHours * 60 + endMinutes;
+    const duration = endTotalMinutes - startTotalMinutes;
+
+    if (duration > 60) {
+      endTimeControl.setErrors({ ...endErrors, maxDuration: true });
+      return;
+    }
+
+    // If no errors, clear them
+    endTimeControl.setErrors(Object.keys(endErrors).length > 0 ? endErrors : null);
+    startTimeControl.setErrors(Object.keys(startErrors).length > 0 ? startErrors : null);
+  }
+
   private initializeForm(): void {
     const sessionData = this.prefilledData?.sessionData;
     const isEditMode = !!sessionData;
@@ -267,12 +337,20 @@ export class NewSessionFormComponent implements OnInit {
     this.sessionForm = this.fb.group({
       patient_id: [{value: formValues.patient_id, disabled: isEditMode}, [Validators.required]],
       session_date: [formValues.session_date, [Validators.required]],
-      start_time: [formValues.start_time, [Validators.required]],
-      end_time: [formValues.end_time, [Validators.required]],
+      start_time: [formValues.start_time, [Validators.required, this.timeRangeValidator]],
+      end_time: [formValues.end_time, [Validators.required, this.timeRangeValidator]],
       mode: [{value: formValues.mode, disabled: false}, [Validators.required]],
       price: [formValues.price, [Validators.required, Validators.min(0.01)]],
       payment_method: [{value: formValues.payment_method, disabled: !isEditMode}, [Validators.required]],
       notes: [formValues.notes]
+    });
+
+    // Add value changes listener to validate time order and duration
+    this.sessionForm.get('start_time')?.valueChanges.subscribe(() => {
+      this.validateTimeOrderAndDuration();
+    });
+    this.sessionForm.get('end_time')?.valueChanges.subscribe(() => {
+      this.validateTimeOrderAndDuration();
     });
 
     // If start time is prefilled and not in edit mode, calculate end time automatically
@@ -475,12 +553,6 @@ export class NewSessionFormComponent implements OnInit {
 
     if (!patient) {
       this.error.set('Debe seleccionar un paciente.');
-      return;
-    }
-
-    // Validate time
-    if (formValue.start_time >= formValue.end_time) {
-      this.error.set('La hora de inicio debe ser anterior a la hora de fin.');
       return;
     }
 
