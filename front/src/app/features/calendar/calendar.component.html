@@ -130,17 +130,23 @@
               <!-- Slots horarios -->
               @for (hour of hours; track hour) {
               <div class="h-16 sm:h-20 border-b border-gray-200 p-1 hover:bg-gray-50 transition-colors relative group">
-                <div [class]="getSortedSessionDataForDateAndHour(date, hour).length === 1 ? 'h-full overflow-y-auto overflow-x-hidden' : 'h-full overflow-y-auto overflow-x-hidden space-y-1'">
+                <!-- Container for column-based layout (Google Calendar style) -->
+                <!-- overflow-visible allows sessions to extend beyond slot boundaries -->
+                <div class="relative h-full overflow-visible">
                   @for (sessionData of getSortedSessionDataForDateAndHour(date, hour); track
                   sessionData.SessionDetailData.session_id) {
                   <div (click)="onSessionClick(sessionData)"
+                    [title]="getPatientNameFromSessionData(sessionData) + ' - ' + formatTime(sessionData.SessionDetailData.start_time) + ' a ' + formatTime(sessionData.SessionDetailData.end_time) + (isSessionCancelled(sessionData) ? ' (Cancelada)' : '')"
                     [class]="isSessionCancelled(sessionData) ?
-                    'bg-gray-100 border-l-4 border-gray-400 rounded-sm px-2 py-1.5 text-xs cursor-pointer transition-all duration-200 text-gray-500 opacity-60 hover:opacity-80 relative line-through' :
-                    'border-l-4 rounded-sm p-2 text-xs cursor-pointer hover:shadow-md transition-all duration-200 text-white ' + (!getClinicConfigFromSessionData(sessionData).hasCustomColor ? getClinicConfigFromSessionData(sessionData).backgroundColor : '') + (getSessionStatusBadgeClass(sessionData).includes('green') ? ' ring-2 ring-green-500 ring-opacity-50' : '')"
+                    'absolute bg-gray-100 border-l-4 border-gray-400 rounded-sm px-1 sm:px-2 py-1.5 text-xs cursor-pointer transition-all duration-200 text-gray-500 opacity-60 hover:opacity-80 line-through z-10 group/session' :
+                    'absolute border-l-4 rounded-sm px-1 sm:px-2 py-1 sm:py-2 text-xs cursor-pointer hover:shadow-md transition-all duration-200 text-white z-10 group/session ' + (!getClinicConfigFromSessionData(sessionData).hasCustomColor ? getClinicConfigFromSessionData(sessionData).backgroundColor : '') + (getSessionStatusBadgeClass(sessionData).includes('green') ? ' ring-2 ring-green-500 ring-opacity-50' : '')"
                     [style.background-color]="!isSessionCancelled(sessionData) && getClinicConfigFromSessionData(sessionData).hasCustomColor ? getClinicColorFromSessionData(sessionData) : ''"
                     [style.border-left-color]="isSessionCancelled(sessionData) ? '#9ca3af' : (getClinicConfigFromSessionData(sessionData).hasCustomColor ? getClinicColorFromSessionData(sessionData) : getClinicConfigFromSessionData(sessionData).borderColor)"
-                    [style.height]="getSortedSessionDataForDateAndHour(date, hour).length === 1 ? '100%' : ''"
-                    class="min-h-[45px] flex flex-col justify-between relative group flex-shrink-0">
+                    [style.top.%]="getSessionSlotRenderInfo(sessionData, hour, date).topOffsetPercentage"
+                    [style.height.px]="getSessionSlotRenderInfo(sessionData, hour, date).heightPx"
+                    [style.left.%]="getSessionSlotRenderInfo(sessionData, hour, date).leftOffsetPercentage"
+                    [style.width.%]="getSessionSlotRenderInfo(sessionData, hour, date).widthPercentage"
+                    class="min-h-[45px] flex flex-col justify-between overflow-hidden border-r border-gray-200">
                     <!-- Indicador de completado -->
                     @if (sessionData.SessionDetailData.completed && !isSessionCancelled(sessionData)) {
                     <div
