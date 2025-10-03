@@ -1,4 +1,4 @@
-const { getInvoicesKPIs, getPendingInvoices } = require("../../models/invoices/invoice_model");
+const { getInvoicesKPIs, getPendingInvoices, createInvoice } = require("../../models/invoices/invoice_model");
 
 // Obtener KPIs de facturación
 const obtenerKPIsFacturacion = async (req, res) => {
@@ -78,7 +78,77 @@ const obtenerFacturasPendientes = async (req, res) => {
   }
 };
 
+// Generar factura
+const generarFactura = async (req, res) => {
+  try {
+    const {
+      invoice_number,
+      invoice_date,
+      patient_id,
+      session_ids,
+      concept
+    } = req.body;
+
+    // Validaciones básicas
+    if (!invoice_number || !invoice_date || !patient_id || !session_ids || !concept) {
+      return res.status(400).json({
+        success: false,
+        error: "Faltan campos obligatorios: invoice_number, invoice_date, patient_id, session_ids, concept"
+      });
+    }
+
+    if (!Array.isArray(session_ids) || session_ids.length === 0) {
+      return res.status(400).json({
+        success: false,
+        error: "session_ids debe ser un array con al menos un ID"
+      });
+    }
+
+    // Validar formato de fecha (YYYY-MM-DD)
+    const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
+    if (!dateRegex.test(invoice_date)) {
+      return res.status(400).json({
+        success: false,
+        error: "El formato de invoice_date debe ser YYYY-MM-DD"
+      });
+    }
+
+    const invoiceData = {
+      invoice_number,
+      invoice_date,
+      patient_id: parseInt(patient_id),
+      session_ids: session_ids.map(id => parseInt(id)),
+      concept,
+      pdf_path: null // Se generará después si es necesario
+    };
+
+    const result = await createInvoice(req.db, invoiceData);
+
+    res.status(201).json({
+      success: true,
+      message: `Factura ${invoice_number} generada exitosamente`,
+      data: result
+    });
+  } catch (err) {
+    console.error("Error al generar factura:", err.message);
+
+    // Manejo de errores específicos
+    if (err.message.includes('Duplicate entry') && err.message.includes('invoice_number')) {
+      return res.status(409).json({
+        success: false,
+        error: "El número de factura ya existe. Por favor, use un número diferente."
+      });
+    }
+
+    res.status(500).json({
+      success: false,
+      error: err.message || "Error al generar la factura"
+    });
+  }
+};
+
 module.exports = {
   obtenerKPIsFacturacion,
-  obtenerFacturasPendientes
+  obtenerFacturasPendientes,
+  generarFactura
 };

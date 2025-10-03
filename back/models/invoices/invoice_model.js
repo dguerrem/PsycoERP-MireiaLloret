@@ -154,7 +154,99 @@ const getPendingInvoices = async (db, filters = {}) => {
   };
 };
 
+// Generar factura y marcar sesiones como facturadas
+const createInvoice = async (db, invoiceData) => {
+  const {
+    invoice_number,
+    invoice_date,
+    patient_id,
+    session_ids,
+    concept,
+    pdf_path = null
+  } = invoiceData;
+
+  // Validar que existan sesiones
+  if (!session_ids || session_ids.length === 0) {
+    throw new Error('Debe proporcionar al menos una sesión para facturar');
+  }
+
+  const connection = await db.getConnection();
+
+  try {
+    await connection.beginTransaction();
+
+    // 1. Obtener información de las sesiones a facturar
+    const placeholders = session_ids.map(() => '?').join(',');
+    const [sessionsData] = await connection.execute(
+      `SELECT id, price, session_date
+       FROM sessions
+       WHERE id IN (${placeholders})
+         AND is_active = true
+         AND invoiced = 0`,
+      session_ids
+    );
+
+    if (sessionsData.length === 0) {
+      throw new Error('No se encontraron sesiones válidas para facturar');
+    }
+
+    if (sessionsData.length !== session_ids.length) {
+      throw new Error('Algunas sesiones no están disponibles para facturar (ya facturadas o inactivas)');
+    }
+
+    // Calcular total (suma de precios de todas las sesiones)
+    const total = sessionsData.reduce((sum, s) => sum + parseFloat(s.price), 0);
+
+    // Extraer mes y año de la fecha de factura
+    const invoiceDateObj = new Date(invoice_date);
+    const month = invoiceDateObj.getMonth() + 1;
+    const year = invoiceDateObj.getFullYear();
+
+    // 2. Crear la factura
+    const [invoiceResult] = await connection.execute(
+      `INSERT INTO invoices
+       (invoice_number, invoice_date, patient_id, concept, total, pdf_path, month, year)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+      [invoice_number, invoice_date, patient_id, concept, total, pdf_path, month, year]
+    );
+
+    const invoice_id = invoiceResult.insertId;
+
+    // 3. Insertar relaciones en invoice_sessions
+    const invoiceSessionsValues = session_ids.map(session_id => [invoice_id, session_id]);
+    await connection.query(
+      `INSERT INTO invoice_sessions (invoice_id, session_id) VALUES ?`,
+      [invoiceSessionsValues]
+    );
+
+    // 4. Marcar sesiones como facturadas
+    await connection.execute(
+      `UPDATE sessions SET invoiced = 1 WHERE id IN (${placeholders})`,
+      session_ids
+    );
+
+    await connection.commit();
+
+    // Retornar la factura creada
+    const [createdInvoice] = await connection.execute(
+      `SELECT * FROM invoices WHERE id = ?`,
+      [invoice_id]
+    );
+
+    return {
+      invoice: createdInvoice[0],
+      sessions_invoiced_count: sessionsData.length
+    };
+  } catch (error) {
+    await connection.rollback();
+    throw error;
+  } finally {
+    connection.release();
+  }
+};
+
 module.exports = {
   getInvoicesKPIs,
-  getPendingInvoices
+  getPendingInvoices,
+  createInvoice
 };

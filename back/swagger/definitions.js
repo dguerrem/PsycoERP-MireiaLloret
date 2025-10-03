@@ -1365,10 +1365,20 @@ const definitions = {
       },
       message: {
         type: "string",
-        example: "Factura creada exitosamente",
+        example: "Factura 2025-001 generada exitosamente",
       },
       data: {
-        $ref: "#/components/schemas/Invoice",
+        type: "object",
+        properties: {
+          invoice: {
+            $ref: "#/components/schemas/Invoice",
+          },
+          sessions_invoiced_count: {
+            type: "integer",
+            description: "Número de sesiones marcadas como facturadas",
+            example: 4,
+          },
+        },
       },
     },
   },
