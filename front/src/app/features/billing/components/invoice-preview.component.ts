@@ -1,6 +1,7 @@
-import { Component, Input, Output, EventEmitter, ChangeDetectionStrategy } from '@angular/core';
+import { Component, Input, Output, EventEmitter, ChangeDetectionStrategy, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { User } from '../../../core/models/user.model';
+import { PdfGeneratorService } from '../services/pdf-generator.service';
 
 export interface InvoicePreviewData {
   patient_full_name: string;
@@ -20,6 +21,8 @@ export interface InvoicePreviewData {
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class InvoicePreviewComponent {
+  private pdfGenerator = inject(PdfGeneratorService);
+
   @Input() isOpen: boolean = false;
   @Input() invoiceData: InvoicePreviewData | null = null;
   @Input() userData: User | null = null;
@@ -55,7 +58,16 @@ export class InvoicePreviewComponent {
   /**
    * Descarga el PDF
    */
-  download() {
-    this.onDownload.emit();
+  async download() {
+    if (!this.invoiceData) return;
+
+    try {
+      await this.pdfGenerator.generatePdfById(
+        'invoice-content',
+        this.invoiceData.invoice_number
+      );
+    } catch (error) {
+      console.error('Error generando PDF:', error);
+    }
   }
 }
