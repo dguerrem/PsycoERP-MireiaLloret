@@ -467,3 +467,13 @@
   </div>
 
 </app-reusable-modal>
+
+<!-- Modal de vista previa de factura -->
+<app-invoice-preview
+  [isOpen]="isPreviewModalOpen()"
+  [invoiceData]="previewInvoiceData()"
+  [userData]="userData()"
+  (onClose)="closePreviewModal()"
+  (onPrint)="printInvoice()"
+  (onDownload)="downloadInvoicePDF()">
+</app-invoice-preview>

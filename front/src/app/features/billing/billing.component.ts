@@ -5,16 +5,11 @@ import { BillingService } from './services/billing.service';
 import { InvoiceKPIs, PendingInvoice, ExistingInvoice } from './models/billing.models';
 import { SectionHeaderComponent } from '../../shared/components/section-header/section-header.component';
 import { ReusableModalComponent } from '../../shared/components/reusable-modal/reusable-modal.component';
+import { InvoicePreviewComponent, InvoicePreviewData } from './components/invoice-preview.component';
+import { UserService } from '../../core/services/user.service';
+import { User } from '../../core/models/user.model';
 
-interface InvoiceToGenerate {
-  patient_full_name: string;
-  dni: string;
-  email: string;
-  pending_sessions_count: number;
-  total_gross: number;
-  invoice_number: string;
-  invoice_date: string;
-}
+interface InvoiceToGenerate extends InvoicePreviewData {}
 
 /**
  * Componente de facturación
@@ -23,13 +18,14 @@ interface InvoiceToGenerate {
 @Component({
   selector: 'app-billing',
   standalone: true,
-  imports: [CommonModule, FormsModule, SectionHeaderComponent, ReusableModalComponent],
+  imports: [CommonModule, FormsModule, SectionHeaderComponent, ReusableModalComponent, InvoicePreviewComponent],
   templateUrl: './billing.component.html',
   styleUrl: './billing.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class BillingComponent implements OnInit {
   private billingService = inject(BillingService);
+  private userService = inject(UserService);
 
   // Signals para estado del componente
   activeTab = signal<'bulk' | 'existing'>('bulk');
@@ -54,6 +50,13 @@ export class BillingComponent implements OnInit {
   // Modal state
   isModalOpen = signal(false);
   invoicesToGenerate = signal<InvoiceToGenerate[]>([]);
+
+  // Preview modal state
+  isPreviewModalOpen = signal(false);
+  previewInvoiceData = signal<InvoiceToGenerate | null>(null);
+
+  // User data for invoice
+  userData = signal<User | null>(null);
 
   isLoadingKPIs = signal(false);
   isLoadingPending = signal(false);
@@ -91,6 +94,22 @@ export class BillingComponent implements OnInit {
   ngOnInit() {
     this.loadKPIs();
     this.loadPendingInvoices();
+    this.loadUserData();
+  }
+
+  /**
+   * Carga los datos del usuario
+   */
+  loadUserData() {
+    // Obtener el ID del usuario (asumiendo que es 1, o podrías obtenerlo del servicio de auth)
+    this.userService.getUserProfile(1).subscribe({
+      next: (user) => {
+        this.userData.set(user);
+      },
+      error: (error) => {
+        console.error('Error loading user data:', error);
+      }
+    });
   }
 
   /**
@@ -310,8 +329,34 @@ export class BillingComponent implements OnInit {
   previewInvoice(dni: string) {
     const invoice = this.invoicesToGenerate().find(inv => inv.dni === dni);
     if (invoice) {
-      // TODO: Implementar vista previa de la factura
-      console.log('Vista previa de factura:', invoice);
+      this.previewInvoiceData.set(invoice);
+      this.isPreviewModalOpen.set(true);
+    }
+  }
+
+  /**
+   * Cierra el modal de vista previa
+   */
+  closePreviewModal() {
+    this.isPreviewModalOpen.set(false);
+    this.previewInvoiceData.set(null);
+  }
+
+  /**
+   * Imprime la factura
+   */
+  printInvoice() {
+    window.print();
+  }
+
+  /**
+   * Descarga el PDF de la factura
+   */
+  downloadInvoicePDF() {
+    const invoice = this.previewInvoiceData();
+    if (invoice) {
+      // TODO: Implementar descarga real del PDF
+      console.log('Descargando PDF:', invoice.invoice_number);
     }
   }
 
