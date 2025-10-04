@@ -4,6 +4,17 @@ import { FormsModule } from '@angular/forms';
 import { BillingService } from './services/billing.service';
 import { InvoiceKPIs, PendingInvoice, ExistingInvoice } from './models/billing.models';
 import { SectionHeaderComponent } from '../../shared/components/section-header/section-header.component';
+import { ReusableModalComponent } from '../../shared/components/reusable-modal/reusable-modal.component';
+
+interface InvoiceToGenerate {
+  patient_full_name: string;
+  dni: string;
+  email: string;
+  pending_sessions_count: number;
+  total_gross: number;
+  invoice_number: string;
+  invoice_date: string;
+}
 
 /**
  * Componente de facturación
@@ -12,7 +23,7 @@ import { SectionHeaderComponent } from '../../shared/components/section-header/s
 @Component({
   selector: 'app-billing',
   standalone: true,
-  imports: [CommonModule, FormsModule, SectionHeaderComponent],
+  imports: [CommonModule, FormsModule, SectionHeaderComponent, ReusableModalComponent],
   templateUrl: './billing.component.html',
   styleUrl: './billing.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -39,6 +50,10 @@ export class BillingComponent implements OnInit {
   // Numeración de facturas
   invoiceBaseNumber = signal('FAC-2025');
   invoiceNextNumber = signal(6);
+
+  // Modal state
+  isModalOpen = signal(false);
+  invoicesToGenerate = signal<InvoiceToGenerate[]>([]);
 
   isLoadingKPIs = signal(false);
   isLoadingPending = signal(false);
@@ -201,7 +216,7 @@ export class BillingComponent implements OnInit {
   }
 
   /**
-   * Genera facturas masivas para los pacientes seleccionados
+   * Abre el modal con las facturas a generar
    */
   generateBulkInvoices() {
     const selected = this.selectedPatients();
@@ -209,17 +224,49 @@ export class BillingComponent implements OnInit {
       return;
     }
 
-    // TODO: Implementar confirmación y generación real
-    console.log('Generando facturas para:', selected);
-    console.log('Total a facturar:', this.totalSelectedAmount());
+    // Obtener datos de las facturas seleccionadas
+    const selectedInvoices = this.pendingInvoices().filter(inv =>
+      selected.includes(inv.dni)
+    );
+
+    // Preparar datos para el modal
+    const invoices: InvoiceToGenerate[] = selectedInvoices.map((inv, index) => ({
+      patient_full_name: inv.patient_full_name,
+      dni: inv.dni,
+      email: inv.email,
+      pending_sessions_count: inv.pending_sessions_count,
+      total_gross: inv.total_gross,
+      invoice_number: `${this.invoiceBaseNumber()}-${this.padNumber(this.invoiceNextNumber() + index)}`,
+      invoice_date: new Date().toISOString().split('T')[0]
+    }));
+
+    this.invoicesToGenerate.set(invoices);
+    this.isModalOpen.set(true);
+  }
+
+  /**
+   * Cierra el modal de generación
+   */
+  closeModal() {
+    this.isModalOpen.set(false);
+    this.invoicesToGenerate.set([]);
+  }
+
+  /**
+   * Confirma y genera las facturas desde el modal
+   */
+  confirmGenerateInvoices() {
+    // TODO: Implementar generación real con los datos del modal
+    console.log('Generando facturas:', this.invoicesToGenerate());
 
     this.billingService.generateBulkInvoices(
-      selected,
+      this.selectedPatients(),
       this.pendingMonth(),
       this.pendingYear()
     ).subscribe({
       next: (response) => {
         console.log('Facturas generadas:', response);
+        this.closeModal();
         // Recargar datos después de generar
         this.loadKPIs();
         this.loadPendingInvoices();
@@ -229,6 +276,43 @@ export class BillingComponent implements OnInit {
         console.error('Error al generar facturas:', error);
       }
     });
+  }
+
+  /**
+   * Actualiza el número de factura de un paciente
+   */
+  updateInvoiceNumber(dni: string, newNumber: string) {
+    const invoices = this.invoicesToGenerate();
+    const index = invoices.findIndex(inv => inv.dni === dni);
+    if (index !== -1) {
+      const updated = [...invoices];
+      updated[index] = { ...updated[index], invoice_number: newNumber };
+      this.invoicesToGenerate.set(updated);
+    }
+  }
+
+  /**
+   * Actualiza la fecha de emisión de un paciente
+   */
+  updateInvoiceDate(dni: string, newDate: string) {
+    const invoices = this.invoicesToGenerate();
+    const index = invoices.findIndex(inv => inv.dni === dni);
+    if (index !== -1) {
+      const updated = [...invoices];
+      updated[index] = { ...updated[index], invoice_date: newDate };
+      this.invoicesToGenerate.set(updated);
+    }
+  }
+
+  /**
+   * Vista previa de la factura
+   */
+  previewInvoice(dni: string) {
+    const invoice = this.invoicesToGenerate().find(inv => inv.dni === dni);
+    if (invoice) {
+      // TODO: Implementar vista previa de la factura
+      console.log('Vista previa de factura:', invoice);
+    }
   }
 
   /**
