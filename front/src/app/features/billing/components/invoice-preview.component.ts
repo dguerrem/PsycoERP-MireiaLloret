@@ -2,6 +2,7 @@ import { Component, Input, Output, EventEmitter, ChangeDetectionStrategy, inject
 import { CommonModule } from '@angular/common';
 import { User } from '../../../core/models/user.model';
 import { PdfGeneratorService } from '../services/pdf-generator.service';
+import { InvoiceTemplateComponent } from './invoice-template.component';
 
 export interface InvoicePreviewData {
   patient_full_name: string;
@@ -16,7 +17,7 @@ export interface InvoicePreviewData {
 @Component({
   selector: 'app-invoice-preview',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, InvoiceTemplateComponent],
   templateUrl: './invoice-preview.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush
 })

@@ -63,45 +63,120 @@ const invoicesPaths = {
     },
     post: {
       tags: ["Invoices"],
-      summary: "Generar factura",
+      summary: "Generar factura(s)",
       description:
-        "Crea una nueva factura para un paciente, asocia las sesiones especificadas, las marca como facturadas (invoiced = 1) y registra las relaciones en invoice_sessions. Todo el proceso se ejecuta en una transacción.",
+        "Crea una o múltiples facturas. Acepta tanto un objeto individual como un array de objetos. Para cada factura, asocia las sesiones especificadas, las marca como facturadas (invoiced = 1) y registra las relaciones en invoice_sessions. Todo el proceso se ejecuta en una transacción.",
       requestBody: {
         required: true,
         content: {
           "application/json": {
             schema: {
-              type: "object",
-              required: ["invoice_number", "invoice_date", "patient_id", "session_ids", "concept"],
-              properties: {
-                invoice_number: {
-                  type: "string",
-                  description: "Número único de la factura (ej: 2025-001)",
-                  example: "2025-001",
-                },
-                invoice_date: {
-                  type: "string",
-                  format: "date",
-                  description: "Fecha de emisión de la factura (YYYY-MM-DD)",
-                  example: "2025-01-15",
-                },
-                patient_id: {
-                  type: "integer",
-                  description: "ID del paciente",
-                  example: 123,
-                },
-                session_ids: {
+              oneOf: [
+                {
+                  // Múltiples facturas
                   type: "array",
                   items: {
-                    type: "integer",
+                    type: "object",
+                    required: ["invoice_number", "invoice_date", "patient_id", "session_ids", "concept"],
+                    properties: {
+                      invoice_number: {
+                        type: "string",
+                        description: "Número único de la factura (ej: 2025-001)",
+                        example: "2025-001",
+                      },
+                      invoice_date: {
+                        type: "string",
+                        format: "date",
+                        description: "Fecha de emisión de la factura (YYYY-MM-DD)",
+                        example: "2025-01-15",
+                      },
+                      patient_id: {
+                        type: "integer",
+                        description: "ID del paciente",
+                        example: 123,
+                      },
+                      session_ids: {
+                        type: "array",
+                        items: {
+                          type: "integer",
+                        },
+                        description: "IDs de las sesiones a facturar",
+                        example: [45, 46, 47],
+                      },
+                      concept: {
+                        type: "string",
+                        description: "Concepto o descripción del servicio facturado",
+                        example: "Sesiones de psicología - Enero 2025",
+                      },
+                    },
                   },
-                  description: "IDs de las sesiones a facturar",
-                  example: [45, 46, 47, 48],
                 },
-                concept: {
-                  type: "string",
-                  description: "Concepto o descripción del servicio facturado",
-                  example: "Sesiones de psicología - Enero 2025",
+                {
+                  // Factura individual
+                  type: "object",
+                  required: ["invoice_number", "invoice_date", "patient_id", "session_ids", "concept"],
+                  properties: {
+                    invoice_number: {
+                      type: "string",
+                      description: "Número único de la factura (ej: 2025-001)",
+                      example: "2025-001",
+                    },
+                    invoice_date: {
+                      type: "string",
+                      format: "date",
+                      description: "Fecha de emisión de la factura (YYYY-MM-DD)",
+                      example: "2025-01-15",
+                    },
+                    patient_id: {
+                      type: "integer",
+                      description: "ID del paciente",
+                      example: 123,
+                    },
+                    session_ids: {
+                      type: "array",
+                      items: {
+                        type: "integer",
+                      },
+                      description: "IDs de las sesiones a facturar",
+                      example: [45, 46, 47, 48],
+                    },
+                    concept: {
+                      type: "string",
+                      description: "Concepto o descripción del servicio facturado",
+                      example: "Sesiones de psicología - Enero 2025",
+                    },
+                  },
+                },
+              ],
+            },
+            examples: {
+              multipleInvoices: {
+                summary: "Múltiples facturas",
+                value: [
+                  {
+                    invoice_number: "2025-001",
+                    invoice_date: "2025-01-15",
+                    patient_id: 123,
+                    session_ids: [45, 46],
+                    concept: "Sesiones paciente 1 - Enero 2025",
+                  },
+                  {
+                    invoice_number: "2025-002",
+                    invoice_date: "2025-01-15",
+                    patient_id: 124,
+                    session_ids: [47, 48],
+                    concept: "Sesiones paciente 2 - Enero 2025",
+                  },
+                ],
+              },
+              singleInvoice: {
+                summary: "Factura individual",
+                value: {
+                  invoice_number: "2025-001",
+                  invoice_date: "2025-01-15",
+                  patient_id: 123,
+                  session_ids: [45, 46, 47, 48],
+                  concept: "Sesiones de psicología - Enero 2025",
                 },
               },
             },
@@ -110,11 +185,131 @@ const invoicesPaths = {
       },
       responses: {
         201: {
-          description: "Factura generada exitosamente",
+          description: "Factura(s) generada(s) exitosamente",
           content: {
             "application/json": {
               schema: {
-                $ref: "#/components/schemas/CreateInvoiceResponse",
+                oneOf: [
+                  {
+                    // Respuesta para factura individual
+                    $ref: "#/components/schemas/CreateInvoiceResponse",
+                  },
+                  {
+                    // Respuesta para múltiples facturas
+                    type: "object",
+                    properties: {
+                      success: {
+                        type: "boolean",
+                        example: true,
+                      },
+                      message: {
+                        type: "string",
+                        example: "2 factura(s) generada(s) exitosamente",
+                      },
+                      data: {
+                        type: "object",
+                        properties: {
+                          successful: {
+                            type: "array",
+                            items: {
+                              type: "object",
+                              properties: {
+                                invoice_number: {
+                                  type: "string",
+                                  example: "2025-001",
+                                },
+                                success: {
+                                  type: "boolean",
+                                  example: true,
+                                },
+                                data: {
+                                  type: "object",
+                                },
+                              },
+                            },
+                          },
+                          failed: {
+                            type: "array",
+                            items: {
+                              type: "object",
+                              properties: {
+                                invoice_number: {
+                                  type: "string",
+                                  example: "2025-002",
+                                },
+                                success: {
+                                  type: "boolean",
+                                  example: false,
+                                },
+                                error: {
+                                  type: "string",
+                                  example: "El número de factura ya existe",
+                                },
+                              },
+                            },
+                          },
+                          summary: {
+                            type: "object",
+                            properties: {
+                              total: {
+                                type: "integer",
+                                example: 2,
+                              },
+                              successful: {
+                                type: "integer",
+                                example: 1,
+                              },
+                              failed: {
+                                type: "integer",
+                                example: 1,
+                              },
+                            },
+                          },
+                        },
+                      },
+                    },
+                  },
+                ],
+              },
+            },
+          },
+        },
+        207: {
+          description: "Procesamiento parcial - Algunas facturas se generaron y otras fallaron",
+          content: {
+            "application/json": {
+              schema: {
+                type: "object",
+                properties: {
+                  success: {
+                    type: "boolean",
+                    example: false,
+                  },
+                  message: {
+                    type: "string",
+                    example: "1 factura(s) generada(s), 1 fallida(s)",
+                  },
+                  data: {
+                    type: "object",
+                    properties: {
+                      successful: {
+                        type: "array",
+                        items: {
+                          type: "object",
+                        },
+                      },
+                      failed: {
+                        type: "array",
+                        items: {
+                          type: "object",
+                        },
+                      },
+                      summary: {
+                        type: "object",
+                      },
+                    },
+                  },
+                },
               },
             },
           },
@@ -124,7 +319,34 @@ const invoicesPaths = {
           content: {
             "application/json": {
               schema: {
-                $ref: "#/components/schemas/ErrorResponse",
+                oneOf: [
+                  {
+                    $ref: "#/components/schemas/ErrorResponse",
+                  },
+                  {
+                    type: "object",
+                    properties: {
+                      success: {
+                        type: "boolean",
+                        example: false,
+                      },
+                      error: {
+                        type: "string",
+                        example: "Errores de validación",
+                      },
+                      details: {
+                        type: "array",
+                        items: {
+                          type: "string",
+                        },
+                        example: [
+                          "Factura[0]: Faltan campos obligatorios (invoice_number, invoice_date, patient_id, session_ids, concept)",
+                          "Factura[1]: El formato de invoice_date debe ser YYYY-MM-DD",
+                        ],
+                      },
+                    },
+                  },
+                ],
               },
             },
           },

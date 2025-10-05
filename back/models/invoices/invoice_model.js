@@ -130,6 +130,7 @@ const getPendingInvoices = async (db, filters = {}) => {
   );
 
   const pendingInvoices = pendingSessionsResult.map(row => ({
+    patient_id: parseInt(row.patient_id),
     patient_full_name: row.patient_full_name,
     dni: row.dni || '',
     email: row.email || '',

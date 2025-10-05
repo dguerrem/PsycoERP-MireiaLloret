@@ -5,7 +5,9 @@ import {
   InvoiceKPIs,
   PendingInvoicesResponse,
   ExistingInvoicesResponse,
-  ApiResponse
+  ApiResponse,
+  CreateBulkInvoicesRequest,
+  CreateInvoiceResponse
 } from '../models/billing.models';
 
 /**
@@ -141,18 +143,20 @@ export class BillingService {
   }
 
   /**
-   * Genera facturas masivas para los pacientes seleccionados
+   * Crea facturas en bulk
    */
-  generateBulkInvoices(patientDnis: string[], month: number, year: number): Observable<any> {
-    return this.http.post(`${this.baseUrl}/invoices/bulk`, {
-      patient_dnis: patientDnis,
-      month,
-      year
-    }).pipe(
+  createBulkInvoices(invoices: CreateBulkInvoicesRequest): Observable<any> {
+    return this.http.post<any>(`${this.baseUrl}/invoices`, invoices).pipe(
       catchError(error => {
-        console.error('Error al generar facturas masivas:', error);
-        this.error.set('Error al generar las facturas');
-        return of({ success: false, error: error.message });
+        console.error('Error al crear facturas:', error);
+
+        // Si el error tiene un body con información (error.error), lo retornamos
+        if (error.error && typeof error.error === 'object') {
+          return of(error.error);
+        }
+
+        this.error.set('Error al crear las facturas');
+        return of({ success: false, message: error.message || 'Error al crear las facturas' });
       })
     );
   }

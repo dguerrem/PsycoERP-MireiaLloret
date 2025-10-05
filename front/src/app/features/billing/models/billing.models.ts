@@ -28,6 +28,7 @@ export interface ClinicInfo {
 }
 
 export interface PendingInvoice {
+  patient_id: number;
   patient_full_name: string;
   dni: string;
   email: string;
@@ -49,11 +50,11 @@ export interface PendingInvoicesResponse {
 export interface ExistingInvoice {
   id: number;
   invoice_number: string;
-  patient_name: string;
-  date: string;
+  invoice_date: string;
+  patient_full_name: string;
+  dni: string;
+  sessions_count: number;
   total: number;
-  status: string;
-  [key: string]: any;
 }
 
 export interface ExistingInvoicesResponse {
@@ -67,4 +68,29 @@ export interface ExistingInvoicesResponse {
 
 export interface ApiResponse<T> {
   data: T;
+}
+
+/**
+ * Request para crear una factura individual
+ */
+export interface CreateInvoiceRequest {
+  invoice_number: string;
+  invoice_date: string;
+  patient_id: number;
+  session_ids: number[];
+  concept: string;
+}
+
+/**
+ * Request para crear facturas en bulk
+ */
+export type CreateBulkInvoicesRequest = CreateInvoiceRequest[];
+
+/**
+ * Response de creación de factura
+ */
+export interface CreateInvoiceResponse {
+  success: boolean;
+  message: string;
+  invoice_id?: number;
 }

@@ -78,67 +78,138 @@ const obtenerFacturasPendientes = async (req, res) => {
   }
 };
 
-// Generar factura
+// Generar factura (individual o múltiple)
 const generarFactura = async (req, res) => {
   try {
-    const {
-      invoice_number,
-      invoice_date,
-      patient_id,
-      session_ids,
-      concept
-    } = req.body;
+    const data = req.body;
 
-    // Validaciones básicas
-    if (!invoice_number || !invoice_date || !patient_id || !session_ids || !concept) {
+    // Detectar si es un array o un objeto individual
+    const isArray = Array.isArray(data);
+    const invoices = isArray ? data : [data];
+
+    // Validar que hay al menos una factura
+    if (invoices.length === 0) {
       return res.status(400).json({
         success: false,
-        error: "Faltan campos obligatorios: invoice_number, invoice_date, patient_id, session_ids, concept"
-      });
-    }
-
-    if (!Array.isArray(session_ids) || session_ids.length === 0) {
-      return res.status(400).json({
-        success: false,
-        error: "session_ids debe ser un array con al menos un ID"
+        error: "Debe proporcionar al menos una factura"
       });
     }
 
     // Validar formato de fecha (YYYY-MM-DD)
     const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
-    if (!dateRegex.test(invoice_date)) {
+
+    // Validar cada factura
+    const errors = [];
+    invoices.forEach((invoice, index) => {
+      const {
+        invoice_number,
+        invoice_date,
+        patient_id,
+        session_ids,
+        concept
+      } = invoice;
+
+      const position = isArray ? `[${index}]` : '';
+
+      if (!invoice_number || !invoice_date || !patient_id || !session_ids || !concept) {
+        errors.push(`Factura${position}: Faltan campos obligatorios (invoice_number, invoice_date, patient_id, session_ids, concept)`);
+      }
+
+      if (session_ids && (!Array.isArray(session_ids) || session_ids.length === 0)) {
+        errors.push(`Factura${position}: session_ids debe ser un array con al menos un ID`);
+      }
+
+      if (invoice_date && !dateRegex.test(invoice_date)) {
+        errors.push(`Factura${position}: El formato de invoice_date debe ser YYYY-MM-DD`);
+      }
+    });
+
+    if (errors.length > 0) {
       return res.status(400).json({
         success: false,
-        error: "El formato de invoice_date debe ser YYYY-MM-DD"
+        error: "Errores de validación",
+        details: errors
       });
     }
 
-    const invoiceData = {
-      invoice_number,
-      invoice_date,
-      patient_id: parseInt(patient_id),
-      session_ids: session_ids.map(id => parseInt(id)),
-      concept
-    };
+    // Procesar todas las facturas
+    const results = [];
+    const failedInvoices = [];
 
-    const result = await createInvoice(req.db, invoiceData);
+    for (let i = 0; i < invoices.length; i++) {
+      const {
+        invoice_number,
+        invoice_date,
+        patient_id,
+        session_ids,
+        concept
+      } = invoices[i];
 
-    res.status(201).json({
-      success: true,
-      message: `Factura ${invoice_number} generada exitosamente`,
-      data: result
+      try {
+        const invoiceData = {
+          invoice_number,
+          invoice_date,
+          patient_id: parseInt(patient_id),
+          session_ids: session_ids.map(id => parseInt(id)),
+          concept
+        };
+
+        const result = await createInvoice(req.db, invoiceData);
+        results.push({
+          invoice_number,
+          success: true,
+          data: result
+        });
+      } catch (err) {
+        failedInvoices.push({
+          invoice_number,
+          success: false,
+          error: err.message.includes('Duplicate entry') && err.message.includes('invoice_number')
+            ? "El número de factura ya existe"
+            : err.message
+        });
+      }
+    }
+
+    // Respuesta para factura individual
+    if (!isArray) {
+      if (results.length > 0) {
+        return res.status(201).json({
+          success: true,
+          message: `Factura ${results[0].invoice_number} generada exitosamente`,
+          data: results[0].data
+        });
+      } else {
+        return res.status(500).json({
+          success: false,
+          error: failedInvoices[0].error
+        });
+      }
+    }
+
+    // Respuesta para múltiples facturas
+    const allSuccess = failedInvoices.length === 0;
+    const partialSuccess = results.length > 0 && failedInvoices.length > 0;
+
+    res.status(allSuccess ? 201 : (partialSuccess ? 207 : 500)).json({
+      success: allSuccess,
+      message: allSuccess
+        ? `${results.length} factura(s) generada(s) exitosamente`
+        : partialSuccess
+        ? `${results.length} factura(s) generada(s), ${failedInvoices.length} fallida(s)`
+        : `Todas las facturas fallaron`,
+      data: {
+        successful: results,
+        failed: failedInvoices,
+        summary: {
+          total: invoices.length,
+          successful: results.length,
+          failed: failedInvoices.length
+        }
+      }
     });
   } catch (err) {
     console.error("Error al generar factura:", err.message);
-
-    // Manejo de errores específicos
-    if (err.message.includes('Duplicate entry') && err.message.includes('invoice_number')) {
-      return res.status(409).json({
-        success: false,
-        error: "El número de factura ya existe. Por favor, use un número diferente."
-      });
-    }
-
     res.status(500).json({
       success: false,
       error: err.message || "Error al generar la factura"
