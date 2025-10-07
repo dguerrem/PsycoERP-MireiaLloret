@@ -152,6 +152,15 @@ const crearSesion = async (req, res) => {
       });
     }
 
+    // Validar duración máxima de 1 hora (60 minutos)
+    const durationMinutes = endTimeMinutes - startTimeMinutes;
+    if (durationMinutes > 60) {
+      return res.status(400).json({
+        success: false,
+        error: "La duración de la sesión no puede exceder 1 hora (60 minutos)",
+      });
+    }
+
     // Verificar si hay solapamiento de horarios
     const overlappingSession = await checkTimeOverlap(req.db, session_date, start_time, end_time);
 
@@ -294,6 +303,15 @@ const actualizarSesion = async (req, res) => {
           return res.status(400).json({
             success: false,
             error: "La hora de inicio debe ser anterior a la hora de fin",
+          });
+        }
+
+        // Validar duración máxima de 1 hora (60 minutos)
+        const durationMinutes = endTimeMinutes - startTimeMinutes;
+        if (durationMinutes > 60) {
+          return res.status(400).json({
+            success: false,
+            error: "La duración de la sesión no puede exceder 1 hora (60 minutos)",
           });
         }
       }

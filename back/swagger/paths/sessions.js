@@ -137,7 +137,7 @@ const sessionsPaths = {
     post: {
       tags: ["Sessions"],
       summary: "Crear nueva sesión",
-      description: "Crea una nueva sesión en el sistema. Validaciones: horario entre 08:00-21:00, start_time < end_time, sin solapamiento con otras sesiones.",
+      description: "Crea una nueva sesión en el sistema. Validaciones: horario entre 08:00-21:00, duración máxima 1 hora, start_time < end_time, sin solapamiento con otras sesiones.",
       requestBody: {
         required: true,
         content: {
@@ -178,7 +178,7 @@ const sessionsPaths = {
                 end_time: {
                   type: "string",
                   format: "time",
-                  description: "Hora de fin (HH:mm:ss). Debe ser <= 21:00 y posterior a start_time",
+                  description: "Hora de fin (HH:mm:ss). Debe ser <= 21:00, posterior a start_time y la duración no puede exceder 1 hora",
                   example: "10:00:00",
                 },
                 mode: {
@@ -318,7 +318,7 @@ const sessionsPaths = {
       tags: ["Sessions"],
       summary: "Actualizar sesión existente",
       description:
-        "Actualiza una sesión existente con los datos proporcionados. Solo se actualizan los campos enviados. Validaciones: horario entre 08:00-21:00, start_time < end_time, sin solapamiento con otras sesiones.",
+        "Actualiza una sesión existente con los datos proporcionados. Solo se actualizan los campos enviados. Validaciones: horario entre 08:00-21:00, duración máxima 1 hora, start_time < end_time, sin solapamiento con otras sesiones.",
       parameters: [
         {
           name: "id",
@@ -362,7 +362,7 @@ const sessionsPaths = {
                 end_time: {
                   type: "string",
                   format: "time",
-                  description: "Hora de fin (HH:mm:ss). Debe ser <= 21:00 y posterior a start_time",
+                  description: "Hora de fin (HH:mm:ss). Debe ser <= 21:00, posterior a start_time y la duración no puede exceder 1 hora",
                   example: "10:00:00",
                 },
                 mode: {
