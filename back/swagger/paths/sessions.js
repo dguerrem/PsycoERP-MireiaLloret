@@ -137,7 +137,7 @@ const sessionsPaths = {
     post: {
       tags: ["Sessions"],
       summary: "Crear nueva sesión",
-      description: "Crea una nueva sesión en el sistema. Valida que no exista solapamiento de horarios con otras sesiones activas en la misma fecha.",
+      description: "Crea una nueva sesión en el sistema. Validaciones: horario entre 08:00-21:00, start_time < end_time, sin solapamiento con otras sesiones.",
       requestBody: {
         required: true,
         content: {
@@ -172,12 +172,14 @@ const sessionsPaths = {
                 start_time: {
                   type: "string",
                   format: "time",
-                  description: "Hora de inicio (HH:mm:ss)",
+                  description: "Hora de inicio (HH:mm:ss). Debe ser >= 08:00 y anterior a end_time",
+                  example: "09:00:00",
                 },
                 end_time: {
                   type: "string",
                   format: "time",
-                  description: "Hora de fin (HH:mm:ss)",
+                  description: "Hora de fin (HH:mm:ss). Debe ser <= 21:00 y posterior a start_time",
+                  example: "10:00:00",
                 },
                 mode: {
                   type: "string",
@@ -316,7 +318,7 @@ const sessionsPaths = {
       tags: ["Sessions"],
       summary: "Actualizar sesión existente",
       description:
-        "Actualiza una sesión existente con los datos proporcionados. Solo se actualizan los campos enviados. Valida que no exista solapamiento de horarios si se modifican fecha, hora de inicio o fin.",
+        "Actualiza una sesión existente con los datos proporcionados. Solo se actualizan los campos enviados. Validaciones: horario entre 08:00-21:00, start_time < end_time, sin solapamiento con otras sesiones.",
       parameters: [
         {
           name: "id",
@@ -354,12 +356,14 @@ const sessionsPaths = {
                 start_time: {
                   type: "string",
                   format: "time",
-                  description: "Hora de inicio (HH:mm:ss)",
+                  description: "Hora de inicio (HH:mm:ss). Debe ser >= 08:00 y anterior a end_time",
+                  example: "09:00:00",
                 },
                 end_time: {
                   type: "string",
                   format: "time",
-                  description: "Hora de fin (HH:mm:ss)",
+                  description: "Hora de fin (HH:mm:ss). Debe ser <= 21:00 y posterior a start_time",
+                  example: "10:00:00",
                 },
                 mode: {
                   type: "string",

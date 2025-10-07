@@ -119,6 +119,39 @@ const crearSesion = async (req, res) => {
       });
     }
 
+    // Validar horario laboral (8:00 - 21:00)
+    const startHour = parseInt(start_time.split(':')[0]);
+    const startMinute = parseInt(start_time.split(':')[1]);
+    const endHour = parseInt(end_time.split(':')[0]);
+    const endMinute = parseInt(end_time.split(':')[1]);
+
+    // Hora de inicio debe ser >= 08:00
+    if (startHour < 8) {
+      return res.status(400).json({
+        success: false,
+        error: "La hora de inicio no puede ser anterior a las 08:00",
+      });
+    }
+
+    // Hora de fin debe ser <= 21:00
+    if (endHour > 21 || (endHour === 21 && endMinute > 0)) {
+      return res.status(400).json({
+        success: false,
+        error: "La hora de fin no puede ser posterior a las 21:00",
+      });
+    }
+
+    // Validar que start_time sea anterior a end_time
+    const startTimeMinutes = startHour * 60 + startMinute;
+    const endTimeMinutes = endHour * 60 + endMinute;
+
+    if (startTimeMinutes >= endTimeMinutes) {
+      return res.status(400).json({
+        success: false,
+        error: "La hora de inicio debe ser anterior a la hora de fin",
+      });
+    }
+
     // Verificar si hay solapamiento de horarios
     const overlappingSession = await checkTimeOverlap(req.db, session_date, start_time, end_time);
 
@@ -210,7 +243,7 @@ const actualizarSesion = async (req, res) => {
       });
     }
 
-    // Si se está actualizando session_date, start_time o end_time, verificar solapamiento de horarios
+    // Si se está actualizando session_date, start_time o end_time, validar horarios
     if (session_date || start_time || end_time) {
       // Obtener sesión actual para tener todos los datos
       const [currentSession] = await req.db.execute(
@@ -229,6 +262,41 @@ const actualizarSesion = async (req, res) => {
       const finalSessionDate = session_date || currentSession[0].session_date;
       const finalStartTime = start_time || currentSession[0].start_time;
       const finalEndTime = end_time || currentSession[0].end_time;
+
+      // Validar horario laboral (8:00 - 21:00) si se modifican las horas
+      if (start_time || end_time) {
+        const startHour = parseInt(finalStartTime.split(':')[0]);
+        const startMinute = parseInt(finalStartTime.split(':')[1]);
+        const endHour = parseInt(finalEndTime.split(':')[0]);
+        const endMinute = parseInt(finalEndTime.split(':')[1]);
+
+        // Hora de inicio debe ser >= 08:00
+        if (startHour < 8) {
+          return res.status(400).json({
+            success: false,
+            error: "La hora de inicio no puede ser anterior a las 08:00",
+          });
+        }
+
+        // Hora de fin debe ser <= 21:00
+        if (endHour > 21 || (endHour === 21 && endMinute > 0)) {
+          return res.status(400).json({
+            success: false,
+            error: "La hora de fin no puede ser posterior a las 21:00",
+          });
+        }
+
+        // Validar que start_time sea anterior a end_time
+        const startTimeMinutes = startHour * 60 + startMinute;
+        const endTimeMinutes = endHour * 60 + endMinute;
+
+        if (startTimeMinutes >= endTimeMinutes) {
+          return res.status(400).json({
+            success: false,
+            error: "La hora de inicio debe ser anterior a la hora de fin",
+          });
+        }
+      }
 
       // Verificar solapamiento excluyendo la sesión actual
       const overlappingSession = await checkTimeOverlap(
