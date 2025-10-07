@@ -102,6 +102,9 @@ export class BillingComponent implements OnInit {
   // Error state
   errorMessage = signal<string | null>(null);
 
+  // Bulk invoice generation state
+  isGeneratingBulkInvoices = signal(false);
+
   // Computed signals
   monthNames = [
     'Enero',
@@ -330,6 +333,7 @@ export class BillingComponent implements OnInit {
           this.invoiceNextNumber() + index
         )}`,
         invoice_date: new Date().toISOString().split('T')[0],
+        sessions: inv.sessions,
       })
     );
 
@@ -363,6 +367,9 @@ export class BillingComponent implements OnInit {
       return;
     }
 
+    // Activar spinner
+    this.isGeneratingBulkInvoices.set(true);
+
     // Obtener datos completos de las facturas seleccionadas
     const selected = this.selectedPatients();
     const selectedInvoicesData = this.pendingInvoices().filter((inv) =>
@@ -386,7 +393,6 @@ export class BillingComponent implements OnInit {
     });
 
     // Llamar al servicio para crear las facturas
-    debugger
     this.billingService.createBulkInvoices(invoicesPayload).subscribe({
       next: (response: any) => {
         console.log('Respuesta completa:', response);
@@ -412,6 +418,7 @@ export class BillingComponent implements OnInit {
               'Ocurrió un error al generar las facturas. Por favor, revisa los datos e intenta nuevamente.'
             );
           }
+          this.isGeneratingBulkInvoices.set(false);
         } else {
           // Todas las facturas se crearon exitosamente
           const successCount = data?.successful?.length || invoicesToCreate.length;
@@ -420,11 +427,18 @@ export class BillingComponent implements OnInit {
           );
           this.closeModal();
           this.errorMessage.set(null);
+          this.isGeneratingBulkInvoices.set(false);
           // Recargar datos después de generar
           this.loadKPIs();
           this.loadPendingInvoices();
           this.loadExistingInvoices();
         }
+      },
+      error: () => {
+        this.isGeneratingBulkInvoices.set(false);
+        this.errorMessage.set(
+          'Ocurrió un error al generar las facturas. Por favor, intenta nuevamente.'
+        );
       },
     });
   }
@@ -478,7 +492,8 @@ export class BillingComponent implements OnInit {
       pending_sessions_count: invoice.sessions_count,
       total_gross: invoice.total,
       invoice_number: invoice.invoice_number,
-      invoice_date: invoice.invoice_date
+      invoice_date: invoice.invoice_date,
+      sessions: invoice.sessions
     };
 
     this.previewInvoiceData.set(previewData);
@@ -575,6 +590,7 @@ export class BillingComponent implements OnInit {
           this.invoiceNextNumber() + index
         )}`,
         invoice_date: new Date().toISOString().split('T')[0],
+        sessions: inv.sessions,
       })
     );
 

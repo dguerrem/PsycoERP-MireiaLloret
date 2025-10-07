@@ -643,3 +643,19 @@
     </div>
   </div>
 }
+
+<!-- Spinner overlay para generación masiva de facturas -->
+@if (isGeneratingBulkInvoices()) {
+  <div class="fixed inset-0 z-[70] bg-black/80 backdrop-blur-sm flex items-center justify-center">
+    <div class="bg-white rounded-xl p-8 shadow-2xl max-w-md w-full mx-4">
+      <div class="text-center">
+        <app-spinner [size]="'lg'" [overlay]="false"></app-spinner>
+        <h3 class="text-xl font-bold text-gray-900 mt-6 mb-2">Generando Facturas</h3>
+        <p class="text-gray-600 mb-4">
+          Por favor espera mientras se generan las facturas...
+        </p>
+        <p class="text-sm text-gray-500">Este proceso puede tardar unos momentos</p>
+      </div>
+    </div>
+  </div>
+}

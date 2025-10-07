@@ -31,13 +31,23 @@
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
             </svg>
           </button>
-          <h2 class="text-sm sm:text-base lg:text-lg font-semibold text-center text-gray-900 min-w-[140px] sm:min-w-[180px] lg:min-w-[200px]">
-            @if (currentView() === 'week') {
-            {{ formatWeekRange(weekDates()) }}
-            } @else {
-            {{ formatMonthYear(currentDate()) }}
-            }
-          </h2>
+
+          @if (currentView() === 'week') {
+            <input
+              type="date"
+              [value]="getCurrentDateValue()"
+              (change)="onWeekDateSelect($event)"
+              (click)="openDatePicker($event)"
+              class="text-sm sm:text-base lg:text-lg font-semibold text-center text-gray-900 min-w-[140px] sm:min-w-[180px] lg:min-w-[200px] border-0 rounded-lg px-3 py-2 bg-transparent hover:bg-gray-50 outline-none transition-all cursor-pointer [color-scheme:light]">
+          } @else {
+            <input
+              type="month"
+              [value]="getCurrentMonthValue()"
+              (change)="onDateSelect($event)"
+              (click)="openDatePicker($event)"
+              class="text-sm sm:text-base lg:text-lg font-semibold text-center text-gray-900 min-w-[140px] sm:min-w-[180px] lg:min-w-[200px] border-0 rounded-lg px-3 py-2 bg-transparent hover:bg-gray-50 outline-none transition-all cursor-pointer [color-scheme:light]">
+          }
+
           <button (click)="navigateNext()"
             class="border border-gray-300 bg-white hover:bg-primary hover:border-primary hover:text-white inline-flex items-center justify-center rounded-xl px-2 sm:px-3 py-2 text-sm font-medium transition-all flex-shrink-0">
             <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

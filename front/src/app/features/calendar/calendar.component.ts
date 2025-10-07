@@ -86,6 +86,43 @@ export class CalendarComponent {
     this.calendarService.navigateToToday();
   }
 
+  onDateSelect(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const [year, month] = input.value.split('-').map(Number);
+    const newDate = new Date(year, month - 1, 1);
+    this.calendarService.setCurrentDate(newDate);
+    this.calendarService.reloadSessions();
+  }
+
+  onWeekDateSelect(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const selectedDate = new Date(input.value + 'T00:00:00');
+    this.calendarService.setCurrentDate(selectedDate);
+    this.calendarService.reloadSessions();
+  }
+
+  getCurrentMonthValue(): string {
+    const date = this.currentDate();
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    return `${year}-${month}`;
+  }
+
+  getCurrentDateValue(): string {
+    const date = this.currentDate();
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  }
+
+  openDatePicker(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    if (input && typeof input.showPicker === 'function') {
+      input.showPicker();
+    }
+  }
+
   onSessionClick(sessionData: SessionData): void {
     // Open the session form in edit mode instead of showing popup
     this.prefilledSessionData = {

@@ -12,6 +12,7 @@ export interface InvoicePreviewData {
   total_gross: number;
   invoice_number: string;
   invoice_date: string;
+  sessions?: { session_id: number; session_date: string; price: number; }[];
 }
 
 @Component({
