@@ -1605,8 +1605,8 @@ const definitions = {
                 invoice_date: {
                   type: "string",
                   format: "date",
-                  description: "Fecha de emisión",
-                  example: "2025-01-15",
+                  description: "Fecha de emisión (formato dd/mm/yyyy)",
+                  example: "15/01/2025",
                 },
                 patient_id: {
                   type: "integer",
@@ -1624,6 +1624,48 @@ const definitions = {
                   description: "DNI del paciente",
                   example: "12345678A",
                 },
+                email: {
+                  type: "string",
+                  description: "Email del paciente",
+                  example: "david@example.com",
+                },
+                patient_address_line1: {
+                  type: "string",
+                  description: "Primera línea de dirección del paciente (calle, número, puerta)",
+                  example: "Calle Mayor 123 2B",
+                },
+                patient_address_line2: {
+                  type: "string",
+                  description: "Segunda línea de dirección del paciente (ciudad, código postal)",
+                  example: "Madrid 28001",
+                },
+                sessions: {
+                  type: "array",
+                  items: {
+                    type: "object",
+                    properties: {
+                      session_id: {
+                        type: "integer",
+                        format: "int64",
+                        description: "ID de la sesión",
+                        example: 45,
+                      },
+                      session_date: {
+                        type: "string",
+                        format: "date",
+                        description: "Fecha de la sesión (YYYY-MM-DD)",
+                        example: "2025-01-10",
+                      },
+                      price: {
+                        type: "number",
+                        format: "decimal",
+                        description: "Precio de la sesión",
+                        example: 60.00,
+                      },
+                    },
+                  },
+                  description: "Detalles de las sesiones facturadas",
+                },
                 sessions_count: {
                   type: "integer",
                   description: "Número de sesiones facturadas",
@@ -1639,22 +1681,6 @@ const definitions = {
                   type: "string",
                   description: "Concepto de la factura",
                   example: "Sesiones de psicología - Enero 2025",
-                },
-                month: {
-                  type: "integer",
-                  description: "Mes de la factura",
-                  example: 1,
-                },
-                year: {
-                  type: "integer",
-                  description: "Año de la factura",
-                  example: 2025,
-                },
-                created_at: {
-                  type: "string",
-                  format: "date-time",
-                  description: "Fecha de creación",
-                  example: "2025-01-15T10:30:00Z",
                 },
               },
             },

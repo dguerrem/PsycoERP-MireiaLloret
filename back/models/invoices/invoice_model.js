@@ -276,6 +276,7 @@ const getIssuedInvoices = async (db, filters = {}) => {
   const targetMonth = month || (currentDate.getMonth() + 1);
   const targetYear = year || currentDate.getFullYear();
 
+  // Primero obtenemos las facturas con información del paciente
   const [invoicesResult] = await db.execute(
     `SELECT
        i.id,
@@ -284,7 +285,9 @@ const getIssuedInvoices = async (db, filters = {}) => {
        i.patient_id,
        CONCAT(p.first_name, ' ', p.last_name) as patient_full_name,
        p.dni,
-       COUNT(ist.session_id) as sessions_count,
+       p.email,
+       CONCAT_WS(' ', p.street, p.street_number, p.door) as patient_address_line1,
+       CONCAT_WS(' ', p.city, p.postal_code) as patient_address_line2,
        i.total,
        i.concept,
        i.month,
@@ -292,30 +295,53 @@ const getIssuedInvoices = async (db, filters = {}) => {
        i.created_at
      FROM invoices i
      INNER JOIN patients p ON i.patient_id = p.id AND p.is_active = true
-     LEFT JOIN invoice_sessions ist ON ist.invoice_id = i.id
      WHERE i.is_active = true
        AND i.month = ?
        AND i.year = ?
-     GROUP BY i.id, i.invoice_number, i.invoice_date, i.patient_id, p.first_name, p.last_name, p.dni, i.total, i.concept, i.month, i.year, i.created_at
      ORDER BY i.invoice_date DESC, i.invoice_number DESC`,
     [targetMonth, targetYear]
   );
 
-  const invoices = invoicesResult.map(row => {
-    // Formatear fecha a dd/mm/yyyy
-    const date = new Date(row.invoice_date);
-    const formattedDate = `${String(date.getDate()).padStart(2, '0')}/${String(date.getMonth() + 1).padStart(2, '0')}/${date.getFullYear()}`;
+  // Para cada factura, obtener los detalles de las sesiones
+  const invoices = await Promise.all(
+    invoicesResult.map(async (row) => {
+      const [sessionsDetails] = await db.execute(
+        `SELECT
+           s.id as session_id,
+           DATE_FORMAT(s.session_date, '%Y-%m-%d') as session_date,
+           s.price
+         FROM invoice_sessions ist
+         INNER JOIN sessions s ON ist.session_id = s.id AND s.is_active = true
+         WHERE ist.invoice_id = ?
+         ORDER BY s.session_date ASC`,
+        [row.id]
+      );
 
-    return {
-      id: parseInt(row.id),
-      invoice_number: row.invoice_number,
-      invoice_date: formattedDate,
-      patient_full_name: row.patient_full_name,
-      dni: row.dni || '',
-      sessions_count: parseInt(row.sessions_count) || 0,
-      total: parseFloat(row.total) || 0
-    };
-  });
+      // Formatear fecha a dd/mm/yyyy
+      const date = new Date(row.invoice_date);
+      const formattedDate = `${String(date.getDate()).padStart(2, '0')}/${String(date.getMonth() + 1).padStart(2, '0')}/${date.getFullYear()}`;
+
+      return {
+        id: parseInt(row.id),
+        invoice_number: row.invoice_number,
+        invoice_date: formattedDate,
+        patient_id: parseInt(row.patient_id),
+        patient_full_name: row.patient_full_name,
+        dni: row.dni || '',
+        email: row.email || '',
+        patient_address_line1: row.patient_address_line1 || '',
+        patient_address_line2: row.patient_address_line2 || '',
+        sessions: sessionsDetails.map(session => ({
+          session_id: parseInt(session.session_id),
+          session_date: session.session_date,
+          price: parseFloat(session.price)
+        })),
+        sessions_count: sessionsDetails.length,
+        total: parseFloat(row.total) || 0,
+        concept: row.concept || ''
+      };
+    })
+  );
 
   return {
     filters_applied: {
