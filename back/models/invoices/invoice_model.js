@@ -106,14 +106,16 @@ const getPendingInvoices = async (db, filters = {}) => {
   const targetMonth = month || (currentDate.getMonth() + 1);
   const targetYear = year || currentDate.getFullYear();
 
+  // Primero obtenemos los pacientes con sesiones pendientes
   const [pendingSessionsResult] = await db.execute(
     `SELECT
        p.id as patient_id,
        CONCAT(p.first_name, ' ', p.last_name) as patient_full_name,
        p.dni,
        p.email,
+       CONCAT_WS(' ', p.street, p.street_number, p.door) as patient_address_line1,
+       CONCAT_WS(' ', p.city, p.postal_code) as patient_address_line2,
        c.name as clinic_name,
-       GROUP_CONCAT(s.id ORDER BY s.session_date ASC) as session_ids,
        COUNT(s.id) as pending_sessions_count,
        COALESCE(SUM(s.price), 0) as total_gross
      FROM patients p
@@ -124,21 +126,47 @@ const getPendingInvoices = async (db, filters = {}) => {
        AND YEAR(s.session_date) = ?
      INNER JOIN clinics c ON s.clinic_id = c.id AND c.is_active = true
      WHERE p.is_active = true
-     GROUP BY p.id, p.first_name, p.last_name, p.dni, p.email, c.name
+     GROUP BY p.id, p.first_name, p.last_name, p.dni, p.email, p.street, p.street_number, p.door, p.city, p.postal_code, c.name
      ORDER BY patient_full_name ASC`,
     [targetMonth, targetYear]
   );
 
-  const pendingInvoices = pendingSessionsResult.map(row => ({
-    patient_id: parseInt(row.patient_id),
-    patient_full_name: row.patient_full_name,
-    dni: row.dni || '',
-    email: row.email || '',
-    clinic_name: row.clinic_name,
-    session_ids: row.session_ids ? row.session_ids.split(',').map(id => parseInt(id)) : [],
-    pending_sessions_count: parseInt(row.pending_sessions_count),
-    total_gross: parseFloat(row.total_gross)
-  }));
+  // Para cada paciente, obtener los detalles de las sesiones
+  const pendingInvoices = await Promise.all(
+    pendingSessionsResult.map(async (row) => {
+      const [sessionsDetails] = await db.execute(
+        `SELECT
+           id as session_id,
+           DATE_FORMAT(session_date, '%Y-%m-%d') as session_date,
+           price
+         FROM sessions
+         WHERE patient_id = ?
+           AND is_active = true
+           AND invoiced = 0
+           AND MONTH(session_date) = ?
+           AND YEAR(session_date) = ?
+         ORDER BY session_date ASC`,
+        [row.patient_id, targetMonth, targetYear]
+      );
+
+      return {
+        patient_id: parseInt(row.patient_id),
+        patient_full_name: row.patient_full_name,
+        dni: row.dni || '',
+        email: row.email || '',
+        patient_address_line1: row.patient_address_line1 || '',
+        patient_address_line2: row.patient_address_line2 || '',
+        clinic_name: row.clinic_name,
+        sessions: sessionsDetails.map(session => ({
+          session_id: parseInt(session.session_id),
+          session_date: session.session_date,
+          price: parseFloat(session.price)
+        })),
+        pending_sessions_count: parseInt(row.pending_sessions_count),
+        total_gross: parseFloat(row.total_gross)
+      };
+    })
+  );
 
   return {
     filters_applied: {
