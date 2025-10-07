@@ -5,6 +5,7 @@ const {
   deleteSession,
   getSessionForWhatsApp,
   checkDuplicateSession,
+  checkTimeOverlap,
   getSessionsKPIs,
 } = require("../../models/sessions/sessions_model");
 
@@ -118,18 +119,20 @@ const crearSesion = async (req, res) => {
       });
     }
 
-    // Verificar si ya existe una sesión para este paciente en la misma fecha y hora
-    const existingSession = await checkDuplicateSession(req.db, patient_id, session_date, start_time);
+    // Verificar si hay solapamiento de horarios
+    const overlappingSession = await checkTimeOverlap(req.db, session_date, start_time, end_time);
 
-    if (existingSession) {
+    if (overlappingSession) {
       return res.status(409).json({
         success: false,
-        error: "Ya existe una sesión programada en esta fecha y hora. No se pueden agendar dos citas simultáneas.",
+        error: "El horario de esta sesión se solapa con otra sesión existente. Por favor, selecciona un horario diferente.",
         conflicting_session: {
-          id: existingSession.id,
-          status: existingSession.status,
-          patient_id: existingSession.patient_id,
-          patient_name: existingSession.patient_name,
+          id: overlappingSession.id,
+          start_time: overlappingSession.start_time,
+          end_time: overlappingSession.end_time,
+          status: overlappingSession.status,
+          patient_id: overlappingSession.patient_id,
+          patient_name: overlappingSession.patient_name,
         },
       });
     }
@@ -207,11 +210,11 @@ const actualizarSesion = async (req, res) => {
       });
     }
 
-    // Si se está actualizando patient_id, session_date o start_time, verificar duplicados
-    if (patient_id || session_date || start_time) {
+    // Si se está actualizando session_date, start_time o end_time, verificar solapamiento de horarios
+    if (session_date || start_time || end_time) {
       // Obtener sesión actual para tener todos los datos
       const [currentSession] = await req.db.execute(
-        "SELECT patient_id, session_date, start_time FROM sessions WHERE id = ? AND is_active = true",
+        "SELECT session_date, start_time, end_time FROM sessions WHERE id = ? AND is_active = true",
         [parseInt(id)]
       );
 
@@ -223,28 +226,30 @@ const actualizarSesion = async (req, res) => {
       }
 
       // Usar los valores nuevos si se proporcionan, o los actuales si no
-      const finalPatientId = patient_id || currentSession[0].patient_id;
       const finalSessionDate = session_date || currentSession[0].session_date;
       const finalStartTime = start_time || currentSession[0].start_time;
+      const finalEndTime = end_time || currentSession[0].end_time;
 
-      // Verificar duplicados excluyendo la sesión actual
-      const existingSession = await checkDuplicateSession(
+      // Verificar solapamiento excluyendo la sesión actual
+      const overlappingSession = await checkTimeOverlap(
         req.db,
-        finalPatientId,
         finalSessionDate,
         finalStartTime,
+        finalEndTime,
         parseInt(id)
       );
 
-      if (existingSession) {
+      if (overlappingSession) {
         return res.status(409).json({
           success: false,
-          error: "Ya existe una sesión programada en esta fecha y hora. No se pueden agendar dos citas simultáneas.",
+          error: "El horario de esta sesión se solapa con otra sesión existente. Por favor, selecciona un horario diferente.",
           conflicting_session: {
-            id: existingSession.id,
-            status: existingSession.status,
-            patient_id: existingSession.patient_id,
-            patient_name: existingSession.patient_name,
+            id: overlappingSession.id,
+            start_time: overlappingSession.start_time,
+            end_time: overlappingSession.end_time,
+            status: overlappingSession.status,
+            patient_id: overlappingSession.patient_id,
+            patient_name: overlappingSession.patient_name,
           },
         });
       }

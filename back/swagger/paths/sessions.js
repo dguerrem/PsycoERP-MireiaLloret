@@ -137,7 +137,7 @@ const sessionsPaths = {
     post: {
       tags: ["Sessions"],
       summary: "Crear nueva sesión",
-      description: "Crea una nueva sesión en el sistema",
+      description: "Crea una nueva sesión en el sistema. Valida que no exista solapamiento de horarios con otras sesiones activas en la misma fecha.",
       requestBody: {
         required: true,
         content: {
@@ -249,6 +249,55 @@ const sessionsPaths = {
             },
           },
         },
+        409: {
+          description: "Conflicto de horarios - Ya existe una sesión en ese rango horario",
+          content: {
+            "application/json": {
+              schema: {
+                type: "object",
+                properties: {
+                  success: {
+                    type: "boolean",
+                    example: false,
+                  },
+                  error: {
+                    type: "string",
+                    example: "El horario de esta sesión se solapa con otra sesión existente. Por favor, selecciona un horario diferente.",
+                  },
+                  conflicting_session: {
+                    type: "object",
+                    properties: {
+                      id: {
+                        type: "integer",
+                        example: 123,
+                      },
+                      start_time: {
+                        type: "string",
+                        example: "09:00:00",
+                      },
+                      end_time: {
+                        type: "string",
+                        example: "10:00:00",
+                      },
+                      status: {
+                        type: "string",
+                        example: "programada",
+                      },
+                      patient_id: {
+                        type: "integer",
+                        example: 45,
+                      },
+                      patient_name: {
+                        type: "string",
+                        example: "Juan Pérez",
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
         500: {
           description: "Error interno del servidor",
           content: {
@@ -267,7 +316,7 @@ const sessionsPaths = {
       tags: ["Sessions"],
       summary: "Actualizar sesión existente",
       description:
-        "Actualiza una sesión existente con los datos proporcionados. Solo se actualizan los campos enviados.",
+        "Actualiza una sesión existente con los datos proporcionados. Solo se actualizan los campos enviados. Valida que no exista solapamiento de horarios si se modifican fecha, hora de inicio o fin.",
       parameters: [
         {
           name: "id",
@@ -389,6 +438,55 @@ const sessionsPaths = {
             "application/json": {
               schema: {
                 $ref: "#/components/schemas/ErrorResponse",
+              },
+            },
+          },
+        },
+        409: {
+          description: "Conflicto de horarios - Ya existe una sesión en ese rango horario",
+          content: {
+            "application/json": {
+              schema: {
+                type: "object",
+                properties: {
+                  success: {
+                    type: "boolean",
+                    example: false,
+                  },
+                  error: {
+                    type: "string",
+                    example: "El horario de esta sesión se solapa con otra sesión existente. Por favor, selecciona un horario diferente.",
+                  },
+                  conflicting_session: {
+                    type: "object",
+                    properties: {
+                      id: {
+                        type: "integer",
+                        example: 123,
+                      },
+                      start_time: {
+                        type: "string",
+                        example: "09:00:00",
+                      },
+                      end_time: {
+                        type: "string",
+                        example: "10:00:00",
+                      },
+                      status: {
+                        type: "string",
+                        example: "programada",
+                      },
+                      patient_id: {
+                        type: "integer",
+                        example: 45,
+                      },
+                      patient_name: {
+                        type: "string",
+                        example: "Juan Pérez",
+                      },
+                    },
+                  },
+                },
               },
             },
           },

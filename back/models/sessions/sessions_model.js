@@ -285,18 +285,33 @@ const getSessionForWhatsApp = async (db, sessionId) => {
   return rows[0];
 };
 
-// Verificar si existe una sesión conflictiva en el mismo slot de tiempo
+// Verificar si existe una sesión con solapamiento de horarios
 // Verifica conflictos independientemente del paciente (control de horarios del psicólogo)
-const checkDuplicateSession = async (db, patient_id, session_date, start_time, excludeSessionId = null) => {
+// Una sesión se solapa si:
+// - La nueva sesión empieza antes de que termine una existente Y
+// - La nueva sesión termina después de que empiece una existente
+const checkTimeOverlap = async (db, session_date, start_time, end_time, excludeSessionId = null) => {
   let query = `
-    SELECT s.id, s.status, s.patient_id, CONCAT(p.first_name, ' ', p.last_name) as patient_name
+    SELECT s.id, s.start_time, s.end_time, s.status, s.patient_id,
+           CONCAT(p.first_name, ' ', p.last_name) as patient_name
     FROM sessions s
     LEFT JOIN patients p ON s.patient_id = p.id
-    WHERE s.session_date = ? AND s.start_time = ?
-    AND s.is_active = true AND s.status != 'cancelada'
+    WHERE s.session_date = ?
+      AND s.is_active = true
+      AND s.status != 'cancelada'
+      AND (
+        -- La nueva sesión empieza antes de que termine una existente
+        (? < s.end_time AND ? > s.start_time)
+        OR
+        -- La nueva sesión termina después de que empiece una existente
+        (? > s.start_time AND ? < s.end_time)
+        OR
+        -- La nueva sesión contiene completamente a una existente
+        (? <= s.start_time AND ? >= s.end_time)
+      )
   `;
 
-  const params = [session_date, start_time];
+  const params = [session_date, start_time, start_time, end_time, end_time, start_time, end_time];
 
   // Si estamos actualizando, excluir la sesión actual
   if (excludeSessionId) {
@@ -306,6 +321,13 @@ const checkDuplicateSession = async (db, patient_id, session_date, start_time, e
 
   const [rows] = await db.execute(query, params);
   return rows.length > 0 ? rows[0] : null;
+};
+
+// Mantener función legacy por compatibilidad (ahora usa checkTimeOverlap)
+const checkDuplicateSession = async (db, patient_id, session_date, start_time, excludeSessionId = null) => {
+  // Nota: Esta función ya no se usa, se mantiene solo por compatibilidad
+  // Usar checkTimeOverlap en su lugar
+  return null;
 };
 
 // Obtener KPIs globales de sesiones
@@ -337,5 +359,6 @@ module.exports = {
   deleteSession,
   getSessionForWhatsApp,
   checkDuplicateSession,
+  checkTimeOverlap,
   getSessionsKPIs,
 };
