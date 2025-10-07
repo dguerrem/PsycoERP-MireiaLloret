@@ -3,6 +3,8 @@ import {
   inject,
   signal,
   ChangeDetectionStrategy,
+  ViewChild,
+  ElementRef,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import {
@@ -26,6 +28,9 @@ import { NewSessionFormComponent } from './components/new-sesion-dialog/new-sess
 })
 export class CalendarComponent {
   private calendarService = inject(CalendarService);
+
+  @ViewChild('weekDateInput') weekDateInput?: ElementRef<HTMLInputElement>;
+  @ViewChild('monthInput') monthInput?: ElementRef<HTMLInputElement>;
 
   readonly currentDate = this.calendarService.currentDate;
   readonly currentView = this.calendarService.currentView;
@@ -120,6 +125,18 @@ export class CalendarComponent {
     const input = event.target as HTMLInputElement;
     if (input && typeof input.showPicker === 'function') {
       input.showPicker();
+    }
+  }
+
+  openWeekDatePicker(): void {
+    if (this.weekDateInput?.nativeElement && typeof this.weekDateInput.nativeElement.showPicker === 'function') {
+      this.weekDateInput.nativeElement.showPicker();
+    }
+  }
+
+  openMonthPicker(): void {
+    if (this.monthInput?.nativeElement && typeof this.monthInput.nativeElement.showPicker === 'function') {
+      this.monthInput.nativeElement.showPicker();
     }
   }
 
