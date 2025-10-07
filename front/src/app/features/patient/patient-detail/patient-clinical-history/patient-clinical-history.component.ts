@@ -101,10 +101,13 @@ export class PatientClinicalHistoryComponent implements OnInit, OnChanges {
 
     if (!search) return notes;
 
-    return notes.filter(note =>
-      note.title.toLowerCase().includes(search) ||
-      note.content.toLowerCase().includes(search)
-    );
+    return notes.filter(note => {
+      const titleMatch = note.title.toLowerCase().includes(search);
+      const contentMatch = note.content.toLowerCase().includes(search);
+      const dateMatch = this.formatDate(note.date).includes(search);
+
+      return titleMatch || contentMatch || dateMatch;
+    });
   });
 
   // Computed para notas ordenadas
