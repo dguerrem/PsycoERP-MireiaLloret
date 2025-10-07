@@ -378,7 +378,7 @@ export class BillingComponent implements OnInit {
         invoice_number: invoice.invoice_number,
         invoice_date: invoice.invoice_date,
         patient_id: originalData.patient_id,
-        session_ids: originalData.session_ids,
+        session_ids: originalData.sessions.map(s => s.session_id),
         concept: `Sesiones ${
           originalData.patient_full_name
         } - ${monthName} ${this.pendingYear()}`,

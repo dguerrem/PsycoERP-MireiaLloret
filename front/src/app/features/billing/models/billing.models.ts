@@ -27,14 +27,21 @@ export interface ClinicInfo {
   color: string;
 }
 
+export interface SessionDetail {
+  session_id: number;
+  session_date: string;
+  price: number;
+}
+
 export interface PendingInvoice {
   patient_id: number;
   patient_full_name: string;
   dni: string;
   email: string;
+  patient_address_line1: string;
+  patient_address_line2: string;
   clinic_name: string;
-  clinics: ClinicInfo[]; // Lista de clínicas donde tiene sesiones
-  session_ids: number[];
+  sessions: SessionDetail[];
   pending_sessions_count: number;
   total_gross: number;
 }
@@ -51,10 +58,16 @@ export interface ExistingInvoice {
   id: number;
   invoice_number: string;
   invoice_date: string;
+  patient_id: number;
   patient_full_name: string;
   dni: string;
+  email: string;
+  patient_address_line1: string;
+  patient_address_line2: string;
+  sessions: SessionDetail[];
   sessions_count: number;
   total: number;
+  concept: string;
 }
 
 export interface ExistingInvoicesResponse {
