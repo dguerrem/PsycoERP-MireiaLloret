@@ -353,9 +353,37 @@ const getIssuedInvoices = async (db, filters = {}) => {
   };
 };
 
+// Obtener el último número de factura del año especificado
+const getLastInvoiceNumber = async (db, year) => {
+  const [result] = await db.execute(
+    `SELECT invoice_number
+     FROM invoices
+     WHERE is_active = true
+       AND invoice_number LIKE ?
+     ORDER BY CAST(SUBSTRING_INDEX(invoice_number, '-', -1) AS UNSIGNED) DESC
+     LIMIT 1`,
+    [`FAC-${year}-%`]
+  );
+
+  if (result.length === 0) {
+    return 0;
+  }
+
+  // Extraer el número secuencial del formato FAC-YYYY-NNNN
+  const invoiceNumber = result[0].invoice_number;
+  const parts = invoiceNumber.split('-');
+
+  if (parts.length === 3) {
+    return parseInt(parts[2]) || 0;
+  }
+
+  return 0;
+};
+
 module.exports = {
   getInvoicesKPIs,
   getPendingInvoices,
   createInvoice,
-  getIssuedInvoices
+  getIssuedInvoices,
+  getLastInvoiceNumber
 };

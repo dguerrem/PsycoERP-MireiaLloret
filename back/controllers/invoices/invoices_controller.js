@@ -1,4 +1,4 @@
-const { getInvoicesKPIs, getPendingInvoices, createInvoice, getIssuedInvoices } = require("../../models/invoices/invoice_model");
+const { getInvoicesKPIs, getPendingInvoices, createInvoice, getIssuedInvoices, getLastInvoiceNumber } = require("../../models/invoices/invoice_model");
 
 // Obtener KPIs de facturación
 const obtenerKPIsFacturacion = async (req, res) => {
@@ -256,9 +256,49 @@ const obtenerFacturasEmitidas = async (req, res) => {
   }
 };
 
+// Obtener el último número de factura del año especificado
+const obtenerUltimoNumeroFactura = async (req, res) => {
+  try {
+    const { year } = req.query;
+
+    // Validar que el año sea obligatorio
+    if (!year) {
+      return res.status(400).json({
+        success: false,
+        error: "El parámetro 'year' es obligatorio"
+      });
+    }
+
+    // Validar formato del año
+    if (isNaN(parseInt(year)) || parseInt(year) < 2000) {
+      return res.status(400).json({
+        success: false,
+        error: "El año debe ser un número válido mayor a 2000"
+      });
+    }
+
+    const lastNumber = await getLastInvoiceNumber(req.db, parseInt(year));
+
+    res.json({
+      success: true,
+      data: {
+        year: parseInt(year),
+        last_invoice_number: lastNumber
+      }
+    });
+  } catch (err) {
+    console.error("Error al obtener último número de factura:", err.message);
+    res.status(500).json({
+      success: false,
+      error: "Error al obtener el último número de factura"
+    });
+  }
+};
+
 module.exports = {
   obtenerKPIsFacturacion,
   obtenerFacturasPendientes,
   generarFactura,
-  obtenerFacturasEmitidas
+  obtenerFacturasEmitidas,
+  obtenerUltimoNumeroFactura
 };
