@@ -500,6 +500,80 @@ const invoicesPaths = {
       },
     },
   },
+  "/api/invoices/last-number": {
+    get: {
+      tags: ["Invoices"],
+      summary: "Obtener último número de factura del año",
+      description:
+        "Obtiene el último número secuencial de factura emitida para el año especificado. Por ejemplo, si la última factura es FAC-2025-0017, devolverá 17. Si no hay facturas para ese año, devuelve 0.",
+      parameters: [
+        {
+          name: "year",
+          in: "query",
+          required: true,
+          schema: {
+            type: "integer",
+            minimum: 2000,
+          },
+          description: "Año para consultar el último número de factura (ej: 2025)",
+          example: 2025,
+        },
+      ],
+      responses: {
+        200: {
+          description: "Último número obtenido exitosamente",
+          content: {
+            "application/json": {
+              schema: {
+                type: "object",
+                properties: {
+                  success: {
+                    type: "boolean",
+                    example: true,
+                  },
+                  data: {
+                    type: "object",
+                    properties: {
+                      year: {
+                        type: "integer",
+                        description: "Año consultado",
+                        example: 2025,
+                      },
+                      last_invoice_number: {
+                        type: "integer",
+                        description: "Último número secuencial de factura (0 si no hay facturas)",
+                        example: 17,
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+        400: {
+          description: "Parámetro year faltante o inválido",
+          content: {
+            "application/json": {
+              schema: {
+                $ref: "#/components/schemas/ErrorResponse",
+              },
+            },
+          },
+        },
+        500: {
+          description: "Error del servidor",
+          content: {
+            "application/json": {
+              schema: {
+                $ref: "#/components/schemas/ErrorResponse",
+              },
+            },
+          },
+        },
+      },
+    },
+  },
 };
 
 module.exports = invoicesPaths;
