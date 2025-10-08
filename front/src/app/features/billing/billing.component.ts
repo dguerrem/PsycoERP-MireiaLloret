@@ -76,7 +76,8 @@ export class BillingComponent implements OnInit {
   selectedPatients = signal<string[]>([]);
 
   // Numeración de facturas
-  invoiceBaseNumber = signal(`FAC-${new Date().getFullYear()}`);
+  invoicePrefix = signal('FAC');
+  invoiceYear = signal(new Date().getFullYear());
   invoiceNextNumber = signal(1);
 
   // Modal state
@@ -124,7 +125,8 @@ export class BillingComponent implements OnInit {
   years = computed(() => {
     const currentYear = new Date().getFullYear();
     const years = [];
-    for (let i = currentYear - 2; i <= currentYear + 1; i++) {
+    // 5 años hacia atrás, año actual, y 5 años hacia adelante
+    for (let i = currentYear - 5; i <= currentYear + 5; i++) {
       years.push(i);
     }
     return years;
@@ -149,6 +151,7 @@ export class BillingComponent implements OnInit {
     this.loadKPIs();
     this.loadPendingInvoices();
     this.loadUserData();
+    this.loadLastInvoiceNumber();
   }
 
   /**
@@ -275,6 +278,57 @@ export class BillingComponent implements OnInit {
   }
 
   /**
+   * Valida el año cuando el usuario sale del campo (blur)
+   */
+  validateInvoiceYear() {
+    const year = this.invoiceYear();
+    if (year < 2000) {
+      this.invoiceYear.set(2000);
+      this.loadLastInvoiceNumber();
+    }
+  }
+
+  /**
+   * Maneja el cambio de año en el campo de numeración de facturas
+   */
+  onInvoiceYearChange() {
+    const year = this.invoiceYear();
+    // Solo cargar si el año es válido
+    if (year >= 2000) {
+      this.loadLastInvoiceNumber();
+    }
+  }
+
+  /**
+   * Carga el último número de factura para el año seleccionado
+   */
+  loadLastInvoiceNumber() {
+    this.billingService.getLastInvoiceNumber(this.invoiceYear()).subscribe({
+      next: (response: any) => {
+        // Manejar diferentes estructuras de respuesta
+        let lastNumber = 0;
+
+        if (response.data) {
+          // Si la respuesta viene envuelta en un objeto data
+          lastNumber = response.data.last_invoice_number || 0;
+        } else if (response.last_invoice_number !== undefined) {
+          // Si la respuesta viene directamente
+          lastNumber = response.last_invoice_number;
+        }
+
+        // El próximo número es el último + 1
+        const nextNumber = lastNumber + 1;
+        this.invoiceNextNumber.set(nextNumber);
+      },
+      error: (error) => {
+        console.error('Error loading last invoice number:', error);
+        // En caso de error, usar 1 como valor por defecto
+        this.invoiceNextNumber.set(1);
+      },
+    });
+  }
+
+  /**
    * Cambia entre tabs
    */
   onTabChange(tab: 'bulk' | 'existing') {
@@ -329,7 +383,7 @@ export class BillingComponent implements OnInit {
         email: inv.email,
         pending_sessions_count: inv.pending_sessions_count,
         total_gross: inv.total_gross,
-        invoice_number: `${this.invoiceBaseNumber()}-${this.padNumber(
+        invoice_number: `${this.invoicePrefix()}-${this.invoiceYear()}-${this.padNumber(
           this.invoiceNextNumber() + index
         )}`,
         invoice_date: new Date().toISOString().split('T')[0],
@@ -586,7 +640,7 @@ export class BillingComponent implements OnInit {
         email: inv.email,
         pending_sessions_count: inv.pending_sessions_count,
         total_gross: inv.total_gross,
-        invoice_number: `${this.invoiceBaseNumber()}-${this.padNumber(
+        invoice_number: `${this.invoicePrefix()}-${this.invoiceYear()}-${this.padNumber(
           this.invoiceNextNumber() + index
         )}`,
         invoice_date: new Date().toISOString().split('T')[0],
@@ -612,9 +666,17 @@ export class BillingComponent implements OnInit {
       await new Promise((resolve) => setTimeout(resolve, 150));
 
       try {
+        // Crear nombre de archivo descriptivo: "FACTURA-FAC-2025-0020-Juan_Perez"
+        const patientName = invoice.patient_full_name
+          .replace(/\s+/g, '_')  // Reemplazar espacios por guiones bajos
+          .normalize('NFD')       // Normalizar caracteres acentuados
+          .replace(/[\u0300-\u036f]/g, ''); // Eliminar acentos
+
+        const fileName = `FACTURA-${invoice.invoice_number}-${patientName}`;
+
         await this.pdfGenerator.generatePdfById(
           'hidden-invoice-content',
-          invoice.invoice_number
+          fileName
         );
       } catch (error) {
         console.error(

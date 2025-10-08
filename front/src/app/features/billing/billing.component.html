@@ -257,34 +257,54 @@
                   <!-- Card con inputs de numeración -->
                   <div data-slot="card" class="bg-card text-card-foreground flex flex-col gap-6 rounded-xl border py-6 shadow-sm mb-6">
                     <div data-slot="card-content" class="p-4">
-                      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
                         <div>
-                          <label data-slot="label" class="flex items-center gap-2 text-sm leading-none font-medium select-none" for="base-number">
-                            Número Base de Factura
+                          <label data-slot="label" class="flex items-center gap-2 text-sm leading-none font-medium select-none" for="invoice-prefix">
+                            Prefijo
                           </label>
                           <input
                             data-slot="input"
-                            id="base-number"
+                            id="invoice-prefix"
                             type="text"
-                            placeholder="FAC-2025"
-                            [(ngModel)]="invoiceBaseNumber"
+                            placeholder="FAC"
+                            [(ngModel)]="invoicePrefix"
+                            class="border-input h-9 w-full min-w-0 rounded-md border bg-white px-3 py-1 text-base shadow-xs transition-[color,box-shadow] outline-none md:text-sm focus-visible:ring-[3px]">
+                        </div>
+                        <div>
+                          <label data-slot="label" class="flex items-center gap-2 text-sm leading-none font-medium select-none" for="invoice-year">
+                            Año
+                          </label>
+                          <input
+                            data-slot="input"
+                            id="invoice-year"
+                            type="number"
+                            min="2000"
+                            max="2099"
+                            placeholder="2025"
+                            [(ngModel)]="invoiceYear"
+                            (blur)="validateInvoiceYear()"
+                            (ngModelChange)="onInvoiceYearChange()"
                             class="border-input h-9 w-full min-w-0 rounded-md border bg-white px-3 py-1 text-base shadow-xs transition-[color,box-shadow] outline-none md:text-sm focus-visible:ring-[3px]">
                         </div>
                         <div>
                           <label data-slot="label" class="flex items-center gap-2 text-sm leading-none font-medium select-none" for="next-number">
                             Próximo Número
                           </label>
-                          <input
-                            data-slot="input"
-                            id="next-number"
-                            type="number"
-                            min="1"
-                            [(ngModel)]="invoiceNextNumber"
-                            class="border-input h-9 w-full min-w-0 rounded-md border bg-white px-3 py-1 text-base shadow-xs transition-[color,box-shadow] outline-none md:text-sm focus-visible:ring-[3px]">
+                          <div class="relative">
+                            <input
+                              data-slot="input"
+                              id="next-number"
+                              type="number"
+                              min="1"
+                              [ngModel]="invoiceNextNumber()"
+                              readonly
+                              tabindex="-1"
+                              class="border-input h-9 w-full min-w-0 rounded-md border bg-gray-50 px-3 py-1 text-base shadow-xs outline-none md:text-sm cursor-default text-gray-700">
+                          </div>
                         </div>
                         <div class="flex items-end">
                           <div class="text-sm text-muted-foreground">
-                            <p>Ejemplo: {{ invoiceBaseNumber() }}-{{ padNumber(invoiceNextNumber()) }}</p>
+                            <p>Ejemplo: {{ invoicePrefix() }}-{{ invoiceYear() }}-{{ padNumber(invoiceNextNumber()) }}</p>
                             <p>Las siguientes facturas heredarán números correlativos</p>
                           </div>
                         </div>

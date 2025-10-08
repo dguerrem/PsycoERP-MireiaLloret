@@ -143,6 +143,24 @@ export class BillingService {
   }
 
   /**
+   * Obtiene el último número de factura para un año determinado
+   */
+  getLastInvoiceNumber(year: number): Observable<{ year: number; last_invoice_number: number }> {
+    const params = new HttpParams().set('year', year.toString());
+
+    return this.http.get<{ year: number; last_invoice_number: number }>(
+      `${this.baseUrl}/invoices/last-number`,
+      { params }
+    ).pipe(
+      catchError(error => {
+        console.error('Error al obtener último número de factura:', error);
+        // Si no hay facturas para ese año, devolver 0
+        return of({ year, last_invoice_number: 0 });
+      })
+    );
+  }
+
+  /**
    * Crea facturas en bulk
    */
   createBulkInvoices(invoices: CreateBulkInvoicesRequest): Observable<any> {

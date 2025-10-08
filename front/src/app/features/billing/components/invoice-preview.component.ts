@@ -64,9 +64,17 @@ export class InvoicePreviewComponent {
     if (!this.invoiceData) return;
 
     try {
+      // Crear nombre de archivo descriptivo: "FACTURA-FAC-2025-0020-Juan_Perez"
+      const patientName = this.invoiceData.patient_full_name
+        .replace(/\s+/g, '_')  // Reemplazar espacios por guiones bajos
+        .normalize('NFD')       // Normalizar caracteres acentuados
+        .replace(/[\u0300-\u036f]/g, ''); // Eliminar acentos
+
+      const fileName = `FACTURA-${this.invoiceData.invoice_number}-${patientName}`;
+
       await this.pdfGenerator.generatePdfById(
         'invoice-content',
-        this.invoiceData.invoice_number
+        fileName
       );
     } catch (error) {
       console.error('Error generando PDF:', error);
