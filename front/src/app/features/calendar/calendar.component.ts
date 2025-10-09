@@ -67,6 +67,10 @@ export class CalendarComponent {
   readonly pendingReminderSession = signal<SessionData | null>(null);
   readonly clinicConfigs = CLINIC_CONFIGS;
 
+  // Tooltip state
+  readonly hoveredSession = signal<SessionData | null>(null);
+  readonly tooltipPosition = signal<{ x: number; y: number }>({ x: 0, y: 0 });
+
   // Data to prefill when creating new session from calendar
   prefilledSessionData: {
     date: string;
@@ -659,5 +663,55 @@ export class CalendarComponent {
     });
 
     return layouts;
+  }
+
+  /**
+   * Maneja el evento de mouse enter sobre una sesión
+   */
+  onSessionMouseEnter(sessionData: SessionData, event: MouseEvent): void {
+    this.hoveredSession.set(sessionData);
+    this.updateTooltipPosition(event);
+  }
+
+  /**
+   * Maneja el evento de mouse leave sobre una sesión
+   */
+  onSessionMouseLeave(): void {
+    this.hoveredSession.set(null);
+  }
+
+  /**
+   * Actualiza la posición del tooltip
+   */
+  private updateTooltipPosition(event: MouseEvent): void {
+    const offset = 10;
+    this.tooltipPosition.set({
+      x: event.clientX + offset,
+      y: event.clientY + offset
+    });
+  }
+
+  /**
+   * Formatea la información de la sesión para el tooltip
+   */
+  getTooltipContent(sessionData: SessionData): {
+    patientName: string;
+    time: string;
+    clinic: string;
+    status: string;
+    price: string;
+    paymentMethod: string;
+    notes: string;
+  } {
+    const session = sessionData.SessionDetailData;
+    return {
+      patientName: session.PatientData.name,
+      time: `${this.formatTime(session.start_time)} - ${this.formatTime(session.end_time)}`,
+      clinic: session.ClinicDetailData.clinic_name || 'Sin clínica',
+      status: this.getSessionStatusText(sessionData),
+      price: this.formatPrice(session.price),
+      paymentMethod: this.formatPaymentMethod(session.payment_method),
+      notes: session.notes || 'Sin notas'
+    };
   }
 }
