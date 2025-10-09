@@ -167,7 +167,8 @@ export class SessionComponent implements OnInit {
     this.http.get<any>(`${environment.api.baseUrl}/sessions?${queryString}`).subscribe({
       next: (response) => {
         this.sessions.set(response.data);
-        this.totalSessions.set(response.pagination.total);
+        // The API returns totalRecords instead of total
+        this.totalSessions.set(response.pagination.totalRecords || response.pagination.total || 0);
         this.isLoading.set(false);
       },
       error: (error) => {
@@ -242,6 +243,11 @@ export class SessionComponent implements OnInit {
     const total = this.totalPages();
     const current = this.currentPage();
     const pages: number[] = [];
+
+    // If no total pages, return empty array
+    if (total === 0) {
+      return [];
+    }
 
     // Show max 5 pages
     let start = Math.max(1, current - 2);
