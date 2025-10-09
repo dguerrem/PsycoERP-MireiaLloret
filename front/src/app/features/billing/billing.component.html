@@ -346,9 +346,42 @@
                                   <th data-slot="table-head" class="text-foreground h-10 px-2 text-left align-middle font-medium whitespace-nowrap min-w-[80px]">Total</th>
                                   <th data-slot="table-head" class="text-foreground h-10 px-2 text-left align-middle font-medium whitespace-nowrap min-w-[100px]">Clínicas</th>
                                 </tr>
+                                <tr data-slot="table-row" class="border-b bg-muted/30">
+                                  <th data-slot="table-head" class="h-10 px-2"></th>
+                                  <th data-slot="table-head" class="h-10 px-2">
+                                    <input
+                                      type="text"
+                                      placeholder="Filtrar..."
+                                      [value]="pendingPatientFilter()"
+                                      (input)="pendingPatientFilter.set($any($event.target).value)"
+                                      data-slot="input"
+                                      class="border-input h-8 w-full min-w-0 rounded-md border bg-white px-2 py-1 text-xs shadow-xs outline-none focus-visible:ring-[2px]">
+                                  </th>
+                                  <th data-slot="table-head" class="h-10 px-2">
+                                    <input
+                                      type="text"
+                                      placeholder="Filtrar..."
+                                      [value]="pendingDniFilter()"
+                                      (input)="pendingDniFilter.set($any($event.target).value)"
+                                      data-slot="input"
+                                      class="border-input h-8 w-full min-w-0 rounded-md border bg-white px-2 py-1 text-xs shadow-xs outline-none focus-visible:ring-[2px]">
+                                  </th>
+                                  <th data-slot="table-head" class="h-10 px-2">
+                                    <input
+                                      type="text"
+                                      placeholder="Filtrar..."
+                                      [value]="pendingEmailFilter()"
+                                      (input)="pendingEmailFilter.set($any($event.target).value)"
+                                      data-slot="input"
+                                      class="border-input h-8 w-full min-w-0 rounded-md border bg-white px-2 py-1 text-xs shadow-xs outline-none focus-visible:ring-[2px]">
+                                  </th>
+                                  <th data-slot="table-head" class="h-10 px-2"></th>
+                                  <th data-slot="table-head" class="h-10 px-2"></th>
+                                  <th data-slot="table-head" class="h-10 px-2"></th>
+                                </tr>
                               </thead>
                               <tbody data-slot="table-body" class="[&_tr:last-child]:border-0">
-                                @for (invoice of pendingInvoices(); track invoice.dni) {
+                                @for (invoice of filteredPendingInvoices(); track invoice.dni) {
                                   <tr data-slot="table-row" class="hover:bg-muted/50 border-b transition-colors">
                                     <td data-slot="table-cell" class="p-2 align-middle whitespace-nowrap">
                                       <input
@@ -455,9 +488,50 @@
                                   <th data-slot="table-head" class="text-foreground h-10 px-2 text-left align-middle font-medium whitespace-nowrap min-w-[100px]">Total</th>
                                   <th data-slot="table-head" class="text-foreground h-10 px-2 text-left align-middle font-medium whitespace-nowrap min-w-[80px]">Acciones</th>
                                 </tr>
+                                <tr data-slot="table-row" class="border-b bg-muted/30">
+                                  <th data-slot="table-head" class="h-10 px-2">
+                                    <input
+                                      type="text"
+                                      placeholder="Filtrar..."
+                                      [value]="existingInvoiceNumberFilter()"
+                                      (input)="existingInvoiceNumberFilter.set($any($event.target).value)"
+                                      data-slot="input"
+                                      class="border-input h-8 w-full min-w-0 rounded-md border bg-white px-2 py-1 text-xs shadow-xs outline-none focus-visible:ring-[2px]">
+                                  </th>
+                                  <th data-slot="table-head" class="h-10 px-2">
+                                    <input
+                                      type="text"
+                                      placeholder="Filtrar..."
+                                      [value]="existingDateFilter()"
+                                      (input)="existingDateFilter.set($any($event.target).value)"
+                                      data-slot="input"
+                                      class="border-input h-8 w-full min-w-0 rounded-md border bg-white px-2 py-1 text-xs shadow-xs outline-none focus-visible:ring-[2px]">
+                                  </th>
+                                  <th data-slot="table-head" class="h-10 px-2">
+                                    <input
+                                      type="text"
+                                      placeholder="Filtrar..."
+                                      [value]="existingPatientFilter()"
+                                      (input)="existingPatientFilter.set($any($event.target).value)"
+                                      data-slot="input"
+                                      class="border-input h-8 w-full min-w-0 rounded-md border bg-white px-2 py-1 text-xs shadow-xs outline-none focus-visible:ring-[2px]">
+                                  </th>
+                                  <th data-slot="table-head" class="h-10 px-2">
+                                    <input
+                                      type="text"
+                                      placeholder="Filtrar..."
+                                      [value]="existingDniFilter()"
+                                      (input)="existingDniFilter.set($any($event.target).value)"
+                                      data-slot="input"
+                                      class="border-input h-8 w-full min-w-0 rounded-md border bg-white px-2 py-1 text-xs shadow-xs outline-none focus-visible:ring-[2px]">
+                                  </th>
+                                  <th data-slot="table-head" class="h-10 px-2"></th>
+                                  <th data-slot="table-head" class="h-10 px-2"></th>
+                                  <th data-slot="table-head" class="h-10 px-2"></th>
+                                </tr>
                               </thead>
                               <tbody data-slot="table-body" class="[&_tr:last-child]:border-0">
-                                @for (invoice of existingInvoices(); track invoice.id) {
+                                @for (invoice of filteredExistingInvoices(); track invoice.id) {
                                   <tr data-slot="table-row" class="hover:bg-muted/50 border-b transition-colors">
                                     <td data-slot="table-cell" class="p-2 align-middle whitespace-nowrap font-medium text-primary">{{ invoice.invoice_number }}</td>
                                     <td data-slot="table-cell" class="p-2 align-middle whitespace-nowrap">{{ invoice.invoice_date }}</td>

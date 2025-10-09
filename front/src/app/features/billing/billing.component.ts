@@ -106,6 +106,15 @@ export class BillingComponent implements OnInit {
   // Bulk invoice generation state
   isGeneratingBulkInvoices = signal(false);
 
+  // Filter states
+  pendingPatientFilter = signal('');
+  pendingDniFilter = signal('');
+  pendingEmailFilter = signal('');
+  existingInvoiceNumberFilter = signal('');
+  existingDateFilter = signal('');
+  existingPatientFilter = signal('');
+  existingDniFilter = signal('');
+
   // Computed signals
   monthNames = [
     'Enero',
@@ -145,6 +154,40 @@ export class BillingComponent implements OnInit {
     return this.pendingInvoices()
       .filter((inv) => selected.includes(inv.dni))
       .reduce((sum, inv) => sum + inv.total_gross, 0);
+  });
+
+  // Filtered pending invoices
+  filteredPendingInvoices = computed(() => {
+    const invoices = this.pendingInvoices();
+    const patientFilter = this.pendingPatientFilter().toLowerCase();
+    const dniFilter = this.pendingDniFilter().toLowerCase();
+    const emailFilter = this.pendingEmailFilter().toLowerCase();
+
+    return invoices.filter(invoice => {
+      const matchesPatient = invoice.patient_full_name.toLowerCase().includes(patientFilter);
+      const matchesDni = invoice.dni.toLowerCase().includes(dniFilter);
+      const matchesEmail = invoice.email.toLowerCase().includes(emailFilter);
+
+      return matchesPatient && matchesDni && matchesEmail;
+    });
+  });
+
+  // Filtered existing invoices
+  filteredExistingInvoices = computed(() => {
+    const invoices = this.existingInvoices();
+    const invoiceNumberFilter = this.existingInvoiceNumberFilter().toLowerCase();
+    const dateFilter = this.existingDateFilter().toLowerCase();
+    const patientFilter = this.existingPatientFilter().toLowerCase();
+    const dniFilter = this.existingDniFilter().toLowerCase();
+
+    return invoices.filter(invoice => {
+      const matchesInvoiceNumber = invoice.invoice_number.toLowerCase().includes(invoiceNumberFilter);
+      const matchesDate = invoice.invoice_date.toLowerCase().includes(dateFilter);
+      const matchesPatient = invoice.patient_full_name.toLowerCase().includes(patientFilter);
+      const matchesDni = invoice.dni.toLowerCase().includes(dniFilter);
+
+      return matchesInvoiceNumber && matchesDate && matchesPatient && matchesDni;
+    });
   });
 
   ngOnInit() {
