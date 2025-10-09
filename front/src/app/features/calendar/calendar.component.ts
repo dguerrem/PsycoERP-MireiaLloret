@@ -18,6 +18,26 @@ import {
 import { CalendarService } from './services/calendar.service';
 import { NewSessionFormComponent } from './components/new-sesion-dialog/new-session-form.component';
 
+/**
+ * Representa un fragmento de sesión dentro de un slot horario específico
+ */
+interface SessionFragment {
+  sessionData: SessionData;
+  slotHour: string; // "17:00"
+  topPercent: number; // Posición top en porcentaje (0-100)
+  heightPercent: number; // Altura en porcentaje (0-100)
+  isCancelled: boolean;
+}
+
+/**
+ * Información de layout para posicionar sesiones con colisiones
+ */
+interface SessionLayout extends SessionFragment {
+  leftPercent: number; // Posición left en porcentaje (0-100)
+  widthPercent: number; // Ancho en porcentaje (0-100)
+  zIndex: number; // z-index para control de apilamiento
+}
+
 @Component({
   selector: 'app-calendar',
   standalone: true,
@@ -430,5 +450,214 @@ export class CalendarComponent {
       const bStartTime = b.SessionDetailData.start_time;
       return aStartTime.localeCompare(bStartTime);
     });
+  }
+
+  /**
+   * Calcula los fragmentos de sesiones para un slot horario específico
+   * Una sesión puede cruzar múltiples slots (ej: 17:30-18:30)
+   */
+  getSessionFragmentsForSlot(date: Date, hour: string): SessionFragment[] {
+    const allSessionsForDate = this.getSessionDataForDate(date);
+    const fragments: SessionFragment[] = [];
+
+    // Parse slot hour (ej: "17:00" -> 17.0)
+    const [slotHourNum, slotMinNum] = hour.split(':').map(Number);
+    const slotStartMinutes = slotHourNum * 60 + slotMinNum;
+    const slotEndMinutes = slotStartMinutes + 60; // Cada slot es de 1 hora
+
+    allSessionsForDate.forEach(sessionData => {
+      const startTime = sessionData.SessionDetailData.start_time; // "17:30:00"
+      const endTime = sessionData.SessionDetailData.end_time; // "18:30:00"
+
+      // Parse session times to minutes
+      const [startHour, startMin] = startTime.split(':').map(Number);
+      const [endHour, endMin] = endTime.split(':').map(Number);
+      const sessionStartMinutes = startHour * 60 + startMin;
+      const sessionEndMinutes = endHour * 60 + endMin;
+
+      // Check if session overlaps with this slot
+      const overlaps = sessionStartMinutes < slotEndMinutes && sessionEndMinutes > slotStartMinutes;
+
+      if (overlaps) {
+        // Calculate the portion of the session that falls within this slot
+        const overlapStart = Math.max(sessionStartMinutes, slotStartMinutes);
+        const overlapEnd = Math.min(sessionEndMinutes, slotEndMinutes);
+
+        // Calculate top and height as percentages
+        const topPercent = ((overlapStart - slotStartMinutes) / 60) * 100;
+        const heightPercent = ((overlapEnd - overlapStart) / 60) * 100;
+
+        fragments.push({
+          sessionData,
+          slotHour: hour,
+          topPercent,
+          heightPercent,
+          isCancelled: this.isSessionCancelled(sessionData)
+        });
+      }
+    });
+
+    // Sort: active sessions first, then by start time
+    return fragments.sort((a, b) => {
+      if (!a.isCancelled && b.isCancelled) return -1;
+      if (a.isCancelled && !b.isCancelled) return 1;
+      return a.sessionData.SessionDetailData.start_time.localeCompare(
+        b.sessionData.SessionDetailData.start_time
+      );
+    });
+  }
+
+  /**
+   * Obtiene sesiones que COMIENZAN en este slot (para evitar duplicados)
+   */
+  getSessionsStartingInSlot(date: Date, hour: string): SessionData[] {
+    const allSessionsForDate = this.getSessionDataForDate(date);
+    const [slotHourNum] = hour.split(':').map(Number);
+
+    return allSessionsForDate.filter(sessionData => {
+      const [startHour] = sessionData.SessionDetailData.start_time.split(':').map(Number);
+      return startHour === slotHourNum;
+    }).sort((a, b) => {
+      const aIsCancelled = this.isSessionCancelled(a);
+      const bIsCancelled = this.isSessionCancelled(b);
+      if (!aIsCancelled && bIsCancelled) return -1;
+      if (aIsCancelled && !bIsCancelled) return 1;
+      return a.SessionDetailData.start_time.localeCompare(b.SessionDetailData.start_time);
+    });
+  }
+
+  /**
+   * Calcula posición y altura para sesión que puede cruzar slots
+   */
+  calculateSessionPosition(sessionData: SessionData, slotHour: string): { topPercent: number; heightPercent: number } {
+    const startTime = sessionData.SessionDetailData.start_time;
+    const endTime = sessionData.SessionDetailData.end_time;
+
+    const [startHour, startMin] = startTime.split(':').map(Number);
+    const [endHour, endMin] = endTime.split(':').map(Number);
+    const [slotHourNum] = slotHour.split(':').map(Number);
+
+    const sessionStartMinutes = startHour * 60 + startMin;
+    const sessionEndMinutes = endHour * 60 + endMin;
+    const slotStartMinutes = slotHourNum * 60;
+
+    // Top: posición dentro del slot inicial
+    const topMinutes = sessionStartMinutes - slotStartMinutes;
+    const topPercent = (topMinutes / 60) * 100;
+
+    // Height: duración total (puede ser > 100% si cruza slots)
+    const durationMinutes = sessionEndMinutes - sessionStartMinutes;
+    const heightPercent = (durationMinutes / 60) * 100;
+
+    return { topPercent, heightPercent };
+  }
+
+  /**
+   * Calcula el layout de las sesiones detectando colisiones y distribuyendo horizontalmente
+   * Solo renderiza sesiones que COMIENZAN en este slot (evita duplicados)
+   */
+  getSessionLayoutsForSlot(date: Date, hour: string): SessionLayout[] {
+    const sessionsInSlot = this.getSessionsStartingInSlot(date, hour);
+
+    if (sessionsInSlot.length === 0) {
+      return [];
+    }
+
+    const layouts: SessionLayout[] = [];
+    const activeSessions = sessionsInSlot.filter(s => !this.isSessionCancelled(s));
+    const cancelledSessions = sessionsInSlot.filter(s => this.isSessionCancelled(s));
+
+    // Una sola sesión: ocupa todo el ancho
+    if (sessionsInSlot.length === 1) {
+      const session = sessionsInSlot[0];
+      const position = this.calculateSessionPosition(session, hour);
+      return [{
+        sessionData: session,
+        slotHour: hour,
+        topPercent: position.topPercent,
+        heightPercent: position.heightPercent,
+        isCancelled: this.isSessionCancelled(session),
+        leftPercent: 0,
+        widthPercent: 100,
+        zIndex: this.isSessionCancelled(session) ? 1 : 10
+      }];
+    }
+
+    // Si solo hay sesiones canceladas, distribuirlas horizontalmente
+    if (activeSessions.length === 0 && cancelledSessions.length > 0) {
+      const width = 100 / cancelledSessions.length;
+      cancelledSessions.forEach((session, index) => {
+        const position = this.calculateSessionPosition(session, hour);
+        layouts.push({
+          sessionData: session,
+          slotHour: hour,
+          topPercent: position.topPercent,
+          heightPercent: position.heightPercent,
+          isCancelled: true,
+          leftPercent: index * width,
+          widthPercent: width - 1.5,
+          zIndex: 1
+        });
+      });
+      return layouts;
+    }
+
+    // Si hay sesiones activas y canceladas
+    // Distribuir todas horizontalmente (activas primero, canceladas después)
+    if (activeSessions.length > 0 && cancelledSessions.length > 0) {
+      const totalSessions = activeSessions.length + cancelledSessions.length;
+      const sessionWidth = 100 / totalSessions;
+
+      // Colocar sesiones activas primero (a la izquierda)
+      activeSessions.forEach((session, index) => {
+        const position = this.calculateSessionPosition(session, hour);
+        layouts.push({
+          sessionData: session,
+          slotHour: hour,
+          topPercent: position.topPercent,
+          heightPercent: position.heightPercent,
+          isCancelled: false,
+          leftPercent: index * sessionWidth,
+          widthPercent: sessionWidth - 1,
+          zIndex: 10
+        });
+      });
+
+      // Colocar sesiones canceladas después (a la derecha)
+      cancelledSessions.forEach((session, index) => {
+        const position = this.calculateSessionPosition(session, hour);
+        const positionIndex = activeSessions.length + index;
+        layouts.push({
+          sessionData: session,
+          slotHour: hour,
+          topPercent: position.topPercent,
+          heightPercent: position.heightPercent,
+          isCancelled: true,
+          leftPercent: positionIndex * sessionWidth,
+          widthPercent: sessionWidth - 1,
+          zIndex: 5
+        });
+      });
+
+      return layouts;
+    }
+
+    // Solo sesiones activas: distribuir horizontalmente
+    const width = 100 / activeSessions.length;
+    activeSessions.forEach((session, index) => {
+      const position = this.calculateSessionPosition(session, hour);
+      layouts.push({
+        sessionData: session,
+        slotHour: hour,
+        topPercent: position.topPercent,
+        heightPercent: position.heightPercent,
+        isCancelled: false,
+        leftPercent: index * width,
+        widthPercent: width - 1.5,
+        zIndex: 10
+      });
+    });
+
+    return layouts;
   }
 }
