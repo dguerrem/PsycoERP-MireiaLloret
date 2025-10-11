@@ -98,18 +98,17 @@
                 [class.border-red-500]="dateFromError()"
                 class="w-full px-2 py-1.5 text-xs border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-cyan-500">
               @if (dateFromError()) {
-                <p class="text-red-600 text-xs mt-1">{{ dateFromError() }}</p>
+              <p class="text-red-600 text-xs mt-1">{{ dateFromError() }}</p>
               }
             </div>
 
             <div>
               <label class="text-xs font-medium block mb-1">Fecha Hasta</label>
               <input type="date" [value]="filters().dateTo"
-                (change)="onFilterChange('dateTo', $any($event.target).value)"
-                [class.border-red-500]="dateToError()"
+                (change)="onFilterChange('dateTo', $any($event.target).value)" [class.border-red-500]="dateToError()"
                 class="w-full px-2 py-1.5 text-xs border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-cyan-500">
               @if (dateToError()) {
-                <p class="text-red-600 text-xs mt-1">{{ dateToError() }}</p>
+              <p class="text-red-600 text-xs mt-1">{{ dateToError() }}</p>
               }
             </div>
           </div>
@@ -125,28 +124,7 @@
       </div>
     </div>
 
-    <!-- Pagination Controls (Top) -->
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-2">
-      <div class="flex items-center gap-4">
-        <div class="flex items-center gap-2">
-          <span class="text-sm text-muted-foreground">Mostrar:</span>
-          <select (change)="onPageSizeChange($event)" [value]="pageSize()" data-slot="select-trigger"
-            data-size="default"
-            class="border-input focus-visible:border-ring focus-visible:ring-ring/50 flex items-center justify-between gap-2 rounded-md border border-gray-300 bg-white px-3 py-2 text-sm whitespace-nowrap shadow-xs transition-[color,box-shadow] outline-none focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-50 h-9 w-20">
-            @for (size of pageSizeOptions; track size) {
-            <option [value]="size">{{ size }}</option>
-            }
-          </select>
-          <span class="text-sm text-muted-foreground">por página</span>
-        </div>
-        @if (totalSessions() > 0) {
-        <span class="text-sm text-muted-foreground">
-          Mostrando {{ ((currentPage() - 1) * pageSize()) + 1 }} - {{ Math.min(currentPage() * pageSize(),
-          totalSessions()) }} de {{ totalSessions() }} sesiones
-        </span>
-        }
-      </div>
-
       <!-- Pagination Buttons -->
       <div class="flex items-center gap-2">
         <button (click)="goToPage(currentPage() - 1)" [disabled]="currentPage() === 1" data-slot="button"
@@ -173,8 +151,6 @@
           </button>
           }
           }
-          } @else {
-          <span class="text-sm text-muted-foreground px-2">Cargando...</span>
           }
         </div>
 
@@ -252,20 +228,23 @@
                 <!-- Precio Base -->
                 <td class="p-2 font-medium text-muted-foreground">
                   @if (session.SessionDetailData.price_brute) {
-                    {{ session.SessionDetailData.price_brute }}€
+                  {{ session.SessionDetailData.price_brute }}€
                   } @else {
-                    -
+                  -
                   }
                 </td>
                 <!-- Comisión Clínica -->
                 <td class="p-2">
-                  @if (session.SessionDetailData.price_brute && session.SessionDetailData.ClinicDetailData.clinic_percentage) {
-                    <div class="text-sm text-orange-600">
-                      <span class="font-medium">{{ (session.SessionDetailData.price_brute - session.SessionDetailData.price).toFixed(2) }}€</span>
-                      <span class="text-muted-foreground ml-1">({{ session.SessionDetailData.ClinicDetailData.clinic_percentage }}%)</span>
-                    </div>
+                  @if (session.SessionDetailData.price_brute &&
+                  session.SessionDetailData.ClinicDetailData.clinic_percentage) {
+                  <div class="text-sm text-orange-600">
+                    <span class="font-medium">{{ (session.SessionDetailData.price_brute -
+                      session.SessionDetailData.price).toFixed(2) }}€</span>
+                    <span class="text-muted-foreground ml-1">({{
+                      session.SessionDetailData.ClinicDetailData.clinic_percentage }}%)</span>
+                  </div>
                   } @else {
-                    <span class="text-muted-foreground">-</span>
+                  <span class="text-muted-foreground">-</span>
                   }
                 </td>
                 <!-- Tu Neto -->

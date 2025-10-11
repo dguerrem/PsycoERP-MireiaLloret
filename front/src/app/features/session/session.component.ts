@@ -60,7 +60,8 @@ export class SessionComponent implements OnInit {
   Math = Math;
 
   // State signals
-  sessions = signal<SessionData[]>([]);
+  allSessions = signal<SessionData[]>([]); // All sessions from API
+  sessions = signal<SessionData[]>([]); // Current page sessions
   clinics = signal<Clinic[]>([]);
   isLoading = signal(false);
   totalSessions = signal(0);
@@ -82,15 +83,14 @@ export class SessionComponent implements OnInit {
     dateTo: this.getTodayDate(),
   });
 
-  // Pagination signals
+  // Pagination signals (frontend only)
   currentPage = signal(1);
-  pageSize = signal(25);
+  pageSize = signal(10);
   pageSizeOptions = [10, 25, 50, 100];
 
-  // Computed values - Now sessions come directly from API with pagination
+  // Computed values - Calculate stats from all sessions
   stats = computed(() => {
-    const sessions = this.sessions();
-    debugger;
+    const allSessions = this.allSessions();
     const stats: SessionStats = {
       total: this.totalSessions(),
       completada: 0,
@@ -98,8 +98,8 @@ export class SessionComponent implements OnInit {
       totalRevenue: 0,
     };
 
-    // Calculate stats from current page only (for display)
-    sessions.forEach((session) => {
+    // Calculate stats from all sessions (not just current page)
+    allSessions.forEach((session) => {
       const status = this.getSessionStatus(session);
       if (status === 'completada') stats.completada++;
       if (status === 'cancelada') stats.cancelada++;
@@ -141,13 +141,11 @@ export class SessionComponent implements OnInit {
     this.isLoading.set(true);
 
     const currentFilters = this.filters();
-    const page = this.currentPage();
-    const limit = this.pageSize();
 
-    // Build query params
+    // Build query params - always request 5000 sessions
     const params: any = {
-      page: page.toString(),
-      limit: limit.toString(),
+      page: '1',
+      limit: '5000',
     };
 
     if (currentFilters.clinicId) {
@@ -179,11 +177,13 @@ export class SessionComponent implements OnInit {
       .get<any>(`${environment.api.baseUrl}/sessions?${queryString}`)
       .subscribe({
         next: (response) => {
-          this.sessions.set(response.data);
-          // The API returns totalRecords instead of total
-          this.totalSessions.set(
-            response.pagination.totalRecords || response.pagination.total || 0
-          );
+          // Store all sessions
+          this.allSessions.set(response.data);
+          this.totalSessions.set(response.data.length);
+
+          // Apply frontend pagination
+          this.updatePaginatedSessions();
+
           this.isLoading.set(false);
         },
         error: (error) => {
@@ -191,6 +191,17 @@ export class SessionComponent implements OnInit {
           this.isLoading.set(false);
         },
       });
+  }
+
+  private updatePaginatedSessions(): void {
+    const allSessions = this.allSessions();
+    const page = this.currentPage();
+    const size = this.pageSize();
+
+    const startIndex = (page - 1) * size;
+    const endIndex = startIndex + size;
+
+    this.sessions.set(allSessions.slice(startIndex, endIndex));
   }
 
   onFilterChange(filterName: keyof SessionFilters, value: any): void {
@@ -247,12 +258,12 @@ export class SessionComponent implements OnInit {
     const target = event.target as HTMLSelectElement;
     this.pageSize.set(Number(target.value));
     this.currentPage.set(1);
-    this.loadSessions();
+    this.updatePaginatedSessions();
   }
 
   goToPage(page: number): void {
     this.currentPage.set(page);
-    this.loadSessions();
+    this.updatePaginatedSessions();
   }
 
   getSessionStatus(session: SessionData): 'completada' | 'cancelada' {
