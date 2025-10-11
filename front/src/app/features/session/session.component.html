@@ -11,7 +11,7 @@
     </div>
 
     <!-- Stats Cards -->
-    <div class="grid grid-cols-1 md:grid-cols-5 gap-4 mb-6">
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
       <div class="bg-card rounded-xl border py-6 shadow-sm">
         <div class="p-4 text-center">
           <div class="text-2xl font-bold text-primary">{{ stats().total }}</div>
@@ -21,21 +21,14 @@
 
       <div class="bg-card rounded-xl border py-6 shadow-sm">
         <div class="p-4 text-center">
-          <div class="text-2xl font-bold text-green-600">{{ stats().completed }}</div>
+          <div class="text-2xl font-bold text-green-600">{{ stats().completada }}</div>
           <p class="text-sm text-muted-foreground">Completadas</p>
         </div>
       </div>
 
       <div class="bg-card rounded-xl border py-6 shadow-sm">
         <div class="p-4 text-center">
-          <div class="text-2xl font-bold text-blue-600">{{ stats().scheduled }}</div>
-          <p class="text-sm text-muted-foreground">Programadas</p>
-        </div>
-      </div>
-
-      <div class="bg-card rounded-xl border py-6 shadow-sm">
-        <div class="p-4 text-center">
-          <div class="text-2xl font-bold text-red-600">{{ stats().cancelled }}</div>
+          <div class="text-2xl font-bold text-red-600">{{ stats().cancelada }}</div>
           <p class="text-sm text-muted-foreground">Canceladas</p>
         </div>
       </div>
@@ -219,7 +212,6 @@
                 <th class="h-10 px-2 text-left font-medium">Estado</th>
                 <th class="h-10 px-2 text-left font-medium">Precio</th>
                 <th class="h-10 px-2 text-left font-medium">Pago</th>
-                <th class="h-10 px-2 text-left font-medium">Notas</th>
               </tr>
             </thead>
             <tbody>
@@ -264,7 +256,6 @@
                     </td>
                     <td class="p-2 font-semibold">{{ session.SessionDetailData.price }}€</td>
                     <td class="p-2 capitalize">{{ formatPaymentMethod(session.SessionDetailData.payment_method) }}</td>
-                    <td class="p-2 max-w-32 truncate">{{ session.SessionDetailData.notes || '-' }}</td>
                   </tr>
                 }
               }

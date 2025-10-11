@@ -1,4 +1,11 @@
-import { Component, ChangeDetectionStrategy, OnInit, inject, signal, computed } from '@angular/core';
+import {
+  Component,
+  ChangeDetectionStrategy,
+  OnInit,
+  inject,
+  signal,
+  computed,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { SessionsService } from '../calendar/services/sessions.service';
@@ -19,9 +26,8 @@ interface SessionFilters {
 
 interface SessionStats {
   total: number;
-  completed: number;
-  scheduled: number;
-  cancelled: number;
+  completada: number;
+  cancelada: number;
   totalRevenue: number;
 }
 
@@ -44,7 +50,7 @@ interface SessionStats {
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule, ClinicSelectorComponent],
   templateUrl: './session.component.html',
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class SessionComponent implements OnInit {
   private sessionsService = inject(SessionsService);
@@ -69,7 +75,7 @@ export class SessionComponent implements OnInit {
     status: null,
     paymentMethod: null,
     dateFrom: '',
-    dateTo: ''
+    dateTo: '',
   });
 
   // Pagination signals
@@ -80,20 +86,19 @@ export class SessionComponent implements OnInit {
   // Computed values - Now sessions come directly from API with pagination
   stats = computed(() => {
     const sessions = this.sessions();
-
+    debugger;
     const stats: SessionStats = {
       total: this.totalSessions(),
-      completed: 0,
-      scheduled: 0,
-      cancelled: 0,
-      totalRevenue: 0
+      completada: 0,
+      cancelada: 0,
+      totalRevenue: 0,
     };
 
     // Calculate stats from current page only (for display)
-    sessions.forEach(session => {
+    sessions.forEach((session) => {
       const status = this.getSessionStatus(session);
-      if (status === 'completada') stats.scheduled++;
-      if (status === 'cancelada') stats.cancelled++;
+      if (status === 'completada') stats.completada++;
+      if (status === 'cancelada') stats.cancelada++;
     });
 
     return stats;
@@ -110,18 +115,20 @@ export class SessionComponent implements OnInit {
   }
 
   private loadClinics(): void {
-    this.http.get<{ data: Clinic[] }>(`${environment.api.baseUrl}/clinics`).subscribe({
-      next: (response) => {
-        this.clinics.set(response.data);
-      },
-      error: (error) => {
-        console.error('Error loading clinics:', error);
-      }
-    });
+    this.http
+      .get<{ data: Clinic[] }>(`${environment.api.baseUrl}/clinics`)
+      .subscribe({
+        next: (response) => {
+          this.clinics.set(response.data);
+        },
+        error: (error) => {
+          console.error('Error loading clinics:', error);
+        },
+      });
   }
 
   private setupClinicControlSubscription(): void {
-    this.clinicControl.valueChanges.subscribe(value => {
+    this.clinicControl.valueChanges.subscribe((value) => {
       this.onFilterChange('clinicId', value);
     });
   }
@@ -136,7 +143,7 @@ export class SessionComponent implements OnInit {
     // Build query params
     const params: any = {
       page: page.toString(),
-      limit: limit.toString()
+      limit: limit.toString(),
     };
 
     if (currentFilters.clinicId) {
@@ -161,25 +168,29 @@ export class SessionComponent implements OnInit {
 
     // Build query string
     const queryString = Object.keys(params)
-      .map(key => `${key}=${params[key]}`)
+      .map((key) => `${key}=${params[key]}`)
       .join('&');
 
-    this.http.get<any>(`${environment.api.baseUrl}/sessions?${queryString}`).subscribe({
-      next: (response) => {
-        this.sessions.set(response.data);
-        // The API returns totalRecords instead of total
-        this.totalSessions.set(response.pagination.totalRecords || response.pagination.total || 0);
-        this.isLoading.set(false);
-      },
-      error: (error) => {
-        console.error('Error loading sessions:', error);
-        this.isLoading.set(false);
-      }
-    });
+    this.http
+      .get<any>(`${environment.api.baseUrl}/sessions?${queryString}`)
+      .subscribe({
+        next: (response) => {
+          this.sessions.set(response.data);
+          // The API returns totalRecords instead of total
+          this.totalSessions.set(
+            response.pagination.totalRecords || response.pagination.total || 0
+          );
+          this.isLoading.set(false);
+        },
+        error: (error) => {
+          console.error('Error loading sessions:', error);
+          this.isLoading.set(false);
+        },
+      });
   }
 
   onFilterChange(filterName: keyof SessionFilters, value: any): void {
-    this.filters.update(f => ({ ...f, [filterName]: value }));
+    this.filters.update((f) => ({ ...f, [filterName]: value }));
     this.currentPage.set(1);
     this.loadSessions();
   }
@@ -191,7 +202,7 @@ export class SessionComponent implements OnInit {
       status: null,
       paymentMethod: null,
       dateFrom: '',
-      dateTo: ''
+      dateTo: '',
     });
     this.clinicControl.setValue(null);
     this.currentPage.set(1);
@@ -216,16 +227,18 @@ export class SessionComponent implements OnInit {
 
   getStatusClass(status: string): string {
     const classes = {
-      'completada': 'bg-green-100 text-green-800',
-      'cancelada': 'bg-red-100 text-red-800'
+      completada: 'bg-green-100 text-green-800',
+      cancelada: 'bg-red-100 text-red-800',
     };
-    return classes[status as keyof typeof classes] || 'bg-gray-100 text-gray-800';
+    return (
+      classes[status as keyof typeof classes] || 'bg-gray-100 text-gray-800'
+    );
   }
 
   getStatusText(status: string): string {
     const texts = {
-      'completada': 'Completada',
-      'cancelada': 'Cancelada'
+      completada: 'Completada',
+      cancelada: 'Cancelada',
     };
     return texts[status as keyof typeof texts] || status;
   }
