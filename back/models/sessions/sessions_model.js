@@ -30,7 +30,8 @@ const getSessions = async (db, filters = {}) => {
             CONCAT(p.first_name, ' ', p.last_name) AS patient_name,
             c.id AS clinic_id,
             c.name AS clinic_name,
-            c.clinic_color
+            c.clinic_color,
+            c.percentage AS clinic_percentage
         FROM sessions s
         LEFT JOIN patients p ON s.patient_id = p.id AND p.is_active = true AND p.status = 'en curso'
         LEFT JOIN clinics c ON s.clinic_id = c.id AND c.is_active = true
@@ -114,6 +115,21 @@ const getSessions = async (db, filters = {}) => {
         [row.patient_id]
       );
 
+      // Calcular el precio bruto (lo que cobra la clínica al paciente)
+      // Si price es el neto del psicólogo y clinic_percentage es el % que recibe el psicólogo
+      // entonces: bruto = neto / (porcentaje/100)
+      // Ejemplo: neto=98, porcentaje=70 -> bruto = 98 / 0.70 = 140
+      let priceBrute = null;
+      if (row.price && row.clinic_percentage) {
+        const netPrice = parseFloat(row.price);
+        const percentage = parseFloat(row.clinic_percentage);
+        if (!isNaN(netPrice) && !isNaN(percentage) && percentage > 0 && percentage <= 100) {
+          priceBrute = netPrice / (percentage / 100);
+          // Redondear a 2 decimales
+          priceBrute = Math.round(priceBrute * 100) / 100;
+        }
+      }
+
       return {
         SessionDetailData: {
           session_id: row.session_id,
@@ -123,6 +139,7 @@ const getSessions = async (db, filters = {}) => {
           mode: row.mode,
           status: row.status,
           price: row.price,
+          price_brute: priceBrute,
           payment_method: row.payment_method,
           notes: row.notes,
           PatientData: {
@@ -133,6 +150,7 @@ const getSessions = async (db, filters = {}) => {
             clinic_id: row.clinic_id,
             clinic_name: row.clinic_name,
             clinic_color: row.clinic_color,
+            clinic_percentage: row.clinic_percentage,
           },
           MedicalRecordData: medicalRecords.map((record) => ({
             id: record.id,

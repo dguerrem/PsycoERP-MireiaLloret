@@ -94,6 +94,9 @@ export class NewSessionFormComponent implements OnInit {
   patients = signal<PatientSelector[]>([]);
   selectedPatient = signal<PatientSelector | null>(null);
 
+  /** Base price signal for reactivity */
+  basePrice = signal<number>(0);
+
   /** Tab state */
   activeTab = signal<'details' | 'clinical-notes'>('details');
 
@@ -314,13 +317,14 @@ export class NewSessionFormComponent implements OnInit {
     const defaultStartTime = this.prefilledData?.startTime || '';
 
     // If in edit mode, use session data to prefill the form
+    // Note: base_price will be calculated after loading patients
     const formValues = isEditMode ? {
       patient_id: sessionData!.SessionDetailData.PatientData.id,
       session_date: sessionData!.SessionDetailData.session_date,
       start_time: sessionData!.SessionDetailData.start_time.substring(0, 5),
       end_time: sessionData!.SessionDetailData.end_time.substring(0, 5),
       mode: sessionData!.SessionDetailData.mode.toLowerCase(),
-      price: sessionData!.SessionDetailData.price,
+      base_price: 0, // Will be calculated after loading patients
       payment_method: sessionData!.SessionDetailData.payment_method || 'pendiente',
       notes: sessionData!.SessionDetailData.notes || ''
     } : {
@@ -329,7 +333,7 @@ export class NewSessionFormComponent implements OnInit {
       start_time: defaultStartTime,
       end_time: '',
       mode: 'presencial',
-      price: 0,
+      base_price: 0,
       payment_method: 'pendiente',
       notes: ''
     };
@@ -340,7 +344,7 @@ export class NewSessionFormComponent implements OnInit {
       start_time: [formValues.start_time, [Validators.required, this.timeRangeValidator]],
       end_time: [formValues.end_time, [Validators.required, this.timeRangeValidator]],
       mode: [{value: formValues.mode, disabled: false}, [Validators.required]],
-      price: [formValues.price, [Validators.required, Validators.min(0.01)]],
+      base_price: [formValues.base_price, [Validators.required, Validators.min(0.01)]],
       payment_method: [{value: formValues.payment_method, disabled: !isEditMode}, [Validators.required]],
       notes: [formValues.notes]
     });
@@ -363,11 +367,11 @@ export class NewSessionFormComponent implements OnInit {
       const patient = this.patients().find(p => p.idPaciente === patientId);
       this.selectedPatient.set(patient || null);
 
-      // Update price and mode when patient changes
-      if (patient) {
+      // Update base_price and mode when patient changes (only in create mode)
+      if (patient && !isEditMode) {
         const mode = patient.presencial ? 'presencial' : 'online';
         this.sessionForm.patchValue({
-          price: parseFloat(this.netPrice.toFixed(2)),
+          base_price: patient.precioSesion,
           mode: mode
         });
       }
@@ -379,6 +383,14 @@ export class NewSessionFormComponent implements OnInit {
         this.updateEndTime(startTime);
       }
     });
+
+    // Watch for base_price changes to update the signal
+    this.sessionForm.get('base_price')?.valueChanges.subscribe(price => {
+      this.basePrice.set(price || 0);
+    });
+
+    // Initialize basePrice signal with current form value
+    this.basePrice.set(this.sessionForm.get('base_price')?.value || 0);
   }
 
   private loadPatients(): void {
@@ -389,13 +401,28 @@ export class NewSessionFormComponent implements OnInit {
 
           // If in edit mode, set the selected patient after loading patients
           if (this.isEditMode && this.prefilledData?.sessionData) {
-            const patientId = this.prefilledData.sessionData.SessionDetailData.PatientData.id;
+            const sessionData = this.prefilledData.sessionData;
+            const patientId = sessionData.SessionDetailData.PatientData.id;
             const patient = response.data.find(p => p.idPaciente === patientId);
             if (patient) {
               this.selectedPatient.set(patient);
+
+              // Calculate base_price from net price using inverse formula
+              const netPrice = sessionData.SessionDetailData.price;
+              const percentage = patient.porcentaje;
+              const calculatedBasePrice = percentage > 0 ? netPrice / (percentage / 100) : netPrice;
+
               // Set the mode based on patient's presencial setting
               const mode = patient.presencial ? 'presencial' : 'online';
-              this.sessionForm.get('mode')?.setValue(mode);
+
+              // Update form with calculated base_price
+              this.sessionForm.patchValue({
+                base_price: parseFloat(calculatedBasePrice.toFixed(2)),
+                mode: mode
+              });
+
+              // Update basePrice signal
+              this.basePrice.set(parseFloat(calculatedBasePrice.toFixed(2)));
             }
           }
         },
@@ -448,6 +475,9 @@ export class NewSessionFormComponent implements OnInit {
 
     this.isLoading.set(true);
 
+    // Calculate net price from base_price and percentage
+    const calculatedPrice = formValue.base_price * (patient.porcentaje / 100);
+
     const sessionData: CreateSessionRequest = {
       patient_id: formValue.patient_id,
       clinic_id: patient.idClinica,
@@ -456,7 +486,7 @@ export class NewSessionFormComponent implements OnInit {
       end_time: this.convertTimeToMySQL(formValue.end_time),
       mode: formValue.mode,
       status: 'cancelada',
-      price: formValue.price,
+      price: parseFloat(calculatedPrice.toFixed(2)),
       payment_method: formValue.payment_method,
       notes: formValue.notes || null
     };
@@ -575,6 +605,9 @@ export class NewSessionFormComponent implements OnInit {
       ? this.prefilledData?.sessionData?.SessionDetailData.status || 'completada'
       : 'completada';
 
+    // Calculate net price from base_price and percentage
+    const calculatedPrice = formValue.base_price * (patient.porcentaje / 100);
+
     const sessionData: CreateSessionRequest = {
       patient_id: formValue.patient_id,
       clinic_id: patient.idClinica,
@@ -583,7 +616,7 @@ export class NewSessionFormComponent implements OnInit {
       end_time: this.convertTimeToMySQL(formValue.end_time),
       mode: formValue.mode,
       status: currentStatus,
-      price: formValue.price,
+      price: parseFloat(calculatedPrice.toFixed(2)),
       payment_method: formValue.payment_method,
       notes: formValue.notes || null
     };
@@ -633,6 +666,19 @@ export class NewSessionFormComponent implements OnInit {
 
     return patient.precioSesion * (patient.porcentaje / 100);
   }
+
+  /** Computed net price based on base_price and percentage */
+  calculatedNetPrice = computed(() => {
+    const patient = this.selectedPatient();
+    const basePrice = this.basePrice();
+
+    if (!patient || !basePrice || basePrice <= 0) {
+      return '0.00';
+    }
+
+    const netPrice = basePrice * (patient.porcentaje / 100);
+    return netPrice.toFixed(2);
+  });
 
   // Clinical Notes Methods
   onSearchChange(event: Event): void {

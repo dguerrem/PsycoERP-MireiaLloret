@@ -68,14 +68,18 @@ export class SessionComponent implements OnInit {
   // Filter controls
   clinicControl = new FormControl<number | null>(null);
 
-  // Filter signals
+  // Date validation signals
+  dateFromError = signal<string | null>(null);
+  dateToError = signal<string | null>(null);
+
+  // Filter signals with initial dates
   filters = signal<SessionFilters>({
     clinicId: null,
     sessionType: null,
     status: null,
     paymentMethod: null,
-    dateFrom: '',
-    dateTo: '',
+    dateFrom: this.getThreeMonthsAgo(),
+    dateTo: this.getTodayDate(),
   });
 
   // Pagination signals
@@ -190,9 +194,37 @@ export class SessionComponent implements OnInit {
   }
 
   onFilterChange(filterName: keyof SessionFilters, value: any): void {
+    // Handle empty date values - reset to defaults
+    if (filterName === 'dateFrom' && (!value || value === '')) {
+      this.filters.update((f) => ({ ...f, dateFrom: this.getThreeMonthsAgo() }));
+      this.dateFromError.set(null);
+      this.currentPage.set(1);
+      this.loadSessions();
+      return;
+    }
+
+    if (filterName === 'dateTo' && (!value || value === '')) {
+      this.filters.update((f) => ({ ...f, dateTo: this.getTodayDate() }));
+      this.dateToError.set(null);
+      this.currentPage.set(1);
+      this.loadSessions();
+      return;
+    }
+
     this.filters.update((f) => ({ ...f, [filterName]: value }));
-    this.currentPage.set(1);
-    this.loadSessions();
+
+    // Validate dates when they change
+    if (filterName === 'dateFrom' || filterName === 'dateTo') {
+      this.validateDates();
+      // Only load sessions if dates are valid
+      if (!this.dateFromError() && !this.dateToError()) {
+        this.currentPage.set(1);
+        this.loadSessions();
+      }
+    } else {
+      this.currentPage.set(1);
+      this.loadSessions();
+    }
   }
 
   clearFilters(): void {
@@ -201,10 +233,12 @@ export class SessionComponent implements OnInit {
       sessionType: null,
       status: null,
       paymentMethod: null,
-      dateFrom: '',
-      dateTo: '',
+      dateFrom: this.getThreeMonthsAgo(),
+      dateTo: this.getTodayDate(),
     });
     this.clinicControl.setValue(null);
+    this.dateFromError.set(null);
+    this.dateToError.set(null);
     this.currentPage.set(1);
     this.loadSessions();
   }
@@ -276,5 +310,65 @@ export class SessionComponent implements OnInit {
     }
 
     return pages;
+  }
+
+  // Date helper methods
+  private getTodayDate(): string {
+    const today = new Date();
+    return this.formatDateToISO(today);
+  }
+
+  private getThreeMonthsAgo(): string {
+    const today = new Date();
+    today.setMonth(today.getMonth() - 3);
+    return this.formatDateToISO(today);
+  }
+
+  private formatDateToISO(date: Date): string {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  }
+
+  private validateDates(): void {
+    const currentFilters = this.filters();
+    let dateFrom = currentFilters.dateFrom;
+    let dateTo = currentFilters.dateTo;
+
+    // Reset errors
+    this.dateFromError.set(null);
+    this.dateToError.set(null);
+
+    // If dates are empty, set to defaults (shouldn't happen with new logic, but defensive)
+    if (!dateFrom || dateFrom === '') {
+      dateFrom = this.getThreeMonthsAgo();
+      this.filters.update((f) => ({ ...f, dateFrom }));
+    }
+
+    if (!dateTo || dateTo === '') {
+      dateTo = this.getTodayDate();
+      this.filters.update((f) => ({ ...f, dateTo }));
+    }
+
+    const fromDate = new Date(dateFrom);
+    const toDate = new Date(dateTo);
+
+    // Validate: dateFrom cannot be greater than dateTo
+    if (fromDate > toDate) {
+      this.dateFromError.set('La fecha desde no puede ser mayor a la fecha hasta');
+      this.dateToError.set('La fecha hasta no puede ser menor a la fecha desde');
+      return;
+    }
+
+    // Validate: range cannot exceed 3 years (1095 days)
+    const diffInMs = toDate.getTime() - fromDate.getTime();
+    const diffInDays = diffInMs / (1000 * 60 * 60 * 24);
+    const threeYearsInDays = 365 * 3;
+
+    if (diffInDays > threeYearsInDays) {
+      this.dateFromError.set('El rango no puede superar 3 años');
+      this.dateToError.set('El rango no puede superar 3 años');
+    }
   }
 }
