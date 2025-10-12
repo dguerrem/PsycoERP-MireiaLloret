@@ -86,6 +86,20 @@ const definitions = {
     type: "object",
     properties: {
       id: {
+        irpf: {
+          type: "number",
+          format: "decimal",
+          nullable: true,
+          description: "Porcentaje IRPF (ej: 15.5)",
+          example: 15.5,
+        },
+        irpf: {
+          type: "number",
+          format: "decimal",
+          nullable: true,
+          description: "Porcentaje IRPF (ej: 15.5)",
+          example: 15.5,
+        },
         type: "integer",
         format: "int64",
         description: "ID único del bonus",
@@ -3243,6 +3257,13 @@ const definitions = {
         nullable: true,
         description: "Número de colegiado (license/registration number)",
         example: "COLE-12345",
+      },
+      irpf: {
+        type: "number",
+        format: "decimal",
+        nullable: true,
+        description: "Porcentaje IRPF (ej: 15.5)",
+        example: 15.5,
       },
       name: {
         type: "string",

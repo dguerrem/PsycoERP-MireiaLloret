@@ -3,6 +3,7 @@ const getUserById = async (db, userId) => {
     SELECT 
       id,
       license_number,
+      irpf,
       name,
       dni,
       street,
@@ -35,6 +36,10 @@ const updateUser = async (db, userId, userData) => {
   if (userData.license_number !== undefined) {
     fields.push("license_number = ?");
     values.push(userData.license_number);
+  }
+  if (userData.irpf !== undefined) {
+    fields.push("irpf = ?");
+    values.push(userData.irpf);
   }
   if (userData.dni !== undefined) {
     fields.push("dni = ?");
