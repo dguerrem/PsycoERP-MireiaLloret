@@ -3238,6 +3238,12 @@ const definitions = {
   UpdateUserRequest: {
     type: "object",
     properties: {
+      license_number: {
+        type: "string",
+        nullable: true,
+        description: "Número de colegiado (license/registration number)",
+        example: "COLE-12345",
+      },
       name: {
         type: "string",
         description: "Nombre completo del usuario",
@@ -3372,6 +3378,12 @@ const definitions = {
         description: "Nombre del usuario",
         example: "Admin Usuario",
       },
+      license_number: {
+        type: "string",
+        nullable: true,
+        description: "Número de colegiado (license/registration number)",
+        example: "COLE-12345",
+      },
       last_login: {
         type: "string",
         format: "date-time",
@@ -3395,6 +3407,12 @@ const definitions = {
         type: "string",
         description: "Nombre completo del usuario",
         example: "Admin Usuario",
+      },
+      license_number: {
+        type: "string",
+        nullable: true,
+        description: "Número de colegiado (license/registration number)",
+        example: "COLE-12345",
       },
       dni: {
         type: "string",

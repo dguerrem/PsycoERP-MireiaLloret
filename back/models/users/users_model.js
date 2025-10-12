@@ -2,6 +2,7 @@ const getUserById = async (db, userId) => {
   const query = `
     SELECT 
       id,
+      license_number,
       name,
       dni,
       street,
@@ -30,6 +31,10 @@ const updateUser = async (db, userId, userData) => {
   if (userData.name !== undefined) {
     fields.push("name = ?");
     values.push(userData.name);
+  }
+  if (userData.license_number !== undefined) {
+    fields.push("license_number = ?");
+    values.push(userData.license_number);
   }
   if (userData.dni !== undefined) {
     fields.push("dni = ?");
