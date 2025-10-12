@@ -54,7 +54,8 @@ const crearSesionGoogleMeet = async (sessionData) => {
 
     console.log("Evento a crear:", JSON.stringify(event, null, 2));
 
-    const calendarId = process.env.GOOGLE_CALENDAR_ID || "dacormus@gmail.com";
+  const calendarId = process.env.GOOGLE_CALENDAR_ID || "primary";
+  console.log("Using calendarId:", calendarId);
     const response = await calendar.events.insert({
       calendarId,
       resource: event,

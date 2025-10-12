@@ -14,12 +14,21 @@ const TOKEN_PATH = path.join(__dirname, '../.secret/token.json');
     }
 
     const credentials = JSON.parse(fs.readFileSync(CREDENTIALS_PATH));
-    const { client_id, client_secret, redirect_uris } = credentials.web;
+    let client_id, client_secret, redirect_uris;
+    if (credentials.web) {
+      ({ client_id, client_secret, redirect_uris } = credentials.web);
+      console.log('Using credentials type: web');
+    } else if (credentials.installed) {
+      ({ client_id, client_secret, redirect_uris } = credentials.installed);
+      console.log('Using credentials type: installed (desktop)');
+    } else {
+      throw new Error('Invalid credentials.json: missing web or installed');
+    }
 
     const oAuth2Client = new google.auth.OAuth2(
       client_id,
       client_secret,
-      redirect_uris[0]
+      (redirect_uris && redirect_uris.length > 0) ? redirect_uris[0] : undefined
     );
 
     const authUrl = oAuth2Client.generateAuthUrl({
