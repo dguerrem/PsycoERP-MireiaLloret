@@ -34,7 +34,7 @@ const getPendingReminders = async (db) => {
     INNER JOIN patients p ON s.patient_id = p.id
     LEFT JOIN reminders r ON s.id = r.session_id
     WHERE s.session_date = ?
-      AND s.status = 'programada'
+      AND s.status != 'cancelada'
       AND s.is_active = true
       AND p.is_active = true
     ORDER BY s.start_time ASC
