@@ -9,7 +9,7 @@ const getSessions = async (db, filters = {}) => {
   let countQuery = `
         SELECT COUNT(*) as total
         FROM sessions s
-        LEFT JOIN patients p ON s.patient_id = p.id AND p.is_active = true AND p.status = 'en curso'
+        LEFT JOIN patients p ON s.patient_id = p.id AND p.status = 'en curso'
         LEFT JOIN clinics c ON s.clinic_id = c.id AND c.is_active = true
         WHERE s.is_active = true
     `;
@@ -33,7 +33,7 @@ const getSessions = async (db, filters = {}) => {
             c.clinic_color,
             c.percentage AS clinic_percentage
         FROM sessions s
-        LEFT JOIN patients p ON s.patient_id = p.id AND p.is_active = true AND p.status = 'en curso'
+        LEFT JOIN patients p ON s.patient_id = p.id AND p.status = 'en curso'
         LEFT JOIN clinics c ON s.clinic_id = c.id AND c.is_active = true
         WHERE s.is_active = true
     `;
@@ -103,18 +103,6 @@ const getSessions = async (db, filters = {}) => {
   // Transformar datos a estructura organizada
   const transformedData = await Promise.all(
     rows.map(async (row) => {
-      // Obtener notas clínicas del paciente (solo si el paciente está activo)
-      const [medicalRecords] = await db.execute(
-        `
-      SELECT cn.id, cn.title, cn.content, cn.created_at
-      FROM clinical_notes cn
-      INNER JOIN patients p ON cn.patient_id = p.id
-      WHERE cn.patient_id = ? AND p.is_active = true
-      ORDER BY cn.created_at DESC
-    `,
-        [row.patient_id]
-      );
-
       // Calcular el precio bruto (lo que cobra la clínica al paciente)
       // Si price es el neto del psicólogo y clinic_percentage es el % que recibe el psicólogo
       // entonces: bruto = neto / (porcentaje/100)
@@ -284,7 +272,7 @@ const getSessionForWhatsApp = async (db, sessionId) => {
       CONCAT(p.first_name, ' ', p.last_name) as patient_name,
       p.phone as patient_phone
     FROM sessions s
-    INNER JOIN patients p ON s.patient_id = p.id AND p.is_active = true AND p.status = 'en curso'
+    INNER JOIN patients p ON s.patient_id = p.id AND p.status = 'en curso'
     WHERE s.id = ? AND s.is_active = true
   `;
 
