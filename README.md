@@ -425,7 +425,7 @@ chmod +x /var/www/millopsicologia/backend/deploy.sh
 ```powershell
 # Generar build de producción
 cd D:\Proyectos\PsychologyERP-demo\front
-ng build --configuration production
+ng build --configuration staging
 
 # Subir al servidor
 scp -r "dist/psichology-erp/browser/*" root@62.169.18.15:/tmp/dist-test/
