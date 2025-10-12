@@ -7,6 +7,7 @@ const {
   restorePatient,
   updatePatient,
   getActivePatientsWithClinicInfo,
+  hasFutureSessions,
 } = require("../../models/patients/patients_model");
 
 const obtenerPacientes = async (req, res) => {
@@ -219,6 +220,14 @@ const eliminarPaciente = async (req, res) => {
         error: "ID del paciente es requerido",
       });
     }
+      // Comprobar si el paciente tiene sesiones futuras programadas
+      const tieneSesionesFuturas = await hasFutureSessions(req.db, id);
+      if (tieneSesionesFuturas) {
+        return res.status(400).json({
+          success: false,
+          error: "No se puede eliminar el paciente: tiene sesiones programadas en el futuro",
+        });
+      }
 
     const eliminado = await deletePatient(req.db, id);
 
