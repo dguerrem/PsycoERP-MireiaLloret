@@ -28,7 +28,8 @@ interface SessionStats {
   total: number;
   completada: number;
   cancelada: number;
-  totalRevenue: number;
+  totalRevenueBrute: number;
+  totalRevenueNet: number;
 }
 
 /**
@@ -95,13 +96,20 @@ export class SessionComponent implements OnInit {
       total: this.totalSessions(),
       completada: 0,
       cancelada: 0,
-      totalRevenue: 0,
+      totalRevenueBrute: 0,
+      totalRevenueNet: 0,
     };
 
     // Calculate stats from all sessions (not just current page)
     allSessions.forEach((session) => {
       const status = this.getSessionStatus(session);
-      if (status === 'completada') stats.completada++;
+      if (status === 'completada') {
+        stats.completada++;
+        // Sumar ingresos brutos (precio base) - convert to number
+        stats.totalRevenueBrute += Number(session.SessionDetailData.price_brute) || 0;
+        // Sumar ingresos netos (lo que recibe la profesional) - convert to number
+        stats.totalRevenueNet += Number(session.SessionDetailData.price) || 0;
+      }
       if (status === 'cancelada') stats.cancelada++;
     });
 
@@ -145,7 +153,7 @@ export class SessionComponent implements OnInit {
     // Build query params - always request 5000 sessions
     const params: any = {
       page: '1',
-      limit: '5000',
+      limit: '7000',
     };
 
     if (currentFilters.clinicId) {
@@ -286,6 +294,30 @@ export class SessionComponent implements OnInit {
       cancelada: 'Cancelada',
     };
     return texts[status as keyof typeof texts] || status;
+  }
+
+  getModeClass(mode: string): string {
+    const classes = {
+      presencial: 'bg-blue-100 text-blue-800 border-blue-200',
+      online: 'bg-purple-100 text-purple-800 border-purple-200',
+      telefónica: 'bg-cyan-100 text-cyan-800 border-cyan-200',
+    };
+    return (
+      classes[mode as keyof typeof classes] || 'bg-gray-100 text-gray-800 border-gray-200'
+    );
+  }
+
+  getPaymentMethodClass(method: string): string {
+    const classes = {
+      bizum: 'bg-emerald-100 text-emerald-800 border-emerald-200',
+      transferencia: 'bg-blue-100 text-blue-800 border-blue-200',
+      tarjeta: 'bg-violet-100 text-violet-800 border-violet-200',
+      efectivo: 'bg-amber-100 text-amber-800 border-amber-200',
+      pendiente: 'bg-orange-100 text-orange-800 border-orange-200',
+    };
+    return (
+      classes[method as keyof typeof classes] || 'bg-gray-100 text-gray-800 border-gray-200'
+    );
   }
 
   formatPaymentMethod(method: string): string {

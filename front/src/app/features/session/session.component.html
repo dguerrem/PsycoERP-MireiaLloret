@@ -11,7 +11,7 @@
     </div>
 
     <!-- Stats Cards -->
-    <div class="grid grid-cols-1 md:grid-cols-4 gap-3 mb-3">
+    <div class="grid grid-cols-2 md:grid-cols-5 gap-3 mb-3">
       <div class="bg-card rounded-lg border py-3 shadow-sm">
         <div class="px-3 text-center">
           <div class="text-xl font-bold text-primary">{{ stats().total }}</div>
@@ -35,8 +35,15 @@
 
       <div class="bg-card rounded-lg border py-3 shadow-sm">
         <div class="px-3 text-center">
-          <div class="text-xl font-bold text-primary">100€</div>
-          <p class="text-xs text-muted-foreground">Ingresos</p>
+          <div class="text-xl font-bold text-gray-600">{{ (stats().totalRevenueBrute || 0).toFixed(2) }}€</div>
+          <p class="text-xs text-muted-foreground">Ingresos Brutos</p>
+        </div>
+      </div>
+
+      <div class="bg-card rounded-lg border py-3 shadow-sm">
+        <div class="px-3 text-center">
+          <div class="text-xl font-bold text-green-700">{{ (stats().totalRevenueNet || 0).toFixed(2) }}€</div>
+          <p class="text-xs text-muted-foreground">Ingresos Netos</p>
         </div>
       </div>
     </div>
@@ -177,7 +184,7 @@
                 <th class="h-10 px-2 text-left font-medium">Fecha</th>
                 <th class="h-10 px-2 text-left font-medium">Clínica</th>
                 <th class="h-10 px-2 text-left font-medium">Estado</th>
-                <th class="h-10 px-2 text-left font-medium">Precio Base</th>
+                <th class="h-10 px-2 text-left font-medium">Precio</th>
                 <th class="h-10 px-2 text-left font-medium">Comisión</th>
                 <th class="h-10 px-2 text-left font-medium">Neto</th>
                 <th class="h-10 px-2 text-left font-medium">Pago</th>
@@ -204,7 +211,8 @@
               <tr class="hover:bg-muted/50 border-b transition-colors">
                 <td class="p-2 font-medium">{{ session.SessionDetailData.PatientData.name }}</td>
                 <td class="p-2">
-                  <span class="inline-flex items-center rounded-md border px-2 py-0.5 text-xs capitalize">
+                  <span [class]="getModeClass(session.SessionDetailData.mode)"
+                    class="inline-flex items-center rounded-md border px-2 py-0.5 text-xs font-medium capitalize">
                     {{ session.SessionDetailData.mode }}
                   </span>
                 </td>
@@ -240,16 +248,21 @@
                   <div class="text-sm text-orange-600">
                     <span class="font-medium">{{ (session.SessionDetailData.price_brute -
                       session.SessionDetailData.price).toFixed(2) }}€</span>
-                    <span class="text-muted-foreground ml-1">({{
-                      session.SessionDetailData.ClinicDetailData.clinic_percentage }}%)</span>
                   </div>
                   } @else {
                   <span class="text-muted-foreground">-</span>
                   }
                 </td>
                 <!-- Tu Neto -->
-                <td class="p-2 font-semibold text-green-600">{{ session.SessionDetailData.price }}€</td>
-                <td class="p-2 capitalize">{{ formatPaymentMethod(session.SessionDetailData.payment_method) }}</td>
+                <td class="p-2 font-semibold text-green-600">{{ session.SessionDetailData.price }}€ <span
+                    class="text-muted-foreground ml-1">({{
+                    session.SessionDetailData.ClinicDetailData.clinic_percentage }}%)</span></td>
+                <td class="p-2">
+                  <span [class]="getPaymentMethodClass(session.SessionDetailData.payment_method)"
+                    class="inline-flex items-center rounded-md border px-2 py-0.5 text-xs font-medium capitalize">
+                    {{ formatPaymentMethod(session.SessionDetailData.payment_method) }}
+                  </span>
+                </td>
               </tr>
               }
               }

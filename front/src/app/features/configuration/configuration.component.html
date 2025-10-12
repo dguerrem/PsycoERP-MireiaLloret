@@ -62,6 +62,22 @@
               <p class="text-red-500 text-xs mt-1">{{ getFieldError('dni') }}</p>
               }
             </div>
+
+            <div>
+              <label class="text-sm font-semibold leading-none text-gray-700 peer-disabled:cursor-not-allowed peer-disabled:opacity-70 mb-2 block" for="license_number">
+                Número de Colegiado
+              </label>
+              <input id="license_number" type="text" formControlName="license_number" placeholder="Ej: COL-XYZ"
+                class="flex h-9 w-full rounded-md border border-gray-300 bg-white px-3 py-1 text-sm text-gray-900 placeholder:text-gray-500 hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-[#0891b2] focus:border-[#0891b2] disabled:cursor-not-allowed disabled:opacity-50 transition-colors" />
+            </div>
+
+            <div>
+              <label class="text-sm font-semibold leading-none text-gray-700 peer-disabled:cursor-not-allowed peer-disabled:opacity-70 mb-2 block" for="irpf">
+                IRPF (%)
+              </label>
+              <input id="irpf" type="text" formControlName="irpf" placeholder="Ej: 7.50"
+                class="flex h-9 w-full rounded-md border border-gray-300 bg-white px-3 py-1 text-sm text-gray-900 placeholder:text-gray-500 hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-[#0891b2] focus:border-[#0891b2] disabled:cursor-not-allowed disabled:opacity-50 transition-colors" />
+            </div>
           </div>
 
           <div class="space-y-4">

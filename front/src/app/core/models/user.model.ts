@@ -3,6 +3,8 @@ export interface User {
   email: string;
   name: string;
   last_login: string;
+  license_number?: string;
+  irpf?: string;
   dni?: string;
   street?: string;
   street_number?: string;
@@ -18,6 +20,8 @@ export interface UserProfileResponse {
 
 export interface UpdateUserProfileRequest {
   name: string;
+  license_number?: string;
+  irpf?: string;
   dni: string;
   street: string;
   street_number: string;
