@@ -211,7 +211,8 @@
               <tr class="hover:bg-muted/50 border-b transition-colors">
                 <td class="p-2 font-medium">{{ session.SessionDetailData.PatientData.name }}</td>
                 <td class="p-2">
-                  <span class="inline-flex items-center rounded-md border px-2 py-0.5 text-xs capitalize">
+                  <span [class]="getModeClass(session.SessionDetailData.mode)"
+                    class="inline-flex items-center rounded-md border px-2 py-0.5 text-xs font-medium capitalize">
                     {{ session.SessionDetailData.mode }}
                   </span>
                 </td>
@@ -256,7 +257,12 @@
                 <td class="p-2 font-semibold text-green-600">{{ session.SessionDetailData.price }}€ <span
                     class="text-muted-foreground ml-1">({{
                     session.SessionDetailData.ClinicDetailData.clinic_percentage }}%)</span></td>
-                <td class="p-2 capitalize">{{ formatPaymentMethod(session.SessionDetailData.payment_method) }}</td>
+                <td class="p-2">
+                  <span [class]="getPaymentMethodClass(session.SessionDetailData.payment_method)"
+                    class="inline-flex items-center rounded-md border px-2 py-0.5 text-xs font-medium capitalize">
+                    {{ formatPaymentMethod(session.SessionDetailData.payment_method) }}
+                  </span>
+                </td>
               </tr>
               }
               }

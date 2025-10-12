@@ -296,6 +296,30 @@ export class SessionComponent implements OnInit {
     return texts[status as keyof typeof texts] || status;
   }
 
+  getModeClass(mode: string): string {
+    const classes = {
+      presencial: 'bg-blue-100 text-blue-800 border-blue-200',
+      online: 'bg-purple-100 text-purple-800 border-purple-200',
+      telefónica: 'bg-cyan-100 text-cyan-800 border-cyan-200',
+    };
+    return (
+      classes[mode as keyof typeof classes] || 'bg-gray-100 text-gray-800 border-gray-200'
+    );
+  }
+
+  getPaymentMethodClass(method: string): string {
+    const classes = {
+      bizum: 'bg-emerald-100 text-emerald-800 border-emerald-200',
+      transferencia: 'bg-blue-100 text-blue-800 border-blue-200',
+      tarjeta: 'bg-violet-100 text-violet-800 border-violet-200',
+      efectivo: 'bg-amber-100 text-amber-800 border-amber-200',
+      pendiente: 'bg-orange-100 text-orange-800 border-orange-200',
+    };
+    return (
+      classes[method as keyof typeof classes] || 'bg-gray-100 text-gray-800 border-gray-200'
+    );
+  }
+
   formatPaymentMethod(method: string): string {
     return SessionUtils.formatPaymentMethod(method);
   }
