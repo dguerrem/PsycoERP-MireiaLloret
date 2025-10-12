@@ -118,6 +118,28 @@ const deleteClinic = async (db, id) => {
   return result.affectedRows > 0;
 };
 
+// Comprueba si una clínica tiene pacientes activos asociados
+const hasActivePatients = async (db, clinicId) => {
+  const query = `
+    SELECT COUNT(*) as total
+    FROM patients
+    WHERE clinic_id = ? AND is_active = true
+  `;
+  const [rows] = await db.execute(query, [clinicId]);
+  return rows[0].total > 0;
+};
+
+// Comprueba si una clínica tiene sesiones (independientemente de su estado)
+const hasSessions = async (db, clinicId) => {
+  const query = `
+    SELECT COUNT(*) as total
+    FROM sessions
+    WHERE clinic_id = ?
+  `;
+  const [rows] = await db.execute(query, [clinicId]);
+  return rows[0].total > 0;
+};
+
 
 const createClinic = async (db, data) => {
   const { name, clinic_color, address, price, percentage } = data;
@@ -170,4 +192,6 @@ module.exports = {
   createClinic,
   updateClinic,
   deleteClinic,
+  hasActivePatients,
+  hasSessions
 };

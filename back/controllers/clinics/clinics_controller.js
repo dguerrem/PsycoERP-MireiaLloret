@@ -3,6 +3,8 @@ const {
   createClinic,
   updateClinic,
   deleteClinic,
+  hasActivePatients,
+  hasSessions,
 } = require("../../models/clinics/clinics_model");
 
 const obtenerClinicas = async (req, res) => {
@@ -139,6 +141,22 @@ const eliminarClinica = async (req, res) => {
       return res.status(400).json({
         success: false,
         error: "ID de clínica inválido",
+      });
+    }
+    // Comprobaciones antes de eliminar
+    const tienePacientes = await hasActivePatients(req.db, id);
+    if (tienePacientes) {
+      return res.status(400).json({
+        success: false,
+        error: "No se puede eliminar la cl\u00ednica: existen pacientes activos asociados",
+      });
+    }
+
+    const tieneSesiones = await hasSessions(req.db, id);
+    if (tieneSesiones) {
+      return res.status(400).json({
+        success: false,
+        error: "No se puede eliminar la cl\u00ednica: existen sesiones asociadas",
       });
     }
 
