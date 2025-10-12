@@ -75,7 +75,7 @@ const swaggerDefinition = {
   tags: [
     {
       name: "Auth",
-      description: "Autenticación de usuarios",
+      description: "Autenticación de usuarios prueba",
     },
     {
       name: "Bonuses",
