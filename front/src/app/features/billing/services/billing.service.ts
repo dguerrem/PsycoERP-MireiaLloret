@@ -9,6 +9,7 @@ import {
   CreateBulkInvoicesRequest,
   CreateInvoiceResponse
 } from '../models/billing.models';
+import { environment } from '../../../../environments/environment';
 
 /**
  * Servicio para gestión de facturación
@@ -19,7 +20,7 @@ import {
 })
 export class BillingService {
   private http = inject(HttpClient);
-  private readonly baseUrl = 'http://localhost:3000/api';
+  private readonly baseUrl = environment.api.baseUrl;
 
   // Signals para estado interno
   private kpisData = signal<InvoiceKPIs | null>(null);
