@@ -35,6 +35,8 @@ export class ConfigurationComponent implements OnInit {
 
   public configurationForm = this.fb.group({
     name: ['', Validators.required],
+    license_number: [''],
+    irpf: [''],
     dni: ['', Validators.required],
     street: ['', Validators.required],
     street_number: ['', Validators.required],
@@ -75,6 +77,8 @@ export class ConfigurationComponent implements OnInit {
           // Llenar el formulario con los datos del usuario
           this.configurationForm.patchValue({
             name: user.name || '',
+            license_number: user.license_number || '',
+            irpf: user.irpf || '',
             dni: user.dni || '',
             street: user.street || '',
             street_number: user.street_number || '',

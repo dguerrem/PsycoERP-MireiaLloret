@@ -698,6 +698,11 @@ export class NewSessionFormComponent implements OnInit {
     this.newNote.set({ title: note.title, content: note.content });
   }
 
+  onEditNoteButton(event: Event, note: { id: string; title: string; content: string; date: Date }): void {
+    event.stopPropagation();
+    this.onEditNote(note);
+  }
+
   onTitleChange(event: Event): void {
     const target = event.target as HTMLInputElement;
     this.newNote.update(note => ({ ...note, title: target.value }));
