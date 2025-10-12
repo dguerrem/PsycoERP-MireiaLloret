@@ -90,7 +90,7 @@ const crearSesion = async (req, res) => {
       start_time,
       end_time,
       mode,
-      status = "programada",
+      status = "completada",
       price = 0.0,
       payment_method = "tarjeta",
       notes,

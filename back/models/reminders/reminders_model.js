@@ -79,11 +79,6 @@ const createReminder = async (db, sessionId) => {
 
   const sessionData = sessionResult[0];
 
-  // Verificar que la sesión esté programada
-  if (sessionData.status !== "programada") {
-    throw new Error("Session not found or not scheduled");
-  }
-
   // Verificar que no existe ya un reminder
   if (sessionData.reminder_id) {
     throw new Error("Reminder already exists for this session");
