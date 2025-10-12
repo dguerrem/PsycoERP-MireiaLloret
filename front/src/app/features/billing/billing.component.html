@@ -656,8 +656,9 @@
                     data-slot="input"
                     type="text"
                     [value]="invoice.invoice_number"
-                    (input)="updateInvoiceNumber(invoice.dni, $any($event.target).value)"
-                    class="border-input h-9 w-full min-w-[160px] rounded-md border bg-background px-3 py-1 text-base shadow-xs transition-[color,box-shadow] outline-none md:text-sm focus-visible:ring-[3px]">
+                    disabled
+                    readonly
+                    class="border-input h-9 w-full min-w-[160px] rounded-md border bg-gray-50 px-3 py-1 text-base shadow-xs outline-none md:text-sm cursor-not-allowed text-gray-600">
                 </td>
                 <td data-slot="table-cell" class="p-2 align-middle whitespace-nowrap">
                   <input
