@@ -151,13 +151,7 @@ const getSessions = async (db, filters = {}) => {
             clinic_name: row.clinic_name,
             clinic_color: row.clinic_color,
             clinic_percentage: row.clinic_percentage,
-          },
-          MedicalRecordData: medicalRecords.map((record) => ({
-            id: record.id,
-            title: record.title,
-            content: record.content,
-            date: record.created_at,
-          })),
+          }
         },
       };
     })

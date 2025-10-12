@@ -2892,13 +2892,7 @@ const definitions = {
       },
       ClinicDetailData: {
         $ref: "#/components/schemas/ClinicData",
-      },
-      MedicalRecordData: {
-        type: "array",
-        items: {
-          $ref: "#/components/schemas/MedicalRecord",
-        },
-      },
+      }
     },
   },
 
