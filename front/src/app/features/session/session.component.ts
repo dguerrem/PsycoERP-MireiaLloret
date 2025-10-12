@@ -28,7 +28,8 @@ interface SessionStats {
   total: number;
   completada: number;
   cancelada: number;
-  totalRevenue: number;
+  totalRevenueBrute: number;
+  totalRevenueNet: number;
 }
 
 /**
@@ -95,13 +96,20 @@ export class SessionComponent implements OnInit {
       total: this.totalSessions(),
       completada: 0,
       cancelada: 0,
-      totalRevenue: 0,
+      totalRevenueBrute: 0,
+      totalRevenueNet: 0,
     };
 
     // Calculate stats from all sessions (not just current page)
     allSessions.forEach((session) => {
       const status = this.getSessionStatus(session);
-      if (status === 'completada') stats.completada++;
+      if (status === 'completada') {
+        stats.completada++;
+        // Sumar ingresos brutos (precio base) - convert to number
+        stats.totalRevenueBrute += Number(session.SessionDetailData.price_brute) || 0;
+        // Sumar ingresos netos (lo que recibe la profesional) - convert to number
+        stats.totalRevenueNet += Number(session.SessionDetailData.price) || 0;
+      }
       if (status === 'cancelada') stats.cancelada++;
     });
 
@@ -145,7 +153,7 @@ export class SessionComponent implements OnInit {
     // Build query params - always request 5000 sessions
     const params: any = {
       page: '1',
-      limit: '5000',
+      limit: '7000',
     };
 
     if (currentFilters.clinicId) {
