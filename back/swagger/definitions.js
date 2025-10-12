@@ -86,6 +86,20 @@ const definitions = {
     type: "object",
     properties: {
       id: {
+        irpf: {
+          type: "number",
+          format: "decimal",
+          nullable: true,
+          description: "Porcentaje IRPF (ej: 15.5)",
+          example: 15.5,
+        },
+        irpf: {
+          type: "number",
+          format: "decimal",
+          nullable: true,
+          description: "Porcentaje IRPF (ej: 15.5)",
+          example: 15.5,
+        },
         type: "integer",
         format: "int64",
         description: "ID único del bonus",
@@ -2892,13 +2906,7 @@ const definitions = {
       },
       ClinicDetailData: {
         $ref: "#/components/schemas/ClinicData",
-      },
-      MedicalRecordData: {
-        type: "array",
-        items: {
-          $ref: "#/components/schemas/MedicalRecord",
-        },
-      },
+      }
     },
   },
 
@@ -3244,6 +3252,19 @@ const definitions = {
   UpdateUserRequest: {
     type: "object",
     properties: {
+      license_number: {
+        type: "string",
+        nullable: true,
+        description: "Número de colegiado (license/registration number)",
+        example: "COLE-12345",
+      },
+      irpf: {
+        type: "number",
+        format: "decimal",
+        nullable: true,
+        description: "Porcentaje IRPF (ej: 15.5)",
+        example: 15.5,
+      },
       name: {
         type: "string",
         description: "Nombre completo del usuario",
@@ -3378,6 +3399,12 @@ const definitions = {
         description: "Nombre del usuario",
         example: "Admin Usuario",
       },
+      license_number: {
+        type: "string",
+        nullable: true,
+        description: "Número de colegiado (license/registration number)",
+        example: "COLE-12345",
+      },
       last_login: {
         type: "string",
         format: "date-time",
@@ -3401,6 +3428,12 @@ const definitions = {
         type: "string",
         description: "Nombre completo del usuario",
         example: "Admin Usuario",
+      },
+      license_number: {
+        type: "string",
+        nullable: true,
+        description: "Número de colegiado (license/registration number)",
+        example: "COLE-12345",
       },
       dni: {
         type: "string",

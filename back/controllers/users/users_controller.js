@@ -44,7 +44,7 @@ const obtenerUsuarioPorId = async (req, res) => {
 const actualizarUsuario = async (req, res) => {
   try {
     const { id } = req.params;
-    const { name, dni, street, street_number, door, city, province, postal_code } = req.body;
+    const { name, license_number, irpf, dni, street, street_number, door, city, province, postal_code } = req.body;
 
     // Validar que se proporcione el ID y sea un número válido
     if (!id || isNaN(id)) {
@@ -58,6 +58,8 @@ const actualizarUsuario = async (req, res) => {
     // Crear objeto con los datos a actualizar (solo campos no undefined)
     const userData = {};
     if (name !== undefined) userData.name = name;
+    if (license_number !== undefined) userData.license_number = license_number;
+  if (irpf !== undefined) userData.irpf = irpf;
     if (dni !== undefined) userData.dni = dni;
     if (street !== undefined) userData.street = street;
     if (street_number !== undefined) userData.street_number = street_number;
