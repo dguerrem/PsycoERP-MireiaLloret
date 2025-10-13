@@ -330,25 +330,44 @@ const checkDuplicateSession = async (db, patient_id, session_date, start_time, e
   return null;
 };
 
-// Obtener KPIs globales de sesiones
-const getSessionsKPIs = async (db) => {
+// Obtener KPIs globales de sesiones con filtros opcionales (fechaDesde / fechaHasta / session_date / clinic_id)
+const getSessionsKPIs = async (db, filters = {}) => {
+  const params = [];
+  let where = 'WHERE s.is_active = 1';
+
+  // Lógica de fechas: rango fecha_desde/fecha_hasta
+  if (filters.fecha_desde) {
+    where += ' AND s.session_date >= ?';
+    params.push(filters.fecha_desde);
+  }
+  if (filters.fecha_hasta) {
+    where += ' AND s.session_date <= ?';
+    params.push(filters.fecha_hasta);
+  }
+
   const query = `
     SELECT
-      COUNT(*) as total_sessions,
-      SUM(CASE WHEN status = 'finalizada' THEN 1 ELSE 0 END) as completed_sessions,
-      SUM(CASE WHEN status = 'programada' THEN 1 ELSE 0 END) as scheduled_sessions,
-      SUM(CASE WHEN status = 'cancelada' THEN 1 ELSE 0 END) as cancelled_sessions
-    FROM sessions
-    WHERE is_active = 1
+      SUM(CASE WHEN s.status = 'completada' THEN 1 ELSE 0 END) as completed_sessions,
+      SUM(CASE WHEN s.status = 'cancelada' THEN 1 ELSE 0 END) as cancelled_sessions,
+      COALESCE(SUM(CASE WHEN s.payment_method != 'pendiente' THEN s.price ELSE 0 END), 0) as gross_income,
+      COALESCE(SUM(CASE WHEN s.payment_method != 'pendiente' THEN s.price * (COALESCE(c.percentage,0) / 100) ELSE 0 END), 0) as net_income
+    FROM sessions s
+    LEFT JOIN clinics c ON s.clinic_id = c.id AND c.is_active = true
+    ${where}
   `;
 
-  const [rows] = await db.execute(query);
+  const [rows] = await db.execute(query, params);
+
+  const completed = parseInt(rows[0].completed_sessions) || 0;
+  const cancelled = parseInt(rows[0].cancelled_sessions) || 0;
+  const gross = parseFloat(rows[0].gross_income) || 0;
+  const net = parseFloat(rows[0].net_income) || 0;
 
   return {
-    total_sessions: parseInt(rows[0].total_sessions) || 0,
-    completed_sessions: parseInt(rows[0].completed_sessions) || 0,
-    scheduled_sessions: parseInt(rows[0].scheduled_sessions) || 0,
-    cancelled_sessions: parseInt(rows[0].cancelled_sessions) || 0
+    sesiones_completadas: completed,
+    sesiones_canceladas: cancelled,
+    ingresos_brutos: parseFloat(gross.toFixed(2)),
+    ingresos_netos: parseFloat(net.toFixed(2)),
   };
 };
 
