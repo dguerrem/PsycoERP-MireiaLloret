@@ -34,7 +34,7 @@ const getPendingReminders = async (db) => {
     INNER JOIN patients p ON s.patient_id = p.id
     LEFT JOIN reminders r ON s.id = r.session_id
     WHERE s.session_date = ?
-      AND s.status = 'programada'
+      AND s.status != 'cancelada'
       AND s.is_active = true
       AND p.is_active = true
     ORDER BY s.start_time ASC
@@ -78,11 +78,6 @@ const createReminder = async (db, sessionId) => {
   }
 
   const sessionData = sessionResult[0];
-
-  // Verificar que la sesión esté programada
-  if (sessionData.status !== "programada") {
-    throw new Error("Session not found or not scheduled");
-  }
 
   // Verificar que no existe ya un reminder
   if (sessionData.reminder_id) {

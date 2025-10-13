@@ -41,37 +41,28 @@ app.use(dbMiddleware);
 const CREDENTIALS_PATH = path.join(__dirname, ".secret", "credentials.json");
 const TOKEN_PATH = path.join(__dirname, ".secret", "token.json");
 const credentials = JSON.parse(fs.readFileSync(CREDENTIALS_PATH));
-const { client_id, client_secret, redirect_uris } = credentials.web;
+
+// Support both 'web' and 'installed' credential formats (desktop vs web app)
+let client_id, client_secret, redirect_uris;
+if (credentials.web) {
+  ({ client_id, client_secret, redirect_uris } = credentials.web);
+  console.log('Using OAuth client type: web');
+} else if (credentials.installed) {
+  ({ client_id, client_secret, redirect_uris } = credentials.installed);
+  console.log('Using OAuth client type: installed (desktop)');
+} else {
+  throw new Error('Invalid credentials.json: missing "web" or "installed" client configuration');
+}
 
 const oAuth2Client = new google.auth.OAuth2(
   client_id,
   client_secret,
-  redirect_uris[0]
+  (redirect_uris && redirect_uris.length > 0) ? redirect_uris[0] : undefined
 );
 
-// Ruta para el manejo del callback de Google
-app.get("/oauth2callback", async (req, res) => {
-  const code = req.query.code;
-
-  if (!code) {
-    return res.status(400).send("Falta el código de autorización.");
-  }
-
-  try {
-    const { tokens } = await oAuth2Client.getToken(code);
-    oAuth2Client.setCredentials(tokens);
-
-    // Guarda el token para futuros usos
-    fs.writeFileSync(TOKEN_PATH, JSON.stringify(tokens));
-    
-    res.send(
-      "Autenticación con Google completada con éxito. Ya puedes cerrar esta ventana."
-    );
-  } catch (error) {
-    console.error("Error al obtener el token:", error);
-    res.status(500).send("Error durante la autenticación.");
-  }
-});
+// Montar rutas de Google (auth-url protegido + callback público)
+const googleRoutes = require('./routes/google/google_routes');
+app.use('/api/google', googleRoutes);
 
 // 🔧 SWAGGER UI - Documentación
 app.use(

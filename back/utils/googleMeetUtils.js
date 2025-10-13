@@ -54,8 +54,10 @@ const crearSesionGoogleMeet = async (sessionData) => {
 
     console.log("Evento a crear:", JSON.stringify(event, null, 2));
 
+  const calendarId = process.env.GOOGLE_CALENDAR_ID || "primary";
+  console.log("Using calendarId:", calendarId);
     const response = await calendar.events.insert({
-      calendarId: "dacormus@gmail.com",
+      calendarId,
       resource: event,
       conferenceDataVersion: 1,
       sendUpdates: "all",
@@ -73,6 +75,9 @@ const crearSesionGoogleMeet = async (sessionData) => {
     return meetLink;
   } catch (error) {
     console.error("Error detallado:", error.message);
+    if (error.response && error.response.data) {
+      console.error("Google API response:", JSON.stringify(error.response.data, null, 2));
+    }
     console.error("Causa:", error.cause?.message);
     throw new Error("No se pudo crear la sesión de Google Meet");
   }

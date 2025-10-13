@@ -90,7 +90,7 @@ const crearSesion = async (req, res) => {
       start_time,
       end_time,
       mode,
-      status = "programada",
+      status = "completada",
       price = 0.0,
       payment_method = "tarjeta",
       notes,
@@ -488,7 +488,13 @@ const obtenerEnlaceWhatsApp = async (req, res) => {
 
 const obtenerKPIsSesiones = async (req, res) => {
   try {
-    const kpis = await getSessionsKPIs(req.db);
+    const { fecha_desde, fecha_hasta } = req.query;
+
+    const filters = {};
+    if (fecha_desde) filters.fecha_desde = fecha_desde;
+    if (fecha_hasta) filters.fecha_hasta = fecha_hasta;
+
+    const kpis = await getSessionsKPIs(req.db, filters);
 
     res.json({
       success: true,

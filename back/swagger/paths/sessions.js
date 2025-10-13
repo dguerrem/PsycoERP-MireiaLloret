@@ -735,45 +735,45 @@ const sessionsPaths = {
     get: {
       tags: ["Sessions"],
       summary: "Obtener KPIs globales de sesiones",
-      description: "Obtiene los indicadores clave de rendimiento (KPIs) globales de todas las sesiones activas: total de sesiones, completadas, programadas, canceladas e ingresos totales.",
+      description: "Obtiene los indicadores clave de rendimiento (KPIs) globales de todas las sesiones activas: total de sesiones, completadas, programadas, canceladas e ingresos totales. Permite filtrar por rango de fechas y clínica.",
+      parameters: [
+        {
+          name: "start_date",
+          in: "query",
+          required: false,
+          schema: {
+            type: "string",
+            format: "date",
+          },
+          description: "Fecha de inicio para filtrar las sesiones (YYYY-MM-DD)",
+        },
+        {
+          name: "end_date",
+          in: "query",
+          required: false,
+          schema: {
+            type: "string",
+            format: "date",
+          },
+          description: "Fecha de fin para filtrar las sesiones (YYYY-MM-DD)",
+        },
+        {
+          name: "clinic_id",
+          in: "query",
+          required: false,
+          schema: {
+            type: "integer",
+          },
+          description: "ID de la clínica para filtrar las sesiones",
+        },
+      ],
       responses: {
         200: {
           description: "KPIs obtenidos exitosamente",
           content: {
             "application/json": {
               schema: {
-                type: "object",
-                properties: {
-                  success: {
-                    type: "boolean",
-                    example: true,
-                  },
-                  data: {
-                    type: "object",
-                    properties: {
-                      total_sessions: {
-                        type: "integer",
-                        description: "Número total de sesiones activas",
-                        example: 150,
-                      },
-                      completed_sessions: {
-                        type: "integer",
-                        description: "Número de sesiones finalizadas",
-                        example: 100,
-                      },
-                      scheduled_sessions: {
-                        type: "integer",
-                        description: "Número de sesiones programadas",
-                        example: 35,
-                      },
-                      cancelled_sessions: {
-                        type: "integer",
-                        description: "Número de sesiones canceladas",
-                        example: 15,
-                      }
-                    },
-                  },
-                },
+                $ref: "#/components/schemas/SessionsKPIsResponse",
               },
             },
           },

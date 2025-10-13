@@ -447,6 +447,23 @@ const deletePatient = async (db, id) => {
   return result.affectedRows > 0;
 };
 
+// Comprueba si un paciente tiene sesiones programadas en el futuro
+const hasFutureSessions = async (db, patientId) => {
+  const query = `
+    SELECT COUNT(*) as total
+    FROM sessions
+    WHERE patient_id = ?
+      AND is_active = 1
+      AND status != 'cancelada'
+      AND (
+        session_date > CURDATE()
+        OR (session_date = CURDATE() AND start_time > CURTIME())
+      )
+  `;
+  const [rows] = await db.execute(query, [patientId]);
+  return rows[0].total > 0;
+};
+
 // Crear un nuevo paciente
 const createPatient = async (db, patientData) => {
   const {
@@ -677,4 +694,5 @@ module.exports = {
   restorePatient,
   updatePatient,
   getActivePatientsWithClinicInfo,
+  hasFutureSessions,
 };

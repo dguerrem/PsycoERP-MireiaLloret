@@ -9,7 +9,7 @@ const getSessions = async (db, filters = {}) => {
   let countQuery = `
         SELECT COUNT(*) as total
         FROM sessions s
-        LEFT JOIN patients p ON s.patient_id = p.id AND p.is_active = true AND p.status = 'en curso'
+        LEFT JOIN patients p ON s.patient_id = p.id AND p.status = 'en curso'
         LEFT JOIN clinics c ON s.clinic_id = c.id AND c.is_active = true
         WHERE s.is_active = true
     `;
@@ -33,7 +33,7 @@ const getSessions = async (db, filters = {}) => {
             c.clinic_color,
             c.percentage AS clinic_percentage
         FROM sessions s
-        LEFT JOIN patients p ON s.patient_id = p.id AND p.is_active = true AND p.status = 'en curso'
+        LEFT JOIN patients p ON s.patient_id = p.id AND p.status = 'en curso'
         LEFT JOIN clinics c ON s.clinic_id = c.id AND c.is_active = true
         WHERE s.is_active = true
     `;
@@ -103,18 +103,6 @@ const getSessions = async (db, filters = {}) => {
   // Transformar datos a estructura organizada
   const transformedData = await Promise.all(
     rows.map(async (row) => {
-      // Obtener notas clínicas del paciente (solo si el paciente está activo)
-      const [medicalRecords] = await db.execute(
-        `
-      SELECT cn.id, cn.title, cn.content, cn.created_at
-      FROM clinical_notes cn
-      INNER JOIN patients p ON cn.patient_id = p.id
-      WHERE cn.patient_id = ? AND p.is_active = true
-      ORDER BY cn.created_at DESC
-    `,
-        [row.patient_id]
-      );
-
       // Calcular el precio bruto (lo que cobra la clínica al paciente)
       // Si price es el neto del psicólogo y clinic_percentage es el % que recibe el psicólogo
       // entonces: bruto = neto / (porcentaje/100)
@@ -284,7 +272,7 @@ const getSessionForWhatsApp = async (db, sessionId) => {
       CONCAT(p.first_name, ' ', p.last_name) as patient_name,
       p.phone as patient_phone
     FROM sessions s
-    INNER JOIN patients p ON s.patient_id = p.id AND p.is_active = true AND p.status = 'en curso'
+    INNER JOIN patients p ON s.patient_id = p.id AND p.status = 'en curso'
     WHERE s.id = ? AND s.is_active = true
   `;
 
@@ -342,25 +330,44 @@ const checkDuplicateSession = async (db, patient_id, session_date, start_time, e
   return null;
 };
 
-// Obtener KPIs globales de sesiones
-const getSessionsKPIs = async (db) => {
+// Obtener KPIs globales de sesiones con filtros opcionales (fechaDesde / fechaHasta / session_date / clinic_id)
+const getSessionsKPIs = async (db, filters = {}) => {
+  const params = [];
+  let where = 'WHERE s.is_active = 1';
+
+  // Lógica de fechas: rango fecha_desde/fecha_hasta
+  if (filters.fecha_desde) {
+    where += ' AND s.session_date >= ?';
+    params.push(filters.fecha_desde);
+  }
+  if (filters.fecha_hasta) {
+    where += ' AND s.session_date <= ?';
+    params.push(filters.fecha_hasta);
+  }
+
   const query = `
     SELECT
-      COUNT(*) as total_sessions,
-      SUM(CASE WHEN status = 'finalizada' THEN 1 ELSE 0 END) as completed_sessions,
-      SUM(CASE WHEN status = 'programada' THEN 1 ELSE 0 END) as scheduled_sessions,
-      SUM(CASE WHEN status = 'cancelada' THEN 1 ELSE 0 END) as cancelled_sessions
-    FROM sessions
-    WHERE is_active = 1
+      SUM(CASE WHEN s.status = 'completada' THEN 1 ELSE 0 END) as completed_sessions,
+      SUM(CASE WHEN s.status = 'cancelada' THEN 1 ELSE 0 END) as cancelled_sessions,
+      COALESCE(SUM(CASE WHEN s.payment_method != 'pendiente' THEN s.price ELSE 0 END), 0) as gross_income,
+      COALESCE(SUM(CASE WHEN s.payment_method != 'pendiente' THEN s.price * (COALESCE(c.percentage,0) / 100) ELSE 0 END), 0) as net_income
+    FROM sessions s
+    LEFT JOIN clinics c ON s.clinic_id = c.id AND c.is_active = true
+    ${where}
   `;
 
-  const [rows] = await db.execute(query);
+  const [rows] = await db.execute(query, params);
+
+  const completed = parseInt(rows[0].completed_sessions) || 0;
+  const cancelled = parseInt(rows[0].cancelled_sessions) || 0;
+  const gross = parseFloat(rows[0].gross_income) || 0;
+  const net = parseFloat(rows[0].net_income) || 0;
 
   return {
-    total_sessions: parseInt(rows[0].total_sessions) || 0,
-    completed_sessions: parseInt(rows[0].completed_sessions) || 0,
-    scheduled_sessions: parseInt(rows[0].scheduled_sessions) || 0,
-    cancelled_sessions: parseInt(rows[0].cancelled_sessions) || 0
+    sesiones_completadas: completed,
+    sesiones_canceladas: cancelled,
+    ingresos_brutos: parseFloat(gross.toFixed(2)),
+    ingresos_netos: parseFloat(net.toFixed(2)),
   };
 };
 

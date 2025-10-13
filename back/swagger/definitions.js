@@ -3046,6 +3046,22 @@ const definitions = {
     },
   },
 
+  SessionsKPIsResponse: {
+    type: "object",
+    properties: {
+      success: { type: "boolean", example: true },
+      data: {
+        type: "object",
+        properties: {
+          sesiones_completadas: { type: "integer", example: 12 },
+          sesiones_canceladas: { type: "integer", example: 2 },
+          ingresos_brutos: { type: "number", format: "decimal", example: 1200.50 },
+          ingresos_netos: { type: "number", format: "decimal", example: 840.35 }
+        }
+      }
+    }
+  },
+
   SuccessResponse: {
     type: "object",
     properties: {
