@@ -20,6 +20,7 @@ const getClinics = async (db, filters = {}) => {
             clinic_color,
             price,
             percentage,
+            is_billable,
             DATE_FORMAT(created_at,'%Y-%m-%d') as created_at,
             DATE_FORMAT(updated_at,'%Y-%m-%d') as updated_at
         FROM clinics
@@ -59,7 +60,7 @@ const getClinics = async (db, filters = {}) => {
 };
 
 const updateClinic = async (db, id, data) => {
-  const { name, clinic_color, address, price, percentage } = data;
+  const { name, clinic_color, address, price, percentage, is_billable } = data;
 
   const fields = [];
   const params = [];
@@ -87,6 +88,11 @@ const updateClinic = async (db, id, data) => {
   if (percentage !== undefined) {
     fields.push("percentage = ?");
     params.push(percentage);
+  }
+
+  if (is_billable !== undefined) {
+    fields.push("is_billable = ?");
+    params.push(is_billable);
   }
 
   if (fields.length === 0) {
@@ -142,7 +148,7 @@ const hasSessions = async (db, clinicId) => {
 
 
 const createClinic = async (db, data) => {
-  const { name, clinic_color, address, price, percentage } = data;
+  const { name, clinic_color, address, price, percentage, is_billable } = data;
 
   if (!name) {
     throw new Error("Name is required");
@@ -171,6 +177,12 @@ const createClinic = async (db, data) => {
   if (percentage !== undefined) {
     fields.push("percentage");
     values.push(percentage);
+    placeholders.push("?");
+  }
+
+  if (is_billable !== undefined) {
+    fields.push("is_billable");
+    values.push(is_billable);
     placeholders.push("?");
   }
 

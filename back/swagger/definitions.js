@@ -402,6 +402,12 @@ const definitions = {
         description: "Porcentaje (0.00-100.00)",
         example: 15.50,
       },
+      is_billable: {
+        type: "boolean",
+        nullable: true,
+        description: "Indica si la clínica es facturable",
+        example: true,
+      },
       created_at: {
         type: "string",
         format: "date",
@@ -671,6 +677,12 @@ const definitions = {
         description: "Porcentaje entre 0.00 y 100.00 (opcional)",
         example: 15.50,
       },
+      is_billable: {
+        type: "boolean",
+        nullable: true,
+        description: "Indica si la clínica es facturable (opcional)",
+        example: true
+      },
     },
   },
 
@@ -723,8 +735,13 @@ const definitions = {
             type: "number",
             format: "decimal",
             nullable: true,
-            description: "Porcentaje",
+            description: "Porcentaje aplicado en la clínica",
             example: 15.50,
+          },
+          is_billable: {
+            type: "boolean",
+            description: "Indica si la clínica es facturable",
+            example: true,
           },
         },
       },
@@ -3131,6 +3148,12 @@ const definitions = {
         maximum: 100,
         description: "Porcentaje entre 0.00 y 100.00",
         example: 20.00,
+      },
+      is_billable: {
+        type: "boolean",
+        nullable: true,
+        description: "Indica si la clínica es facturable (opcional)",
+        example: true
       },
     },
   },

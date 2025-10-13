@@ -38,7 +38,7 @@ const obtenerClinicas = async (req, res) => {
 const actualizarClinica = async (req, res) => {
   try {
     const { id } = req.params;
-    const { name, clinic_color, address, price, percentage } = req.body;
+    const { name, clinic_color, address, price, percentage, is_billable } = req.body;
 
     if (!id || isNaN(id)) {
       return res.status(400).json({
@@ -100,6 +100,20 @@ const actualizarClinica = async (req, res) => {
           });
         }
         data.percentage = percentageNum;
+      }
+    }
+
+    // Validate is_billable if provided (accepts boolean or 0/1)
+    if (is_billable !== undefined) {
+      if (typeof is_billable === 'boolean') {
+        data.is_billable = is_billable ? 1 : 0;
+      } else if (is_billable === 0 || is_billable === 1 || is_billable === '0' || is_billable === '1') {
+        data.is_billable = Number(is_billable);
+      } else {
+        return res.status(400).json({
+          success: false,
+          error: "is_billable debe ser booleano o 0/1",
+        });
       }
     }
 
@@ -185,7 +199,7 @@ const eliminarClinica = async (req, res) => {
 
 const crearClinica = async (req, res) => {
   try {
-    const { name, clinic_color, address, price, percentage } = req.body;
+    const { name, clinic_color, address, price, percentage, is_billable } = req.body;
 
     if (!name || name.trim() === "") {
       return res.status(400).json({
@@ -230,6 +244,20 @@ const crearClinica = async (req, res) => {
         });
       }
       data.percentage = percentageNum;
+    }
+
+    // Validate is_billable if provided (accepts boolean or 0/1)
+    if (is_billable !== undefined) {
+      if (typeof is_billable === 'boolean') {
+        data.is_billable = is_billable ? 1 : 0;
+      } else if (is_billable === 0 || is_billable === 1 || is_billable === '0' || is_billable === '1') {
+        data.is_billable = Number(is_billable);
+      } else {
+        return res.status(400).json({
+          success: false,
+          error: "is_billable debe ser booleano o 0/1",
+        });
+      }
     }
 
     const nuevaClinica = await createClinic(req.db, data);
