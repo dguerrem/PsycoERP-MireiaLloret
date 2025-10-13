@@ -735,27 +735,27 @@ const sessionsPaths = {
     get: {
       tags: ["Sessions"],
       summary: "Obtener KPIs globales de sesiones",
-      description: "Obtiene los indicadores clave de rendimiento (KPIs) globales de todas las sesiones activas: total de sesiones, completadas, programadas, canceladas e ingresos totales. Permite filtrar por rango de fechas y clínica.",
+      description: "Obtiene los indicadores clave de rendimiento (KPIs) globales de todas las sesiones activas: total de sesiones, completadas, programadas, canceladas e ingresos totales. Permite filtrar por rango de fechas, clínica, estado de la sesión y método de pago.",
       parameters: [
         {
-          name: "start_date",
+          name: "fecha_desde",
           in: "query",
           required: false,
           schema: {
             type: "string",
             format: "date",
           },
-          description: "Fecha de inicio para filtrar las sesiones (YYYY-MM-DD)",
+          description: "Fecha de inicio para filtrar las sesiones (YYYY-MM-DD). El rango no puede exceder los 3 años.",
         },
         {
-          name: "end_date",
+          name: "fecha_hasta",
           in: "query",
           required: false,
           schema: {
             type: "string",
             format: "date",
           },
-          description: "Fecha de fin para filtrar las sesiones (YYYY-MM-DD)",
+          description: "Fecha de fin para filtrar las sesiones (YYYY-MM-DD). El rango no puede exceder los 3 años.",
         },
         {
           name: "clinic_id",
@@ -764,7 +764,27 @@ const sessionsPaths = {
           schema: {
             type: "integer",
           },
-          description: "ID de la clínica para filtrar las sesiones",
+          description: "ID de la clínica para filtrar las sesiones.",
+        },
+        {
+          name: "status",
+          in: "query",
+          required: false,
+          schema: {
+            type: "string",
+            enum: ["completada", "cancelada"],
+          },
+          description: "Estado de la sesión para filtrar.",
+        },
+        {
+          name: "payment_method",
+          in: "query",
+          required: false,
+          schema: {
+            type: "string",
+            enum: ["pendiente", "transferencia", "bizum", "efectivo", "tarjeta"],
+          },
+          description: "Método de pago para filtrar las sesiones.",
         },
       ],
       responses: {
@@ -774,6 +794,16 @@ const sessionsPaths = {
             "application/json": {
               schema: {
                 $ref: "#/components/schemas/SessionsKPIsResponse",
+              },
+            },
+          },
+        },
+        400: {
+          description: "Rango de fechas inválido (excede los 3 años)",
+          content: {
+            "application/json": {
+              schema: {
+                $ref: "#/components/schemas/ErrorResponse",
               },
             },
           },

@@ -488,11 +488,27 @@ const obtenerEnlaceWhatsApp = async (req, res) => {
 
 const obtenerKPIsSesiones = async (req, res) => {
   try {
-    const { fecha_desde, fecha_hasta } = req.query;
+    const { fecha_desde, fecha_hasta, clinic_id, status, payment_method } = req.query;
 
     const filters = {};
     if (fecha_desde) filters.fecha_desde = fecha_desde;
     if (fecha_hasta) filters.fecha_hasta = fecha_hasta;
+    if (clinic_id) filters.clinic_id = clinic_id;
+    if (status) filters.status = status;
+    if (payment_method) filters.payment_method = payment_method;
+
+    // Validación de rango de fechas no mayor a 3 años
+    if (fecha_desde && fecha_hasta) {
+      const startDate = new Date(fecha_desde);
+      const endDate = new Date(fecha_hasta);
+      const diffYears = (endDate - startDate) / (1000 * 60 * 60 * 24 * 365);
+      if (diffYears > 3) {
+        return res.status(400).json({
+          success: false,
+          error: "El rango de fechas no puede exceder los 3 años."
+        });
+      }
+    }
 
     const kpis = await getSessionsKPIs(req.db, filters);
 

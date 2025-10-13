@@ -345,6 +345,24 @@ const getSessionsKPIs = async (db, filters = {}) => {
     params.push(filters.fecha_hasta);
   }
 
+  // Filtrado por clínica
+  if (filters.clinic_id) {
+    where += ' AND s.clinic_id = ?';
+    params.push(filters.clinic_id);
+  }
+
+  // Filtrado por estado de la sesión
+  if (filters.status) {
+    where += ' AND s.status = ?';
+    params.push(filters.status);
+  }
+
+  // Filtrado por método de pago
+  if (filters.payment_method) {
+    where += ' AND s.payment_method = ?';
+    params.push(filters.payment_method);
+  }
+
   const query = `
     SELECT
       SUM(CASE WHEN s.status = 'completada' THEN 1 ELSE 0 END) as completed_sessions,
