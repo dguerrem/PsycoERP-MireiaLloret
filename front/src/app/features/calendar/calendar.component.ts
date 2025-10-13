@@ -5,6 +5,7 @@ import {
   ChangeDetectionStrategy,
   ViewChild,
   ElementRef,
+  OnInit,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import {
@@ -46,8 +47,12 @@ interface SessionLayout extends SessionFragment {
   styleUrl: './calendar.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class CalendarComponent {
+export class CalendarComponent implements OnInit {
   private calendarService = inject(CalendarService);
+
+  ngOnInit(): void {
+    this.calendarService.reloadSessions();
+  }
 
   @ViewChild('weekDateInput') weekDateInput?: ElementRef<HTMLInputElement>;
   @ViewChild('monthInput') monthInput?: ElementRef<HTMLInputElement>;
@@ -414,6 +419,10 @@ export class CalendarComponent {
       sessionData.SessionDetailData.status === 'cancelada' ||
       sessionData.SessionDetailData.cancelled
     );
+  }
+
+  isSessionPaid(sessionData: SessionData): boolean {
+    return sessionData.SessionDetailData.payment_method !== 'pendiente';
   }
 
   hasActiveSessionInSlot(date: Date, hour: string): boolean {

@@ -182,7 +182,10 @@
                     }
                     <div class="flex flex-col space-y-0.5 h-full justify-between">
                       <div
-                        [class]="layout.isCancelled ? 'font-semibold truncate text-xs leading-tight' : 'truncate font-semibold text-white text-xs leading-tight'">
+                        [class]="layout.isCancelled ? 'font-semibold truncate text-xs leading-tight flex items-center gap-1' : 'truncate font-semibold text-white text-xs leading-tight flex items-center gap-1'">
+                        @if (isSessionPaid(layout.sessionData) && !layout.isCancelled) {
+                        <span class="w-1.5 h-1.5 bg-green-400 rounded-full flex-shrink-0"></span>
+                        }
                         <span class="sm:hidden">{{ (getPatientNameFromSessionData(layout.sessionData) || 'Sin nombre').split(' ')[0] }}</span>
                         <span class="hidden sm:inline">{{ getPatientNameFromSessionData(layout.sessionData) || 'Sin nombre' }}</span>
                       </div>
@@ -301,7 +304,10 @@
                   {{ formatTime(sessionData.SessionDetailData.start_time) }} - {{
                   formatTime(sessionData.SessionDetailData.end_time) }}
                 </div>
-                <div [class]="isSessionCancelled(sessionData) ? 'truncate text-xs' : 'truncate text-xs text-white'">
+                <div [class]="isSessionCancelled(sessionData) ? 'truncate text-xs flex items-center gap-1' : 'truncate text-xs text-white flex items-center gap-1'">
+                  @if (isSessionPaid(sessionData) && !isSessionCancelled(sessionData)) {
+                  <span class="w-1.5 h-1.5 bg-green-400 rounded-full flex-shrink-0"></span>
+                  }
                   <span class="sm:hidden">{{ (getPatientNameFromSessionData(sessionData) || 'Sin nombre').split(' ')[0] }}</span>
                   <span class="hidden sm:inline">{{ getPatientNameFromSessionData(sessionData) || 'Sin nombre' }}</span>
                 </div>
@@ -349,7 +355,12 @@
   [style.left.px]="tooltipPosition().x"
   [style.top.px]="tooltipPosition().y"
   title="{{ getTooltipContent(session).patientName }} - {{ getTooltipContent(session).time }}">
-  <div class="font-semibold">{{ getTooltipContent(session).patientName }}</div>
+  <div class="font-semibold flex items-center gap-1.5">
+    @if (isSessionPaid(session) && !isSessionCancelled(session)) {
+    <span class="w-1.5 h-1.5 bg-green-400 rounded-full flex-shrink-0"></span>
+    }
+    <span>{{ getTooltipContent(session).patientName }}</span>
+  </div>
   <div class="text-xs text-gray-300">{{ getTooltipContent(session).time }}</div>
 </div>
 }
