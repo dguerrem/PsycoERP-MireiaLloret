@@ -14,35 +14,35 @@
     <div class="grid grid-cols-2 md:grid-cols-5 gap-3 mb-3">
       <div class="bg-card rounded-lg border py-3 shadow-sm">
         <div class="px-3 text-center">
-          <div class="text-xl font-bold text-primary">{{ stats().total }}</div>
+          <div class="text-xl font-bold" style="color: #0891b2">{{ stats().total }}</div>
           <p class="text-xs text-muted-foreground">Total Sesiones</p>
         </div>
       </div>
 
       <div class="bg-card rounded-lg border py-3 shadow-sm">
         <div class="px-3 text-center">
-          <div class="text-xl font-bold text-green-600">En desarrollo</div>
+          <div class="text-xl font-bold" style="color: #16a34a">{{ kpis().sesiones_completadas }}</div>
           <p class="text-xs text-muted-foreground">Completadas</p>
         </div>
       </div>
 
       <div class="bg-card rounded-lg border py-3 shadow-sm">
         <div class="px-3 text-center">
-          <div class="text-xl font-bold text-red-600">En desarrollo</div>
+          <div class="text-xl font-bold" style="color: #dc2626">{{ kpis().sesiones_canceladas }}</div>
           <p class="text-xs text-muted-foreground">Canceladas</p>
         </div>
       </div>
 
       <div class="bg-card rounded-lg border py-3 shadow-sm">
         <div class="px-3 text-center">
-          <div class="text-xl font-bold text-gray-600">En desarrollo</div>
+          <div class="text-xl font-bold" style="color: #4b5563">{{ kpis().ingresos_brutos.toFixed(2) }}€</div>
           <p class="text-xs text-muted-foreground">Ingresos Brutos</p>
         </div>
       </div>
 
       <div class="bg-card rounded-lg border py-3 shadow-sm">
         <div class="px-3 text-center">
-          <div class="text-xl font-bold text-green-700">En desarrollo</div>
+          <div class="text-xl font-bold" style="color: #15803d">{{ kpis().ingresos_netos.toFixed(2) }}€</div>
           <p class="text-xs text-muted-foreground">Ingresos Netos</p>
         </div>
       </div>
@@ -120,11 +120,15 @@
             </div>
           </div>
 
-          <!-- Clear Filters Button Row -->
-          <div class="flex justify-end">
+          <!-- Action Buttons Row -->
+          <div class="flex justify-end gap-2">
             <button (click)="clearFilters()"
               class="px-4 py-1.5 text-xs bg-white border border-gray-300 rounded-md hover:bg-gray-50 transition-colors shadow-sm">
               Limpiar Filtros
+            </button>
+            <button (click)="applyFilters()"
+              class="px-4 py-1.5 text-xs bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors shadow-sm font-medium">
+              Buscar
             </button>
           </div>
         </div>
@@ -135,7 +139,9 @@
       <!-- Pagination Buttons -->
       <div class="flex items-center gap-2">
         <button (click)="goToPage(currentPage() - 1)" [disabled]="currentPage() === 1" data-slot="button"
-          class="inline-flex items-center justify-center whitespace-nowrap text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive border bg-background shadow-xs hover:bg-accent hover:text-accent-foreground dark:bg-input/30 dark:border-input dark:hover:bg-input/50 h-8 w-8 rounded-md p-0">
+          class="inline-flex items-center justify-center whitespace-nowrap text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none border bg-background shadow-xs rounded-md h-8 w-8 p-0"
+          onmouseover="if(!this.disabled) { this.style.backgroundColor='#0891b2'; this.style.color='white'; this.style.borderColor='#0891b2'; }"
+          onmouseout="if(!this.disabled) { this.style.backgroundColor=''; this.style.color=''; this.style.borderColor=''; }">
           <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
             class="lucide lucide-chevron-left h-4 w-4">
@@ -148,12 +154,15 @@
           @for (page of getPageNumbers(); track page) {
           @if (page === currentPage()) {
           <button (click)="goToPage(page)" data-slot="button"
-            class="inline-flex items-center justify-center whitespace-nowrap text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive bg-primary text-primary-foreground shadow-xs hover:bg-primary/90 rounded-md gap-1.5 has-[>svg]:px-2.5 w-8 h-8 p-0">
+            style="background-color: #0891b2"
+            class="inline-flex items-center justify-center whitespace-nowrap text-sm font-medium transition-all text-white shadow-xs hover:opacity-90 rounded-md w-8 h-8 p-0">
             {{ page }}
           </button>
           } @else {
           <button (click)="goToPage(page)" data-slot="button"
-            class="inline-flex items-center justify-center whitespace-nowrap text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive border bg-background shadow-xs hover:bg-accent hover:text-accent-foreground dark:bg-input/30 dark:border-input dark:hover:bg-input/50 rounded-md gap-1.5 has-[>svg]:px-2.5 w-8 h-8 p-0">
+            class="inline-flex items-center justify-center whitespace-nowrap text-sm font-medium transition-all border bg-background shadow-xs rounded-md w-8 h-8 p-0"
+            onmouseover="this.style.backgroundColor='#0891b2'; this.style.color='white'; this.style.borderColor='#0891b2';"
+            onmouseout="this.style.backgroundColor=''; this.style.color=''; this.style.borderColor='';">
             {{ page }}
           </button>
           }
@@ -162,7 +171,9 @@
         </div>
 
         <button (click)="goToPage(currentPage() + 1)" [disabled]="currentPage() === totalPages()" data-slot="button"
-          class="inline-flex items-center justify-center whitespace-nowrap text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive border bg-background shadow-xs hover:bg-accent hover:text-accent-foreground dark:bg-input/30 dark:border-input dark:hover:bg-input/50 h-8 w-8 rounded-md p-0">
+          class="inline-flex items-center justify-center whitespace-nowrap text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none border bg-background shadow-xs rounded-md h-8 w-8 p-0"
+          onmouseover="if(!this.disabled) { this.style.backgroundColor='#0891b2'; this.style.color='white'; this.style.borderColor='#0891b2'; }"
+          onmouseout="if(!this.disabled) { this.style.backgroundColor=''; this.style.color=''; this.style.borderColor=''; }">
           <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
             class="lucide lucide-chevron-right h-4 w-4">
@@ -196,7 +207,6 @@
                 <td colspan="11" class="p-8 text-center">
                   <div class="flex items-center justify-center">
                     <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-                    <span class="ml-3 text-muted-foreground">Cargando sesiones...</span>
                   </div>
                 </td>
               </tr>

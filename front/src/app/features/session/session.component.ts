@@ -32,6 +32,13 @@ interface SessionStats {
   totalRevenueNet: number;
 }
 
+interface SessionKPIs {
+  sesiones_completadas: number;
+  sesiones_canceladas: number;
+  ingresos_brutos: number;
+  ingresos_netos: number;
+}
+
 /**
  * Session management feature component
  *
@@ -66,6 +73,12 @@ export class SessionComponent implements OnInit {
   clinics = signal<Clinic[]>([]);
   isLoading = signal(false);
   totalSessions = signal(0);
+  kpis = signal<SessionKPIs>({
+    sesiones_completadas: 0,
+    sesiones_canceladas: 0,
+    ingresos_brutos: 0,
+    ingresos_netos: 0,
+  });
 
   // Filter controls
   clinicControl = new FormControl<number | null>(null);
@@ -123,6 +136,7 @@ export class SessionComponent implements OnInit {
   ngOnInit(): void {
     this.loadClinics();
     this.loadSessions();
+    this.loadKPIs();
     this.setupClinicControlSubscription();
   }
 
@@ -146,8 +160,6 @@ export class SessionComponent implements OnInit {
   }
 
   private loadSessions(): void {
-    this.isLoading.set(true);
-
     const currentFilters = this.filters();
 
     // Build query params - always request 5000 sessions
@@ -191,12 +203,52 @@ export class SessionComponent implements OnInit {
 
           // Apply frontend pagination
           this.updatePaginatedSessions();
-
-          this.isLoading.set(false);
         },
         error: (error) => {
           console.error('Error loading sessions:', error);
-          this.isLoading.set(false);
+        },
+      });
+  }
+
+  private loadKPIs(): void {
+    const currentFilters = this.filters();
+
+    // Build query params with same filters as loadSessions
+    const params: any = {};
+
+    if (currentFilters.clinicId) {
+      params.clinic_id = currentFilters.clinicId.toString();
+    }
+
+    if (currentFilters.status) {
+      params.status = currentFilters.status;
+    }
+
+    if (currentFilters.paymentMethod) {
+      params.payment_method = currentFilters.paymentMethod;
+    }
+
+    if (currentFilters.dateFrom) {
+      params.fecha_desde = currentFilters.dateFrom;
+    }
+
+    if (currentFilters.dateTo) {
+      params.fecha_hasta = currentFilters.dateTo;
+    }
+
+    // Build query string
+    const queryString = Object.keys(params)
+      .map((key) => `${key}=${params[key]}`)
+      .join('&');
+
+    this.http
+      .get<{ data: SessionKPIs }>(`${environment.api.baseUrl}/sessions/kpis?${queryString}`)
+      .subscribe({
+        next: (response) => {
+          this.kpis.set(response.data);
+        },
+        error: (error) => {
+          console.error('Error loading KPIs:', error);
         },
       });
   }
@@ -217,16 +269,12 @@ export class SessionComponent implements OnInit {
     if (filterName === 'dateFrom' && (!value || value === '')) {
       this.filters.update((f) => ({ ...f, dateFrom: this.getThreeMonthsAgo() }));
       this.dateFromError.set(null);
-      this.currentPage.set(1);
-      this.loadSessions();
       return;
     }
 
     if (filterName === 'dateTo' && (!value || value === '')) {
       this.filters.update((f) => ({ ...f, dateTo: this.getTodayDate() }));
       this.dateToError.set(null);
-      this.currentPage.set(1);
-      this.loadSessions();
       return;
     }
 
@@ -235,14 +283,18 @@ export class SessionComponent implements OnInit {
     // Validate dates when they change
     if (filterName === 'dateFrom' || filterName === 'dateTo') {
       this.validateDates();
-      // Only load sessions if dates are valid
-      if (!this.dateFromError() && !this.dateToError()) {
-        this.currentPage.set(1);
-        this.loadSessions();
-      }
-    } else {
+    }
+  }
+
+  applyFilters(): void {
+    // Validate dates before applying filters
+    this.validateDates();
+
+    // Only load data if dates are valid
+    if (!this.dateFromError() && !this.dateToError()) {
       this.currentPage.set(1);
       this.loadSessions();
+      this.loadKPIs();
     }
   }
 
@@ -258,8 +310,7 @@ export class SessionComponent implements OnInit {
     this.clinicControl.setValue(null);
     this.dateFromError.set(null);
     this.dateToError.set(null);
-    this.currentPage.set(1);
-    this.loadSessions();
+    this.applyFilters();
   }
 
   onPageSizeChange(event: Event): void {
