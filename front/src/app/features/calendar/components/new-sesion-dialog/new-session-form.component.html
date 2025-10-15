@@ -46,14 +46,27 @@
 
     <!-- Patient Info Section - Always Visible -->
     <section class="space-y-4">
-      <div class="flex items-center gap-3 pb-3 border-b border-gray-100">
-        <div class="p-1.5 bg-blue-100 rounded-md">
+      <div class="flex items-center justify-between gap-3 pb-3 border-b border-gray-100">
+        <div class="flex items-center gap-3">
+          <div class="p-1.5 bg-blue-100 rounded-md">
           <svg class="h-4 w-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
               d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
           </svg>
+          </div>
+          <h3 class="text-lg font-semibold text-gray-900">Información del Paciente</h3>
         </div>
-        <h3 class="text-lg font-semibold text-gray-900">Información del Paciente</h3>
+
+        <!-- View patient detail button -->
+        <div class="pl-3">
+          <button type="button" (click)="viewPatientDetail()"
+            class="inline-flex items-center gap-2 px-3 py-1.5 bg-white border border-gray-200 rounded-md text-sm text-gray-700 hover:bg-gray-50 transition-colors">
+            <svg class="h-4 w-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M15 12H3m0 0l4-4m-4 4l4 4M21 12v6a2 2 0 0 1-2 2H7" />
+            </svg>
+            Ver ficha
+          </button>
+        </div>
       </div>
 
       <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">

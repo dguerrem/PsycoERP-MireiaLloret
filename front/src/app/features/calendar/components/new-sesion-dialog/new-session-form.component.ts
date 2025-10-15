@@ -10,6 +10,7 @@ import {
   inject,
   OnInit,
 } from '@angular/core';
+import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import {
   ReactiveFormsModule,
@@ -72,6 +73,7 @@ export class NewSessionFormComponent implements OnInit {
   private sessionsService = inject(SessionsService);
   private clinicalNotesService = inject(ClinicalNotesService);
   private toastService = inject(ToastService);
+  private router = inject(Router);
 
   /** Loading state signal */
   readonly isLoading = signal(false);
@@ -915,5 +917,23 @@ export class NewSessionFormComponent implements OnInit {
     // Reload clinical notes with IDs after create/update/delete
     this.notesLoadedWithIds.set(false);
     this.loadClinicalNotesWithIds();
+  }
+
+  /**
+   * Close the modal and navigate to the selected patient's detail page
+   */
+  viewPatientDetail(): void {
+    const patient = this.selectedPatientData;
+    if (!patient) return;
+
+    // Close the modal first so the parent can remove it
+    this.close.emit();
+
+    // Navigate to patient detail route
+    // selectedPatientData uses `idPaciente` as the identifier
+    const patientId = (patient as any).idPaciente ?? (patient as any).id;
+    if (!patientId) return;
+
+    this.router.navigate(['/patient', patientId]);
   }
 }
