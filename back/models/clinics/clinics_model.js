@@ -39,13 +39,19 @@ const getClinics = async (db, filters = {}) => {
 
   const [dataRows] = await db.execute(dataQuery, [...params, limit, offset]);
   
+  // Mapear datos para convertir is_billable de TINYINT (0/1) a boolean
+  const mappedData = dataRows.map(row => ({
+    ...row,
+    is_billable: row.is_billable === 1
+  }));
+  
   // Calcular información de paginación
   const totalPages = Math.ceil(totalRecords / limit);
   const hasNextPage = page < totalPages;
   const hasPrevPage = page > 1;
   
   return {
-    data: dataRows,
+    data: mappedData,
     pagination: {
       currentPage: page,
       totalPages: totalPages,
