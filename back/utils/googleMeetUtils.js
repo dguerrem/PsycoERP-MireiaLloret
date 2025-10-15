@@ -1,8 +1,14 @@
 const { initializeGoogleAuth } = require("../config/googleMeet");
 
-const crearSesionGoogleMeet = async (sessionData) => {
+/**
+ * Crea una sesión de Google Meet para una sesión de psicología
+ * @param {Object} sessionData - Datos de la sesión
+ * @param {string} hostname - Hostname de la request para seleccionar credenciales apropiadas
+ * @returns {string} URL del Google Meet creado
+ */
+const crearSesionGoogleMeet = async (sessionData, hostname) => {
   try {
-    const calendar = await initializeGoogleAuth();
+    const calendar = await initializeGoogleAuth(hostname);
 
     console.log("Datos recibidos:", {
       session_date: sessionData.session_date,

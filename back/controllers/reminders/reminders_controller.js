@@ -56,8 +56,8 @@ const crearRecordatorio = async (req, res) => {
 
     const reminderData = await createReminder(req.db, parseInt(session_id));
 
-    // Generar mensaje de WhatsApp personalizado
-    const whatsappMessage = await generarMensajeWhatsApp(reminderData);
+    // Generar mensaje de WhatsApp personalizado (pasa hostname para Google Meet)
+    const whatsappMessage = await generarMensajeWhatsApp(reminderData, req.hostname);
 
     // Generar deeplink de WhatsApp
     const whatsappDeeplink = generarDeeplinkWhatsApp(
@@ -101,7 +101,7 @@ const crearRecordatorio = async (req, res) => {
 };
 
 // Función para generar mensaje de WhatsApp personalizado
-const generarMensajeWhatsApp = async (sessionData) => {
+const generarMensajeWhatsApp = async (sessionData, hostname) => {
   const fecha = new Date(sessionData.session_date);
   const fechaFormateada = fecha.toLocaleDateString("es-ES", {
     weekday: "long",
@@ -129,8 +129,8 @@ const generarMensajeWhatsApp = async (sessionData) => {
     }
   } else if (sessionData.mode === "online") {
     try {
-      // Crear Google Meet REAL
-      const meetLink = await crearSesionGoogleMeet(sessionData);
+      // Crear Google Meet REAL (con hostname para seleccionar credenciales)
+      const meetLink = await crearSesionGoogleMeet(sessionData, hostname);
       mensaje += `*Enlace de la sesión:* ${meetLink}\n`;
       console.log("Google Meet creado exitosamente");
     } catch (error) {

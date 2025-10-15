@@ -38,9 +38,35 @@ app.use(express.urlencoded({ extended: true, limit: "50mb" }));
 app.use(dbMiddleware);
 
 // Configuración de credenciales de Google OAuth 2.0
-const CREDENTIALS_PATH = path.join(__dirname, ".secret", "credentials.json");
-const TOKEN_PATH = path.join(__dirname, ".secret", "token.json");
-const credentials = JSON.parse(fs.readFileSync(CREDENTIALS_PATH));
+// Función para determinar qué credenciales usar (sigue el mismo patrón que db.js)
+const getGoogleCredentialsPath = (hostname) => {
+  // Localhost siempre usa TEST
+  if (hostname === "127.0.0.1" || hostname === "localhost") {
+    return {
+      credentials: path.join(__dirname, ".secret", "credentials.test.json"),
+      token: path.join(__dirname, ".secret", "token.test.json"),
+    };
+  }
+
+  // Si incluye "test." usa credenciales de test
+  if (hostname && hostname.includes("test.")) {
+    return {
+      credentials: path.join(__dirname, ".secret", "credentials.test.json"),
+      token: path.join(__dirname, ".secret", "token.test.json"),
+    };
+  }
+
+  // Por defecto (producción)
+  return {
+    credentials: path.join(__dirname, ".secret", "credentials.production.json"),
+    token: path.join(__dirname, ".secret", "token.production.json"),
+  };
+};
+
+// Por defecto inicializa con credenciales de producción para el oAuth2Client global
+// Las rutas de Google OAuth pueden usar esto o crear su propio client dinámicamente
+const defaultPaths = getGoogleCredentialsPath();
+const credentials = JSON.parse(fs.readFileSync(defaultPaths.credentials));
 
 // Support both 'web' and 'installed' credential formats (desktop vs web app)
 let client_id, client_secret, redirect_uris;
@@ -94,6 +120,84 @@ app.get("/", (req, res) => {
 
 // Rutas públicas (sin autenticación)
 app.use("/api/auth", authRoutes);
+
+// Ruta pública para OAuth callback de Google (usado por get_gcal_token.js)
+app.get("/oauth/callback", (req, res) => {
+  const code = req.query.code;
+  
+  if (!code) {
+    return res.status(400).json({
+      success: false,
+      message: "No se recibió el código de autorización",
+    });
+  }
+
+  // Mostrar el código en una página simple para que el usuario lo copie
+  res.send(`
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <title>Autorización de Google Calendar</title>
+      <style>
+        body {
+          font-family: Arial, sans-serif;
+          max-width: 600px;
+          margin: 50px auto;
+          padding: 20px;
+          background-color: #f5f5f5;
+        }
+        .container {
+          background: white;
+          padding: 30px;
+          border-radius: 8px;
+          box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 { color: #4285f4; }
+        .code-box {
+          background: #f8f9fa;
+          padding: 15px;
+          border-radius: 4px;
+          border: 1px solid #ddd;
+          word-break: break-all;
+          font-family: monospace;
+          margin: 20px 0;
+        }
+        button {
+          background: #4285f4;
+          color: white;
+          border: none;
+          padding: 10px 20px;
+          border-radius: 4px;
+          cursor: pointer;
+          font-size: 16px;
+        }
+        button:hover { background: #357ae8; }
+        .success { color: #0f9d58; margin-top: 10px; display: none; }
+      </style>
+    </head>
+    <body>
+      <div class="container">
+        <h1>✅ Autorización Exitosa</h1>
+        <p>Copia el siguiente código y pégalo en la terminal donde ejecutaste <code>get_gcal_token.js</code>:</p>
+        <div class="code-box" id="code">${code}</div>
+        <button onclick="copyCode()">📋 Copiar Código</button>
+        <p class="success" id="copied">✓ Código copiado al portapapeles</p>
+        <p style="margin-top: 20px; color: #666; font-size: 14px;">
+          Después de pegar el código, puedes cerrar esta ventana.
+        </p>
+      </div>
+      <script>
+        function copyCode() {
+          const code = document.getElementById('code').textContent;
+          navigator.clipboard.writeText(code).then(() => {
+            document.getElementById('copied').style.display = 'block';
+          });
+        }
+      </script>
+    </body>
+    </html>
+  `);
+});
 
 // Middleware global de autenticación para todas las rutas protegidas
 app.use(authenticateToken);
