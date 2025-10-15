@@ -79,8 +79,8 @@ const crearRecordatorio = async (req, res) => {
     if (err.message === "Session not found or not scheduled") {
       return res.status(404).json({
         success: false,
-        error: "Sesión no encontrada o no está programada",
-        message: "La sesión debe existir y estar en estado 'programada'",
+        error: "Sesión no encontrada o está cancelada",
+        message: "La sesión debe existir y estar en estado distinto de 'cancelada'",
       });
     }
 

@@ -65,7 +65,7 @@ const remindersPaths = {
           },
         },
         404: {
-          description: "Sesión no encontrada o no está programada",
+          description: "Sesión no encontrada o está cancelada",
           content: {
             "application/json": {
               schema: {

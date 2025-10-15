@@ -31,7 +31,7 @@ const sessionsPaths = {
           required: false,
           schema: {
             type: "string",
-            enum: ["programada", "finalizada", "cancelada"],
+            enum: ["completada", "cancelada"],
           },
           description: "Estado de la sesión",
         },
@@ -192,8 +192,8 @@ const sessionsPaths = {
                 },
                 status: {
                   type: "string",
-                  enum: ["programada", "finalizada", "cancelada"],
-                  default: "programada",
+                  enum: ["completada", "cancelada"],
+                  default: "completada",
                   description: "Estado de la sesión",
                 },
                 price: {
@@ -283,7 +283,7 @@ const sessionsPaths = {
                       },
                       status: {
                         type: "string",
-                        example: "programada",
+                        example: "completada",
                       },
                       patient_id: {
                         type: "integer",
@@ -376,7 +376,7 @@ const sessionsPaths = {
                 },
                 status: {
                   type: "string",
-                  enum: ["programada", "finalizada", "cancelada"],
+                  enum: ["completada", "cancelada"],
                   description: "Estado de la sesión",
                 },
                 price: {
@@ -478,7 +478,7 @@ const sessionsPaths = {
                       },
                       status: {
                         type: "string",
-                        example: "programada",
+                        example: "completada",
                       },
                       patient_id: {
                         type: "integer",
@@ -665,7 +665,7 @@ const sessionsPaths = {
           },
         },
         400: {
-          description: "ID de sesión inválido, sesión no está programada, o número de teléfono inválido",
+          description: "ID de sesión inválido, sesión no está completada, o número de teléfono inválido",
           content: {
             "application/json": {
               schema: {

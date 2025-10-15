@@ -413,8 +413,8 @@ const obtenerEnlaceWhatsApp = async (req, res) => {
       });
     }
 
-    // Validar que la sesión esté programada
-    if (sessionData.status !== "programada") {
+    // Validar que la sesión no esté cancelada
+    if (sessionData.status === "cancelada") {
       return res.status(400).json({
         success: false,
         error: "Solo se pueden generar enlaces para sesiones programadas",

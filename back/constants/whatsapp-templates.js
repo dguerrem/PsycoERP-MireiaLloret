@@ -65,19 +65,7 @@ const getRandomTemplate = () => {
   return templates[randomIndex];
 };
 
-const getAllTemplates = () => {
-  return Object.values(WHATSAPP_MESSAGE_TEMPLATES);
-};
-
-const getTemplateById = (templateId) => {
-  return Object.values(WHATSAPP_MESSAGE_TEMPLATES).find(
-    (template) => template.id === templateId
-  );
-};
-
 module.exports = {
   WHATSAPP_MESSAGE_TEMPLATES,
   getRandomTemplate,
-  getAllTemplates,
-  getTemplateById,
 };

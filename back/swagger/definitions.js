@@ -2818,9 +2818,9 @@ const definitions = {
       },
       status: {
         type: "string",
-        enum: ["programada", "finalizada", "cancelada"],
+        enum: ["completada", "cancelada"],
         description: "Estado de la sesión",
-        example: "programada",
+        example: "completada",
       },
       price: {
         type: "number",
@@ -2892,9 +2892,9 @@ const definitions = {
       },
       status: {
         type: "string",
-        enum: ["programada", "finalizada", "cancelada"],
+        enum: ["completada", "cancelada"],
         description: "Estado de la sesión",
-        example: "finalizada",
+        example: "completada",
       },
       type: {
         type: "string",
