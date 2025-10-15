@@ -106,7 +106,7 @@ const getPendingInvoices = async (db, filters = {}) => {
   const targetMonth = month || (currentDate.getMonth() + 1);
   const targetYear = year || currentDate.getFullYear();
 
-  // Primero obtenemos los pacientes con sesiones pendientes
+  // Obtener pacientes con sesiones pendientes y detalles de sesiones en una sola query
   const [pendingSessionsResult] = await db.execute(
     `SELECT
        p.id as patient_id,
@@ -117,11 +117,19 @@ const getPendingInvoices = async (db, filters = {}) => {
        CONCAT_WS(' ', p.city, p.postal_code) as patient_address_line2,
        c.name as clinic_name,
        COUNT(s.id) as pending_sessions_count,
-       COALESCE(SUM(s.price), 0) as total_gross
+       COALESCE(SUM(s.price), 0) as total_gross,
+       JSON_ARRAYAGG(
+         JSON_OBJECT(
+           'session_id', s.id,
+           'session_date', DATE_FORMAT(s.session_date, '%Y-%m-%d'),
+           'price', s.price
+         ) ORDER BY s.session_date ASC
+       ) as sessions
      FROM patients p
      INNER JOIN sessions s ON s.patient_id = p.id
        AND s.is_active = true
        AND s.invoiced = 0
+       AND s.payment_method != 'pendiente'
        AND MONTH(s.session_date) = ?
        AND YEAR(s.session_date) = ?
      INNER JOIN clinics c ON s.clinic_id = c.id AND c.is_active = true
@@ -131,42 +139,23 @@ const getPendingInvoices = async (db, filters = {}) => {
     [targetMonth, targetYear]
   );
 
-  // Para cada paciente, obtener los detalles de las sesiones
-  const pendingInvoices = await Promise.all(
-    pendingSessionsResult.map(async (row) => {
-      const [sessionsDetails] = await db.execute(
-        `SELECT
-           id as session_id,
-           DATE_FORMAT(session_date, '%Y-%m-%d') as session_date,
-           price
-         FROM sessions
-         WHERE patient_id = ?
-           AND is_active = true
-           AND invoiced = 0
-           AND MONTH(session_date) = ?
-           AND YEAR(session_date) = ?
-         ORDER BY session_date ASC`,
-        [row.patient_id, targetMonth, targetYear]
-      );
-
-      return {
-        patient_id: parseInt(row.patient_id),
-        patient_full_name: row.patient_full_name,
-        dni: row.dni || '',
-        email: row.email || '',
-        patient_address_line1: row.patient_address_line1 || '',
-        patient_address_line2: row.patient_address_line2 || '',
-        clinic_name: row.clinic_name,
-        sessions: sessionsDetails.map(session => ({
-          session_id: parseInt(session.session_id),
-          session_date: session.session_date,
-          price: parseFloat(session.price)
-        })),
-        pending_sessions_count: parseInt(row.pending_sessions_count),
-        total_gross: parseFloat(row.total_gross)
-      };
-    })
-  );
+  // Mapear resultados parseando el JSON de sesiones
+  const pendingInvoices = pendingSessionsResult.map(row => ({
+    patient_id: parseInt(row.patient_id),
+    patient_full_name: row.patient_full_name,
+    dni: row.dni || '',
+    email: row.email || '',
+    patient_address_line1: row.patient_address_line1 || '',
+    patient_address_line2: row.patient_address_line2 || '',
+    clinic_name: row.clinic_name,
+    sessions: JSON.parse(row.sessions).map(session => ({
+      session_id: parseInt(session.session_id),
+      session_date: session.session_date,
+      price: parseFloat(session.price)
+    })),
+    pending_sessions_count: parseInt(row.pending_sessions_count),
+    total_gross: parseFloat(row.total_gross)
+  }));
 
   return {
     filters_applied: {
