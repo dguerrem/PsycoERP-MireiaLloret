@@ -133,7 +133,7 @@ const getPendingInvoices = async (db, filters = {}) => {
        AND MONTH(s.session_date) = ?
        AND YEAR(s.session_date) = ?
      INNER JOIN clinics c ON s.clinic_id = c.id AND c.is_active = true
-     WHERE p.is_active = true
+     WHERE p.is_active = true AND c.is_billable = false
      GROUP BY p.id, p.first_name, p.last_name, p.dni, p.email, p.street, p.street_number, p.door, p.city, p.postal_code, c.name
      ORDER BY patient_full_name ASC`,
     [targetMonth, targetYear]
