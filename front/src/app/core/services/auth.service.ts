@@ -11,11 +11,13 @@ import {
   TokenData,
   ApiError,
 } from '../models';
+import { UserService } from './user.service';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
   private http = inject(HttpClient);
   private router = inject(Router);
+  private userService = inject(UserService);
 
   // Signals para el estado de autenticación
   private currentUser = signal<User | null>(null);
@@ -73,7 +75,8 @@ export class AuthService {
     this.isRefreshing = false;
 
     localStorage.removeItem('auth_token');
-    localStorage.removeItem('user');
+    // Dejar que UserService limpie el usuario almacenado
+    this.userService.clearProfile();
     localStorage.removeItem('token_expiration');
 
     this.refreshTokenSubject$.next(null);
@@ -120,7 +123,8 @@ export class AuthService {
 
     // Guardar en localStorage
     localStorage.setItem('auth_token', token.access_token);
-    localStorage.setItem('user', JSON.stringify(user));
+    // Delegar persistencia del user a UserService
+    this.userService.setProfile(user);
     localStorage.setItem('token_expiration', expirationTime.toISOString());
 
     this.loading.set(false);
@@ -171,6 +175,8 @@ export class AuthService {
 
         // Verificar si el token no ha expirado
         if (expiration > new Date()) {
+          // Sincronizar con UserService
+          this.userService.setProfile(user);
           this.currentUser.set(user);
           this.currentToken.set(token);
           this.tokenExpirationTime.set(expiration);

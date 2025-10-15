@@ -12,6 +12,11 @@ export class UserService {
   private toast = inject(ToastService);
   private loadingService = inject(LoadingService);
 
+  constructor() {
+    // Inicializar desde localStorage si existe
+    this.loadFromStorage();
+  }
+
   // Signals para el estado del perfil de usuario
   private userProfile = signal<User | null>(null);
   private loading = signal(false);
@@ -84,6 +89,11 @@ export class UserService {
    */
   clearProfile(): void {
     this.userProfile.set(null);
+    try {
+      localStorage.removeItem('user');
+    } catch (e) {
+      console.error('Error removing user from localStorage:', e);
+    }
   }
 
   /**
@@ -91,6 +101,30 @@ export class UserService {
    */
   setProfile(user: User): void {
     this.userProfile.set(user);
+    // Persistir en localStorage
+    try {
+      localStorage.setItem('user', JSON.stringify(user));
+    } catch (e) {
+      console.error('Error saving user to localStorage:', e);
+    }
+  }
+
+  /**
+   * Carga el usuario desde localStorage si está presente y lo establece en la señal.
+   */
+  private loadFromStorage(): void {
+    const stored = localStorage.getItem('user');
+    if (stored) {
+      try {
+        const user = JSON.parse(stored) as User;
+        this.userProfile.set(user);
+      } catch (e) {
+        console.error('Error parsing stored user:', e);
+        try {
+          localStorage.removeItem('user');
+        } catch {}
+      }
+    }
   }
 
   /**

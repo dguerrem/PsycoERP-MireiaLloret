@@ -3,6 +3,8 @@ import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { MenuService } from '../../../core/services/menu.service';
 import { AuthService } from '../../../core/services/auth.service';
+import { UserService } from '../../../core/services/user.service';
+import { computed } from '@angular/core';
 
 @Component({
   selector: 'app-sidebar',
@@ -15,6 +17,7 @@ export class SidebarComponent {
   private router = inject(Router);
   private menuService = inject(MenuService);
   private authService = inject(AuthService);
+  private userService = inject(UserService);
 
   @Input() activeModule: string = '';
   @Input() isOpen: boolean = false;
@@ -23,6 +26,16 @@ export class SidebarComponent {
 
   // Get menu items from service using signals
   readonly menuItems = this.menuService.items;
+
+  // Exponer nombre y iniciales del usuario desde UserService
+  readonly userName = computed(() => this.userService.profile()?.name ?? '');
+  readonly userInitials = computed(() => {
+    const name = this.userService.profile()?.name ?? '';
+    if (!name) return '';
+    const parts = name.split(' ');
+    const initials = parts.slice(0,2).map(p => p.charAt(0)).join('');
+    return initials.toUpperCase();
+  });
 
   onModuleChange(modulePath: string): void {
     // Navigate to the selected route
