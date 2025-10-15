@@ -4,7 +4,6 @@ const {
   updateSession,
   deleteSession,
   getSessionForWhatsApp,
-  checkDuplicateSession,
   checkTimeOverlap,
   getSessionsKPIs,
 } = require("../../models/sessions/sessions_model");

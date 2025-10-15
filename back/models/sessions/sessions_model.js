@@ -323,13 +323,6 @@ const checkTimeOverlap = async (db, session_date, start_time, end_time, excludeS
   return rows.length > 0 ? rows[0] : null;
 };
 
-// Mantener función legacy por compatibilidad (ahora usa checkTimeOverlap)
-const checkDuplicateSession = async (db, patient_id, session_date, start_time, excludeSessionId = null) => {
-  // Nota: Esta función ya no se usa, se mantiene solo por compatibilidad
-  // Usar checkTimeOverlap en su lugar
-  return null;
-};
-
 // Obtener KPIs globales de sesiones con filtros opcionales (fechaDesde / fechaHasta / session_date / clinic_id)
 const getSessionsKPIs = async (db, filters = {}) => {
   const params = [];
@@ -395,7 +388,6 @@ module.exports = {
   updateSession,
   deleteSession,
   getSessionForWhatsApp,
-  checkDuplicateSession,
   checkTimeOverlap,
   getSessionsKPIs,
 };
