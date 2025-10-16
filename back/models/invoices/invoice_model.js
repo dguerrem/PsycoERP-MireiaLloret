@@ -408,11 +408,106 @@ const getPendingInvoicesOfClinics = async (db, filters = {}) => {
   return pendingInvoicesOfClinics;
 };
 
+const createInvoiceOfClinics = async (db, invoiceData) => {
+  const {
+    clinic_id,
+    invoice_number,
+    invoice_date,
+    concept,
+    total,
+    month,
+    year
+  } = invoiceData;
+
+  const connection = await db.getConnection();
+
+  try {
+    await connection.beginTransaction();
+
+    // VALIDACIÓN: Verificar que no exista ya una factura para esta clínica en este mes/año
+    const [existingInvoice] = await connection.execute(
+      `SELECT id, invoice_number FROM invoices 
+       WHERE clinic_id = ? AND month = ? AND year = ? AND is_active = true`,
+      [clinic_id, month, year]
+    );
+
+    if (existingInvoice.length > 0) {
+      throw new Error(`Ya existe una factura para esta clínica en ${month}/${year} (Factura: ${existingInvoice[0].invoice_number})`);
+    }
+
+    // 1. Obtener sesiones pendientes de la clínica para el mes/año especificado
+    const [sessionsData] = await connection.execute(
+      `SELECT s.id, s.price, s.session_date
+       FROM sessions s
+       INNER JOIN clinics c ON s.clinic_id = c.id
+       WHERE s.clinic_id = ?
+         AND s.is_active = true
+         AND s.invoiced = 0
+         AND s.payment_method != 'pendiente'
+         AND MONTH(s.session_date) = ?
+         AND YEAR(s.session_date) = ?
+         AND c.is_active = true
+         AND c.is_billable = true`,
+      [clinic_id, month, year]
+    );
+
+    if (sessionsData.length === 0) {
+      throw new Error('No se encontraron sesiones pendientes para facturar en esta clínica');
+    }
+
+    // Extraer los session_ids para las operaciones posteriores
+    const session_ids = sessionsData.map(s => s.id);
+
+    // 2. Crear la factura (usando el total proporcionado por el front)
+    const [invoiceResult] = await connection.execute(
+      `INSERT INTO invoices
+       (invoice_number, invoice_date, clinic_id, concept, total, month, year)
+       VALUES (?, ?, ?, ?, ?, ?, ?)`,
+      [invoice_number, invoice_date, clinic_id, concept, total, month, year]
+    );
+
+    const invoice_id = invoiceResult.insertId;
+
+    // 3. Insertar relaciones en invoice_sessions
+    const invoiceSessionsValues = session_ids.map(session_id => [invoice_id, session_id]);
+    await connection.query(
+      `INSERT INTO invoice_sessions (invoice_id, session_id) VALUES ?`,
+      [invoiceSessionsValues]
+    );
+
+    // 4. Marcar sesiones como facturadas
+    const placeholders = session_ids.map(() => '?').join(',');
+    await connection.execute(
+      `UPDATE sessions SET invoiced = 1 WHERE id IN (${placeholders})`,
+      session_ids
+    );
+
+    await connection.commit();
+
+    // Retornar la factura creada
+    const [createdInvoice] = await connection.execute(
+      `SELECT * FROM invoices WHERE id = ?`,
+      [invoice_id]
+    );
+
+    return {
+      invoice: createdInvoice[0],
+      sessions_invoiced_count: sessionsData.length
+    };
+  } catch (error) {
+    await connection.rollback();
+    throw error;
+  } finally {
+    connection.release();
+  }
+};
+
 module.exports = {
   getInvoicesKPIs,
   getPendingInvoices,
   getPendingInvoicesOfClinics,
   createInvoice,
+  createInvoiceOfClinics,
   getIssuedInvoices,
   getLastInvoiceNumber
 };

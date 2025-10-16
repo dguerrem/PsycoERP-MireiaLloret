@@ -1,4 +1,4 @@
-const { getInvoicesKPIs, getPendingInvoices, getPendingInvoicesOfClinics, createInvoice, getIssuedInvoices, getLastInvoiceNumber } = require("../../models/invoices/invoice_model");
+const { getInvoicesKPIs, getPendingInvoices, getPendingInvoicesOfClinics, createInvoice, createInvoiceOfClinics, getIssuedInvoices, getLastInvoiceNumber } = require("../../models/invoices/invoice_model");
 
 // Obtener KPIs de facturación
 const obtenerKPIsFacturacion = async (req, res) => {
@@ -256,6 +256,87 @@ const generarFactura = async (req, res) => {
   }
 };
 
+// Generar factura de clínica (factura todas las sesiones pendientes de una clínica)
+const generarFacturaClinica = async (req, res) => {
+  try {
+    const {
+      clinic_id,
+      invoice_number,
+      invoice_date,
+      concept,
+      total,
+      month,
+      year
+    } = req.body;
+
+    // Validar campos obligatorios
+    if (!clinic_id || !invoice_number || !invoice_date || !concept || total === undefined || !month || !year) {
+      return res.status(400).json({
+        success: false,
+        error: "Faltan campos obligatorios: clinic_id, invoice_number, invoice_date, concept, total, month, year"
+      });
+    }
+
+    // Validar formato de fecha (YYYY-MM-DD)
+    const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
+    if (!dateRegex.test(invoice_date)) {
+      return res.status(400).json({
+        success: false,
+        error: "El formato de invoice_date debe ser YYYY-MM-DD"
+      });
+    }
+
+    // Validar mes y año
+    if (isNaN(parseInt(month)) || parseInt(month) < 1 || parseInt(month) > 12) {
+      return res.status(400).json({
+        success: false,
+        error: "El mes debe ser un número entre 1 y 12"
+      });
+    }
+
+    if (isNaN(parseInt(year)) || parseInt(year) < 2000) {
+      return res.status(400).json({
+        success: false,
+        error: "El año debe ser un número válido mayor a 2000"
+      });
+    }
+
+    // Validar que total sea un número
+    if (isNaN(parseFloat(total))) {
+      return res.status(400).json({
+        success: false,
+        error: "El total debe ser un número válido"
+      });
+    }
+
+    const invoiceData = {
+      clinic_id: parseInt(clinic_id),
+      invoice_number,
+      invoice_date,
+      concept,
+      total: parseFloat(total),
+      month: parseInt(month),
+      year: parseInt(year)
+    };
+
+    const result = await createInvoiceOfClinics(req.db, invoiceData);
+
+    res.status(201).json({
+      success: true,
+      message: `Factura ${invoice_number} generada exitosamente para la clínica`,
+      data: result
+    });
+  } catch (err) {
+    console.error("Error al generar factura de clínica:", err.message);
+    res.status(500).json({
+      success: false,
+      error: err.message.includes('Duplicate entry') && err.message.includes('invoice_number')
+        ? "El número de factura ya existe"
+        : err.message || "Error al generar la factura de clínica"
+    });
+  }
+};
+
 // Obtener facturas emitidas
 const obtenerFacturasEmitidas = async (req, res) => {
   try {
@@ -339,6 +420,7 @@ module.exports = {
   obtenerFacturasPendientes,
   obtenerFacturasPendientesClinicas,
   generarFactura,
+  generarFacturaClinica,
   obtenerFacturasEmitidas,
   obtenerUltimoNumeroFactura
 };

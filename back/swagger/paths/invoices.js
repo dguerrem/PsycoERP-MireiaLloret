@@ -374,6 +374,164 @@ const invoicesPaths = {
       },
     },
   },
+  "/api/invoices/of-clinics": {
+    post: {
+      tags: ["Invoices"],
+      summary: "Generar factura de clínica",
+      description:
+        "Crea una factura para una clínica facturable. Recupera automáticamente todas las sesiones pendientes de la clínica para el mes/año especificado, las marca como facturadas (invoiced = 1) y registra las relaciones en invoice_sessions. El total es proporcionado por el frontend (ya calculado con IRPF). **Restricción**: No se puede emitir más de una factura por clínica, mes y año. Todo el proceso se ejecuta en una transacción.",
+      requestBody: {
+        required: true,
+        content: {
+          "application/json": {
+            schema: {
+              type: "object",
+              required: ["clinic_id", "invoice_number", "invoice_date", "concept", "total", "month", "year"],
+              properties: {
+                clinic_id: {
+                  type: "integer",
+                  description: "ID de la clínica a facturar",
+                  example: 1,
+                },
+                invoice_number: {
+                  type: "string",
+                  description: "Número único de la factura (ej: FAC-2025-001)",
+                  example: "FAC-2025-001",
+                },
+                invoice_date: {
+                  type: "string",
+                  format: "date",
+                  description: "Fecha de emisión de la factura (YYYY-MM-DD)",
+                  example: "2025-01-15",
+                },
+                concept: {
+                  type: "string",
+                  description: "Concepto o descripción del servicio facturado",
+                  example: "Servicios profesionales - Enero 2025",
+                },
+                total: {
+                  type: "number",
+                  format: "float",
+                  description: "Total de la factura (ya calculado con IRPF por el frontend)",
+                  example: 225.00,
+                },
+                month: {
+                  type: "integer",
+                  minimum: 1,
+                  maximum: 12,
+                  description: "Mes de las sesiones a facturar (1-12)",
+                  example: 1,
+                },
+                year: {
+                  type: "integer",
+                  minimum: 2000,
+                  description: "Año de las sesiones a facturar",
+                  example: 2025,
+                },
+              },
+            },
+          },
+        },
+      },
+      responses: {
+        201: {
+          description: "Factura de clínica generada exitosamente",
+          content: {
+            "application/json": {
+              schema: {
+                type: "object",
+                properties: {
+                  success: {
+                    type: "boolean",
+                    example: true,
+                  },
+                  message: {
+                    type: "string",
+                    example: "Factura FAC-2025-001 generada exitosamente para la clínica",
+                  },
+                  data: {
+                    type: "object",
+                    properties: {
+                      invoice: {
+                        type: "object",
+                        description: "Datos de la factura creada",
+                        properties: {
+                          id: {
+                            type: "integer",
+                            example: 45,
+                          },
+                          invoice_number: {
+                            type: "string",
+                            example: "FAC-2025-001",
+                          },
+                          clinic_id: {
+                            type: "integer",
+                            example: 1,
+                          },
+                          concept: {
+                            type: "string",
+                            example: "Servicios profesionales - Enero 2025",
+                          },
+                          total: {
+                            type: "number",
+                            format: "float",
+                            example: 225.00,
+                          },
+                          month: {
+                            type: "integer",
+                            example: 1,
+                          },
+                          year: {
+                            type: "integer",
+                            example: 2025,
+                          },
+                        },
+                      },
+                      sessions_invoiced_count: {
+                        type: "integer",
+                        description: "Número de sesiones que se marcaron como facturadas",
+                        example: 15,
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+        400: {
+          description: "Datos inválidos o faltan campos obligatorios",
+          content: {
+            "application/json": {
+              schema: {
+                $ref: "#/components/schemas/ErrorResponse",
+              },
+            },
+          },
+        },
+        409: {
+          description: "Número de factura duplicado o factura ya existe para esta clínica en este período",
+          content: {
+            "application/json": {
+              schema: {
+                $ref: "#/components/schemas/ErrorResponse",
+              },
+            },
+          },
+        },
+        500: {
+          description: "Error del servidor",
+          content: {
+            "application/json": {
+              schema: {
+                $ref: "#/components/schemas/ErrorResponse",
+              },
+            },
+          },
+        },
+      },
+    },
+  },
   "/api/invoices/kpis": {
     get: {
       tags: ["Invoices"],
