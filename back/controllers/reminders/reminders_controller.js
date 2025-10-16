@@ -111,13 +111,12 @@ const generarMensajeWhatsApp = async (sessionData, hostname) => {
   });
 
   const horaInicio = sessionData.start_time.slice(0, 5);
-  const horaFin = sessionData.end_time.slice(0, 5);
 
   let mensaje = `*RECORDATORIO DE CITA PSICOLÓGICA*\n\n`;
   mensaje += `Hola ${sessionData.patient_name},\n\n`;
   mensaje += `Te recuerdo que tienes una cita programada para:\n\n`;
   mensaje += `*Fecha:* ${fechaFormateada}\n`;
-  mensaje += `*Hora:* ${horaInicio} - ${horaFin}\n`;
+  mensaje += `*Hora:* ${horaInicio}\n`;
   mensaje += `*Modalidad:* ${
     sessionData.mode === "presencial" ? "Presencial" : "Online"
   }\n`;
