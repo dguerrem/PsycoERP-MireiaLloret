@@ -477,9 +477,6 @@ export class NewSessionFormComponent implements OnInit {
 
     this.isLoading.set(true);
 
-    // Calculate net price from base_price and percentage
-    const calculatedPrice = formValue.base_price * (patient.porcentaje / 100);
-
     const sessionData: CreateSessionRequest = {
       patient_id: formValue.patient_id,
       clinic_id: patient.idClinica,
@@ -488,7 +485,7 @@ export class NewSessionFormComponent implements OnInit {
       end_time: this.convertTimeToMySQL(formValue.end_time),
       mode: formValue.mode,
       status: 'cancelada',
-      price: parseFloat(calculatedPrice.toFixed(2)),
+      price: parseFloat(formValue.base_price),
       payment_method: formValue.payment_method,
       notes: formValue.notes || null
     };
@@ -607,9 +604,6 @@ export class NewSessionFormComponent implements OnInit {
       ? this.prefilledData?.sessionData?.SessionDetailData.status || 'completada'
       : 'completada';
 
-    // Calculate net price from base_price and percentage
-    const calculatedPrice = formValue.base_price * (patient.porcentaje / 100);
-
     const sessionData: CreateSessionRequest = {
       patient_id: formValue.patient_id,
       clinic_id: patient.idClinica,
@@ -618,7 +612,7 @@ export class NewSessionFormComponent implements OnInit {
       end_time: this.convertTimeToMySQL(formValue.end_time),
       mode: formValue.mode,
       status: currentStatus,
-      price: parseFloat(calculatedPrice.toFixed(2)),
+      price: parseFloat(formValue.base_price),
       payment_method: formValue.payment_method,
       notes: formValue.notes || null
     };
