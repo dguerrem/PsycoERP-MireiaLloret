@@ -369,9 +369,49 @@ const getLastInvoiceNumber = async (db, year) => {
   return 0;
 };
 
+const getPendingInvoicesOfClinics = async (db, filters = {}) => {
+  const { month, year } = filters;
+
+  // Por defecto usar mes y año actual si no se especifican
+  const currentDate = new Date();
+  const targetMonth = month || (currentDate.getMonth() + 1);
+  const targetYear = year || currentDate.getFullYear();
+
+  // Obtener clínicas facturables con sesiones pendientes
+  const [pendingClinicsResult] = await db.execute(
+    `SELECT
+       c.id as clinic_id,
+       c.name as clinic_name,
+       COUNT(s.id) as sessions_count,
+       COALESCE(SUM(s.price * (c.percentage / 100)), 0) as total_net
+     FROM clinics c
+     INNER JOIN sessions s ON s.clinic_id = c.id
+       AND s.is_active = true
+       AND s.invoiced = 0
+       AND s.payment_method != 'pendiente'
+       AND MONTH(s.session_date) = ?
+       AND YEAR(s.session_date) = ?
+     WHERE c.is_active = true AND c.is_billable = true
+     GROUP BY c.id, c.name
+     ORDER BY clinic_name ASC`,
+    [targetMonth, targetYear]
+  );
+
+  // Mapear resultados con tipos correctos
+  const pendingInvoicesOfClinics = pendingClinicsResult.map(row => ({
+    clinic_id: parseInt(row.clinic_id),
+    clinic_name: row.clinic_name,
+    sessions_count: parseInt(row.sessions_count),
+    total_net: parseFloat(row.total_net)
+  }));
+
+  return pendingInvoicesOfClinics;
+};
+
 module.exports = {
   getInvoicesKPIs,
   getPendingInvoices,
+  getPendingInvoicesOfClinics,
   createInvoice,
   getIssuedInvoices,
   getLastInvoiceNumber

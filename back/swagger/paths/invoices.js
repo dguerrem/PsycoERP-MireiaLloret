@@ -500,6 +500,69 @@ const invoicesPaths = {
       },
     },
   },
+  "/api/invoices/pending-of-clinics": {
+    get: {
+      tags: ["Invoices"],
+      summary: "Obtener facturas pendientes de clínicas",
+      description:
+        "Obtiene las sesiones pendientes de facturar agrupadas por clínica facturable (is_billable = true). Incluye nombre de la clínica, número de sesiones y total neto (calculado como precio * porcentaje de la clínica). Si no se especifica mes/año, usa el mes y año actual.",
+      parameters: [
+        {
+          name: "month",
+          in: "query",
+          required: false,
+          schema: {
+            type: "integer",
+            minimum: 1,
+            maximum: 12,
+          },
+          description: "Mes para filtrar (1-12). Por defecto usa el mes actual.",
+        },
+        {
+          name: "year",
+          in: "query",
+          required: false,
+          schema: {
+            type: "integer",
+            minimum: 2000,
+          },
+          description: "Año para filtrar (ej: 2025). Por defecto usa el año actual.",
+        },
+      ],
+      responses: {
+        200: {
+          description: "Facturas pendientes de clínicas obtenidas exitosamente",
+          content: {
+            "application/json": {
+              schema: {
+                $ref: "#/components/schemas/PendingInvoicesOfClinicsResponse",
+              },
+            },
+          },
+        },
+        400: {
+          description: "Parámetros inválidos",
+          content: {
+            "application/json": {
+              schema: {
+                $ref: "#/components/schemas/ErrorResponse",
+              },
+            },
+          },
+        },
+        500: {
+          description: "Error del servidor",
+          content: {
+            "application/json": {
+              schema: {
+                $ref: "#/components/schemas/ErrorResponse",
+              },
+            },
+          },
+        },
+      },
+    },
+  },
   "/api/invoices/last-number": {
     get: {
       tags: ["Invoices"],

@@ -1587,6 +1587,46 @@ const definitions = {
     },
   },
 
+  PendingInvoicesOfClinicsResponse: {
+    type: "object",
+    properties: {
+      success: {
+        type: "boolean",
+        example: true,
+      },
+      data: {
+        type: "array",
+        items: {
+          type: "object",
+          properties: {
+            clinic_id: {
+              type: "integer",
+              format: "int64",
+              description: "ID de la clínica",
+              example: 1,
+            },
+            clinic_name: {
+              type: "string",
+              description: "Nombre de la clínica",
+              example: "Clínica Central",
+            },
+            sessions_count: {
+              type: "integer",
+              description: "Número de sesiones pendientes de facturar",
+              example: 15,
+            },
+            total_net: {
+              type: "number",
+              format: "float",
+              description: "Total neto a facturar (precio * porcentaje de la clínica)",
+              example: 225.00,
+            },
+          },
+        },
+      },
+    },
+  },
+
   IssuedInvoicesResponse: {
     type: "object",
     properties: {
