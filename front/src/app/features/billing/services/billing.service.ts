@@ -7,7 +7,8 @@ import {
   ExistingInvoicesResponse,
   ApiResponse,
   CreateBulkInvoicesRequest,
-  CreateInvoiceResponse
+  CreateInvoiceResponse,
+  PendingClinicInvoicesResponse
 } from '../models/billing.models';
 import { environment } from '../../../../environments/environment';
 
@@ -162,6 +163,26 @@ export class BillingService {
   }
 
   /**
+   * Obtiene las facturas pendientes de clínicas filtradas por mes y año
+   */
+  getPendingClinicInvoices(month: number, year: number): Observable<ApiResponse<PendingClinicInvoicesResponse>> {
+    this.error.set(null);
+
+    const params = new HttpParams()
+      .set('month', month.toString())
+      .set('year', year.toString());
+
+    return this.http.get<ApiResponse<PendingClinicInvoicesResponse>>(`${this.baseUrl}/invoices/pending-of-clinics`, { params })
+      .pipe(
+        catchError(error => {
+          console.error('Error al obtener facturas pendientes de clínicas:', error);
+          this.error.set('Error al cargar las facturas pendientes de clínicas');
+          return of({ data: [] });
+        })
+      );
+  }
+
+  /**
    * Crea facturas en bulk
    */
   createBulkInvoices(invoices: CreateBulkInvoicesRequest): Observable<any> {
@@ -176,6 +197,34 @@ export class BillingService {
 
         this.error.set('Error al crear las facturas');
         return of({ success: false, message: error.message || 'Error al crear las facturas' });
+      })
+    );
+  }
+
+  /**
+   * Emite facturas para clínicas
+   */
+  emitClinicInvoice(clinicId: number, month: number, year: number, invoiceNumber: string, invoiceDate: string, concept: string, total: number): Observable<any> {
+    const payload = {
+      clinic_id: clinicId,
+      invoice_number: invoiceNumber,
+      invoice_date: invoiceDate,
+      concept,
+      total,
+      month,
+      year
+    };
+
+    return this.http.post<any>(`${this.baseUrl}/invoices/of-clinics`, payload).pipe(
+      catchError(error => {
+        console.error('Error al emitir factura de clínica:', error);
+
+        if (error.error && typeof error.error === 'object') {
+          return of(error.error);
+        }
+
+        this.error.set('Error al emitir la factura de la clínica');
+        return of({ success: false, message: error.message || 'Error al emitir la factura' });
       })
     );
   }

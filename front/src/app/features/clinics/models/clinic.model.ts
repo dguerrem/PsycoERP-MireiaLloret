@@ -5,6 +5,8 @@ export interface Clinic {
   address: string;
   price: number;
   percentage: number;
+  is_billable: boolean;
+  cif?: string;
   status: string;
   created_at?: string;
   updated_at?: string;

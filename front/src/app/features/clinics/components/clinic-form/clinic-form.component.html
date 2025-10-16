@@ -138,6 +138,26 @@
           }
         </div>
       </div>
+
+      <!-- Facturación -->
+      <div class="space-y-4 mt-6">
+        <!-- Checkbox Es Facturable -->
+        <div class="flex items-center gap-2">
+          <input id="is_billable" type="checkbox" formControlName="is_billable"
+            class="h-4 w-4 rounded border-gray-300 text-[#d29f67] focus:ring-[#d29f67] focus:ring-2">
+          <label for="is_billable" class="text-sm font-medium text-gray-700 cursor-pointer">
+            Es facturable (requiere CIF)
+          </label>
+        </div>
+
+        <!-- CIF -->
+        <div>
+          <app-form-input controlName="cif" label="CIF"
+            [placeholder]="clinicaForm.get('is_billable')?.value ? 'Ej: A12345678' : 'No facturable - CIF no requerido'"
+            [required]="clinicaForm.get('is_billable')?.value">
+          </app-form-input>
+        </div>
+      </div>
     </section>
   </form>
 </app-reusable-modal>

@@ -61,12 +61,19 @@ export class ClinicFormComponent implements OnInit, OnChanges {
       address: ['', [Validators.required, Validators.minLength(5)]],
       price: [0, [Validators.required, Validators.min(0), Validators.max(1000)]],
       percentage: [0, [Validators.required, Validators.min(0), Validators.max(100)]],
+      is_billable: [false],
+      cif: [''],
       status: ['active'],
     });
 
     // Escuchar cambios en el checkbox is_online
     this.clinicaForm.get('is_online')?.valueChanges.subscribe(isOnline => {
       this.updateAddressValidation(isOnline);
+    });
+
+    // Escuchar cambios en el checkbox is_billable
+    this.clinicaForm.get('is_billable')?.valueChanges.subscribe(isBillable => {
+      this.updateCifValidation(isBillable);
     });
   }
 
@@ -82,11 +89,14 @@ export class ClinicFormComponent implements OnInit, OnChanges {
         address: this.clinica.address || '',
         price: this.clinica.price || 0,
         percentage: this.clinica.percentage || 0,
+        is_billable: this.clinica.is_billable || false,
+        cif: this.clinica.cif || '',
         status: 'active',
       });
 
       // Aplicar la lógica de validación después de poblar el formulario
       this.updateAddressValidation(isOnline);
+      this.updateCifValidation(this.clinica.is_billable || false);
     } else {
       this.resetForm();
     }
@@ -100,11 +110,14 @@ export class ClinicFormComponent implements OnInit, OnChanges {
       address: '',
       price: 0,
       percentage: 0,
+      is_billable: false,
+      cif: '',
       status: 'active',
     });
 
     // Asegurar que las validaciones están correctas al resetear
     this.updateAddressValidation(false);
+    this.updateCifValidation(false);
   }
 
   private updateAddressValidation(isOnline: boolean): void {
@@ -122,6 +135,23 @@ export class ClinicFormComponent implements OnInit, OnChanges {
     }
 
     addressControl?.updateValueAndValidity();
+  }
+
+  private updateCifValidation(isBillable: boolean): void {
+    const cifControl = this.clinicaForm.get('cif');
+
+    if (isBillable) {
+      // Si es facturable, el CIF es requerido y habilitado
+      cifControl?.setValidators([Validators.required, Validators.minLength(9)]);
+      cifControl?.enable();
+    } else {
+      // Si no es facturable, deshabilitar y quitar validaciones
+      cifControl?.clearValidators();
+      cifControl?.setValue('');
+      cifControl?.disable();
+    }
+
+    cifControl?.updateValueAndValidity();
   }
 
   get isEditing(): boolean {
@@ -142,7 +172,7 @@ export class ClinicFormComponent implements OnInit, OnChanges {
 
   handleSubmit(): void {
     if (this.clinicaForm.valid) {
-      const formData = { ...this.clinicaForm.value };
+      const formData = { ...this.clinicaForm.getRawValue() };
 
       // Excluir is_online del envío ya que no se almacena en BD
       delete formData.is_online;
@@ -150,6 +180,11 @@ export class ClinicFormComponent implements OnInit, OnChanges {
       // Si es online, asegurar que address esté vacío
       if (this.clinicaForm.get('is_online')?.value) {
         formData.address = '';
+      }
+
+      // Si no es facturable, asegurar que cif esté vacío
+      if (!formData.is_billable) {
+        formData.cif = '';
       }
 
       if (this.isEditing && this.clinica) {
@@ -200,6 +235,8 @@ export class ClinicFormComponent implements OnInit, OnChanges {
       address: 'Dirección',
       price: 'Precio por sesión',
       percentage: 'Porcentaje de comisión',
+      is_billable: 'Es facturable',
+      cif: 'CIF',
     };
     return labels[fieldName] || fieldName;
   }

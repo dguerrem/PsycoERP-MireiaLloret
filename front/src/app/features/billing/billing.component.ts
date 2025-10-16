@@ -13,6 +13,7 @@ import {
   InvoiceKPIs,
   PendingInvoice,
   ExistingInvoice,
+  ClinicInvoiceData,
 } from './models/billing.models';
 import { SectionHeaderComponent } from '../../shared/components/section-header/section-header.component';
 import { ReusableModalComponent } from '../../shared/components/reusable-modal/reusable-modal.component';
@@ -28,6 +29,16 @@ import { InvoiceTemplateComponent } from './components/invoice-template.componen
 import { ToastService } from '../../core/services/toast.service';
 
 interface InvoiceToGenerate extends InvoicePreviewData {}
+
+interface ClinicInvoiceToGenerate {
+  clinic_id: number;
+  clinic_name: string;
+  sessions_count: number;
+  total_net: number;
+  total_net_with_irpf: number;
+  invoice_number: string;
+  invoice_date: string;
+}
 
 /**
  * Componente de facturación
@@ -56,7 +67,7 @@ export class BillingComponent implements OnInit {
   private toastService = inject(ToastService);
 
   // Signals para estado del componente
-  activeTab = signal<'bulk' | 'existing'>('bulk');
+  activeTab = signal<'bulk' | 'clinics' | 'existing'>('bulk');
 
   // Filtros para KPIs (Período de Análisis)
   kpiMonth = signal(new Date().getMonth() + 1);
@@ -70,10 +81,16 @@ export class BillingComponent implements OnInit {
   existingMonth = signal(new Date().getMonth() + 1);
   existingYear = signal(new Date().getFullYear());
 
+  // Filtros para Facturas de Clínicas
+  clinicsMonth = signal(new Date().getMonth() + 1);
+  clinicsYear = signal(new Date().getFullYear());
+
   kpis = signal<InvoiceKPIs | null>(null);
   pendingInvoices = signal<PendingInvoice[]>([]);
   existingInvoices = signal<ExistingInvoice[]>([]);
+  clinicInvoices = signal<ClinicInvoiceData[]>([]);
   selectedPatients = signal<string[]>([]);
+  selectedClinicId = signal<number | null>(null);
 
   // Numeración de facturas
   invoicePrefix = signal('FAC');
@@ -84,9 +101,16 @@ export class BillingComponent implements OnInit {
   isModalOpen = signal(false);
   invoicesToGenerate = signal<InvoiceToGenerate[]>([]);
 
+  // Modal state for clinic invoice
+  isClinicModalOpen = signal(false);
+  clinicInvoiceToGenerate = signal<ClinicInvoiceToGenerate | null>(null);
+
   // Preview modal state
   isPreviewModalOpen = signal(false);
   previewInvoiceData = signal<InvoiceToGenerate | null>(null);
+
+  // Preview modal state for clinic invoices
+  isClinicPreviewModalOpen = signal(false);
 
   // User data for invoice
   userData = signal<User | null>(null);
@@ -94,6 +118,7 @@ export class BillingComponent implements OnInit {
   isLoadingKPIs = signal(false);
   isLoadingPending = signal(false);
   isLoadingExisting = signal(false);
+  isLoadingClinics = signal(false);
 
   // PDF Generation state
   isGeneratingPDFs = signal(false);
@@ -267,6 +292,28 @@ export class BillingComponent implements OnInit {
   }
 
   /**
+   * Carga las facturas pendientes de clínicas
+   */
+  loadClinicInvoices() {
+    this.isLoadingClinics.set(true);
+    this.billingService
+      .getPendingClinicInvoices(this.clinicsMonth(), this.clinicsYear())
+      .subscribe({
+        next: (response) => {
+          // Los datos vienen directamente en response.data como array
+          this.clinicInvoices.set(response.data);
+          this.isLoadingClinics.set(false);
+          // Limpiar selección al cambiar filtros
+          this.selectedClinicId.set(null);
+        },
+        error: (error) => {
+          console.error('Error cargando clínicas:', error);
+          this.isLoadingClinics.set(false);
+        },
+      });
+  }
+
+  /**
    * Maneja el cambio de mes en el filtro de KPIs
    */
   onKpiMonthChange(event: Event) {
@@ -318,6 +365,24 @@ export class BillingComponent implements OnInit {
     const select = event.target as HTMLSelectElement;
     this.existingYear.set(parseInt(select.value));
     this.loadExistingInvoices();
+  }
+
+  /**
+   * Maneja el cambio de mes en el filtro de Facturas de Clínicas
+   */
+  onClinicsMonthChange(event: Event) {
+    const select = event.target as HTMLSelectElement;
+    this.clinicsMonth.set(parseInt(select.value));
+    this.loadClinicInvoices();
+  }
+
+  /**
+   * Maneja el cambio de año en el filtro de Facturas de Clínicas
+   */
+  onClinicsYearChange(event: Event) {
+    const select = event.target as HTMLSelectElement;
+    this.clinicsYear.set(parseInt(select.value));
+    this.loadClinicInvoices();
   }
 
   /**
@@ -374,10 +439,13 @@ export class BillingComponent implements OnInit {
   /**
    * Cambia entre tabs
    */
-  onTabChange(tab: 'bulk' | 'existing') {
+  onTabChange(tab: 'bulk' | 'clinics' | 'existing') {
     this.activeTab.set(tab);
     if (tab === 'existing' && this.existingInvoices().length === 0) {
       this.loadExistingInvoices();
+    }
+    if (tab === 'clinics' && this.clinicInvoices().length === 0) {
+      this.loadClinicInvoices();
     }
   }
 
@@ -401,6 +469,19 @@ export class BillingComponent implements OnInit {
       this.selectedPatients.set([]);
     } else {
       this.selectedPatients.set(this.pendingInvoices().map((inv) => inv.dni));
+    }
+  }
+
+  /**
+   * Selecciona una clínica (solo una a la vez)
+   */
+  selectClinic(clinicId: number) {
+    if (this.selectedClinicId() === clinicId) {
+      // Si ya está seleccionada, deseleccionar
+      this.selectedClinicId.set(null);
+    } else {
+      // Seleccionar solo esta clínica
+      this.selectedClinicId.set(clinicId);
     }
   }
 
@@ -529,6 +610,7 @@ export class BillingComponent implements OnInit {
           this.loadKPIs();
           this.loadPendingInvoices();
           this.loadExistingInvoices();
+          this.loadLastInvoiceNumber();
         }
       },
       error: () => {
@@ -655,10 +737,145 @@ export class BillingComponent implements OnInit {
   }
 
   /**
+   * Obtiene el nombre del mes de facturas de clínicas
+   */
+  getClinicsMonthName(): string {
+    return this.monthNames[this.clinicsMonth() - 1];
+  }
+
+  /**
    * Formatea número con padding
    */
   padNumber(num: number, length: number = 4): string {
     return num.toString().padStart(length, '0');
+  }
+
+  /**
+   * Abre el modal de confirmación para generar factura de clínica
+   */
+  generateClinicInvoice() {
+    const clinicId = this.selectedClinicId();
+    if (!clinicId) {
+      return;
+    }
+
+    // Obtener los datos de la clínica seleccionada
+    const selectedClinic = this.clinicInvoices().find(c => c.clinic_id === clinicId);
+    if (!selectedClinic) {
+      return;
+    }
+
+    const user = this.userData();
+    if (!user) {
+      this.toastService.showError('No se pudo cargar la información del usuario');
+      return;
+    }
+
+    const invoiceNumber = `${this.invoicePrefix()}-${this.invoiceYear()}-${this.padNumber(this.invoiceNextNumber())}`;
+    const invoiceDate = new Date().toISOString().split('T')[0];
+
+    // Calcular total con IRPF
+    const irpfPercentage = Number(user.irpf || 0);
+    const totalNetWithIrpf = Number(selectedClinic.total_net) * (1 - irpfPercentage / 100);
+
+    // Preparar datos para el modal
+    const clinicInvoice: ClinicInvoiceToGenerate = {
+      clinic_id: selectedClinic.clinic_id,
+      clinic_name: selectedClinic.clinic_name,
+      sessions_count: selectedClinic.sessions_count,
+      total_net: selectedClinic.total_net,
+      total_net_with_irpf: totalNetWithIrpf,
+      invoice_number: invoiceNumber,
+      invoice_date: invoiceDate,
+    };
+
+    this.clinicInvoiceToGenerate.set(clinicInvoice);
+    this.isClinicModalOpen.set(true);
+  }
+
+  /**
+   * Cierra el modal de generación de factura de clínica
+   */
+  closeClinicModal() {
+    this.isClinicModalOpen.set(false);
+    this.clinicInvoiceToGenerate.set(null);
+    this.errorMessage.set(null);
+  }
+
+  /**
+   * Actualiza la fecha de emisión de la factura de clínica
+   */
+  updateClinicInvoiceDate(newDate: string) {
+    const invoice = this.clinicInvoiceToGenerate();
+    if (invoice) {
+      this.clinicInvoiceToGenerate.set({ ...invoice, invoice_date: newDate });
+    }
+  }
+
+  /**
+   * Vista previa de la factura de clínica
+   */
+  previewClinicInvoice() {
+    const invoice = this.clinicInvoiceToGenerate();
+    if (invoice) {
+      this.isClinicPreviewModalOpen.set(true);
+    }
+  }
+
+  /**
+   * Cierra el modal de vista previa de factura de clínica
+   */
+  closeClinicPreviewModal() {
+    this.isClinicPreviewModalOpen.set(false);
+  }
+
+  /**
+   * Confirma y genera la factura de clínica desde el modal
+   */
+  confirmGenerateClinicInvoice() {
+    const invoice = this.clinicInvoiceToGenerate();
+    if (!invoice) {
+      return;
+    }
+
+    this.isGeneratingBulkInvoices.set(true);
+
+    const monthName = this.monthNames[this.clinicsMonth() - 1];
+    const concept = `Servicios profesionales - ${monthName} ${this.clinicsYear()}`;
+
+    this.billingService
+      .emitClinicInvoice(
+        invoice.clinic_id,
+        this.clinicsMonth(),
+        this.clinicsYear(),
+        invoice.invoice_number,
+        invoice.invoice_date,
+        concept,
+        invoice.total_net
+      )
+      .subscribe({
+        next: (response: any) => {
+          if (response?.success === false) {
+            this.errorMessage.set(
+              response.message || 'Error al generar la factura de la clínica'
+            );
+          } else {
+            this.toastService.showSuccess('Factura de clínica generada exitosamente');
+            this.closeClinicModal();
+            // Recargar datos
+            this.loadKPIs();
+            this.loadClinicInvoices();
+            this.loadExistingInvoices();
+            this.loadLastInvoiceNumber();
+            this.selectedClinicId.set(null);
+          }
+          this.isGeneratingBulkInvoices.set(false);
+        },
+        error: () => {
+          this.errorMessage.set('Error al generar la factura de la clínica');
+          this.isGeneratingBulkInvoices.set(false);
+        },
+      });
   }
 
   /**

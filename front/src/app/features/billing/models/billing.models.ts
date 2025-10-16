@@ -107,3 +107,19 @@ export interface CreateInvoiceResponse {
   message: string;
   invoice_id?: number;
 }
+
+/**
+ * Datos de facturación pendiente por clínica
+ */
+export interface ClinicInvoiceData {
+  clinic_id: number;
+  clinic_name: string;
+  sessions_count: number;
+  total_net: number;
+}
+
+/**
+ * Response de facturas pendientes de clínicas
+ * El API devuelve directamente un array en el campo data
+ */
+export type PendingClinicInvoicesResponse = ClinicInvoiceData[];
