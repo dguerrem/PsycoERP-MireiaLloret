@@ -11,7 +11,8 @@ const getUserById = async (db, userId) => {
       door,
       city,
       province,
-      postal_code
+      postal_code,
+      iban
     FROM users
     WHERE id = ? AND is_active = true
   `;
@@ -68,6 +69,10 @@ const updateUser = async (db, userId, userData) => {
   if (userData.postal_code !== undefined) {
     fields.push("postal_code = ?");
     values.push(userData.postal_code);
+  }
+  if (userData.iban !== undefined) {
+    fields.push("iban = ?");
+    values.push(userData.iban);
   }
 
   if (fields.length === 0) {
