@@ -3,7 +3,7 @@ const clinicsPaths = {
     get: {
       tags: ["Clinics"],
       summary: "Obtener clínicas activas",
-      description: "Obtiene una lista de clínicas activas (is_active = true) con paginación",
+      description: "Obtiene una lista de clínicas activas (is_active = true) con paginación. Incluye información básica de la clínica y campos de facturación para clínicas billables.",
       parameters: [
         {
           name: "page",
@@ -65,7 +65,7 @@ const clinicsPaths = {
     post: {
       tags: ["Clinics"],
       summary: "Crear nueva clínica",
-      description: "Crea una nueva clínica en el sistema",
+      description: "Crea una nueva clínica en el sistema. Para clínicas facturables (is_billable = true), se pueden proporcionar campos adicionales de facturación como billing_address, cif y fiscal_name.",
       requestBody: {
         required: true,
         content: {
@@ -114,7 +114,7 @@ const clinicsPaths = {
     put: {
       tags: ["Clinics"],
       summary: "Actualizar clínica",
-      description: "Actualiza los datos de una clínica existente",
+      description: "Actualiza los datos de una clínica existente. Se pueden actualizar campos de facturación como billing_address, cif y fiscal_name para clínicas facturables.",
       parameters: [
         {
           name: "id",

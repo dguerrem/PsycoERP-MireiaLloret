@@ -408,6 +408,24 @@ const definitions = {
         description: "Indica si la clínica es facturable",
         example: true,
       },
+      billing_address: {
+        type: "string",
+        nullable: true,
+        description: "Dirección de facturación",
+        example: "Calle Facturación 456, Madrid 28001",
+      },
+      cif: {
+        type: "string",
+        nullable: true,
+        description: "CIF (Tax Identification Number)",
+        example: "B12345678",
+      },
+      fiscal_name: {
+        type: "string",
+        nullable: true,
+        description: "Nombre fiscal para facturación",
+        example: "Psicología Integral S.L.",
+      },
       created_at: {
         type: "string",
         format: "date",
@@ -682,6 +700,24 @@ const definitions = {
         nullable: true,
         description: "Indica si la clínica es facturable (opcional)",
         example: true
+      },
+      billing_address: {
+        type: "string",
+        nullable: true,
+        description: "Dirección de facturación (opcional)",
+        example: "Calle Facturación 456, Madrid 28001",
+      },
+      cif: {
+        type: "string",
+        nullable: true,
+        description: "CIF (Tax Identification Number) (opcional)",
+        example: "B12345678",
+      },
+      fiscal_name: {
+        type: "string",
+        nullable: true,
+        description: "Nombre fiscal para facturación (opcional)",
+        example: "Psicología Integral S.L.",
       },
     },
   },
@@ -3194,6 +3230,24 @@ const definitions = {
         nullable: true,
         description: "Indica si la clínica es facturable (opcional)",
         example: true
+      },
+      billing_address: {
+        type: "string",
+        nullable: true,
+        description: "Dirección de facturación",
+        example: "Calle Facturación 456, Madrid 28001",
+      },
+      cif: {
+        type: "string",
+        nullable: true,
+        description: "CIF (Tax Identification Number)",
+        example: "B12345678",
+      },
+      fiscal_name: {
+        type: "string",
+        nullable: true,
+        description: "Nombre fiscal para facturación",
+        example: "Psicología Integral S.L.",
       },
     },
   },
