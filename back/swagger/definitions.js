@@ -1797,6 +1797,145 @@ const definitions = {
     },
   },
 
+  IssuedInvoicesOfClinicsResponse: {
+    type: "object",
+    properties: {
+      success: {
+        type: "boolean",
+        example: true,
+      },
+      data: {
+        type: "object",
+        properties: {
+          filters_applied: {
+            type: "object",
+            properties: {
+              month: {
+                type: "integer",
+                description: "Mes aplicado en el filtro",
+                example: 1,
+              },
+              year: {
+                type: "integer",
+                description: "Año aplicado en el filtro",
+                example: 2025,
+              },
+            },
+          },
+          total_invoices: {
+            type: "integer",
+            description: "Número total de facturas encontradas",
+            example: 5,
+          },
+          invoices: {
+            type: "array",
+            items: {
+              type: "object",
+              properties: {
+                id: {
+                  type: "integer",
+                  format: "int64",
+                  description: "ID de la factura",
+                  example: 1,
+                },
+                invoice_number: {
+                  type: "string",
+                  description: "Número de factura",
+                  example: "FAC-2025-001",
+                },
+                invoice_date: {
+                  type: "string",
+                  format: "date",
+                  description: "Fecha de emisión (formato dd/mm/yyyy)",
+                  example: "15/01/2025",
+                },
+                clinic_id: {
+                  type: "integer",
+                  format: "int64",
+                  description: "ID de la clínica",
+                  example: 1,
+                },
+                clinic_name: {
+                  type: "string",
+                  description: "Nombre de la clínica",
+                  example: "Clínica Psicológica Madrid Centro",
+                },
+                fiscal_name: {
+                  type: "string",
+                  description: "Nombre fiscal de la clínica",
+                  example: "Psicología Integral S.L.",
+                },
+                cif: {
+                  type: "string",
+                  description: "CIF de la clínica",
+                  example: "B12345678",
+                },
+                billing_address: {
+                  type: "string",
+                  description: "Dirección de facturación de la clínica",
+                  example: "Calle Gran Vía 45, 28013 Madrid",
+                },
+                sessions: {
+                  type: "array",
+                  items: {
+                    type: "object",
+                    properties: {
+                      session_id: {
+                        type: "integer",
+                        format: "int64",
+                        description: "ID de la sesión",
+                        example: 45,
+                      },
+                      session_date: {
+                        type: "string",
+                        format: "date",
+                        description: "Fecha de la sesión (YYYY-MM-DD)",
+                        example: "2025-01-10",
+                      },
+                      price: {
+                        type: "number",
+                        format: "decimal",
+                        description: "Precio de la sesión",
+                        example: 60.00,
+                      },
+                    },
+                  },
+                  description: "Detalles de las sesiones facturadas",
+                },
+                sessions_count: {
+                  type: "integer",
+                  description: "Número de sesiones facturadas",
+                  example: 15,
+                },
+                total: {
+                  type: "number",
+                  format: "decimal",
+                  description: "Total de la factura",
+                  example: 900.00,
+                },
+                concept: {
+                  type: "string",
+                  description: "Concepto de la factura",
+                  example: "Servicios profesionales - Enero 2025",
+                },
+                month: {
+                  type: "integer",
+                  description: "Mes de las sesiones facturadas",
+                  example: 1,
+                },
+                year: {
+                  type: "integer",
+                  description: "Año de las sesiones facturadas",
+                  example: 2025,
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+  },
+
   PendingSessionDetail: {
     type: "object",
     properties: {
