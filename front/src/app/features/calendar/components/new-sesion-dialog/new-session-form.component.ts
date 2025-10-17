@@ -19,7 +19,10 @@ import {
   Validators,
 } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
-import { CreateSessionRequest, SessionData } from '../../../../shared/models/session.model';
+import {
+  CreateSessionRequest,
+  SessionData,
+} from '../../../../shared/models/session.model';
 import { PatientSelector } from '../../../../shared/models/patient.model';
 import { SessionsService } from '../../services/sessions.service';
 import { ReusableModalComponent } from '../../../../shared/components/reusable-modal/reusable-modal.component';
@@ -58,13 +61,17 @@ import { SpinnerComponent } from '../../../../shared/components/spinner/spinner.
     FormInputComponent,
     PatientSelectorComponent,
     ConfirmationModalComponent,
-    SpinnerComponent
+    SpinnerComponent,
   ],
   templateUrl: './new-session-form.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class NewSessionFormComponent implements OnInit {
-  @Input() prefilledData: { date: string; startTime: string | null; sessionData?: SessionData } | null = null;
+  @Input() prefilledData: {
+    date: string;
+    startTime: string | null;
+    sessionData?: SessionData;
+  } | null = null;
   @Output() close = new EventEmitter<void>();
   @Output() sessionDataCreated = new EventEmitter<SessionData>();
 
@@ -90,7 +97,12 @@ export class NewSessionFormComponent implements OnInit {
 
   /** Delete note confirmation modal state */
   readonly showDeleteNoteConfirmation = signal<boolean>(false);
-  private pendingDeleteNote: { id: string; title: string; content: string; date: Date } | null = null;
+  private pendingDeleteNote: {
+    id: string;
+    title: string;
+    content: string;
+    date: Date;
+  } | null = null;
 
   /** Patients data from API */
   patients = signal<PatientSelector[]>([]);
@@ -103,14 +115,24 @@ export class NewSessionFormComponent implements OnInit {
   activeTab = signal<'details' | 'clinical-notes'>('details');
 
   /** Clinical Notes state */
-  notes = signal<Array<{ id: string; title: string; content: string; date: Date }>>([]);
+  notes = signal<
+    Array<{ id: string; title: string; content: string; date: Date }>
+  >([]);
   private notesLoadedWithIds = signal(false);
   searchTerm = signal('');
   isCreatingNote = signal(false);
-  editingNote = signal<{ id: string; title: string; content: string; date: Date } | null>(null);
+  editingNote = signal<{
+    id: string;
+    title: string;
+    content: string;
+    date: Date;
+  } | null>(null);
   deletingNoteId = signal<string | null>(null);
   isSavingNote = signal(false);
-  newNote = signal<{ title: string; content: string }>({ title: '', content: '' });
+  newNote = signal<{ title: string; content: string }>({
+    title: '',
+    content: '',
+  });
 
   /** Voice recording state */
   isRecording = signal(false);
@@ -123,10 +145,11 @@ export class NewSessionFormComponent implements OnInit {
 
     if (!search) return notesArray;
 
-    return notesArray.filter(note => {
+    return notesArray.filter((note) => {
       // Search in title and content
-      const matchesText = note.title.toLowerCase().includes(search) ||
-                          note.content.toLowerCase().includes(search);
+      const matchesText =
+        note.title.toLowerCase().includes(search) ||
+        note.content.toLowerCase().includes(search);
 
       // Search in date (format: DD/MM/YYYY)
       const formattedDate = this.formatDate(note.date).toLowerCase();
@@ -134,7 +157,7 @@ export class NewSessionFormComponent implements OnInit {
 
       // Also search in date parts (day, month, year)
       const dateParts = formattedDate.split('/');
-      const matchesDateParts = dateParts.some(part => part.includes(search));
+      const matchesDateParts = dateParts.some((part) => part.includes(search));
 
       return matchesText || matchesDate || matchesDateParts;
     });
@@ -142,7 +165,9 @@ export class NewSessionFormComponent implements OnInit {
 
   /** Computed sorted notes */
   sortedNotes = computed(() => {
-    return this.filteredNotes().sort((a, b) => b.date.getTime() - a.date.getTime());
+    return this.filteredNotes().sort(
+      (a, b) => b.date.getTime() - a.date.getTime()
+    );
   });
 
   /** Computed form validation for clinical notes */
@@ -157,7 +182,11 @@ export class NewSessionFormComponent implements OnInit {
     // Effect to load notes with IDs when switching to clinical notes tab
     effect(() => {
       const tab = this.activeTab();
-      if (tab === 'clinical-notes' && this.isEditMode && !this.notesLoadedWithIds()) {
+      if (
+        tab === 'clinical-notes' &&
+        this.isEditMode &&
+        !this.notesLoadedWithIds()
+      ) {
         this.loadClinicalNotesWithIds();
       }
     });
@@ -165,7 +194,7 @@ export class NewSessionFormComponent implements OnInit {
 
   readonly modeOptions = [
     { value: 'presencial', label: 'Presencial' },
-    { value: 'online', label: 'Online' }
+    { value: 'online', label: 'Online' },
   ];
 
   readonly paymentMethodOptions = [
@@ -173,7 +202,7 @@ export class NewSessionFormComponent implements OnInit {
     { value: 'bizum', label: 'Bizum' },
     { value: 'transferencia', label: 'Transferencia' },
     { value: 'tarjeta', label: 'Tarjeta' },
-    { value: 'efectivo', label: 'Efectivo' }
+    { value: 'efectivo', label: 'Efectivo' },
   ];
 
   /** Reactive form for session data */
@@ -186,12 +215,16 @@ export class NewSessionFormComponent implements OnInit {
 
   /** Get the session ID for editing */
   get sessionId(): number | null {
-    return this.prefilledData?.sessionData?.SessionDetailData.session_id || null;
+    return (
+      this.prefilledData?.sessionData?.SessionDetailData.session_id || null
+    );
   }
 
   /** Check if session is cancelled */
   isCancelledSession = computed(() => {
-    return this.prefilledData?.sessionData?.SessionDetailData.status === 'cancelada';
+    return (
+      this.prefilledData?.sessionData?.SessionDetailData.status === 'cancelada'
+    );
   });
 
   ngOnInit(): void {
@@ -214,19 +247,23 @@ export class NewSessionFormComponent implements OnInit {
     this.clinicalNotesService.getClinicalNotes(patientId).subscribe({
       next: (response: any) => {
         // Handle both array response and object with data property
-        const records = Array.isArray(response) ? response : (response.data || []);
+        const records = Array.isArray(response)
+          ? response
+          : response.data || [];
         const transformed = records.map((record: any) => ({
           id: record.id ? record.id.toString() : '',
           title: record.title || record.titulo || '',
           content: record.content || record.contenido || '',
-          date: this.parseDateString(record.created_at || record.fecha || new Date().toISOString())
+          date: this.parseDateString(
+            record.created_at || record.fecha || new Date().toISOString()
+          ),
         }));
         this.notes.set(transformed);
         this.notesLoadedWithIds.set(true);
       },
       error: (error) => {
         console.error('Error loading clinical notes:', error);
-      }
+      },
     });
   }
 
@@ -307,48 +344,74 @@ export class NewSessionFormComponent implements OnInit {
     }
 
     // If no errors, clear them
-    endTimeControl.setErrors(Object.keys(endErrors).length > 0 ? endErrors : null);
-    startTimeControl.setErrors(Object.keys(startErrors).length > 0 ? startErrors : null);
+    endTimeControl.setErrors(
+      Object.keys(endErrors).length > 0 ? endErrors : null
+    );
+    startTimeControl.setErrors(
+      Object.keys(startErrors).length > 0 ? startErrors : null
+    );
   }
 
   private initializeForm(): void {
     const sessionData = this.prefilledData?.sessionData;
     const isEditMode = !!sessionData;
 
-    const defaultDate = this.prefilledData?.date || new Date().toISOString().split('T')[0];
+    const defaultDate =
+      this.prefilledData?.date || new Date().toISOString().split('T')[0];
     const defaultStartTime = this.prefilledData?.startTime || '';
 
     // If in edit mode, use session data to prefill the form
     // Note: base_price will be calculated after loading patients
-    const formValues = isEditMode ? {
-      patient_id: sessionData!.SessionDetailData.PatientData.id,
-      session_date: sessionData!.SessionDetailData.session_date,
-      start_time: sessionData!.SessionDetailData.start_time.substring(0, 5),
-      end_time: sessionData!.SessionDetailData.end_time.substring(0, 5),
-      mode: sessionData!.SessionDetailData.mode.toLowerCase(),
-      base_price: 0, // Will be calculated after loading patients
-      payment_method: sessionData!.SessionDetailData.payment_method || 'pendiente',
-      notes: sessionData!.SessionDetailData.notes || ''
-    } : {
-      patient_id: null,
-      session_date: defaultDate,
-      start_time: defaultStartTime,
-      end_time: '',
-      mode: 'presencial',
-      base_price: 0,
-      payment_method: 'pendiente',
-      notes: ''
-    };
+    const formValues = isEditMode
+      ? {
+          patient_id: sessionData!.SessionDetailData.PatientData.id,
+          session_date: sessionData!.SessionDetailData.session_date,
+          start_time: sessionData!.SessionDetailData.start_time.substring(0, 5),
+          end_time: sessionData!.SessionDetailData.end_time.substring(0, 5),
+          mode: sessionData!.SessionDetailData.mode.toLowerCase(),
+          base_price: 0, // Will be calculated after loading patients
+          payment_method:
+            sessionData!.SessionDetailData.payment_method || 'pendiente',
+          notes: sessionData!.SessionDetailData.notes || '',
+        }
+      : {
+          patient_id: null,
+          session_date: defaultDate,
+          start_time: defaultStartTime,
+          end_time: '',
+          mode: 'presencial',
+          base_price: 0,
+          payment_method: 'pendiente',
+          notes: '',
+        };
 
     this.sessionForm = this.fb.group({
-      patient_id: [{value: formValues.patient_id, disabled: isEditMode}, [Validators.required]],
+      patient_id: [
+        { value: formValues.patient_id, disabled: isEditMode },
+        [Validators.required],
+      ],
       session_date: [formValues.session_date, [Validators.required]],
-      start_time: [formValues.start_time, [Validators.required, this.timeRangeValidator]],
-      end_time: [formValues.end_time, [Validators.required, this.timeRangeValidator]],
-      mode: [{value: formValues.mode, disabled: false}, [Validators.required]],
-      base_price: [formValues.base_price, [Validators.required, Validators.min(0.01)]],
-      payment_method: [{value: formValues.payment_method, disabled: !isEditMode}, [Validators.required]],
-      notes: [formValues.notes]
+      start_time: [
+        formValues.start_time,
+        [Validators.required, this.timeRangeValidator],
+      ],
+      end_time: [
+        formValues.end_time,
+        [Validators.required, this.timeRangeValidator],
+      ],
+      mode: [
+        { value: formValues.mode, disabled: false },
+        [Validators.required],
+      ],
+      base_price: [
+        formValues.base_price,
+        [Validators.required, Validators.min(0.01)],
+      ],
+      payment_method: [
+        { value: formValues.payment_method, disabled: !isEditMode },
+        [Validators.required],
+      ],
+      notes: [formValues.notes],
     });
 
     // Add value changes listener to validate time order and duration
@@ -365,8 +428,8 @@ export class NewSessionFormComponent implements OnInit {
     }
 
     // Watch for patient selection changes
-    this.sessionForm.get('patient_id')?.valueChanges.subscribe(patientId => {
-      const patient = this.patients().find(p => p.idPaciente === patientId);
+    this.sessionForm.get('patient_id')?.valueChanges.subscribe((patientId) => {
+      const patient = this.patients().find((p) => p.idPaciente === patientId);
       this.selectedPatient.set(patient || null);
 
       // Update base_price and mode when patient changes (only in create mode)
@@ -374,20 +437,20 @@ export class NewSessionFormComponent implements OnInit {
         const mode = patient.presencial ? 'presencial' : 'online';
         this.sessionForm.patchValue({
           base_price: patient.precioSesion,
-          mode: mode
+          mode: mode,
         });
       }
     });
 
     // Watch for start time changes and automatically update end time
-    this.sessionForm.get('start_time')?.valueChanges.subscribe(startTime => {
+    this.sessionForm.get('start_time')?.valueChanges.subscribe((startTime) => {
       if (startTime) {
         this.updateEndTime(startTime);
       }
     });
 
     // Watch for base_price changes to update the signal
-    this.sessionForm.get('base_price')?.valueChanges.subscribe(price => {
+    this.sessionForm.get('base_price')?.valueChanges.subscribe((price) => {
       this.basePrice.set(price || 0);
     });
 
@@ -396,7 +459,10 @@ export class NewSessionFormComponent implements OnInit {
   }
 
   private loadPatients(): void {
-    this.http.get<{ data: PatientSelector[] }>(`${environment.api.baseUrl}/patients/active-with-clinic`)
+    this.http
+      .get<{ data: PatientSelector[] }>(
+        `${environment.api.baseUrl}/patients/active-with-clinic`
+      )
       .subscribe({
         next: (response) => {
           this.patients.set(response.data);
@@ -405,39 +471,35 @@ export class NewSessionFormComponent implements OnInit {
           if (this.isEditMode && this.prefilledData?.sessionData) {
             const sessionData = this.prefilledData.sessionData;
             const patientId = sessionData.SessionDetailData.PatientData.id;
-            const patient = response.data.find(p => p.idPaciente === patientId);
+            const patient = response.data.find(
+              (p) => p.idPaciente === patientId
+            );
             if (patient) {
               this.selectedPatient.set(patient);
-
-              // Calculate base_price from net price using inverse formula
-              const netPrice = sessionData.SessionDetailData.price;
-              const percentage = patient.porcentaje;
-              const calculatedBasePrice = percentage > 0 ? netPrice / (percentage / 100) : netPrice;
 
               // Set the mode based on patient's presencial setting
               const mode = patient.presencial ? 'presencial' : 'online';
 
               // Update form with calculated base_price
               this.sessionForm.patchValue({
-                base_price: parseFloat(calculatedBasePrice.toFixed(2)),
-                mode: mode
+                base_price: sessionData.SessionDetailData.price,
+                mode: mode,
               });
 
               // Update basePrice signal
-              this.basePrice.set(parseFloat(calculatedBasePrice.toFixed(2)));
+              this.basePrice.set(sessionData.SessionDetailData.price);
             }
           }
         },
         error: (error) => {
           console.error('Error loading patients:', error);
-        }
+        },
       });
   }
 
-
   onClose(): void {
     this.sessionForm.reset({
-      mode: 'presencial'
+      mode: 'presencial',
     });
     this.selectedPatient.set(null);
     this.close.emit();
@@ -487,7 +549,7 @@ export class NewSessionFormComponent implements OnInit {
       status: 'cancelada',
       price: parseFloat(formValue.base_price),
       payment_method: formValue.payment_method,
-      notes: formValue.notes || null
+      notes: formValue.notes || null,
     };
 
     this.sessionsService.updateSession(this.sessionId, sessionData).subscribe({
@@ -498,9 +560,11 @@ export class NewSessionFormComponent implements OnInit {
       },
       error: (error) => {
         console.error('Error cancelling session:', error);
-        this.error.set('Error al cancelar la sesión. Por favor, intenta de nuevo.');
+        this.error.set(
+          'Error al cancelar la sesión. Por favor, intenta de nuevo.'
+        );
         this.isLoading.set(false);
-      }
+      },
     });
   }
 
@@ -527,16 +591,17 @@ export class NewSessionFormComponent implements OnInit {
       },
       error: (error) => {
         console.error('Error deleting session:', error);
-        this.toastService.showError('Error al eliminar la sesión. Por favor, intenta de nuevo.');
+        this.toastService.showError(
+          'Error al eliminar la sesión. Por favor, intenta de nuevo.'
+        );
         this.isLoading.set(false);
-      }
+      },
     });
   }
 
   onCancelDeleteSession(): void {
     this.showDeleteConfirmation.set(false);
   }
-
 
   onStartTimeChange(): void {
     const startTime = this.sessionForm.get('start_time')?.value;
@@ -551,9 +616,12 @@ export class NewSessionFormComponent implements OnInit {
     endDate.setHours(hours + 1, minutes, 0);
     const endTime = endDate.toTimeString().slice(0, 5);
 
-    this.sessionForm.patchValue({
-      end_time: endTime,
-    }, { emitEvent: false }); // emitEvent: false para evitar loops infinitos
+    this.sessionForm.patchValue(
+      {
+        end_time: endTime,
+      },
+      { emitEvent: false }
+    ); // emitEvent: false para evitar loops infinitos
   }
 
   private convertTimeToMySQL(time: string): string {
@@ -561,7 +629,6 @@ export class NewSessionFormComponent implements OnInit {
     const [hours, minutes] = time.split(':');
     return `${hours.padStart(2, '0')}:${minutes.padStart(2, '0')}:00`;
   }
-
 
   onSubmit(): void {
     this.error.set(null);
@@ -601,7 +668,8 @@ export class NewSessionFormComponent implements OnInit {
 
     // Get current status in edit mode, or default to 'completada' for new sessions
     const currentStatus = this.isEditMode
-      ? this.prefilledData?.sessionData?.SessionDetailData.status || 'completada'
+      ? this.prefilledData?.sessionData?.SessionDetailData.status ||
+        'completada'
       : 'completada';
 
     const sessionData: CreateSessionRequest = {
@@ -614,23 +682,27 @@ export class NewSessionFormComponent implements OnInit {
       status: currentStatus,
       price: parseFloat(formValue.base_price),
       payment_method: formValue.payment_method,
-      notes: formValue.notes || null
+      notes: formValue.notes || null,
     };
 
     if (this.isEditMode && this.sessionId) {
       // Update existing session
-      this.sessionsService.updateSession(this.sessionId, sessionData).subscribe({
-        next: (updatedSession) => {
-          this.sessionDataCreated.emit(updatedSession);
-          this.isLoading.set(false);
-          this.onClose();
-        },
-        error: (error) => {
-          console.error('Error updating session:', error);
-          this.error.set('Error al actualizar la sesión. Por favor, intenta de nuevo.');
-          this.isLoading.set(false);
-        }
-      });
+      this.sessionsService
+        .updateSession(this.sessionId, sessionData)
+        .subscribe({
+          next: (updatedSession) => {
+            this.sessionDataCreated.emit(updatedSession);
+            this.isLoading.set(false);
+            this.onClose();
+          },
+          error: (error) => {
+            console.error('Error updating session:', error);
+            this.error.set(
+              'Error al actualizar la sesión. Por favor, intenta de nuevo.'
+            );
+            this.isLoading.set(false);
+          },
+        });
     } else {
       // Create new session
       this.sessionsService.createSession(sessionData).subscribe({
@@ -641,9 +713,11 @@ export class NewSessionFormComponent implements OnInit {
         },
         error: (error) => {
           console.error('Error creating session:', error);
-          this.error.set('Error al crear la sesión. Por favor, intenta de nuevo.');
+          this.error.set(
+            'Error al crear la sesión. Por favor, intenta de nuevo.'
+          );
           this.isLoading.set(false);
-        }
+        },
       });
     }
   }
@@ -688,25 +762,33 @@ export class NewSessionFormComponent implements OnInit {
     this.newNote.set({ title: '', content: '' });
   }
 
-  onEditNote(note: { id: string; title: string; content: string; date: Date }): void {
+  onEditNote(note: {
+    id: string;
+    title: string;
+    content: string;
+    date: Date;
+  }): void {
     this.editingNote.set(note);
     this.isCreatingNote.set(false);
     this.newNote.set({ title: note.title, content: note.content });
   }
 
-  onEditNoteButton(event: Event, note: { id: string; title: string; content: string; date: Date }): void {
+  onEditNoteButton(
+    event: Event,
+    note: { id: string; title: string; content: string; date: Date }
+  ): void {
     event.stopPropagation();
     this.onEditNote(note);
   }
 
   onTitleChange(event: Event): void {
     const target = event.target as HTMLInputElement;
-    this.newNote.update(note => ({ ...note, title: target.value }));
+    this.newNote.update((note) => ({ ...note, title: target.value }));
   }
 
   onContentChange(event: Event): void {
     const target = event.target as HTMLTextAreaElement;
-    this.newNote.update(note => ({ ...note, content: target.value }));
+    this.newNote.update((note) => ({ ...note, content: target.value }));
   }
 
   onSaveNote(): void {
@@ -731,42 +813,52 @@ export class NewSessionFormComponent implements OnInit {
         return;
       }
 
-      this.clinicalNotesService.updateClinicalNote({
-        id: noteIdNumber,
-        title: note.title,
-        content: note.content
-      }).subscribe({
-        next: () => {
-          this.isSavingNote.set(false);
-          this.onCancelEdit();
-          this.toastService.showSuccess('Nota clínica actualizada correctamente');
-          this.reloadSessionData();
-        },
-        error: (error) => {
-          console.error('Error updating note:', error);
-          this.toastService.showError('Error al actualizar la nota. Por favor, intenta de nuevo.');
-          this.isSavingNote.set(false);
-        }
-      });
+      this.clinicalNotesService
+        .updateClinicalNote({
+          id: noteIdNumber,
+          title: note.title,
+          content: note.content,
+        })
+        .subscribe({
+          next: () => {
+            this.isSavingNote.set(false);
+            this.onCancelEdit();
+            this.toastService.showSuccess(
+              'Nota clínica actualizada correctamente'
+            );
+            this.reloadSessionData();
+          },
+          error: (error) => {
+            console.error('Error updating note:', error);
+            this.toastService.showError(
+              'Error al actualizar la nota. Por favor, intenta de nuevo.'
+            );
+            this.isSavingNote.set(false);
+          },
+        });
     } else {
       // Create new note
-      this.clinicalNotesService.createClinicalNote({
-        patient_id: patientId,
-        title: note.title,
-        content: note.content
-      }).subscribe({
-        next: () => {
-          this.isSavingNote.set(false);
-          this.onCancelEdit();
-          this.toastService.showSuccess('Nota clínica creada correctamente');
-          this.reloadSessionData();
-        },
-        error: (error) => {
-          console.error('Error creating note:', error);
-          this.toastService.showError('Error al crear la nota. Por favor, intenta de nuevo.');
-          this.isSavingNote.set(false);
-        }
-      });
+      this.clinicalNotesService
+        .createClinicalNote({
+          patient_id: patientId,
+          title: note.title,
+          content: note.content,
+        })
+        .subscribe({
+          next: () => {
+            this.isSavingNote.set(false);
+            this.onCancelEdit();
+            this.toastService.showSuccess('Nota clínica creada correctamente');
+            this.reloadSessionData();
+          },
+          error: (error) => {
+            console.error('Error creating note:', error);
+            this.toastService.showError(
+              'Error al crear la nota. Por favor, intenta de nuevo.'
+            );
+            this.isSavingNote.set(false);
+          },
+        });
     }
   }
 
@@ -776,7 +868,10 @@ export class NewSessionFormComponent implements OnInit {
     this.newNote.set({ title: '', content: '' });
   }
 
-  onDeleteNote(event: Event, note: { id: string; title: string; content: string; date: Date }): void {
+  onDeleteNote(
+    event: Event,
+    note: { id: string; title: string; content: string; date: Date }
+  ): void {
     event.stopPropagation();
 
     const noteIdNumber = parseInt(note.id);
@@ -813,10 +908,12 @@ export class NewSessionFormComponent implements OnInit {
       },
       error: (error) => {
         console.error('Error deleting note:', error);
-        this.toastService.showError('Error al eliminar la nota. Por favor, intenta de nuevo.');
+        this.toastService.showError(
+          'Error al eliminar la nota. Por favor, intenta de nuevo.'
+        );
         this.deletingNoteId.set(null);
         this.pendingDeleteNote = null;
-      }
+      },
     });
   }
 
@@ -829,7 +926,7 @@ export class NewSessionFormComponent implements OnInit {
     return date.toLocaleDateString('es-ES', {
       year: 'numeric',
       month: '2-digit',
-      day: '2-digit'
+      day: '2-digit',
     });
   }
 
@@ -846,10 +943,14 @@ export class NewSessionFormComponent implements OnInit {
 
   private async startRecording(): Promise<void> {
     try {
-      const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+      const SpeechRecognition =
+        (window as any).SpeechRecognition ||
+        (window as any).webkitSpeechRecognition;
 
       if (!SpeechRecognition) {
-        alert('Tu navegador no soporta reconocimiento de voz. Usa Chrome, Edge o Safari.');
+        alert(
+          'Tu navegador no soporta reconocimiento de voz. Usa Chrome, Edge o Safari.'
+        );
         return;
       }
 
@@ -874,7 +975,7 @@ export class NewSessionFormComponent implements OnInit {
         }
 
         const newContent = currentContent + finalTranscript + interimTranscript;
-        this.newNote.update(note => ({ ...note, content: newContent }));
+        this.newNote.update((note) => ({ ...note, content: newContent }));
       };
 
       this.recognition.onerror = (event: any) => {
@@ -882,7 +983,9 @@ export class NewSessionFormComponent implements OnInit {
         this.isRecording.set(false);
 
         if (event.error === 'not-allowed') {
-          alert('Permiso de micrófono denegado. Por favor, permite el acceso al micrófono.');
+          alert(
+            'Permiso de micrófono denegado. Por favor, permite el acceso al micrófono.'
+          );
         }
       };
 
@@ -892,7 +995,6 @@ export class NewSessionFormComponent implements OnInit {
 
       this.recognition.start();
       this.isRecording.set(true);
-
     } catch (error) {
       console.error('Error iniciando grabación:', error);
       alert('Error al acceder al micrófono. Verifica los permisos.');
