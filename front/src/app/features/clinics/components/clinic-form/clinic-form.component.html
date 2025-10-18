@@ -168,7 +168,7 @@
 
         <!-- Dirección de Facturación -->
         <div>
-          <app-form-input controlName="invoice_address" label="Dirección de Facturación"
+          <app-form-input controlName="billing_address" label="Dirección de Facturación"
             [placeholder]="clinicaForm.get('is_billable')?.value ? 'Ej: Calle Principal 123, Madrid' : 'No facturable - Dirección no requerida'"
             [required]="clinicaForm.get('is_billable')?.value">
           </app-form-input>

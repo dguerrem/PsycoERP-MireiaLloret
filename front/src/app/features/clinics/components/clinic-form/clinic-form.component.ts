@@ -64,7 +64,7 @@ export class ClinicFormComponent implements OnInit, OnChanges {
       is_billable: [false],
       cif: [''],
       fiscal_name: [''],
-      invoice_address: [''],
+      billing_address: [''],
       status: ['active'],
     });
 
@@ -96,7 +96,7 @@ export class ClinicFormComponent implements OnInit, OnChanges {
         is_billable: this.clinica.is_billable || false,
         cif: this.clinica.cif || '',
         fiscal_name: this.clinica.fiscal_name || '',
-        billing_address: this.clinica.invoice_address || '',
+        billing_address: this.clinica.billing_address || '',
         status: 'active',
       });
 
@@ -121,7 +121,7 @@ export class ClinicFormComponent implements OnInit, OnChanges {
       is_billable: false,
       cif: '',
       fiscal_name: '',
-      invoice_address: '',
+      billing_address: '',
       status: 'active',
     });
 
@@ -184,7 +184,7 @@ export class ClinicFormComponent implements OnInit, OnChanges {
   }
 
   private updateInvoiceAddressValidation(isBillable: boolean): void {
-    const invoiceAddressControl = this.clinicaForm.get('invoice_address');
+    const invoiceAddressControl = this.clinicaForm.get('billing_address');
 
     if (isBillable) {
       // Si es facturable, la dirección de facturación es requerida y habilitada
@@ -228,11 +228,11 @@ export class ClinicFormComponent implements OnInit, OnChanges {
         formData.address = '';
       }
 
-      // Si no es facturable, asegurar que cif, fiscal_name e invoice_address estén vacíos
+      // Si no es facturable, asegurar que cif, fiscal_name e billing_address estén vacíos
       if (!formData.is_billable) {
         formData.cif = '';
         formData.fiscal_name = '';
-        formData.invoice_address = '';
+        formData.billing_address = '';
       }
 
       if (this.isEditing && this.clinica) {
@@ -286,7 +286,7 @@ export class ClinicFormComponent implements OnInit, OnChanges {
       is_billable: 'Es facturable',
       cif: 'CIF',
       fiscal_name: 'Nombre fiscal',
-      invoice_address: 'Dirección de facturación',
+      billing_address: 'Dirección de facturación',
     };
     return labels[fieldName] || fieldName;
   }
