@@ -23,10 +23,15 @@ import {
 } from './components/invoice-preview.component';
 import { UserService } from '../../core/services/user.service';
 import { User } from '../../core/models/user.model';
-import { PdfGeneratorService } from './services/pdf-generator.service';
-import { SpinnerComponent } from '../../shared/components/spinner/spinner.component';
-import { InvoiceTemplateComponent } from './components/invoice-template.component';
 import { ToastService } from '../../core/services/toast.service';
+import { FilterAnalysisComponent } from './components/filter-analysis/filter-analysis.component';
+import { BulkInvoicingComponent } from './components/bulk-invoicing/bulk-invoicing.component';
+import { ClinicInvoicingComponent } from './components/clinic-invoicing/clinic-invoicing.component';
+import { ExistingInvoicesComponent } from './components/existing-invoices/existing-invoices.component';
+import { BulkInvoiceModalComponent } from './components/bulk-invoice-modal/bulk-invoice-modal.component';
+import { ClinicInvoiceModalComponent } from './components/clinic-invoice-modal/clinic-invoice-modal.component';
+import { ClinicInvoicePreviewComponent } from './components/clinic-invoice-preview/clinic-invoice-preview.component';
+import { InvoiceLoadingSpinnerComponent } from './components/invoice-loading-spinner/invoice-loading-spinner.component';
 
 interface InvoiceToGenerate extends InvoicePreviewData {}
 
@@ -53,8 +58,14 @@ interface ClinicInvoiceToGenerate {
     SectionHeaderComponent,
     ReusableModalComponent,
     InvoicePreviewComponent,
-    SpinnerComponent,
-    InvoiceTemplateComponent,
+    FilterAnalysisComponent,
+    BulkInvoicingComponent,
+    ClinicInvoicingComponent,
+    ExistingInvoicesComponent,
+    BulkInvoiceModalComponent,
+    ClinicInvoiceModalComponent,
+    ClinicInvoicePreviewComponent,
+    InvoiceLoadingSpinnerComponent,
   ],
   templateUrl: './billing.component.html',
   styleUrl: './billing.component.scss',
@@ -63,7 +74,6 @@ interface ClinicInvoiceToGenerate {
 export class BillingComponent implements OnInit {
   private billingService = inject(BillingService);
   private userService = inject(UserService);
-  private pdfGenerator = inject(PdfGeneratorService);
   private toastService = inject(ToastService);
 
   // Signals para estado del componente
@@ -119,11 +129,6 @@ export class BillingComponent implements OnInit {
   isLoadingPending = signal(false);
   isLoadingExisting = signal(false);
   isLoadingClinics = signal(false);
-
-  // PDF Generation state
-  isGeneratingPDFs = signal(false);
-  currentPDFProgress = signal({ current: 0, total: 0 });
-  hiddenInvoiceData = signal<InvoiceToGenerate | null>(null);
 
   // Error state
   errorMessage = signal<string | null>(null);
@@ -316,72 +321,96 @@ export class BillingComponent implements OnInit {
   /**
    * Maneja el cambio de mes en el filtro de KPIs
    */
-  onKpiMonthChange(event: Event) {
-    const select = event.target as HTMLSelectElement;
-    this.kpiMonth.set(parseInt(select.value));
+  onKpiMonthChange(month: number | Event) {
+    // Soportar tanto Event (desde template directo) como number (desde componente hijo)
+    const value = typeof month === 'number'
+      ? month
+      : parseInt((month.target as HTMLSelectElement).value);
+    this.kpiMonth.set(value);
     this.loadKPIs();
   }
 
   /**
    * Maneja el cambio de año en el filtro de KPIs
    */
-  onKpiYearChange(event: Event) {
-    const select = event.target as HTMLSelectElement;
-    this.kpiYear.set(parseInt(select.value));
+  onKpiYearChange(year: number | Event) {
+    // Soportar tanto Event (desde template directo) como number (desde componente hijo)
+    const value = typeof year === 'number'
+      ? year
+      : parseInt((year.target as HTMLSelectElement).value);
+    this.kpiYear.set(value);
     this.loadKPIs();
   }
 
   /**
    * Maneja el cambio de mes en el filtro de Facturas Pendientes
    */
-  onPendingMonthChange(event: Event) {
-    const select = event.target as HTMLSelectElement;
-    this.pendingMonth.set(parseInt(select.value));
+  onPendingMonthChange(month: number | Event) {
+    // Soportar tanto Event (desde template directo) como number (desde componente hijo)
+    const value = typeof month === 'number'
+      ? month
+      : parseInt((month.target as HTMLSelectElement).value);
+    this.pendingMonth.set(value);
     this.loadPendingInvoices();
   }
 
   /**
    * Maneja el cambio de año en el filtro de Facturas Pendientes
    */
-  onPendingYearChange(event: Event) {
-    const select = event.target as HTMLSelectElement;
-    this.pendingYear.set(parseInt(select.value));
+  onPendingYearChange(year: number | Event) {
+    // Soportar tanto Event (desde template directo) como number (desde componente hijo)
+    const value = typeof year === 'number'
+      ? year
+      : parseInt((year.target as HTMLSelectElement).value);
+    this.pendingYear.set(value);
     this.loadPendingInvoices();
   }
 
   /**
    * Maneja el cambio de mes en el filtro de Facturas Existentes
    */
-  onExistingMonthChange(event: Event) {
-    const select = event.target as HTMLSelectElement;
-    this.existingMonth.set(parseInt(select.value));
+  onExistingMonthChange(month: number | Event) {
+    // Soportar tanto Event (desde template directo) como number (desde componente hijo)
+    const value = typeof month === 'number'
+      ? month
+      : parseInt((month.target as HTMLSelectElement).value);
+    this.existingMonth.set(value);
     this.loadExistingInvoices();
   }
 
   /**
    * Maneja el cambio de año en el filtro de Facturas Existentes
    */
-  onExistingYearChange(event: Event) {
-    const select = event.target as HTMLSelectElement;
-    this.existingYear.set(parseInt(select.value));
+  onExistingYearChange(year: number | Event) {
+    // Soportar tanto Event (desde template directo) como number (desde componente hijo)
+    const value = typeof year === 'number'
+      ? year
+      : parseInt((year.target as HTMLSelectElement).value);
+    this.existingYear.set(value);
     this.loadExistingInvoices();
   }
 
   /**
    * Maneja el cambio de mes en el filtro de Facturas de Clínicas
    */
-  onClinicsMonthChange(event: Event) {
-    const select = event.target as HTMLSelectElement;
-    this.clinicsMonth.set(parseInt(select.value));
+  onClinicsMonthChange(month: number | Event) {
+    // Soportar tanto Event (desde template directo) como number (desde componente hijo)
+    const value = typeof month === 'number'
+      ? month
+      : parseInt((month.target as HTMLSelectElement).value);
+    this.clinicsMonth.set(value);
     this.loadClinicInvoices();
   }
 
   /**
    * Maneja el cambio de año en el filtro de Facturas de Clínicas
    */
-  onClinicsYearChange(event: Event) {
-    const select = event.target as HTMLSelectElement;
-    this.clinicsYear.set(parseInt(select.value));
+  onClinicsYearChange(year: number | Event) {
+    // Soportar tanto Event (desde template directo) como number (desde componente hijo)
+    const value = typeof year === 'number'
+      ? year
+      : parseInt((year.target as HTMLSelectElement).value);
+    this.clinicsYear.set(value);
     this.loadClinicInvoices();
   }
 
@@ -391,7 +420,7 @@ export class BillingComponent implements OnInit {
   validateInvoiceYear() {
     const year = this.invoiceYear();
     if (year < 2000) {
-      this.invoiceYear.set(2000);
+      this.invoiceYear.set(new Date().getFullYear());
       this.loadLastInvoiceNumber();
     }
   }
@@ -898,80 +927,4 @@ export class BillingComponent implements OnInit {
       });
   }
 
-  /**
-   * Genera PDFs para todas las facturas seleccionadas
-   */
-  async generateAllPDFs() {
-    const selected = this.selectedPatients();
-    if (selected.length === 0) {
-      return;
-    }
-
-    // Obtener datos de las facturas seleccionadas
-    const selectedInvoices = this.pendingInvoices().filter((inv) =>
-      selected.includes(inv.dni)
-    );
-
-    // Preparar datos para las facturas
-    const invoices: InvoiceToGenerate[] = selectedInvoices.map(
-      (inv, index) => ({
-        patient_full_name: inv.patient_full_name,
-        dni: inv.dni,
-        email: inv.email,
-        pending_sessions_count: inv.pending_sessions_count,
-        total_gross: inv.total_gross,
-        invoice_number: `${this.invoicePrefix()}-${this.invoiceYear()}-${this.padNumber(
-          this.invoiceNextNumber() + index
-        )}`,
-        invoice_date: new Date().toISOString().split('T')[0],
-        sessions: inv.sessions,
-      })
-    );
-
-    // Mostrar spinner
-    this.isGeneratingPDFs.set(true);
-    this.currentPDFProgress.set({ current: 0, total: invoices.length });
-
-    // Generar PDFs uno por uno usando el contenedor oculto
-    for (let i = 0; i < invoices.length; i++) {
-      const invoice = invoices[i];
-
-      // Actualizar progreso
-      this.currentPDFProgress.set({ current: i + 1, total: invoices.length });
-
-      // Establecer datos en el contenedor oculto
-      this.hiddenInvoiceData.set(invoice);
-
-      // Esperar a que el DOM se actualice
-      await new Promise((resolve) => setTimeout(resolve, 150));
-
-      try {
-        // Crear nombre de archivo descriptivo: "FACTURA-FAC-2025-0020-Juan_Perez"
-        const patientName = invoice.patient_full_name
-          .replace(/\s+/g, '_')  // Reemplazar espacios por guiones bajos
-          .normalize('NFD')       // Normalizar caracteres acentuados
-          .replace(/[\u0300-\u036f]/g, ''); // Eliminar acentos
-
-        const fileName = `FACTURA-${invoice.invoice_number}-${patientName}`;
-
-        await this.pdfGenerator.generatePdfById(
-          'hidden-invoice-content',
-          fileName
-        );
-      } catch (error) {
-        console.error(
-          `Error generando PDF para ${invoice.invoice_number}:`,
-          error
-        );
-      }
-
-      // Pequeña pausa entre PDFs
-      await new Promise((resolve) => setTimeout(resolve, 100));
-    }
-
-    // Limpiar estado
-    this.hiddenInvoiceData.set(null);
-    this.isGeneratingPDFs.set(false);
-    this.currentPDFProgress.set({ current: 0, total: 0 });
-  }
 }

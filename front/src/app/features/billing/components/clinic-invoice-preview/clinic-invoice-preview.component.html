@@ -1,0 +1,85 @@
+<!-- Modal de vista previa de factura de clínica -->
+@if (isOpen && clinicInvoiceData) {
+<div class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4"
+  (click)="onClose()">
+  <div class="bg-white rounded-xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-auto"
+    (click)="onContainerClick($event)">
+    <!-- Header -->
+    <div class="sticky top-0 bg-white border-b px-6 py-4 flex items-center justify-between">
+      <div>
+        <h2 class="text-xl font-bold text-gray-900">Vista Previa - Factura de Clínica</h2>
+        <p class="text-sm text-gray-500 mt-1">{{ clinicInvoiceData.invoice_number }}</p>
+      </div>
+      <button type="button" (click)="onClose()"
+        class="text-gray-400 hover:text-gray-600 transition-colors">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+          stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-6 w-6">
+          <path d="M18 6 6 18"></path>
+          <path d="m6 6 12 12"></path>
+        </svg>
+      </button>
+    </div>
+
+    <!-- Content -->
+    <div class="px-6 py-6">
+      <!-- Invoice details -->
+      <div class="border rounded-lg p-6 bg-gray-50">
+        <div class="grid grid-cols-2 gap-4 mb-6">
+          <div>
+            <p class="text-sm font-medium text-gray-500 mb-1">Número de Factura</p>
+            <p class="text-lg font-bold text-gray-900">{{ clinicInvoiceData.invoice_number }}</p>
+          </div>
+          <div>
+            <p class="text-sm font-medium text-gray-500 mb-1">Fecha de Emisión</p>
+            <p class="text-lg font-semibold text-gray-900">{{ clinicInvoiceData.invoice_date }}</p>
+          </div>
+        </div>
+
+        <div class="border-t pt-4 mb-4">
+          <p class="text-sm font-medium text-gray-500 mb-2">Facturado a</p>
+          <p class="text-xl font-bold text-primary">{{ clinicInvoiceData.clinic_name }}</p>
+        </div>
+
+        <div class="border-t pt-4">
+          <p class="text-sm font-medium text-gray-500 mb-3">Detalles</p>
+          <div class="space-y-2">
+            <div class="flex justify-between items-center">
+              <span class="text-gray-600">Número de sesiones:</span>
+              <span class="font-semibold">{{ clinicInvoiceData.sessions_count }}</span>
+            </div>
+            <div class="flex justify-between items-center">
+              <span class="text-gray-600">Total Neto:</span>
+              <span class="font-semibold">{{ formatCurrency(clinicInvoiceData.total_net) }}</span>
+            </div>
+            <div class="flex justify-between items-center text-red-600">
+              <span>IRPF ({{userData?.irpf || 0}}%):</span>
+              <span class="font-semibold">-{{ formatCurrency(clinicInvoiceData.total_net -
+                clinicInvoiceData.total_net_with_irpf) }}</span>
+            </div>
+            <div class="flex justify-between items-center pt-2 border-t-2 text-lg">
+              <span class="font-bold">Total a Facturar:</span>
+              <span class="font-bold text-green-600">{{ formatCurrency(clinicInvoiceData.total_net_with_irpf)
+                }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+        <p class="text-sm text-blue-800">
+          <strong>Nota:</strong> Esta es una vista previa simplificada. La factura generada incluirá todos los detalles
+          legales requeridos.
+        </p>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="sticky bottom-0 bg-gray-50 border-t px-6 py-4 flex justify-end gap-3">
+      <button type="button" (click)="onClose()" data-slot="button"
+        class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-all bg-gray-200 hover:bg-gray-300 text-gray-800 h-9 px-4 py-2">
+        Cerrar
+      </button>
+    </div>
+  </div>
+</div>
+}
