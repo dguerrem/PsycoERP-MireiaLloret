@@ -502,6 +502,74 @@ const createInvoiceOfClinics = async (db, invoiceData) => {
   }
 };
 
+const getIssuedInvoicesOfClinics = async (db, filters = {}) => {
+  const { month, year } = filters;
+
+  // Por defecto usar mes y año actual si no se especifican
+  const currentDate = new Date();
+  const targetMonth = month || (currentDate.getMonth() + 1);
+  const targetYear = year || currentDate.getFullYear();
+
+  // Obtener facturas de clínicas con información de la clínica
+  const [invoicesResult] = await db.execute(
+    `SELECT
+       i.id,
+       i.invoice_number,
+       i.invoice_date,
+       i.clinic_id,
+       c.fiscal_name,
+       c.cif,
+       c.billing_address,
+       i.total,
+       i.concept,
+       i.month,
+       i.year,
+       i.created_at
+     FROM invoices i
+     INNER JOIN clinics c ON i.clinic_id = c.id AND c.is_active = true
+     WHERE i.is_active = true
+       AND i.clinic_id IS NOT NULL
+       AND i.month = ?
+       AND i.year = ?
+     ORDER BY i.invoice_date DESC, i.invoice_number DESC`,
+    [targetMonth, targetYear]
+  );
+
+  // Para cada factura, obtener el número de sesiones
+  const invoices = await Promise.all(
+    invoicesResult.map(async (row) => {
+      const [sessionsCount] = await db.execute(
+        `SELECT COUNT(*) as sessions_count
+         FROM invoice_sessions ist
+         INNER JOIN sessions s ON ist.session_id = s.id AND s.is_active = true
+         WHERE ist.invoice_id = ?`,
+        [row.id]
+      );
+
+      // Formatear fecha a dd/mm/yyyy
+      const date = new Date(row.invoice_date);
+      const formattedDate = `${String(date.getDate()).padStart(2, '0')}/${String(date.getMonth() + 1).padStart(2, '0')}/${date.getFullYear()}`;
+
+      return {
+        id: parseInt(row.id),
+        invoice_number: row.invoice_number,
+        invoice_date: formattedDate,
+        clinic_id: parseInt(row.clinic_id),
+        fiscal_name: row.fiscal_name || '',
+        cif: row.cif || '',
+        billing_address: row.billing_address || '',
+        sessions_count: parseInt(sessionsCount[0].sessions_count),
+        total: parseFloat(row.total),
+        concept: row.concept || '',
+        month: parseInt(row.month),
+        year: parseInt(row.year)
+      };
+    })
+  );
+
+  return invoices;
+};
+
 module.exports = {
   getInvoicesKPIs,
   getPendingInvoices,
@@ -509,5 +577,6 @@ module.exports = {
   createInvoice,
   createInvoiceOfClinics,
   getIssuedInvoices,
+  getIssuedInvoicesOfClinics,
   getLastInvoiceNumber
 };

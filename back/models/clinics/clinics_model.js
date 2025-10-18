@@ -21,6 +21,9 @@ const getClinics = async (db, filters = {}) => {
             price,
             percentage,
             is_billable,
+            billing_address,
+            cif,
+            fiscal_name,
             DATE_FORMAT(created_at,'%Y-%m-%d') as created_at,
             DATE_FORMAT(updated_at,'%Y-%m-%d') as updated_at
         FROM clinics
@@ -66,7 +69,7 @@ const getClinics = async (db, filters = {}) => {
 };
 
 const updateClinic = async (db, id, data) => {
-  const { name, clinic_color, address, price, percentage, is_billable } = data;
+  const { name, clinic_color, address, price, percentage, is_billable, billing_address, cif, fiscal_name } = data;
 
   const fields = [];
   const params = [];
@@ -99,6 +102,21 @@ const updateClinic = async (db, id, data) => {
   if (is_billable !== undefined) {
     fields.push("is_billable = ?");
     params.push(is_billable);
+  }
+
+  if (billing_address !== undefined) {
+    fields.push("billing_address = ?");
+    params.push(billing_address);
+  }
+
+  if (cif !== undefined) {
+    fields.push("cif = ?");
+    params.push(cif);
+  }
+
+  if (fiscal_name !== undefined) {
+    fields.push("fiscal_name = ?");
+    params.push(fiscal_name);
   }
 
   if (fields.length === 0) {
@@ -154,7 +172,7 @@ const hasSessions = async (db, clinicId) => {
 
 
 const createClinic = async (db, data) => {
-  const { name, clinic_color, address, price, percentage, is_billable } = data;
+  const { name, clinic_color, address, price, percentage, is_billable, billing_address, cif, fiscal_name } = data;
 
   if (!name) {
     throw new Error("Name is required");
@@ -189,6 +207,24 @@ const createClinic = async (db, data) => {
   if (is_billable !== undefined) {
     fields.push("is_billable");
     values.push(is_billable);
+    placeholders.push("?");
+  }
+
+  if (billing_address !== undefined) {
+    fields.push("billing_address");
+    values.push(billing_address);
+    placeholders.push("?");
+  }
+
+  if (cif !== undefined) {
+    fields.push("cif");
+    values.push(cif);
+    placeholders.push("?");
+  }
+
+  if (fiscal_name !== undefined) {
+    fields.push("fiscal_name");
+    values.push(fiscal_name);
     placeholders.push("?");
   }
 

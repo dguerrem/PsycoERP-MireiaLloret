@@ -38,7 +38,7 @@ const obtenerClinicas = async (req, res) => {
 const actualizarClinica = async (req, res) => {
   try {
     const { id } = req.params;
-    const { name, clinic_color, address, price, percentage, is_billable } = req.body;
+    const { name, clinic_color, address, price, percentage, is_billable, billing_address, cif, fiscal_name } = req.body;
 
     if (!id || isNaN(id)) {
       return res.status(400).json({
@@ -115,6 +115,18 @@ const actualizarClinica = async (req, res) => {
           error: "is_billable debe ser booleano o 0/1",
         });
       }
+    }
+
+    if (billing_address !== undefined) {
+      data.billing_address = billing_address === null ? null : (billing_address ? billing_address.trim() : null);
+    }
+
+    if (cif !== undefined) {
+      data.cif = cif === null ? null : (cif ? cif.trim() : null);
+    }
+
+    if (fiscal_name !== undefined) {
+      data.fiscal_name = fiscal_name === null ? null : (fiscal_name ? fiscal_name.trim() : null);
     }
 
     if (Object.keys(data).length === 0) {
@@ -199,7 +211,7 @@ const eliminarClinica = async (req, res) => {
 
 const crearClinica = async (req, res) => {
   try {
-    const { name, clinic_color, address, price, percentage, is_billable } = req.body;
+    const { name, clinic_color, address, price, percentage, is_billable, billing_address, cif, fiscal_name } = req.body;
 
     if (!name || name.trim() === "") {
       return res.status(400).json({
@@ -258,6 +270,18 @@ const crearClinica = async (req, res) => {
           error: "is_billable debe ser booleano o 0/1",
         });
       }
+    }
+
+    if (billing_address !== undefined) {
+      data.billing_address = billing_address === null ? null : (billing_address ? billing_address.trim() : null);
+    }
+
+    if (cif !== undefined) {
+      data.cif = cif === null ? null : (cif ? cif.trim() : null);
+    }
+
+    if (fiscal_name !== undefined) {
+      data.fiscal_name = fiscal_name === null ? null : (fiscal_name ? fiscal_name.trim() : null);
     }
 
     const nuevaClinica = await createClinic(req.db, data);

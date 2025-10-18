@@ -1,4 +1,4 @@
-const { getInvoicesKPIs, getPendingInvoices, getPendingInvoicesOfClinics, createInvoice, createInvoiceOfClinics, getIssuedInvoices, getLastInvoiceNumber } = require("../../models/invoices/invoice_model");
+const { getInvoicesKPIs, getPendingInvoices, getPendingInvoicesOfClinics, createInvoice, createInvoiceOfClinics, getIssuedInvoices, getIssuedInvoicesOfClinics, getLastInvoiceNumber } = require("../../models/invoices/invoice_model");
 
 // Obtener KPIs de facturación
 const obtenerKPIsFacturacion = async (req, res) => {
@@ -415,6 +415,44 @@ const obtenerUltimoNumeroFactura = async (req, res) => {
   }
 };
 
+const obtenerFacturasEmitidasClinicas = async (req, res) => {
+  try {
+    const { month, year } = req.query;
+
+    // Validar parámetros si se envían
+    if (month && (isNaN(parseInt(month)) || parseInt(month) < 1 || parseInt(month) > 12)) {
+      return res.status(400).json({
+        success: false,
+        error: "El mes debe ser un número entre 1 y 12"
+      });
+    }
+
+    if (year && (isNaN(parseInt(year)) || parseInt(year) < 2000)) {
+      return res.status(400).json({
+        success: false,
+        error: "El año debe ser un número válido mayor a 2000"
+      });
+    }
+
+    const filters = {};
+    if (month) filters.month = parseInt(month);
+    if (year) filters.year = parseInt(year);
+
+    const invoicesData = await getIssuedInvoicesOfClinics(req.db, filters);
+
+    res.json({
+      success: true,
+      data: invoicesData
+    });
+  } catch (err) {
+    console.error("Error al obtener facturas emitidas de clínicas:", err.message);
+    res.status(500).json({
+      success: false,
+      error: "Error al obtener las facturas emitidas de clínicas"
+    });
+  }
+};
+
 module.exports = {
   obtenerKPIsFacturacion,
   obtenerFacturasPendientes,
@@ -422,5 +460,6 @@ module.exports = {
   generarFactura,
   generarFacturaClinica,
   obtenerFacturasEmitidas,
+  obtenerFacturasEmitidasClinicas,
   obtenerUltimoNumeroFactura
 };
