@@ -660,6 +660,26 @@ export class BillingComponent implements OnInit {
   }
 
   /**
+   * Vista previa de una factura pendiente
+   */
+  previewPendingInvoice(invoice: PendingInvoice) {
+    // Convertir PendingInvoice a InvoicePreviewData
+    const previewData: InvoicePreviewData = {
+      patient_full_name: invoice.patient_full_name,
+      dni: invoice.dni,
+      email: invoice.email,
+      pending_sessions_count: invoice.pending_sessions_count,
+      total_gross: invoice.total_gross,
+      invoice_number: `${this.invoicePrefix()}-${this.invoiceYear()}-${this.padNumber(this.invoiceNextNumber())}`,
+      invoice_date: new Date().toISOString().split('T')[0],
+      sessions: invoice.sessions
+    };
+
+    this.previewInvoiceData.set(previewData);
+    this.isPreviewModalOpen.set(true);
+  }
+
+  /**
    * Vista previa de una factura existente
    */
   previewExistingInvoice(invoice: ExistingInvoice) {

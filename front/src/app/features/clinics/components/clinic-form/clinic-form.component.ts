@@ -63,6 +63,8 @@ export class ClinicFormComponent implements OnInit, OnChanges {
       percentage: [0, [Validators.required, Validators.min(0), Validators.max(100)]],
       is_billable: [false],
       cif: [''],
+      fiscal_name: [''],
+      invoice_address: [''],
       status: ['active'],
     });
 
@@ -74,6 +76,8 @@ export class ClinicFormComponent implements OnInit, OnChanges {
     // Escuchar cambios en el checkbox is_billable
     this.clinicaForm.get('is_billable')?.valueChanges.subscribe(isBillable => {
       this.updateCifValidation(isBillable);
+      this.updateFiscalNameValidation(isBillable);
+      this.updateInvoiceAddressValidation(isBillable);
     });
   }
 
@@ -91,12 +95,16 @@ export class ClinicFormComponent implements OnInit, OnChanges {
         percentage: this.clinica.percentage || 0,
         is_billable: this.clinica.is_billable || false,
         cif: this.clinica.cif || '',
+        fiscal_name: this.clinica.fiscal_name || '',
+        billing_address: this.clinica.invoice_address || '',
         status: 'active',
       });
 
       // Aplicar la lógica de validación después de poblar el formulario
       this.updateAddressValidation(isOnline);
       this.updateCifValidation(this.clinica.is_billable || false);
+      this.updateFiscalNameValidation(this.clinica.is_billable || false);
+      this.updateInvoiceAddressValidation(this.clinica.is_billable || false);
     } else {
       this.resetForm();
     }
@@ -112,12 +120,16 @@ export class ClinicFormComponent implements OnInit, OnChanges {
       percentage: 0,
       is_billable: false,
       cif: '',
+      fiscal_name: '',
+      invoice_address: '',
       status: 'active',
     });
 
     // Asegurar que las validaciones están correctas al resetear
     this.updateAddressValidation(false);
     this.updateCifValidation(false);
+    this.updateFiscalNameValidation(false);
+    this.updateInvoiceAddressValidation(false);
   }
 
   private updateAddressValidation(isOnline: boolean): void {
@@ -154,6 +166,40 @@ export class ClinicFormComponent implements OnInit, OnChanges {
     cifControl?.updateValueAndValidity();
   }
 
+  private updateFiscalNameValidation(isBillable: boolean): void {
+    const fiscalNameControl = this.clinicaForm.get('fiscal_name');
+
+    if (isBillable) {
+      // Si es facturable, el nombre fiscal es requerido y habilitado
+      fiscalNameControl?.setValidators([Validators.required, Validators.minLength(2)]);
+      fiscalNameControl?.enable();
+    } else {
+      // Si no es facturable, deshabilitar y quitar validaciones
+      fiscalNameControl?.clearValidators();
+      fiscalNameControl?.setValue('');
+      fiscalNameControl?.disable();
+    }
+
+    fiscalNameControl?.updateValueAndValidity();
+  }
+
+  private updateInvoiceAddressValidation(isBillable: boolean): void {
+    const invoiceAddressControl = this.clinicaForm.get('invoice_address');
+
+    if (isBillable) {
+      // Si es facturable, la dirección de facturación es requerida y habilitada
+      invoiceAddressControl?.setValidators([Validators.required, Validators.minLength(5)]);
+      invoiceAddressControl?.enable();
+    } else {
+      // Si no es facturable, deshabilitar y quitar validaciones
+      invoiceAddressControl?.clearValidators();
+      invoiceAddressControl?.setValue('');
+      invoiceAddressControl?.disable();
+    }
+
+    invoiceAddressControl?.updateValueAndValidity();
+  }
+
   get isEditing(): boolean {
     return this.clinica !== null;
   }
@@ -182,9 +228,11 @@ export class ClinicFormComponent implements OnInit, OnChanges {
         formData.address = '';
       }
 
-      // Si no es facturable, asegurar que cif esté vacío
+      // Si no es facturable, asegurar que cif, fiscal_name e invoice_address estén vacíos
       if (!formData.is_billable) {
         formData.cif = '';
+        formData.fiscal_name = '';
+        formData.invoice_address = '';
       }
 
       if (this.isEditing && this.clinica) {
@@ -237,6 +285,8 @@ export class ClinicFormComponent implements OnInit, OnChanges {
       percentage: 'Porcentaje de comisión',
       is_billable: 'Es facturable',
       cif: 'CIF',
+      fiscal_name: 'Nombre fiscal',
+      invoice_address: 'Dirección de facturación',
     };
     return labels[fieldName] || fieldName;
   }

@@ -345,6 +345,9 @@
                               <th data-slot="table-head"
                                 class="text-foreground h-10 px-2 text-left align-middle font-medium whitespace-nowrap min-w-[100px]">
                                 Clínicas</th>
+                              <th data-slot="table-head"
+                                class="text-foreground h-10 px-2 text-left align-middle font-medium whitespace-nowrap min-w-[80px]">
+                                Acciones</th>
                             </tr>
                             <tr data-slot="table-row" class="border-b bg-muted/30">
                               <th data-slot="table-head" class="h-10 px-2"></th>
@@ -363,6 +366,7 @@
                                   (input)="pendingEmailFilter.set($any($event.target).value)" data-slot="input"
                                   class="border-input h-8 w-full min-w-0 rounded-md border bg-white px-2 py-1 text-xs shadow-xs outline-none focus-visible:ring-[2px]">
                               </th>
+                              <th data-slot="table-head" class="h-10 px-2"></th>
                               <th data-slot="table-head" class="h-10 px-2"></th>
                               <th data-slot="table-head" class="h-10 px-2"></th>
                               <th data-slot="table-head" class="h-10 px-2"></th>
@@ -393,10 +397,23 @@
                                 formatCurrency(invoice.total_gross) }}</td>
                               <td data-slot="table-cell" class="p-2 align-middle whitespace-nowrap">{{
                                 invoice.clinic_name }}</td>
+                              <td data-slot="table-cell" class="p-2 align-middle whitespace-nowrap">
+                                <button data-slot="button" type="button" (click)="previewPendingInvoice(invoice)"
+                                  class="inline-flex items-center justify-center whitespace-nowrap text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 hover:bg-accent hover:text-accent-foreground h-8 rounded-md gap-1.5 px-3">
+                                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                                    fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                    stroke-linejoin="round" class="h-4 w-4">
+                                    <path
+                                      d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0">
+                                    </path>
+                                    <circle cx="12" cy="12" r="3"></circle>
+                                  </svg>
+                                </button>
+                              </td>
                             </tr>
                             } @empty {
                             <tr>
-                              <td colspan="7" class="text-center py-12 text-muted-foreground">
+                              <td colspan="8" class="text-center py-12 text-muted-foreground">
                                 <div class="flex flex-col items-center gap-2">
                                   <svg class="h-12 w-12 text-muted-foreground" fill="none" stroke="currentColor"
                                     viewBox="0 0 24 24">
