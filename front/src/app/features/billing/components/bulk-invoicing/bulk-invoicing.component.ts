@@ -9,20 +9,24 @@ import {
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { PendingInvoice } from '../../models/billing.models';
+import { PendingInvoice, ExistingInvoice } from '../../models/billing.models';
+import { ExistingInvoicesComponent } from '../existing-invoices/existing-invoices.component';
 
 /**
- * Componente de facturación masiva
+ * Componente de facturación masiva con subtabs
  * Gestiona la selección y generación masiva de facturas para pacientes
+ * Incluye visualización de facturas existentes
  */
 @Component({
   selector: 'app-bulk-invoicing',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, ExistingInvoicesComponent],
   templateUrl: './bulk-invoicing.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class BulkInvoicingComponent {
+  // Subtab activo
+  activeSubTab = signal<'generate' | 'existing'>('generate');
   /**
    * Mes seleccionado para filtrar facturas pendientes
    */
@@ -153,6 +157,76 @@ export class BulkInvoicingComponent {
    */
   @Output() invoiceYearValidate = new EventEmitter<void>();
 
+  // Inputs para facturas existentes
+  /**
+   * Mes seleccionado para facturas existentes
+   */
+  private _existingMonth = signal<number>(0);
+  @Input({ required: true })
+  set existingMonth(value: number) {
+    this._existingMonth.set(value);
+  }
+  get existingMonth(): number {
+    return this._existingMonth();
+  }
+
+  /**
+   * Año seleccionado para facturas existentes
+   */
+  private _existingYear = signal<number>(0);
+  @Input({ required: true })
+  set existingYear(value: number) {
+    this._existingYear.set(value);
+  }
+  get existingYear(): number {
+    return this._existingYear();
+  }
+
+  /**
+   * Facturas existentes
+   */
+  private _existingInvoices = signal<ExistingInvoice[]>([]);
+  @Input({ required: true })
+  set existingInvoices(value: ExistingInvoice[]) {
+    this._existingInvoices.set(value);
+  }
+  get existingInvoices(): ExistingInvoice[] {
+    return this._existingInvoices();
+  }
+
+  /**
+   * Estado de carga de facturas existentes
+   */
+  private _isLoadingExisting = signal<boolean>(false);
+  @Input({ required: true })
+  set isLoadingExisting(value: boolean) {
+    this._isLoadingExisting.set(value);
+  }
+  get isLoadingExisting(): boolean {
+    return this._isLoadingExisting();
+  }
+
+  // Outputs para facturas existentes
+  /**
+   * Evento emitido cuando cambia el mes de facturas existentes
+   */
+  @Output() existingMonthChange = new EventEmitter<number>();
+
+  /**
+   * Evento emitido cuando cambia el año de facturas existentes
+   */
+  @Output() existingYearChange = new EventEmitter<number>();
+
+  /**
+   * Evento emitido cuando se solicita vista previa de una factura existente
+   */
+  @Output() previewExistingInvoice = new EventEmitter<ExistingInvoice>();
+
+  /**
+   * Evento emitido cuando se activa el subtab de facturas existentes
+   */
+  @Output() existingSubTabActivated = new EventEmitter<void>();
+
   // Filtros locales
   pendingPatientFilter = signal('');
   pendingDniFilter = signal('');
@@ -162,7 +236,7 @@ export class BulkInvoicingComponent {
    * Facturas filtradas según los criterios de búsqueda
    */
   filteredPendingInvoices = computed(() => {
-    const invoices = this.pendingInvoices;
+    const invoices = this._pendingInvoices();
     const patientFilter = this.pendingPatientFilter().toLowerCase();
     const dniFilter = this.pendingDniFilter().toLowerCase();
     const emailFilter = this.pendingEmailFilter().toLowerCase();
@@ -183,8 +257,8 @@ export class BulkInvoicingComponent {
    */
   allSelected = computed(
     () =>
-      this.pendingInvoices.length > 0 &&
-      this._selectedPatients().length === this.pendingInvoices.length
+      this._pendingInvoices().length > 0 &&
+      this._selectedPatients().length === this._pendingInvoices().length
   );
 
   /**
@@ -197,7 +271,7 @@ export class BulkInvoicingComponent {
    */
   totalSelectedAmount = computed(() => {
     const selected = this._selectedPatients();
-    return this.pendingInvoices
+    return this._pendingInvoices()
       .filter((inv) => selected.includes(inv.dni))
       .reduce((sum, inv) => sum + inv.total_gross, 0);
   });
@@ -260,7 +334,7 @@ export class BulkInvoicingComponent {
    * Obtiene el nombre del mes seleccionado
    */
   getPendingMonthName(): string {
-    return this.monthNames[this.pendingMonth - 1];
+    return this.monthNames[this._pendingMonth() - 1];
   }
 
   /**
@@ -289,5 +363,22 @@ export class BulkInvoicingComponent {
    */
   onInvoiceYearBlur(): void {
     this.invoiceYearValidate.emit();
+  }
+
+  /**
+   * Cambia el subtab activo
+   */
+  onSubTabChange(tab: 'generate' | 'existing'): void {
+    this.activeSubTab.set(tab);
+    if (tab === 'existing') {
+      this.existingSubTabActivated.emit();
+    }
+  }
+
+  /**
+   * Maneja la vista previa de una factura existente
+   */
+  onPreviewExistingInvoice(invoice: ExistingInvoice): void {
+    this.previewExistingInvoice.emit(invoice);
   }
 }

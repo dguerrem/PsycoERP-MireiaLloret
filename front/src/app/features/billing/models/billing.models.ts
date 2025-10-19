@@ -123,3 +123,21 @@ export interface ClinicInvoiceData {
  * El API devuelve directamente un array en el campo data
  */
 export type PendingClinicInvoicesResponse = ClinicInvoiceData[];
+
+/**
+ * Factura de clínica existente
+ */
+export interface ExistingClinicInvoice {
+  id: number;
+  invoice_number: string;
+  invoice_date: string;
+  clinic_id: number;
+  fiscal_name: string;
+  cif: string;
+  billing_address: string;
+  sessions_count: number;
+  total: number;
+  concept: string;
+  month: number;
+  year: number;
+}

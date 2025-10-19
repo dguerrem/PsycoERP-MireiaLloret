@@ -119,7 +119,8 @@ export class SessionComponent implements OnInit {
       if (status === 'completada') {
         stats.completada++;
         // Sumar ingresos brutos (precio base) - convert to number
-        stats.totalRevenueBrute += Number(session.SessionDetailData.price_brute) || 0;
+        stats.totalRevenueBrute +=
+          Number(session.SessionDetailData.price_brute) || 0;
         // Sumar ingresos netos (lo que recibe la profesional) - convert to number
         stats.totalRevenueNet += Number(session.SessionDetailData.price) || 0;
       }
@@ -242,7 +243,9 @@ export class SessionComponent implements OnInit {
       .join('&');
 
     this.http
-      .get<{ data: SessionKPIs }>(`${environment.api.baseUrl}/sessions/kpis?${queryString}`)
+      .get<{ data: SessionKPIs }>(
+        `${environment.api.baseUrl}/sessions/kpis?${queryString}`
+      )
       .subscribe({
         next: (response) => {
           this.kpis.set(response.data);
@@ -267,7 +270,10 @@ export class SessionComponent implements OnInit {
   onFilterChange(filterName: keyof SessionFilters, value: any): void {
     // Handle empty date values - reset to defaults
     if (filterName === 'dateFrom' && (!value || value === '')) {
-      this.filters.update((f) => ({ ...f, dateFrom: this.getThreeMonthsAgo() }));
+      this.filters.update((f) => ({
+        ...f,
+        dateFrom: this.getThreeMonthsAgo(),
+      }));
       this.dateFromError.set(null);
       return;
     }
@@ -354,7 +360,8 @@ export class SessionComponent implements OnInit {
       telefónica: 'bg-cyan-100 text-cyan-800 border-cyan-200',
     };
     return (
-      classes[mode as keyof typeof classes] || 'bg-gray-100 text-gray-800 border-gray-200'
+      classes[mode as keyof typeof classes] ||
+      'bg-gray-100 text-gray-800 border-gray-200'
     );
   }
 
@@ -367,7 +374,8 @@ export class SessionComponent implements OnInit {
       pendiente: 'bg-orange-100 text-orange-800 border-orange-200',
     };
     return (
-      classes[method as keyof typeof classes] || 'bg-gray-100 text-gray-800 border-gray-200'
+      classes[method as keyof typeof classes] ||
+      'bg-gray-100 text-gray-800 border-gray-200'
     );
   }
 
@@ -450,8 +458,12 @@ export class SessionComponent implements OnInit {
 
     // Validate: dateFrom cannot be greater than dateTo
     if (fromDate > toDate) {
-      this.dateFromError.set('La fecha desde no puede ser mayor a la fecha hasta');
-      this.dateToError.set('La fecha hasta no puede ser menor a la fecha desde');
+      this.dateFromError.set(
+        'La fecha desde no puede ser mayor a la fecha hasta'
+      );
+      this.dateToError.set(
+        'La fecha hasta no puede ser menor a la fecha desde'
+      );
       return;
     }
 
@@ -464,5 +476,35 @@ export class SessionComponent implements OnInit {
       this.dateFromError.set('El rango no puede superar 3 años');
       this.dateToError.set('El rango no puede superar 3 años');
     }
+  }
+
+  /**
+   * Calcula el porcentaje de un valor dado.
+   * @param price El valor total (ej: 50).
+   * @param percentage El porcentaje a aplicar (ej: 60).
+   * @returns El resultado del porcentaje (ej: 30).
+   */
+  calculatePercentage(price: number, percentage: number): number {
+    if (price === 0 || percentage === 0) {
+      return 0;
+    }
+
+    // 1. Convertir el porcentaje (60) a su forma decimal (0.60)
+    const decimalPercentage = percentage / 100; // 60 / 100 = 0.6
+
+    // 2. Multiplicar el precio por el valor decimal
+    const result = price * decimalPercentage; // 50 * 0.6 = 30
+
+    return result;
+  }
+
+  /**
+   * Calcula el porcentaje de un valor dado.
+   * @param price El valor total (ej: 50).
+   * @param percentage El porcentaje a aplicar (ej: 60).
+   * @returns El resultado del porcentaje (ej: 30).
+   */
+  calcularComision(price: number, percentage: number): number {
+    return price - this.calculatePercentage(price, percentage);
   }
 }

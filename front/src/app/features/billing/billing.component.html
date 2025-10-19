@@ -20,7 +20,7 @@
           <!-- Tab Headers -->
           <div class="border-b px-6 pt-6">
             <div data-slot="tabs-list"
-              class="bg-muted text-muted-foreground h-9 items-center justify-center rounded-lg p-[3px] grid w-full grid-cols-3">
+              class="bg-muted text-muted-foreground h-9 items-center justify-center rounded-lg p-[3px] grid w-full grid-cols-2">
               <button type="button" (click)="onTabChange('bulk')"
                 [attr.data-state]="activeTab() === 'bulk' ? 'active' : 'inactive'" data-slot="tabs-trigger"
                 class="data-[state=active]:bg-background dark:data-[state=active]:text-foreground text-foreground dark:text-muted-foreground h-[calc(100%-1px)] flex-1 justify-center rounded-md border border-transparent px-2 py-1 text-sm font-medium whitespace-nowrap transition-[color,box-shadow] data-[state=active]:shadow-sm flex items-center gap-2">
@@ -49,61 +49,46 @@
                 </svg>
                 Facturación Clínicas
               </button>
-              <button type="button" (click)="onTabChange('existing')"
-                [attr.data-state]="activeTab() === 'existing' ? 'active' : 'inactive'" data-slot="tabs-trigger"
-                class="data-[state=active]:bg-background dark:data-[state=active]:text-foreground text-foreground dark:text-muted-foreground h-[calc(100%-1px)] flex-1 justify-center rounded-md border border-transparent px-2 py-1 text-sm font-medium whitespace-nowrap transition-[color,box-shadow] data-[state=active]:shadow-sm flex items-center gap-2">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
-                  stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4">
-                  <path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"></path>
-                  <path d="M14 2v4a2 2 0 0 0 2 2h4"></path>
-                  <path d="M10 9H8"></path>
-                  <path d="M16 13H8"></path>
-                  <path d="M16 17H8"></path>
-                </svg>
-                Facturas Existentes
-              </button>
             </div>
           </div>
 
           <!-- Tab Content -->
           <div class="flex-1">
             @if (activeTab() === 'bulk') {
-            <!-- Componente de Facturación Masiva -->
+            <!-- Componente de Facturación Masiva con Subtabs -->
             <app-bulk-invoicing [pendingMonth]="pendingMonth()" [pendingYear]="pendingYear()" [monthNames]="monthNames"
               [years]="years()" [pendingInvoices]="pendingInvoices()" [isLoadingPending]="isLoadingPending()"
               [selectedPatients]="selectedPatients()" [invoicePrefix]="invoicePrefix()" [invoiceYear]="invoiceYear()"
-              [invoiceNextNumber]="invoiceNextNumber()" (monthChange)="onPendingMonthChange($event)"
+              [invoiceNextNumber]="invoiceNextNumber()" [existingMonth]="existingMonth()"
+              [existingYear]="existingYear()" [existingInvoices]="existingInvoices()"
+              [isLoadingExisting]="isLoadingExisting()" (monthChange)="onPendingMonthChange($event)"
               (yearChange)="onPendingYearChange($event)" (patientToggle)="togglePatientSelection($event)"
               (selectAllToggle)="selectAllPatients()" (generateInvoices)="generateBulkInvoices()"
               (previewInvoice)="previewPendingInvoice($event)" (prefixChange)="invoicePrefix.set($event)"
               (invoiceYearChange)="invoiceYear.set($event); onInvoiceYearChange()"
-              (invoiceYearValidate)="validateInvoiceYear()">
+              (invoiceYearValidate)="validateInvoiceYear()" (existingMonthChange)="onExistingMonthChange($event)"
+              (existingYearChange)="onExistingYearChange($event)"
+              (previewExistingInvoice)="previewExistingInvoice($event)"
+              (existingSubTabActivated)="loadExistingInvoices()">
             </app-bulk-invoicing>
-            } @else if (activeTab() === 'clinics') {
+            } @else {
             <!-- Componente de Facturación Clínicas -->
             <app-clinic-invoicing [clinicsMonth]="clinicsMonth()" [clinicsYear]="clinicsYear()"
               [monthNames]="monthNames" [years]="years()" [clinicInvoices]="clinicInvoices()"
               [isLoadingClinics]="isLoadingClinics()" [selectedClinicId]="selectedClinicId()"
               [invoicePrefix]="invoicePrefix()" [invoiceYear]="invoiceYear()" [invoiceNextNumber]="invoiceNextNumber()"
-              (monthChange)="onClinicsMonthChange($event)" (yearChange)="onClinicsYearChange($event)"
-              (clinicSelect)="selectClinic($event)" (generateInvoice)="generateClinicInvoice()"
-              (prefixChange)="invoicePrefix.set($event)"
+              [existingClinicMonth]="existingClinicMonth()" [existingClinicYear]="existingClinicYear()"
+              [existingClinicInvoices]="existingClinicInvoices()"
+              [isLoadingExistingClinics]="isLoadingExistingClinics()" (monthChange)="onClinicsMonthChange($event)"
+              (yearChange)="onClinicsYearChange($event)" (clinicSelect)="selectClinic($event)"
+              (generateInvoice)="generateClinicInvoice()" (prefixChange)="invoicePrefix.set($event)"
               (invoiceYearChange)="invoiceYear.set($event); onInvoiceYearChange()"
-              (invoiceYearValidate)="validateInvoiceYear()">
+              (invoiceYearValidate)="validateInvoiceYear()"
+              (existingClinicMonthChange)="onExistingClinicMonthChange($event)"
+              (existingClinicYearChange)="onExistingClinicYearChange($event)"
+              (previewExistingClinicInvoice)="previewExistingClinicInvoice($event)"
+              (existingClinicSubTabActivated)="loadExistingClinicInvoices()">
             </app-clinic-invoicing>
-            } @else {
-            <!-- Componente de Facturas Existentes -->
-            <app-existing-invoices
-              [existingMonth]="existingMonth()"
-              [existingYear]="existingYear()"
-              [monthNames]="monthNames"
-              [years]="years()"
-              [existingInvoices]="existingInvoices()"
-              [isLoadingExisting]="isLoadingExisting()"
-              (monthChange)="onExistingMonthChange($event)"
-              (yearChange)="onExistingYearChange($event)"
-              (previewInvoice)="previewExistingInvoice($event)">
-            </app-existing-invoices>
             }
           </div>
         </div>
@@ -114,47 +99,29 @@
 </div>
 
 <!-- Modal de generación masiva de facturas -->
-<app-bulk-invoice-modal
-  [isOpen]="isModalOpen()"
-  [invoicesToGenerate]="invoicesToGenerate()"
-  [errorMessage]="errorMessage()"
-  [totalSelectedAmount]="totalSelectedAmount()"
-  (submit)="confirmGenerateInvoices()"
-  (cancel)="closeModal()"
-  (closeError)="closeErrorMessage()"
-  (updateDate)="updateInvoiceDate($event.dni, $event.date)"
+<app-bulk-invoice-modal [isOpen]="isModalOpen()" [invoicesToGenerate]="invoicesToGenerate()"
+  [errorMessage]="errorMessage()" [totalSelectedAmount]="totalSelectedAmount()" (submit)="confirmGenerateInvoices()"
+  (cancel)="closeModal()" (closeError)="closeErrorMessage()" (updateDate)="updateInvoiceDate($event.dni, $event.date)"
   (preview)="previewInvoice($event)">
 </app-bulk-invoice-modal>
 
 <!-- Modal de generación de factura de clínica -->
-<app-clinic-invoice-modal
-  [isOpen]="isClinicModalOpen()"
-  [clinicInvoiceToGenerate]="clinicInvoiceToGenerate()"
-  [errorMessage]="errorMessage()"
-  [userData]="userData()"
-  (submit)="confirmGenerateClinicInvoice()"
-  (cancel)="closeClinicModal()"
-  (closeError)="closeErrorMessage()"
-  (updateDate)="updateClinicInvoiceDate($event)"
+<app-clinic-invoice-modal [isOpen]="isClinicModalOpen()" [clinicInvoiceToGenerate]="clinicInvoiceToGenerate()"
+  [errorMessage]="errorMessage()" [userData]="userData()" (submit)="confirmGenerateClinicInvoice()"
+  (cancel)="closeClinicModal()" (closeError)="closeErrorMessage()" (updateDate)="updateClinicInvoiceDate($event)"
   (preview)="previewClinicInvoice()">
 </app-clinic-invoice-modal>
 
 <!-- Modal de vista previa de factura -->
 <app-invoice-preview [isOpen]="isPreviewModalOpen()" [invoiceData]="previewInvoiceData()" [userData]="userData()"
-  (onClose)="closePreviewModal()" (onPrint)="printInvoice()" (onDownload)="downloadInvoicePDF()">
+  (onClose)="closePreviewModal()" (onPrint)="printInvoice()">
 </app-invoice-preview>
 
 <!-- Modal de vista previa de factura de clínica -->
-<app-clinic-invoice-preview
-  [isOpen]="isClinicPreviewModalOpen()"
-  [clinicInvoiceData]="clinicInvoiceToGenerate()"
-  [userData]="userData()"
-  (close)="closeClinicPreviewModal()">
+<app-clinic-invoice-preview [isOpen]="isClinicPreviewModalOpen()" [clinicInvoiceData]="clinicInvoiceToGenerate()"
+  [userData]="userData()" (close)="closeClinicPreviewModal()" (download)="downloadClinicInvoicePDF()">
 </app-clinic-invoice-preview>
 
-
-
 <!-- Spinner overlay para generación masiva de facturas -->
-<app-invoice-loading-spinner
-  [isLoading]="isGeneratingBulkInvoices()">
+<app-invoice-loading-spinner [isLoading]="isGeneratingBulkInvoices()">
 </app-invoice-loading-spinner>

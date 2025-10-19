@@ -9,11 +9,13 @@ import {
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { BillingService } from './services/billing.service';
+import { PdfGeneratorService } from './services/pdf-generator.service';
 import {
   InvoiceKPIs,
   PendingInvoice,
   ExistingInvoice,
   ClinicInvoiceData,
+  ExistingClinicInvoice,
 } from './models/billing.models';
 import { SectionHeaderComponent } from '../../shared/components/section-header/section-header.component';
 import { ReusableModalComponent } from '../../shared/components/reusable-modal/reusable-modal.component';
@@ -38,11 +40,16 @@ interface InvoiceToGenerate extends InvoicePreviewData {}
 interface ClinicInvoiceToGenerate {
   clinic_id: number;
   clinic_name: string;
+  fiscal_name: string;
+  cif: string;
+  billing_address: string;
   sessions_count: number;
   total_net: number;
   total_net_with_irpf: number;
   invoice_number: string;
   invoice_date: string;
+  concept: string;
+  total: number;
 }
 
 /**
@@ -75,9 +82,10 @@ export class BillingComponent implements OnInit {
   private billingService = inject(BillingService);
   private userService = inject(UserService);
   private toastService = inject(ToastService);
+  private pdfGeneratorService = inject(PdfGeneratorService);
 
   // Signals para estado del componente
-  activeTab = signal<'bulk' | 'clinics' | 'existing'>('bulk');
+  activeTab = signal<'bulk' | 'clinics'>('bulk');
 
   // Filtros para KPIs (Período de Análisis)
   kpiMonth = signal(new Date().getMonth() + 1);
@@ -95,10 +103,15 @@ export class BillingComponent implements OnInit {
   clinicsMonth = signal(new Date().getMonth() + 1);
   clinicsYear = signal(new Date().getFullYear());
 
+  // Filtros para Facturas Existentes de Clínicas
+  existingClinicMonth = signal(new Date().getMonth() + 1);
+  existingClinicYear = signal(new Date().getFullYear());
+
   kpis = signal<InvoiceKPIs | null>(null);
   pendingInvoices = signal<PendingInvoice[]>([]);
   existingInvoices = signal<ExistingInvoice[]>([]);
   clinicInvoices = signal<ClinicInvoiceData[]>([]);
+  existingClinicInvoices = signal<ExistingClinicInvoice[]>([]);
   selectedPatients = signal<string[]>([]);
   selectedClinicId = signal<number | null>(null);
 
@@ -129,6 +142,7 @@ export class BillingComponent implements OnInit {
   isLoadingPending = signal(false);
   isLoadingExisting = signal(false);
   isLoadingClinics = signal(false);
+  isLoadingExistingClinics = signal(false);
 
   // Error state
   errorMessage = signal<string | null>(null);
@@ -193,8 +207,10 @@ export class BillingComponent implements OnInit {
     const dniFilter = this.pendingDniFilter().toLowerCase();
     const emailFilter = this.pendingEmailFilter().toLowerCase();
 
-    return invoices.filter(invoice => {
-      const matchesPatient = invoice.patient_full_name.toLowerCase().includes(patientFilter);
+    return invoices.filter((invoice) => {
+      const matchesPatient = invoice.patient_full_name
+        .toLowerCase()
+        .includes(patientFilter);
       const matchesDni = invoice.dni.toLowerCase().includes(dniFilter);
       const matchesEmail = invoice.email.toLowerCase().includes(emailFilter);
 
@@ -205,18 +221,27 @@ export class BillingComponent implements OnInit {
   // Filtered existing invoices
   filteredExistingInvoices = computed(() => {
     const invoices = this.existingInvoices();
-    const invoiceNumberFilter = this.existingInvoiceNumberFilter().toLowerCase();
+    const invoiceNumberFilter =
+      this.existingInvoiceNumberFilter().toLowerCase();
     const dateFilter = this.existingDateFilter().toLowerCase();
     const patientFilter = this.existingPatientFilter().toLowerCase();
     const dniFilter = this.existingDniFilter().toLowerCase();
 
-    return invoices.filter(invoice => {
-      const matchesInvoiceNumber = invoice.invoice_number.toLowerCase().includes(invoiceNumberFilter);
-      const matchesDate = invoice.invoice_date.toLowerCase().includes(dateFilter);
-      const matchesPatient = invoice.patient_full_name.toLowerCase().includes(patientFilter);
+    return invoices.filter((invoice) => {
+      const matchesInvoiceNumber = invoice.invoice_number
+        .toLowerCase()
+        .includes(invoiceNumberFilter);
+      const matchesDate = invoice.invoice_date
+        .toLowerCase()
+        .includes(dateFilter);
+      const matchesPatient = invoice.patient_full_name
+        .toLowerCase()
+        .includes(patientFilter);
       const matchesDni = invoice.dni.toLowerCase().includes(dniFilter);
 
-      return matchesInvoiceNumber && matchesDate && matchesPatient && matchesDni;
+      return (
+        matchesInvoiceNumber && matchesDate && matchesPatient && matchesDni
+      );
     });
   });
 
@@ -323,9 +348,10 @@ export class BillingComponent implements OnInit {
    */
   onKpiMonthChange(month: number | Event) {
     // Soportar tanto Event (desde template directo) como number (desde componente hijo)
-    const value = typeof month === 'number'
-      ? month
-      : parseInt((month.target as HTMLSelectElement).value);
+    const value =
+      typeof month === 'number'
+        ? month
+        : parseInt((month.target as HTMLSelectElement).value);
     this.kpiMonth.set(value);
     this.loadKPIs();
   }
@@ -335,9 +361,10 @@ export class BillingComponent implements OnInit {
    */
   onKpiYearChange(year: number | Event) {
     // Soportar tanto Event (desde template directo) como number (desde componente hijo)
-    const value = typeof year === 'number'
-      ? year
-      : parseInt((year.target as HTMLSelectElement).value);
+    const value =
+      typeof year === 'number'
+        ? year
+        : parseInt((year.target as HTMLSelectElement).value);
     this.kpiYear.set(value);
     this.loadKPIs();
   }
@@ -347,9 +374,10 @@ export class BillingComponent implements OnInit {
    */
   onPendingMonthChange(month: number | Event) {
     // Soportar tanto Event (desde template directo) como number (desde componente hijo)
-    const value = typeof month === 'number'
-      ? month
-      : parseInt((month.target as HTMLSelectElement).value);
+    const value =
+      typeof month === 'number'
+        ? month
+        : parseInt((month.target as HTMLSelectElement).value);
     this.pendingMonth.set(value);
     this.loadPendingInvoices();
   }
@@ -359,9 +387,10 @@ export class BillingComponent implements OnInit {
    */
   onPendingYearChange(year: number | Event) {
     // Soportar tanto Event (desde template directo) como number (desde componente hijo)
-    const value = typeof year === 'number'
-      ? year
-      : parseInt((year.target as HTMLSelectElement).value);
+    const value =
+      typeof year === 'number'
+        ? year
+        : parseInt((year.target as HTMLSelectElement).value);
     this.pendingYear.set(value);
     this.loadPendingInvoices();
   }
@@ -371,9 +400,10 @@ export class BillingComponent implements OnInit {
    */
   onExistingMonthChange(month: number | Event) {
     // Soportar tanto Event (desde template directo) como number (desde componente hijo)
-    const value = typeof month === 'number'
-      ? month
-      : parseInt((month.target as HTMLSelectElement).value);
+    const value =
+      typeof month === 'number'
+        ? month
+        : parseInt((month.target as HTMLSelectElement).value);
     this.existingMonth.set(value);
     this.loadExistingInvoices();
   }
@@ -383,9 +413,10 @@ export class BillingComponent implements OnInit {
    */
   onExistingYearChange(year: number | Event) {
     // Soportar tanto Event (desde template directo) como number (desde componente hijo)
-    const value = typeof year === 'number'
-      ? year
-      : parseInt((year.target as HTMLSelectElement).value);
+    const value =
+      typeof year === 'number'
+        ? year
+        : parseInt((year.target as HTMLSelectElement).value);
     this.existingYear.set(value);
     this.loadExistingInvoices();
   }
@@ -395,9 +426,10 @@ export class BillingComponent implements OnInit {
    */
   onClinicsMonthChange(month: number | Event) {
     // Soportar tanto Event (desde template directo) como number (desde componente hijo)
-    const value = typeof month === 'number'
-      ? month
-      : parseInt((month.target as HTMLSelectElement).value);
+    const value =
+      typeof month === 'number'
+        ? month
+        : parseInt((month.target as HTMLSelectElement).value);
     this.clinicsMonth.set(value);
     this.loadClinicInvoices();
   }
@@ -407,9 +439,10 @@ export class BillingComponent implements OnInit {
    */
   onClinicsYearChange(year: number | Event) {
     // Soportar tanto Event (desde template directo) como number (desde componente hijo)
-    const value = typeof year === 'number'
-      ? year
-      : parseInt((year.target as HTMLSelectElement).value);
+    const value =
+      typeof year === 'number'
+        ? year
+        : parseInt((year.target as HTMLSelectElement).value);
     this.clinicsYear.set(value);
     this.loadClinicInvoices();
   }
@@ -468,11 +501,8 @@ export class BillingComponent implements OnInit {
   /**
    * Cambia entre tabs
    */
-  onTabChange(tab: 'bulk' | 'clinics' | 'existing') {
+  onTabChange(tab: 'bulk' | 'clinics') {
     this.activeTab.set(tab);
-    if (tab === 'existing' && this.existingInvoices().length === 0) {
-      this.loadExistingInvoices();
-    }
     if (tab === 'clinics' && this.clinicInvoices().length === 0) {
       this.loadClinicInvoices();
     }
@@ -592,7 +622,7 @@ export class BillingComponent implements OnInit {
         invoice_number: invoice.invoice_number,
         invoice_date: invoice.invoice_date,
         patient_id: originalData.patient_id,
-        session_ids: originalData.sessions.map(s => s.session_id),
+        session_ids: originalData.sessions.map((s) => s.session_id),
         concept: `Sesiones ${
           originalData.patient_full_name
         } - ${monthName} ${this.pendingYear()}`,
@@ -602,13 +632,15 @@ export class BillingComponent implements OnInit {
     // Llamar al servicio para crear las facturas
     this.billingService.createBulkInvoices(invoicesPayload).subscribe({
       next: (response: any) => {
-        console.log('Respuesta completa:', response);
-
         // La respuesta puede venir en response.data o directamente en response
         const data = response?.data || response;
 
         // Verificar si la operación fue exitosa
-        if (response?.success === false && data?.failed && data.failed.length > 0) {
+        if (
+          response?.success === false &&
+          data?.failed &&
+          data.failed.length > 0
+        ) {
           // Buscar error de número de factura duplicado
           const duplicateError = data.failed.find(
             (f: any) =>
@@ -628,9 +660,14 @@ export class BillingComponent implements OnInit {
           this.isGeneratingBulkInvoices.set(false);
         } else {
           // Todas las facturas se crearon exitosamente
-          const successCount = data?.successful?.length || invoicesToCreate.length;
+          const successCount =
+            data?.successful?.length || invoicesToCreate.length;
           this.toastService.showSuccess(
-            `Se ${successCount === 1 ? 'generó' : 'generaron'} ${successCount} ${successCount === 1 ? 'factura' : 'facturas'} exitosamente`
+            `Se ${
+              successCount === 1 ? 'generó' : 'generaron'
+            } ${successCount} ${
+              successCount === 1 ? 'factura' : 'facturas'
+            } exitosamente`
           );
           this.closeModal();
           this.errorMessage.set(null);
@@ -699,9 +736,11 @@ export class BillingComponent implements OnInit {
       email: invoice.email,
       pending_sessions_count: invoice.pending_sessions_count,
       total_gross: invoice.total_gross,
-      invoice_number: `${this.invoicePrefix()}-${this.invoiceYear()}-${this.padNumber(this.invoiceNextNumber())}`,
+      invoice_number: `${this.invoicePrefix()}-${this.invoiceYear()}-${this.padNumber(
+        this.invoiceNextNumber()
+      )}`,
       invoice_date: new Date().toISOString().split('T')[0],
-      sessions: invoice.sessions
+      sessions: invoice.sessions,
     };
 
     this.previewInvoiceData.set(previewData);
@@ -721,11 +760,87 @@ export class BillingComponent implements OnInit {
       total_gross: invoice.total,
       invoice_number: invoice.invoice_number,
       invoice_date: invoice.invoice_date,
-      sessions: invoice.sessions
+      sessions: invoice.sessions,
     };
 
     this.previewInvoiceData.set(previewData);
     this.isPreviewModalOpen.set(true);
+  }
+
+  /**
+   * Carga las facturas existentes de clínicas para el mes y año seleccionados
+   */
+  loadExistingClinicInvoices() {
+    this.isLoadingExistingClinics.set(true);
+    this.billingService
+      .getExistingClinicInvoices(
+        this.existingClinicMonth(),
+        this.existingClinicYear()
+      )
+      .subscribe({
+        next: (invoices) => {
+          this.existingClinicInvoices.set(invoices);
+          this.isLoadingExistingClinics.set(false);
+        },
+        error: (error) => {
+          console.error(
+            'Error al cargar facturas existentes de clínicas:',
+            error
+          );
+          this.toastService.showError(
+            'Error al cargar las facturas existentes de clínicas'
+          );
+          this.existingClinicInvoices.set([]);
+          this.isLoadingExistingClinics.set(false);
+        },
+      });
+  }
+
+  /**
+   * Maneja el cambio de mes para facturas existentes de clínicas
+   */
+  onExistingClinicMonthChange(month: number | Event) {
+    const monthValue =
+      typeof month === 'number'
+        ? month
+        : parseInt((month.target as HTMLSelectElement).value);
+    this.existingClinicMonth.set(monthValue);
+    this.loadExistingClinicInvoices();
+  }
+
+  /**
+   * Maneja el cambio de año para facturas existentes de clínicas
+   */
+  onExistingClinicYearChange(year: number | Event) {
+    const yearValue =
+      typeof year === 'number'
+        ? year
+        : parseInt((year.target as HTMLSelectElement).value);
+    this.existingClinicYear.set(yearValue);
+    this.loadExistingClinicInvoices();
+  }
+
+  /**
+   * Vista previa de una factura existente de clínica
+   */
+  previewExistingClinicInvoice(invoice: ExistingClinicInvoice) {
+    const clinicInvoiceData: ClinicInvoiceToGenerate = {
+      clinic_id: invoice.clinic_id,
+      clinic_name: invoice.fiscal_name,
+      fiscal_name: invoice.fiscal_name,
+      cif: invoice.cif,
+      billing_address: invoice.billing_address,
+      sessions_count: invoice.sessions_count,
+      total_net: invoice.total,
+      total_net_with_irpf: invoice.total, // Mismo valor ya que es el total final
+      invoice_number: invoice.invoice_number,
+      invoice_date: invoice.invoice_date,
+      concept: invoice.concept,
+      total: invoice.total,
+    };
+
+    this.clinicInvoiceToGenerate.set(clinicInvoiceData);
+    this.isClinicPreviewModalOpen.set(true);
   }
 
   /**
@@ -744,13 +859,22 @@ export class BillingComponent implements OnInit {
   }
 
   /**
-   * Descarga el PDF de la factura
+   * Descarga el PDF de la factura de clínica
    */
-  downloadInvoicePDF() {
-    const invoice = this.previewInvoiceData();
+  async downloadClinicInvoicePDF() {
+    const invoice = this.clinicInvoiceToGenerate();
     if (invoice) {
-      // TODO: Implementar descarga real del PDF
-      console.log('Descargando PDF:', invoice.invoice_number);
+      try {
+        const fileName = `${invoice.invoice_number.replace(/\//g, '-')}`;
+        await this.pdfGeneratorService.generatePdfById(
+          'clinic-invoice-content',
+          fileName
+        );
+        this.toastService.showSuccess('PDF descargado correctamente');
+      } catch (error) {
+        console.error('Error al descargar PDF de clínica:', error);
+        this.toastService.showError('Error al generar el PDF');
+      }
     }
   }
 
@@ -809,33 +933,47 @@ export class BillingComponent implements OnInit {
     }
 
     // Obtener los datos de la clínica seleccionada
-    const selectedClinic = this.clinicInvoices().find(c => c.clinic_id === clinicId);
+    const selectedClinic = this.clinicInvoices().find(
+      (c) => c.clinic_id === clinicId
+    );
     if (!selectedClinic) {
       return;
     }
 
     const user = this.userData();
     if (!user) {
-      this.toastService.showError('No se pudo cargar la información del usuario');
+      this.toastService.showError(
+        'No se pudo cargar la información del usuario'
+      );
       return;
     }
 
-    const invoiceNumber = `${this.invoicePrefix()}-${this.invoiceYear()}-${this.padNumber(this.invoiceNextNumber())}`;
+    const invoiceNumber = `${this.invoicePrefix()}-${this.invoiceYear()}-${this.padNumber(
+      this.invoiceNextNumber()
+    )}`;
     const invoiceDate = new Date().toISOString().split('T')[0];
 
     // Calcular total con IRPF
     const irpfPercentage = Number(user.irpf || 0);
-    const totalNetWithIrpf = Number(selectedClinic.total_net) * (1 - irpfPercentage / 100);
+    const totalNetWithIrpf =
+      Number(selectedClinic.total_net) * (1 - irpfPercentage / 100);
 
     // Preparar datos para el modal
     const clinicInvoice: ClinicInvoiceToGenerate = {
       clinic_id: selectedClinic.clinic_id,
       clinic_name: selectedClinic.clinic_name,
+      fiscal_name: selectedClinic.clinic_name, // Usar el nombre de la clínica como fiscal_name
+      cif: '', // No disponible en datos pendientes
+      billing_address: '', // No disponible en datos pendientes
       sessions_count: selectedClinic.sessions_count,
       total_net: selectedClinic.total_net,
       total_net_with_irpf: totalNetWithIrpf,
       invoice_number: invoiceNumber,
       invoice_date: invoiceDate,
+      concept: `Servicios profesionales - ${
+        this.monthNames[new Date().getMonth()]
+      } ${new Date().getFullYear()}`,
+      total: selectedClinic.total_net,
     };
 
     this.clinicInvoiceToGenerate.set(clinicInvoice);
@@ -882,6 +1020,7 @@ export class BillingComponent implements OnInit {
    * Confirma y genera la factura de clínica desde el modal
    */
   confirmGenerateClinicInvoice() {
+    debugger;
     const invoice = this.clinicInvoiceToGenerate();
     if (!invoice) {
       return;
@@ -889,8 +1028,7 @@ export class BillingComponent implements OnInit {
 
     this.isGeneratingBulkInvoices.set(true);
 
-    const monthName = this.monthNames[this.clinicsMonth() - 1];
-    const concept = `Servicios profesionales - ${monthName} ${this.clinicsYear()}`;
+    const concept = `(${invoice.sessions_count}) Sesión psicoterapia`;
 
     this.billingService
       .emitClinicInvoice(
@@ -909,7 +1047,9 @@ export class BillingComponent implements OnInit {
               response.message || 'Error al generar la factura de la clínica'
             );
           } else {
-            this.toastService.showSuccess('Factura de clínica generada exitosamente');
+            this.toastService.showSuccess(
+              'Factura de clínica generada exitosamente'
+            );
             this.closeClinicModal();
             // Recargar datos
             this.loadKPIs();
@@ -926,5 +1066,4 @@ export class BillingComponent implements OnInit {
         },
       });
   }
-
 }

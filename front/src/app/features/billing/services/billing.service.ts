@@ -1,6 +1,6 @@
 import { Injectable, signal, inject } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { Observable, catchError, tap, of } from 'rxjs';
+import { Observable, catchError, tap, of, map } from 'rxjs';
 import {
   InvoiceKPIs,
   PendingInvoicesResponse,
@@ -8,7 +8,8 @@ import {
   ApiResponse,
   CreateBulkInvoicesRequest,
   CreateInvoiceResponse,
-  PendingClinicInvoicesResponse
+  PendingClinicInvoicesResponse,
+  ExistingClinicInvoice
 } from '../models/billing.models';
 import { environment } from '../../../../environments/environment';
 
@@ -227,6 +228,34 @@ export class BillingService {
         return of({ success: false, message: error.message || 'Error al emitir la factura' });
       })
     );
+  }
+
+  /**
+   * Obtiene las facturas existentes de clínicas filtradas por mes y año
+   */
+  getExistingClinicInvoices(month: number, year: number): Observable<ExistingClinicInvoice[]> {
+    this.error.set(null);
+
+    const params = new HttpParams()
+      .set('month', month.toString())
+      .set('year', year.toString());
+
+    return this.http.get<ApiResponse<ExistingClinicInvoice[]>>(`${this.baseUrl}/invoices/of-clinics`, { params })
+      .pipe(
+        map(response => {
+          // Si la respuesta tiene la estructura { data: [...] }, extraemos el array
+          // Si no, asumimos que ya es un array directo
+          if (response && 'data' in response) {
+            return Array.isArray(response.data) ? response.data : [];
+          }
+          return Array.isArray(response) ? response : [];
+        }),
+        catchError(error => {
+          console.error('Error al obtener facturas existentes de clínicas:', error);
+          this.error.set('Error al cargar las facturas existentes de clínicas');
+          return of([]);
+        })
+      );
   }
 
   // Helpers para respuestas vacías

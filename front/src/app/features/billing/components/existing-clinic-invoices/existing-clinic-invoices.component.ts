@@ -8,42 +8,42 @@ import {
   computed,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ExistingInvoice } from '../../models/billing.models';
+import { ExistingClinicInvoice } from '../../models/billing.models';
 
 /**
- * Componente de facturas existentes
- * Muestra el listado de facturas ya generadas con filtros
+ * Componente de facturas existentes de clínicas
+ * Muestra el listado de facturas de clínicas ya generadas con filtros
  */
 @Component({
-  selector: 'app-existing-invoices',
+  selector: 'app-existing-clinic-invoices',
   standalone: true,
   imports: [CommonModule],
-  templateUrl: './existing-invoices.component.html',
+  templateUrl: './existing-clinic-invoices.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class ExistingInvoicesComponent {
+export class ExistingClinicInvoicesComponent {
   /**
    * Mes seleccionado para filtrar facturas existentes
    */
-  private _existingMonth = signal<number>(0);
+  private _existingClinicMonth = signal<number>(0);
   @Input({ required: true })
-  set existingMonth(value: number) {
-    this._existingMonth.set(value);
+  set existingClinicMonth(value: number) {
+    this._existingClinicMonth.set(value);
   }
-  get existingMonth(): number {
-    return this._existingMonth();
+  get existingClinicMonth(): number {
+    return this._existingClinicMonth();
   }
 
   /**
    * Año seleccionado para filtrar facturas existentes
    */
-  private _existingYear = signal<number>(0);
+  private _existingClinicYear = signal<number>(0);
   @Input({ required: true })
-  set existingYear(value: number) {
-    this._existingYear.set(value);
+  set existingClinicYear(value: number) {
+    this._existingClinicYear.set(value);
   }
-  get existingYear(): number {
-    return this._existingYear();
+  get existingClinicYear(): number {
+    return this._existingClinicYear();
   }
 
   /**
@@ -57,27 +57,27 @@ export class ExistingInvoicesComponent {
   @Input({ required: true }) years!: number[];
 
   /**
-   * Facturas existentes
+   * Facturas existentes de clínicas
    */
-  private _existingInvoices = signal<ExistingInvoice[]>([]);
+  private _existingClinicInvoices = signal<ExistingClinicInvoice[]>([]);
   @Input({ required: true })
-  set existingInvoices(value: ExistingInvoice[]) {
-    this._existingInvoices.set(value);
+  set existingClinicInvoices(value: ExistingClinicInvoice[]) {
+    this._existingClinicInvoices.set(value);
   }
-  get existingInvoices(): ExistingInvoice[] {
-    return this._existingInvoices();
+  get existingClinicInvoices(): ExistingClinicInvoice[] {
+    return this._existingClinicInvoices();
   }
 
   /**
    * Estado de carga de facturas existentes
    */
-  private _isLoadingExisting = signal<boolean>(false);
+  private _isLoadingExistingClinics = signal<boolean>(false);
   @Input({ required: true })
-  set isLoadingExisting(value: boolean) {
-    this._isLoadingExisting.set(value);
+  set isLoadingExistingClinics(value: boolean) {
+    this._isLoadingExistingClinics.set(value);
   }
-  get isLoadingExisting(): boolean {
-    return this._isLoadingExisting();
+  get isLoadingExistingClinics(): boolean {
+    return this._isLoadingExistingClinics();
   }
 
   /**
@@ -93,23 +93,21 @@ export class ExistingInvoicesComponent {
   /**
    * Evento emitido cuando se solicita vista previa de una factura
    */
-  @Output() previewInvoice = new EventEmitter<ExistingInvoice>();
+  @Output() previewInvoice = new EventEmitter<ExistingClinicInvoice>();
 
   // Filtros locales
-  existingInvoiceNumberFilter = signal('');
-  existingDateFilter = signal('');
-  existingPatientFilter = signal('');
-  existingDniFilter = signal('');
+  invoiceNumberFilter = signal('');
+  dateFilter = signal('');
+  fiscalNameFilter = signal('');
 
   /**
    * Facturas filtradas según los criterios de búsqueda
    */
-  filteredExistingInvoices = computed(() => {
-    const invoices = this._existingInvoices();
-    const invoiceNumberFilter = this.existingInvoiceNumberFilter().toLowerCase();
-    const dateFilter = this.existingDateFilter().toLowerCase();
-    const patientFilter = this.existingPatientFilter().toLowerCase();
-    const dniFilter = this.existingDniFilter().toLowerCase();
+  filteredInvoices = computed(() => {
+    const invoices = this._existingClinicInvoices();
+    const invoiceNumberFilter = this.invoiceNumberFilter().toLowerCase();
+    const dateFilter = this.dateFilter().toLowerCase();
+    const fiscalNameFilter = this.fiscalNameFilter().toLowerCase();
 
     return invoices.filter((invoice) => {
       const matchesInvoiceNumber = invoice.invoice_number
@@ -118,14 +116,11 @@ export class ExistingInvoicesComponent {
       const matchesDate = invoice.invoice_date
         .toLowerCase()
         .includes(dateFilter);
-      const matchesPatient = invoice.patient_full_name
+      const matchesFiscalName = invoice.fiscal_name
         .toLowerCase()
-        .includes(patientFilter);
-      const matchesDni = invoice.dni.toLowerCase().includes(dniFilter);
+        .includes(fiscalNameFilter);
 
-      return (
-        matchesInvoiceNumber && matchesDate && matchesPatient && matchesDni
-      );
+      return matchesInvoiceNumber && matchesDate && matchesFiscalName;
     });
   });
 
@@ -148,7 +143,7 @@ export class ExistingInvoicesComponent {
   /**
    * Vista previa de una factura
    */
-  onPreviewInvoice(invoice: ExistingInvoice): void {
+  onPreviewInvoice(invoice: ExistingClinicInvoice): void {
     this.previewInvoice.emit(invoice);
   }
 
@@ -165,7 +160,7 @@ export class ExistingInvoicesComponent {
   /**
    * Obtiene el nombre del mes seleccionado
    */
-  getExistingMonthName(): string {
-    return this.monthNames[this._existingMonth() - 1];
+  getMonthName(): string {
+    return this.monthNames[this._existingClinicMonth() - 1];
   }
 }

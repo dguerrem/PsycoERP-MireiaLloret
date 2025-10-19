@@ -153,8 +153,7 @@
           @if (getPageNumbers().length > 0) {
           @for (page of getPageNumbers(); track page) {
           @if (page === currentPage()) {
-          <button (click)="goToPage(page)" data-slot="button"
-            style="background-color: #d29f67"
+          <button (click)="goToPage(page)" data-slot="button" style="background-color: #d29f67"
             class="inline-flex items-center justify-center whitespace-nowrap text-sm font-medium transition-all text-white shadow-xs hover:opacity-90 rounded-md w-8 h-8 p-0">
             {{ page }}
           </button>
@@ -245,26 +244,30 @@
                 </td>
                 <!-- Precio Base -->
                 <td class="p-2 font-medium text-muted-foreground">
-                  @if (session.SessionDetailData.price_brute) {
-                  {{ session.SessionDetailData.price_brute }}€
+                  @if (session.SessionDetailData.price) {
+                  {{ session.SessionDetailData.price }}€
                   } @else {
                   -
                   }
                 </td>
                 <!-- Comisión Clínica -->
                 <td class="p-2">
-                  @if (session.SessionDetailData.price_brute &&
+                  @if (session.SessionDetailData.price &&
                   session.SessionDetailData.ClinicDetailData.clinic_percentage) {
                   <div class="text-sm text-orange-600">
-                    <span class="font-medium">{{ (session.SessionDetailData.price_brute -
-                      session.SessionDetailData.price).toFixed(2) }}€</span>
+                    <span class="font-medium">{{ calcularComision(session.SessionDetailData.price,
+                      session.SessionDetailData.ClinicDetailData.clinic_percentage).toFixed(2) }}€</span>
                   </div>
                   } @else {
                   <span class="text-muted-foreground">-</span>
                   }
                 </td>
+                @if (session.SessionDetailData.price &&
+                session.SessionDetailData.ClinicDetailData.clinic_percentage) {
                 <!-- Tu Neto -->
-                <td class="p-2 font-semibold text-green-600">{{ session.SessionDetailData.price }}€ <span
+                <td class="p-2 font-semibold text-green-600">
+                  {{ calculatePercentage(session.SessionDetailData.price,
+                  session.SessionDetailData.ClinicDetailData.clinic_percentage).toFixed(2) }}€ <span
                     class="text-muted-foreground ml-1">({{
                     session.SessionDetailData.ClinicDetailData.clinic_percentage }}%)</span></td>
                 <td class="p-2">
@@ -273,6 +276,9 @@
                     {{ formatPaymentMethod(session.SessionDetailData.payment_method) }}
                   </span>
                 </td>
+                } @else {
+                <span class="text-muted-foreground">-</span>
+                }
               </tr>
               }
               }
