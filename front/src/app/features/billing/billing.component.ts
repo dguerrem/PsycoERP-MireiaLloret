@@ -1020,7 +1020,6 @@ export class BillingComponent implements OnInit {
    * Confirma y genera la factura de clínica desde el modal
    */
   confirmGenerateClinicInvoice() {
-    debugger;
     const invoice = this.clinicInvoiceToGenerate();
     if (!invoice) {
       return;
@@ -1044,7 +1043,7 @@ export class BillingComponent implements OnInit {
         next: (response: any) => {
           if (response?.success === false) {
             this.errorMessage.set(
-              response.message || 'Error al generar la factura de la clínica'
+              response.error || 'Error al generar la factura de la clínica'
             );
           } else {
             this.toastService.showSuccess(
