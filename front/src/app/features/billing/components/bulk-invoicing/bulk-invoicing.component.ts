@@ -13,7 +13,7 @@ import { PendingInvoice, ExistingInvoice } from '../../models/billing.models';
 import { ExistingInvoicesComponent } from '../existing-invoices/existing-invoices.component';
 
 /**
- * Componente de facturación masiva con subtabs
+ * Componente de facturación con subtabs
  * Gestiona la selección y generación masiva de facturas para pacientes
  * Incluye visualización de facturas existentes
  */

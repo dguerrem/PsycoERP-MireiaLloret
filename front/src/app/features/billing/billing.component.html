@@ -55,7 +55,7 @@
           <!-- Tab Content -->
           <div class="flex-1">
             @if (activeTab() === 'bulk') {
-            <!-- Componente de Facturación Masiva con Subtabs -->
+            <!-- Componente de Facturación con Subtabs -->
             <app-bulk-invoicing [pendingMonth]="pendingMonth()" [pendingYear]="pendingYear()" [monthNames]="monthNames"
               [years]="years()" [pendingInvoices]="pendingInvoices()" [isLoadingPending]="isLoadingPending()"
               [selectedPatients]="selectedPatients()" [invoicePrefix]="invoicePrefix()" [invoiceYear]="invoiceYear()"
