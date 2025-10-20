@@ -5,6 +5,8 @@ const {
   deleteClinic,
   hasActivePatients,
   hasSessions,
+  clinicHasInvoices,
+  getClinicBillableStatus,
 } = require("../../models/clinics/clinics_model");
 
 const obtenerClinicas = async (req, res) => {
@@ -136,6 +138,28 @@ const actualizarClinica = async (req, res) => {
       });
     }
 
+    // Verificar si se está intentando cambiar is_billable de true a false y hay facturas
+    if (data.is_billable === 0) { // is_billable viene como false
+      // Obtener el estado actual de is_billable
+      const currentIsBillable = await getClinicBillableStatus(req.db, id);
+      if (currentIsBillable === null) {
+        return res.status(404).json({
+          success: false,
+          error: "Clínica no encontrada",
+        });
+      }
+      if (currentIsBillable === true) {
+        // Actualmente es true, se quiere cambiar a false, verificar facturas
+        const tieneFacturas = await clinicHasInvoices(req.db, id);
+        if (tieneFacturas) {
+          return res.status(400).json({
+            success: false,
+            error: "No se puede cambiar el campo 'Es facturable' debido a que la clínica tiene facturas asociadas",
+          });
+        }
+      }
+    }
+
     await updateClinic(req.db, id, data);
 
     res.json({
@@ -182,7 +206,15 @@ const eliminarClinica = async (req, res) => {
     if (tieneSesiones) {
       return res.status(400).json({
         success: false,
-        error: "No se puede eliminar la cl\u00ednica: existen sesiones asociadas",
+        error: "No se puede eliminar la clínica: existen sesiones asociadas",
+      });
+    }
+
+    const tieneFacturas = await clinicHasInvoices(req.db, id);
+    if (tieneFacturas) {
+      return res.status(400).json({
+        success: false,
+        error: "No se puede eliminar la clínica: existen facturas asociadas",
       });
     }
 

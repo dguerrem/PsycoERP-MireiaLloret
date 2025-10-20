@@ -170,6 +170,31 @@ const hasSessions = async (db, clinicId) => {
   return rows[0].total > 0;
 };
 
+// Comprueba si una clínica tiene facturas activas asociadas
+const clinicHasInvoices = async (db, clinicId) => {
+  const query = `
+    SELECT COUNT(*) as total
+    FROM invoices
+    WHERE clinic_id = ? AND is_active = 1
+  `;
+  const [rows] = await db.execute(query, [clinicId]);
+  return rows[0].total > 0;
+};
+
+// Obtiene el estado actual de is_billable de una clínica
+const getClinicBillableStatus = async (db, clinicId) => {
+  const query = `
+    SELECT is_billable
+    FROM clinics
+    WHERE id = ? AND is_active = true
+  `;
+  const [rows] = await db.execute(query, [clinicId]);
+  if (rows.length === 0) {
+    return null; // Clínica no encontrada
+  }
+  return rows[0].is_billable === 1; // Retorna boolean
+};
+
 
 const createClinic = async (db, data) => {
   const { name, clinic_color, address, price, percentage, is_billable, billing_address, cif, fiscal_name } = data;
@@ -247,5 +272,7 @@ module.exports = {
   updateClinic,
   deleteClinic,
   hasActivePatients,
-  hasSessions
+  hasSessions,
+  clinicHasInvoices,
+  getClinicBillableStatus
 };

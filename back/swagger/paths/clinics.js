@@ -148,11 +148,34 @@ const clinicsPaths = {
           },
         },
         400: {
-          description: "Parámetros de entrada inválidos",
+          description: "Parámetros de entrada inválidos o restricciones de negocio",
           content: {
             "application/json": {
               schema: {
                 $ref: "#/components/schemas/ErrorResponse",
+              },
+              examples: {
+                invalid_id: {
+                  summary: "ID inválido",
+                  value: {
+                    success: false,
+                    error: "ID de clínica inválido",
+                  },
+                },
+                no_data: {
+                  summary: "Sin datos para actualizar",
+                  value: {
+                    success: false,
+                    error: "No se proporcionaron datos para actualizar",
+                  },
+                },
+                billable_with_invoices: {
+                  summary: "No se puede cambiar is_billable",
+                  value: {
+                    success: false,
+                    error: "No se puede cambiar is_billable a false: la clínica tiene facturas asociadas",
+                  },
+                },
               },
             },
           },
@@ -216,11 +239,41 @@ const clinicsPaths = {
           },
         },
         400: {
-          description: "ID de clínica inválido o no proporcionado",
+          description: "ID de clínica inválido, no proporcionado o restricciones de negocio",
           content: {
             "application/json": {
               schema: {
                 $ref: "#/components/schemas/ErrorResponse",
+              },
+              examples: {
+                invalid_id: {
+                  summary: "ID inválido",
+                  value: {
+                    success: false,
+                    error: "ID de clínica inválido",
+                  },
+                },
+                has_patients: {
+                  summary: "Tiene pacientes activos",
+                  value: {
+                    success: false,
+                    error: "No se puede eliminar la clínica: existen pacientes activos asociados",
+                  },
+                },
+                has_sessions: {
+                  summary: "Tiene sesiones",
+                  value: {
+                    success: false,
+                    error: "No se puede eliminar la clínica: existen sesiones asociadas",
+                  },
+                },
+                has_invoices: {
+                  summary: "Tiene facturas",
+                  value: {
+                    success: false,
+                    error: "No se puede eliminar la clínica: existen facturas asociadas",
+                  },
+                },
               },
             },
           },
