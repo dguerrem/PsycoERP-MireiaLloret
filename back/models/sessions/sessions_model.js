@@ -103,18 +103,17 @@ const getSessions = async (db, filters = {}) => {
   // Transformar datos a estructura organizada
   const transformedData = await Promise.all(
     rows.map(async (row) => {
-      // Calcular el precio bruto (lo que cobra la clínica al paciente)
-      // Si price es el neto del psicólogo y clinic_percentage es el % que recibe el psicólogo
-      // entonces: bruto = neto / (porcentaje/100)
-      // Ejemplo: neto=98, porcentaje=70 -> bruto = 98 / 0.70 = 140
-      let priceBrute = null;
+      // Calcular el precio neto (lo que recibe el psicólogo)
+      // net_price = price_bruto * (percentage / 100)
+      // Ejemplo: price=60, percentage=70 -> net_price = 60 * 0.70 = 42
+      let netPrice = null;
       if (row.price && row.clinic_percentage) {
-        const netPrice = parseFloat(row.price);
+        const brutePrice = parseFloat(row.price);
         const percentage = parseFloat(row.clinic_percentage);
-        if (!isNaN(netPrice) && !isNaN(percentage) && percentage > 0 && percentage <= 100) {
-          priceBrute = netPrice / (percentage / 100);
+        if (!isNaN(brutePrice) && !isNaN(percentage) && percentage > 0 && percentage <= 100) {
+          netPrice = brutePrice * (percentage / 100);
           // Redondear a 2 decimales
-          priceBrute = Math.round(priceBrute * 100) / 100;
+          netPrice = Math.round(netPrice * 100) / 100;
         }
       }
 
@@ -127,7 +126,7 @@ const getSessions = async (db, filters = {}) => {
           mode: row.mode,
           status: row.status,
           price: row.price,
-          price_brute: priceBrute,
+          net_price: netPrice,
           payment_method: row.payment_method,
           notes: row.notes,
           PatientData: {

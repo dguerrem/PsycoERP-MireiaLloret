@@ -3119,8 +3119,15 @@ const definitions = {
       price: {
         type: "number",
         format: "decimal",
-        description: "Precio de la sesión",
+        description: "Precio bruto de la sesión (lo que cobra la clínica al paciente)",
         example: 60.0,
+      },
+      net_price: {
+        type: "number",
+        format: "decimal",
+        nullable: true,
+        description: "Precio neto que recibe el psicólogo (price * clinic_percentage / 100)",
+        example: 42.0,
       },
       payment_method: {
         type: "string",
