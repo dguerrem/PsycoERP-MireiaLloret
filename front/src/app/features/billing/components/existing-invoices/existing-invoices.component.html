@@ -75,22 +75,26 @@
                   <th data-slot="table-head" class="h-10 px-2">
                     <input type="text" placeholder="Filtrar..." [value]="existingInvoiceNumberFilter()"
                       (input)="existingInvoiceNumberFilter.set($any($event.target).value)" data-slot="input"
-                      class="border-input h-8 w-full min-w-0 rounded-md border bg-white px-2 py-1 text-xs shadow-xs outline-none focus-visible:ring-[2px]">
+                      class="border-input h-8 w-full min-w-0 rounded-md border bg-white px-2 py-1 text-xs shadow-xs outline-none focus-visible:ring-[2px]"
+                      aria-label="Filtrar por número de factura">
                   </th>
                   <th data-slot="table-head" class="h-10 px-2">
                     <input type="text" placeholder="Filtrar..." [value]="existingDateFilter()"
                       (input)="existingDateFilter.set($any($event.target).value)" data-slot="input"
-                      class="border-input h-8 w-full min-w-0 rounded-md border bg-white px-2 py-1 text-xs shadow-xs outline-none focus-visible:ring-[2px]">
+                      class="border-input h-8 w-full min-w-0 rounded-md border bg-white px-2 py-1 text-xs shadow-xs outline-none focus-visible:ring-[2px]"
+                      aria-label="Filtrar por fecha">
                   </th>
                   <th data-slot="table-head" class="h-10 px-2">
                     <input type="text" placeholder="Filtrar..." [value]="existingPatientFilter()"
                       (input)="existingPatientFilter.set($any($event.target).value)" data-slot="input"
-                      class="border-input h-8 w-full min-w-0 rounded-md border bg-white px-2 py-1 text-xs shadow-xs outline-none focus-visible:ring-[2px]">
+                      class="border-input h-8 w-full min-w-0 rounded-md border bg-white px-2 py-1 text-xs shadow-xs outline-none focus-visible:ring-[2px]"
+                      aria-label="Filtrar por nombre de paciente">
                   </th>
                   <th data-slot="table-head" class="h-10 px-2">
                     <input type="text" placeholder="Filtrar..." [value]="existingDniFilter()"
                       (input)="existingDniFilter.set($any($event.target).value)" data-slot="input"
-                      class="border-input h-8 w-full min-w-0 rounded-md border bg-white px-2 py-1 text-xs shadow-xs outline-none focus-visible:ring-[2px]">
+                      class="border-input h-8 w-full min-w-0 rounded-md border bg-white px-2 py-1 text-xs shadow-xs outline-none focus-visible:ring-[2px]"
+                      aria-label="Filtrar por DNI">
                   </th>
                   <th data-slot="table-head" class="h-10 px-2"></th>
                   <th data-slot="table-head" class="h-10 px-2"></th>
@@ -119,7 +123,8 @@
                     formatCurrency(invoice.total) }}</td>
                   <td data-slot="table-cell" class="p-2 align-middle whitespace-nowrap">
                     <button data-slot="button" type="button" (click)="onPreviewInvoice(invoice)"
-                      class="inline-flex items-center justify-center whitespace-nowrap text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 hover:bg-accent hover:text-accent-foreground h-8 rounded-md gap-1.5 px-3">
+                      class="inline-flex items-center justify-center whitespace-nowrap text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 hover:bg-accent hover:text-accent-foreground h-8 rounded-md gap-1.5 px-3"
+                      aria-label="Ver factura">
                       <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
                         stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
                         class="h-4 w-4">
