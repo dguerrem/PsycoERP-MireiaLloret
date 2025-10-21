@@ -63,12 +63,10 @@ interface ClinicInvoiceToGenerate {
     CommonModule,
     FormsModule,
     SectionHeaderComponent,
-    ReusableModalComponent,
     InvoicePreviewComponent,
     FilterAnalysisComponent,
     BulkInvoicingComponent,
     ClinicInvoicingComponent,
-    ExistingInvoicesComponent,
     BulkInvoiceModalComponent,
     ClinicInvoiceModalComponent,
     ClinicInvoicePreviewComponent,
@@ -844,6 +842,19 @@ export class BillingComponent implements OnInit {
   }
 
   /**
+   * Vista previa de una factura pendiente de clínica
+   */
+  previewPendingClinicInvoice(clinicId: number) {
+    const clinicInvoice = this.prepareClinicInvoiceData(clinicId);
+    if (!clinicInvoice) {
+      return;
+    }
+
+    this.clinicInvoiceToGenerate.set(clinicInvoice);
+    this.isClinicPreviewModalOpen.set(true);
+  }
+
+  /**
    * Cierra el modal de vista previa
    */
   closePreviewModal() {
@@ -865,7 +876,15 @@ export class BillingComponent implements OnInit {
     const invoice = this.clinicInvoiceToGenerate();
     if (invoice) {
       try {
-        const fileName = `${invoice.invoice_number.replace(/\//g, '-')}`;
+        // Limpiar el nombre de la clínica para usarlo en el nombre del archivo
+        const clinicNameSanitized = invoice.clinic_name
+          .replace(/[^a-zA-Z0-9\sáéíóúñÁÉÍÓÚÑüÜ]/g, '') // Eliminar caracteres especiales pero mantener acentos y ñ
+          .replace(/\s+/g, '-') // Reemplazar espacios por guiones
+          .toLowerCase();
+
+        const invoiceNumberSanitized = invoice.invoice_number.replace(/\//g, '-');
+        const fileName = `${invoiceNumberSanitized}_${clinicNameSanitized}`;
+
         await this.pdfGeneratorService.generatePdfById(
           'clinic-invoice-content',
           fileName
@@ -924,20 +943,19 @@ export class BillingComponent implements OnInit {
   }
 
   /**
-   * Abre el modal de confirmación para generar factura de clínica
+   * Prepara los datos de una factura de clínica pendiente
+   * @param clinicId ID de la clínica
+   * @returns Datos de la factura o null si hay error
    */
-  generateClinicInvoice() {
-    const clinicId = this.selectedClinicId();
-    if (!clinicId) {
-      return;
-    }
-
+  private prepareClinicInvoiceData(
+    clinicId: number
+  ): ClinicInvoiceToGenerate | null {
     // Obtener los datos de la clínica seleccionada
     const selectedClinic = this.clinicInvoices().find(
       (c) => c.clinic_id === clinicId
     );
     if (!selectedClinic) {
-      return;
+      return null;
     }
 
     const user = this.userData();
@@ -945,7 +963,7 @@ export class BillingComponent implements OnInit {
       this.toastService.showError(
         'No se pudo cargar la información del usuario'
       );
-      return;
+      return null;
     }
 
     const invoiceNumber = `${this.invoicePrefix()}-${this.invoiceYear()}-${this.padNumber(
@@ -958,8 +976,8 @@ export class BillingComponent implements OnInit {
     const totalNetWithIrpf =
       Number(selectedClinic.total_net) * (1 - irpfPercentage / 100);
 
-    // Preparar datos para el modal
-    const clinicInvoice: ClinicInvoiceToGenerate = {
+    // Preparar datos de la factura
+    return {
       clinic_id: selectedClinic.clinic_id,
       clinic_name: selectedClinic.clinic_name,
       fiscal_name: selectedClinic.clinic_name, // Usar el nombre de la clínica como fiscal_name
@@ -975,6 +993,21 @@ export class BillingComponent implements OnInit {
       } ${new Date().getFullYear()}`,
       total: selectedClinic.total_net,
     };
+  }
+
+  /**
+   * Abre el modal de confirmación para generar factura de clínica
+   */
+  generateClinicInvoice() {
+    const clinicId = this.selectedClinicId();
+    if (!clinicId) {
+      return;
+    }
+
+    const clinicInvoice = this.prepareClinicInvoiceData(clinicId);
+    if (!clinicInvoice) {
+      return;
+    }
 
     this.clinicInvoiceToGenerate.set(clinicInvoice);
     this.isClinicModalOpen.set(true);
