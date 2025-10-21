@@ -18,41 +18,59 @@ export const errorInterceptor: HttpInterceptorFn = (req, next) => {
         // Error del lado del cliente
         errorMessage = `Error de conexión: ${error.error.message}`;
       } else {
+        // Priorizar el mensaje de error del backend (error.error.error)
+        // Si no existe, intentar con error.error.message
+        // Si no existe ninguno, usar mensajes genéricos por código de estado
+        debugger
+        const backendError = error.error?.error || error.error?.message;
+
         // Error del lado del servidor
         switch (error.status) {
           case 0:
-            errorMessage = 'No se pudo conectar con el servidor. Verifica tu conexión.';
+            errorMessage =
+              'No se pudo conectar con el servidor. Verifica tu conexión.';
             break;
           case 400:
-            errorMessage = error.error?.message || 'Datos inválidos. Revisa la información enviada';
+            errorMessage =
+              backendError || 'Datos inválidos. Revisa la información enviada';
             break;
           case 401:
-            errorMessage = 'Sesión expirada. Por favor, inicia sesión nuevamente.';
+            errorMessage =
+              backendError ||
+              'Sesión expirada. Por favor, inicia sesión nuevamente.';
             // Aquí se podría redirigir al login
             break;
           case 403:
-            errorMessage = 'No tienes permisos para realizar esta acción';
+            errorMessage =
+              backendError || 'No tienes permisos para realizar esta acción';
             break;
           case 404:
-            errorMessage = error.error?.message || 'Recurso no encontrado';
+            errorMessage = backendError || 'Recurso no encontrado';
             break;
           case 409:
-            errorMessage = error.error?.message || 'El recurso ya existe';
+            errorMessage = backendError || 'El recurso ya existe';
             break;
           case 422:
-            errorMessage = error.error?.message || 'Los datos proporcionados no son válidos';
+            errorMessage =
+              backendError || 'Los datos proporcionados no son válidos';
             break;
           case 500:
-            errorMessage = 'Error interno del servidor. Inténtalo más tarde.';
+            errorMessage =
+              backendError ||
+              'Error interno del servidor. Inténtalo más tarde.';
             break;
           case 503:
-            errorMessage = 'Servicio no disponible. Inténtalo más tarde';
+            errorMessage =
+              backendError || 'Servicio no disponible. Inténtalo más tarde';
             break;
           default:
             if (error.status >= 500) {
-              errorMessage = 'Error interno del servidor. Inténtalo más tarde.';
+              errorMessage =
+                backendError ||
+                'Error interno del servidor. Inténtalo más tarde.';
             } else {
-              errorMessage = error.error?.message || `Error ${error.status}: ${error.message}`;
+              errorMessage =
+                backendError || `Error ${error.status}: ${error.message}`;
             }
         }
       }
