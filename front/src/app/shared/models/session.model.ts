@@ -30,6 +30,7 @@ export interface SessionData {
     type: string; // "Terapia Individual"
     mode: 'online' | 'presencial'; // Added mode to new DTO
     price: number; // 60
+    net_price: number; // Price after applying clinic percentage
     payment_method:
       | 'bizum'
       | 'transferencia'

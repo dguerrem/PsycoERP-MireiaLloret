@@ -66,7 +66,7 @@
           <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
             <div>
               <app-clinic-selector [control]="clinicControl" [clinics]="clinics()" label="Clínica"
-                placeholder="Todas las clínicas">
+                placeholder="Todas las clínicas" size="sm">
               </app-clinic-selector>
             </div>
 
@@ -254,33 +254,33 @@
                 </td>
                 <!-- Comisión Clínica -->
                 <td class="p-2">
-                  @if (session.SessionDetailData.price &&
-                  session.SessionDetailData.ClinicDetailData.clinic_percentage) {
+                  @if (session.SessionDetailData.price && session.SessionDetailData.net_price) {
                   <div class="text-sm text-orange-600">
                     <span class="font-medium">{{ calcularComision(session.SessionDetailData.price,
-                      session.SessionDetailData.ClinicDetailData.clinic_percentage).toFixed(2) }}€</span>
+                      session.SessionDetailData.net_price).toFixed(2) }}€</span>
                   </div>
                   } @else {
                   <span class="text-muted-foreground">-</span>
                   }
                 </td>
-                @if (session.SessionDetailData.price &&
-                session.SessionDetailData.ClinicDetailData.clinic_percentage) {
                 <!-- Tu Neto -->
                 <td class="p-2 font-semibold text-green-600">
-                  {{ calculatePercentage(session.SessionDetailData.price,
-                  session.SessionDetailData.ClinicDetailData.clinic_percentage).toFixed(2) }}€ <span
-                    class="text-muted-foreground ml-1">({{
-                    session.SessionDetailData.ClinicDetailData.clinic_percentage }}%)</span></td>
+                  @if (session.SessionDetailData.net_price) {
+                  {{ session.SessionDetailData.net_price.toFixed(2) }}€
+                  @if (session.SessionDetailData.ClinicDetailData.clinic_percentage) {
+                  <span class="text-muted-foreground ml-1">({{
+                    session.SessionDetailData.ClinicDetailData.clinic_percentage }}%)</span>
+                  }
+                  } @else {
+                  <span class="text-muted-foreground">-</span>
+                  }
+                </td>
                 <td class="p-2">
                   <span [class]="getPaymentMethodClass(session.SessionDetailData.payment_method)"
                     class="inline-flex items-center rounded-md border px-2 py-0.5 text-xs font-medium capitalize">
                     {{ formatPaymentMethod(session.SessionDetailData.payment_method) }}
                   </span>
                 </td>
-                } @else {
-                <span class="text-muted-foreground">-</span>
-                }
               </tr>
               }
               }

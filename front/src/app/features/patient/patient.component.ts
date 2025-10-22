@@ -69,11 +69,15 @@ export class PatientComponent implements OnInit {
 
   // Computed signals based on active tab
   patientsList = computed(() => {
-    return this.activeTab() === 'active' ? this.activePatients() : this.deletedPatients();
+    return this.activeTab() === 'active'
+      ? this.activePatients()
+      : this.deletedPatients();
   });
 
   paginationData = computed(() => {
-    return this.activeTab() === 'active' ? this.activePagination() : this.deletedPagination();
+    return this.activeTab() === 'active'
+      ? this.activePagination()
+      : this.deletedPagination();
   });
 
   showForm = computed(
@@ -95,16 +99,18 @@ export class PatientComponent implements OnInit {
    */
   private loadActivePatients(page: number, perPage: number): void {
     const filters = this.currentFilters();
-    this.patientsService.loadActivePatientsPaginated(page, perPage, filters).subscribe({
-      next: (response) => {
-        this.activePatients.set(response.data);
-        this.activePagination.set(response.pagination);
-        this.activePatientsCount.set(response.pagination?.totalRecords || 0);
-      },
-      error: () => {
-        // Error handling is managed by error interceptor
-      },
-    });
+    this.patientsService
+      .loadActivePatientsPaginated(page, perPage, filters)
+      .subscribe({
+        next: (response) => {
+          this.activePatients.set(response.data);
+          this.activePagination.set(response.pagination);
+          this.activePatientsCount.set(response.pagination?.totalRecords || 0);
+        },
+        error: () => {
+          // Error handling is managed by error interceptor
+        },
+      });
   }
 
   /**
@@ -112,16 +118,18 @@ export class PatientComponent implements OnInit {
    */
   private loadDeletedPatients(page: number, perPage: number): void {
     const filters = this.currentFilters();
-    this.patientsService.loadDeletedPatientsPaginated(page, perPage, filters).subscribe({
-      next: (response) => {
-        this.deletedPatients.set(response.data);
-        this.deletedPagination.set(response.pagination);
-        this.deletedPatientsCount.set(response.pagination?.totalRecords || 0);
-      },
-      error: () => {
-        // Error handling is managed by error interceptor
-      },
-    });
+    this.patientsService
+      .loadDeletedPatientsPaginated(page, perPage, filters)
+      .subscribe({
+        next: (response) => {
+          this.deletedPatients.set(response.data);
+          this.deletedPagination.set(response.pagination);
+          this.deletedPatientsCount.set(response.pagination?.totalRecords || 0);
+        },
+        error: () => {
+          // Error handling is managed by error interceptor
+        },
+      });
   }
 
   /**
@@ -160,7 +168,7 @@ export class PatientComponent implements OnInit {
         next: () => {
           // Reload both tabs to update counts and data
           this.reloadBothTabs();
-        }
+        },
       });
     } else {
       // Crear nuevo paciente
@@ -168,8 +176,11 @@ export class PatientComponent implements OnInit {
         next: () => {
           // Reload active patients (new patients go to active)
           const activePag = this.activePagination();
-          this.loadActivePatients(activePag?.currentPage || 1, activePag?.recordsPerPage || 10);
-        }
+          this.loadActivePatients(
+            activePag?.currentPage || 1,
+            activePag?.recordsPerPage || 10
+          );
+        },
       });
     }
 
@@ -200,7 +211,7 @@ export class PatientComponent implements OnInit {
         next: () => {
           // Reload both tabs to update counts
           this.reloadBothTabs();
-        }
+        },
       });
       this.closeDeleteModal();
     }
@@ -243,10 +254,16 @@ export class PatientComponent implements OnInit {
     const tab = this.activeTab();
     if (tab === 'active') {
       const activePag = this.activePagination();
-      this.loadActivePatients(activePag?.currentPage || 1, activePag?.recordsPerPage || 10);
+      this.loadActivePatients(
+        activePag?.currentPage || 1,
+        activePag?.recordsPerPage || 10
+      );
     } else {
       const deletedPag = this.deletedPagination();
-      this.loadDeletedPatients(deletedPag?.currentPage || 1, deletedPag?.recordsPerPage || 10);
+      this.loadDeletedPatients(
+        deletedPag?.currentPage || 1,
+        deletedPag?.recordsPerPage || 10
+      );
     }
   }
 
@@ -257,8 +274,14 @@ export class PatientComponent implements OnInit {
     const activePag = this.activePagination();
     const deletedPag = this.deletedPagination();
 
-    this.loadActivePatients(activePag?.currentPage || 1, activePag?.recordsPerPage || 10);
-    this.loadDeletedPatients(deletedPag?.currentPage || 1, deletedPag?.recordsPerPage || 10);
+    this.loadActivePatients(
+      activePag?.currentPage || 1,
+      activePag?.recordsPerPage || 10
+    );
+    this.loadDeletedPatients(
+      deletedPag?.currentPage || 1,
+      deletedPag?.recordsPerPage || 10
+    );
   }
 
   /**
@@ -273,7 +296,8 @@ export class PatientComponent implements OnInit {
    * Obtener clases CSS para las pestañas
    */
   getTabClasses(tab: TabType): string {
-    const baseClasses = 'data-[state=active]:bg-background dark:data-[state=active]:text-foreground focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:outline-ring dark:data-[state=active]:border-input dark:data-[state=active]:bg-input/30 text-foreground dark:text-muted-foreground h-[calc(100%-1px)] flex-1 justify-center rounded-md border border-transparent px-2 py-1 whitespace-nowrap transition-[color,box-shadow] focus-visible:ring-[3px] focus-visible:outline-1 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:shadow-sm [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*=\'size-\'])]:size-4 flex items-center gap-2 text-sm font-medium';
+    const baseClasses =
+      "data-[state=active]:bg-background dark:data-[state=active]:text-foreground focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:outline-ring dark:data-[state=active]:border-input dark:data-[state=active]:bg-input/30 text-foreground dark:text-muted-foreground h-[calc(100%-1px)] flex-1 justify-center rounded-md border border-transparent px-2 py-1 whitespace-nowrap transition-[color,box-shadow] focus-visible:ring-[3px] focus-visible:outline-1 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:shadow-sm [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 flex items-center gap-2 text-sm font-medium";
 
     return this.activeTab() === tab
       ? `${baseClasses} bg-background text-foreground shadow-sm`

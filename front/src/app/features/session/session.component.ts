@@ -8,7 +8,6 @@ import {
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
-import { SessionsService } from '../calendar/services/sessions.service';
 import { SessionData, SessionUtils } from '../../shared/models/session.model';
 import { ClinicSelectorComponent } from '../../shared/components/clinic-selector/clinic-selector.component';
 import { HttpClient } from '@angular/common/http';
@@ -61,7 +60,6 @@ interface SessionKPIs {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class SessionComponent implements OnInit {
-  private sessionsService = inject(SessionsService);
   private http = inject(HttpClient);
 
   // Expose Math for template
@@ -93,8 +91,8 @@ export class SessionComponent implements OnInit {
     sessionType: null,
     status: null,
     paymentMethod: null,
-    dateFrom: this.getThreeMonthsAgo(),
-    dateTo: this.getTodayDate(),
+    dateFrom: this.getFirstDayOfMonth(),
+    dateTo: this.getLastDayOfMonth(),
   });
 
   // Pagination signals (frontend only)
@@ -121,8 +119,8 @@ export class SessionComponent implements OnInit {
         // Sumar ingresos brutos (precio base) - convert to number
         stats.totalRevenueBrute +=
           Number(session.SessionDetailData.price_brute) || 0;
-        // Sumar ingresos netos (lo que recibe la profesional) - convert to number
-        stats.totalRevenueNet += Number(session.SessionDetailData.price) || 0;
+        // Sumar ingresos netos (lo que recibe la profesional desde el backend) - convert to number
+        stats.totalRevenueNet += Number(session.SessionDetailData.net_price) || 0;
       }
       if (status === 'cancelada') stats.cancelada++;
     });
@@ -272,7 +270,7 @@ export class SessionComponent implements OnInit {
     if (filterName === 'dateFrom' && (!value || value === '')) {
       this.filters.update((f) => ({
         ...f,
-        dateFrom: this.getThreeMonthsAgo(),
+        dateFrom: this.getCurrentMonth(),
       }));
       this.dateFromError.set(null);
       return;
@@ -310,7 +308,7 @@ export class SessionComponent implements OnInit {
       sessionType: null,
       status: null,
       paymentMethod: null,
-      dateFrom: this.getThreeMonthsAgo(),
+      dateFrom: this.getCurrentMonth(),
       dateTo: this.getTodayDate(),
     });
     this.clinicControl.setValue(null);
@@ -420,9 +418,33 @@ export class SessionComponent implements OnInit {
     return this.formatDateToISO(today);
   }
 
-  private getThreeMonthsAgo(): string {
+  /**
+   * Gets the first day of the current month
+   * @returns Date string in format YYYY-MM-01
+   */
+  private getFirstDayOfMonth(): string {
     const today = new Date();
-    today.setMonth(today.getMonth() - 3);
+    const year = today.getFullYear();
+    const month = String(today.getMonth() + 1).padStart(2, '0');
+    return `${year}-${month}-01`;
+  }
+
+  /**
+   * Gets the last day of the current month (handles 28, 30, 31 days)
+   * @returns Date string in format YYYY-MM-DD
+   */
+  private getLastDayOfMonth(): string {
+    const today = new Date();
+    const year = today.getFullYear();
+    const month = today.getMonth();
+    // Create date for the first day of next month, then subtract one day
+    const lastDay = new Date(year, month + 1, 0);
+    return this.formatDateToISO(lastDay);
+  }
+
+  private getCurrentMonth(): string {
+    const today = new Date();
+    today.setMonth(today.getMonth());
     return this.formatDateToISO(today);
   }
 
@@ -442,14 +464,14 @@ export class SessionComponent implements OnInit {
     this.dateFromError.set(null);
     this.dateToError.set(null);
 
-    // If dates are empty, set to defaults (shouldn't happen with new logic, but defensive)
+    // If dates are empty, set to defaults (day 1 and last day of month)
     if (!dateFrom || dateFrom === '') {
-      dateFrom = this.getThreeMonthsAgo();
+      dateFrom = this.getFirstDayOfMonth();
       this.filters.update((f) => ({ ...f, dateFrom }));
     }
 
     if (!dateTo || dateTo === '') {
-      dateTo = this.getTodayDate();
+      dateTo = this.getLastDayOfMonth();
       this.filters.update((f) => ({ ...f, dateTo }));
     }
 
@@ -479,32 +501,15 @@ export class SessionComponent implements OnInit {
   }
 
   /**
-   * Calcula el porcentaje de un valor dado.
-   * @param price El valor total (ej: 50).
-   * @param percentage El porcentaje a aplicar (ej: 60).
-   * @returns El resultado del porcentaje (ej: 30).
+   * Calcula la comisión de la clínica.
+   * @param price El precio base de la sesión.
+   * @param netPrice El precio neto que recibe la profesional.
+   * @returns La comisión de la clínica (price - netPrice).
    */
-  calculatePercentage(price: number, percentage: number): number {
-    if (price === 0 || percentage === 0) {
+  calcularComision(price: number, netPrice: number): number {
+    if (!price || !netPrice) {
       return 0;
     }
-
-    // 1. Convertir el porcentaje (60) a su forma decimal (0.60)
-    const decimalPercentage = percentage / 100; // 60 / 100 = 0.6
-
-    // 2. Multiplicar el precio por el valor decimal
-    const result = price * decimalPercentage; // 50 * 0.6 = 30
-
-    return result;
-  }
-
-  /**
-   * Calcula el porcentaje de un valor dado.
-   * @param price El valor total (ej: 50).
-   * @param percentage El porcentaje a aplicar (ej: 60).
-   * @returns El resultado del porcentaje (ej: 30).
-   */
-  calcularComision(price: number, percentage: number): number {
-    return price - this.calculatePercentage(price, percentage);
+    return price - netPrice;
   }
 }

@@ -147,6 +147,11 @@ export class ClinicInvoicingComponent {
    */
   @Output() invoiceYearValidate = new EventEmitter<void>();
 
+  /**
+   * Evento emitido cuando se solicita vista previa de una factura pendiente de clínica
+   */
+  @Output() previewClinicInvoice = new EventEmitter<number>();
+
   // Inputs para facturas existentes de clínicas
   /**
    * Mes seleccionado para facturas existentes de clínicas
@@ -307,5 +312,12 @@ export class ClinicInvoicingComponent {
    */
   onPreviewExistingClinicInvoice(invoice: ExistingClinicInvoice): void {
     this.previewExistingClinicInvoice.emit(invoice);
+  }
+
+  /**
+   * Maneja la vista previa de una factura pendiente de clínica
+   */
+  onPreviewClinicInvoice(clinicId: number): void {
+    this.previewClinicInvoice.emit(clinicId);
   }
 }

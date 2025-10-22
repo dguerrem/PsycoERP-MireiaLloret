@@ -54,6 +54,21 @@ export class ClinicInvoicePreviewComponent {
   }
 
   /**
+   * Formatea una fecha en formato DD/MM/YYYY
+   * @param dateStr Fecha en formato ISO (YYYY-MM-DD) o ya formateada (DD/MM/YYYY)
+   */
+  formatDate(dateStr: string): string {
+    // Si ya está en formato DD/MM/YYYY, devolverla tal cual
+    if (dateStr.includes('/')) {
+      return dateStr;
+    }
+
+    // Si está en formato ISO (YYYY-MM-DD), convertirla a DD/MM/YYYY
+    const [year, month, day] = dateStr.split('-');
+    return `${day}/${month}/${year}`;
+  }
+
+  /**
    * Maneja el cierre del modal
    */
   onClose() {

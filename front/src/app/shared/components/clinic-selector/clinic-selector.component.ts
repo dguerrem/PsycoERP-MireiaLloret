@@ -27,6 +27,7 @@ export class ClinicSelectorComponent {
   @Input() placeholder: string = 'Seleccionar clínica...';
   @Input() label: string = 'Clínica';
   @Input() required: boolean = false;
+  @Input() size: 'sm' | 'md' = 'md'; // 'sm' for smaller inputs (text-xs), 'md' for standard (text-sm)
 
   // Internal signals
   private searchTerm = signal<string>('');

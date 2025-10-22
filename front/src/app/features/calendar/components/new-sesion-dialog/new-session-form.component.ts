@@ -111,6 +111,9 @@ export class NewSessionFormComponent implements OnInit {
   /** Base price signal for reactivity */
   basePrice = signal<number>(0);
 
+  /** Net price signal for reactivity */
+  netPrice = signal<number>(0);
+
   /** Tab state */
   activeTab = signal<'details' | 'clinical-notes'>('details');
 
@@ -360,8 +363,6 @@ export class NewSessionFormComponent implements OnInit {
       this.prefilledData?.date || new Date().toISOString().split('T')[0];
     const defaultStartTime = this.prefilledData?.startTime || '';
 
-    // If in edit mode, use session data to prefill the form
-    // Note: base_price will be calculated after loading patients
     const formValues = isEditMode
       ? {
           patient_id: sessionData!.SessionDetailData.PatientData.id,
@@ -369,7 +370,7 @@ export class NewSessionFormComponent implements OnInit {
           start_time: sessionData!.SessionDetailData.start_time.substring(0, 5),
           end_time: sessionData!.SessionDetailData.end_time.substring(0, 5),
           mode: sessionData!.SessionDetailData.mode.toLowerCase(),
-          base_price: 0, // Will be calculated after loading patients
+          base_price: 0,
           payment_method:
             sessionData!.SessionDetailData.payment_method || 'pendiente',
           notes: sessionData!.SessionDetailData.notes || '',
@@ -439,6 +440,11 @@ export class NewSessionFormComponent implements OnInit {
           base_price: patient.precioSesion,
           mode: mode,
         });
+
+        // Calculate and set net price for new sessions
+        const calculatedNetPrice =
+          patient.precioSesion * (patient.porcentaje / 100);
+        this.netPrice.set(calculatedNetPrice);
       }
     });
 
@@ -449,9 +455,18 @@ export class NewSessionFormComponent implements OnInit {
       }
     });
 
-    // Watch for base_price changes to update the signal
+    // Watch for base_price changes to update the signals
     this.sessionForm.get('base_price')?.valueChanges.subscribe((price) => {
       this.basePrice.set(price || 0);
+
+      // Recalculate net price when base price changes
+      const patient = this.selectedPatient();
+      if (patient && price > 0) {
+        const calculatedNetPrice = price * (patient.porcentaje / 100);
+        this.netPrice.set(calculatedNetPrice);
+      } else {
+        this.netPrice.set(0);
+      }
     });
 
     // Initialize basePrice signal with current form value
@@ -486,8 +501,9 @@ export class NewSessionFormComponent implements OnInit {
                 mode: mode,
               });
 
-              // Update basePrice signal
+              // Update basePrice and netPrice signals from backend
               this.basePrice.set(sessionData.SessionDetailData.price);
+              this.netPrice.set(sessionData.SessionDetailData.net_price);
             }
           }
         },
@@ -713,8 +729,11 @@ export class NewSessionFormComponent implements OnInit {
         },
         error: (error) => {
           console.error('Error creating session:', error);
+          debugger;
+          const backendError = error.error?.error || error.error?.message;
           this.error.set(
-            'Error al crear la sesión. Por favor, intenta de nuevo.'
+            backendError ||
+              'Error al crear la sesión. Por favor, intenta de nuevo.'
           );
           this.isLoading.set(false);
         },
@@ -729,26 +748,6 @@ export class NewSessionFormComponent implements OnInit {
   get selectedPatientData(): PatientSelector | null {
     return this.selectedPatient();
   }
-
-  get netPrice(): number {
-    const patient = this.selectedPatient();
-    if (!patient) return 0;
-
-    return patient.precioSesion * (patient.porcentaje / 100);
-  }
-
-  /** Computed net price based on base_price and percentage */
-  calculatedNetPrice = computed(() => {
-    const patient = this.selectedPatient();
-    const basePrice = this.basePrice();
-
-    if (!patient || !basePrice || basePrice <= 0) {
-      return '0.00';
-    }
-
-    const netPrice = basePrice * (patient.porcentaje / 100);
-    return netPrice.toFixed(2);
-  });
 
   // Clinical Notes Methods
   onSearchChange(event: Event): void {
