@@ -3,8 +3,8 @@ const { google } = require('googleapis');
 const fs = require('fs');
 const path = require('path');
 
-const CREDENTIALS_PATH = path.join(__dirname, '../.secret/credentials.json');
-const TOKEN_PATH = path.join(__dirname, '../.secret/token.json');
+const CREDENTIALS_PATH = path.join(__dirname, '../.secret/credentials.test.json');
+const TOKEN_PATH = path.join(__dirname, '../.secret/token.test.json');
 
 const PORT = process.env.PORT || 3000;
 const PUBLIC_BASE = process.env.REDIRECT_HOST || `http://localhost:${PORT}`; // can be ngrok URL
