@@ -12,6 +12,7 @@ const {
   swaggerDefinition,
   swaggerOptions,
 } = require("./swagger/swagger");
+const logger = require("./utils/logger");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -72,10 +73,10 @@ const credentials = JSON.parse(fs.readFileSync(defaultPaths.credentials));
 let client_id, client_secret, redirect_uris;
 if (credentials.web) {
   ({ client_id, client_secret, redirect_uris } = credentials.web);
-  console.log('Using OAuth client type: web');
+  logger.log('Using OAuth client type: web');
 } else if (credentials.installed) {
   ({ client_id, client_secret, redirect_uris } = credentials.installed);
-  console.log('Using OAuth client type: installed (desktop)');
+  logger.log('Using OAuth client type: installed (desktop)');
 } else {
   throw new Error('Invalid credentials.json: missing "web" or "installed" client configuration');
 }
@@ -216,7 +217,7 @@ app.use("/api/invoices", invoicesRoutes);
 
 // Iniciar servidor
 app.listen(PORT, async () => {
-  console.log(`🚀 Servidor corriendo en http://localhost:${PORT}`);
+  logger.success(`Servidor corriendo en http://localhost:${PORT}`);
 
   // Probar conexión a la base de datos
   await testConnection();

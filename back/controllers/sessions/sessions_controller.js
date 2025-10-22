@@ -9,6 +9,7 @@ const {
 } = require("../../models/sessions/sessions_model");
 
 const { getRandomTemplate } = require("../../constants/whatsapp-templates");
+const logger = require("../../utils/logger");
 
 const obtenerSesiones = async (req, res) => {
   try {
@@ -72,7 +73,7 @@ const obtenerSesiones = async (req, res) => {
       data: result.data,
     });
   } catch (err) {
-    console.error("Error al obtener sesiones:", err.message);
+    logger.error("Error al obtener sesiones:", err.message);
     res.status(500).json({
       success: false,
       error: "Error al obtener las sesiones",
@@ -197,7 +198,7 @@ const crearSesion = async (req, res) => {
       data: nuevaSesion,
     });
   } catch (err) {
-    console.error("Error al crear sesión:", err.message);
+    logger.error("Error al crear sesión:", err.message);
     res.status(500).json({
       success: false,
       error: "Error al crear la sesión",
@@ -348,7 +349,7 @@ const actualizarSesion = async (req, res) => {
       data: sesionActualizada,
     });
   } catch (err) {
-    console.error("Error al actualizar sesión:", err.message);
+    logger.error("Error al actualizar sesión:", err.message);
     res.status(500).json({
       success: false,
       error: "Error al actualizar la sesión",
@@ -375,7 +376,7 @@ const eliminarSesion = async (req, res) => {
       message: "Sesión eliminada exitosamente",
     });
   } catch (err) {
-    console.error("Error al eliminar sesión:", err.message);
+    logger.error("Error al eliminar sesión:", err.message);
 
     if (err.message === "Sesión no encontrada o ya está eliminada") {
       return res.status(404).json({
@@ -477,7 +478,7 @@ const obtenerEnlaceWhatsApp = async (req, res) => {
       },
     });
   } catch (err) {
-    console.error("Error al generar enlace de WhatsApp:", err.message);
+    logger.error("Error al generar enlace de WhatsApp:", err.message);
     res.status(500).json({
       success: false,
       error: "Error al generar enlace de WhatsApp",
@@ -516,7 +517,7 @@ const obtenerKPIsSesiones = async (req, res) => {
       data: kpis,
     });
   } catch (err) {
-    console.error("Error al obtener KPIs de sesiones:", err.message);
+    logger.error("Error al obtener KPIs de sesiones:", err.message);
     res.status(500).json({
       success: false,
       error: "Error al obtener los KPIs de sesiones",

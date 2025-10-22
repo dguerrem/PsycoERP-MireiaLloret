@@ -1,4 +1,5 @@
 const { getInvoicesKPIs, getPendingInvoices, getPendingInvoicesOfClinics, createInvoice, createInvoiceOfClinics, getIssuedInvoices, getIssuedInvoicesOfClinics, getLastInvoiceNumber } = require("../../models/invoices/invoice_model");
+const logger = require("../../utils/logger");
 
 // Obtener KPIs de facturación
 const obtenerKPIsFacturacion = async (req, res) => {
@@ -31,7 +32,7 @@ const obtenerKPIsFacturacion = async (req, res) => {
       data: kpis
     });
   } catch (err) {
-    console.error("Error al obtener KPIs de facturación:", err.message);
+    logger.error("Error al obtener KPIs de facturación:", err.message);
     res.status(500).json({
       success: false,
       error: "Error al obtener los KPIs de facturación"
@@ -70,7 +71,7 @@ const obtenerFacturasPendientes = async (req, res) => {
       data: pendingData
     });
   } catch (err) {
-    console.error("Error al obtener facturas pendientes:", err.message);
+    logger.error("Error al obtener facturas pendientes:", err.message);
     res.status(500).json({
       success: false,
       error: "Error al obtener las facturas pendientes"
@@ -109,7 +110,7 @@ const obtenerFacturasPendientesClinicas = async (req, res) => {
       data: pendingClinicsData
     });
   } catch (err) {
-    console.error("Error al obtener facturas pendientes de clínicas:", err.message);
+    logger.error("Error al obtener facturas pendientes de clínicas:", err.message);
     res.status(500).json({
       success: false,
       error: "Error al obtener las facturas pendientes de clínicas"
@@ -248,7 +249,7 @@ const generarFactura = async (req, res) => {
       }
     });
   } catch (err) {
-    console.error("Error al generar factura:", err.message);
+    logger.error("Error al generar factura:", err.message);
     res.status(500).json({
       success: false,
       error: err.message || "Error al generar la factura"
@@ -327,7 +328,7 @@ const generarFacturaClinica = async (req, res) => {
       data: result
     });
   } catch (err) {
-    console.error("Error al generar factura de clínica:", err.message);
+    logger.error("Error al generar factura de clínica:", err.message);
     res.status(500).json({
       success: false,
       error: err.message.includes('Duplicate entry') && err.message.includes('invoice_number')
@@ -368,7 +369,7 @@ const obtenerFacturasEmitidas = async (req, res) => {
       data: invoicesData
     });
   } catch (err) {
-    console.error("Error al obtener facturas emitidas:", err.message);
+    logger.error("Error al obtener facturas emitidas:", err.message);
     res.status(500).json({
       success: false,
       error: "Error al obtener las facturas emitidas"
@@ -407,7 +408,7 @@ const obtenerUltimoNumeroFactura = async (req, res) => {
       }
     });
   } catch (err) {
-    console.error("Error al obtener último número de factura:", err.message);
+    logger.error("Error al obtener último número de factura:", err.message);
     res.status(500).json({
       success: false,
       error: "Error al obtener el último número de factura"
@@ -445,7 +446,7 @@ const obtenerFacturasEmitidasClinicas = async (req, res) => {
       data: invoicesData
     });
   } catch (err) {
-    console.error("Error al obtener facturas emitidas de clínicas:", err.message);
+    logger.error("Error al obtener facturas emitidas de clínicas:", err.message);
     res.status(500).json({
       success: false,
       error: "Error al obtener las facturas emitidas de clínicas"

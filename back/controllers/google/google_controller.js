@@ -1,4 +1,5 @@
 const fs = require('fs');
+const logger = require("../../utils/logger");
 const path = require('path');
 const { google } = require('googleapis');
 const { getGoogleCredentialsPath } = require('../../config/googleMeet');
@@ -52,7 +53,7 @@ exports.getAuthUrl = (req, res) => {
       scope: ['https://www.googleapis.com/auth/calendar.events'],
     });
     
-    console.log(`🔐 Generated auth URL for ${paths.environment}`);
+    logger.log(`🔐 Generated auth URL for ${paths.environment}`);
     
     res.json({ 
       success: true,
@@ -61,7 +62,7 @@ exports.getAuthUrl = (req, res) => {
       instructions: 'Visit this URL to authorize the application'
     });
   } catch (err) {
-    console.error('Error generating auth URL', err);
+    logger.error('Error generating auth URL', err);
     res.status(500).json({ 
       success: false,
       error: err.message 
@@ -90,14 +91,14 @@ exports.oauth2callback = async (req, res) => {
     const hostname = req.hostname || 'production';
     const { oAuth2Client, paths } = createOAuthClient(hostname);
     
-    console.log(`🔄 Exchanging code for tokens (${paths.environment})...`);
+    logger.log(`🔄 Exchanging code for tokens (${paths.environment})...`);
     
     const { tokens } = await oAuth2Client.getToken(code);
     
     // Guardar tokens en el archivo apropiado
     fs.writeFileSync(paths.token, JSON.stringify(tokens, null, 2));
     
-    console.log(`✅ Token saved successfully to ${paths.token}`);
+    logger.log(`✅ Token saved successfully to ${paths.token}`);
     
     res.send(`
       <html>
@@ -147,7 +148,7 @@ exports.oauth2callback = async (req, res) => {
       </html>
     `);
   } catch (err) {
-    console.error('Error exchanging code for token', err);
+    logger.error('Error exchanging code for token', err);
     res.status(500).send(`
       <html>
         <body style="font-family: Arial; padding: 40px; text-align: center;">
@@ -195,7 +196,7 @@ exports.getTokenStatus = async (req, res) => {
         : 'Token found but missing refresh_token. Consider reauthorizing.'
     });
   } catch (err) {
-    console.error('Error checking token status', err);
+    logger.error('Error checking token status', err);
     res.status(500).json({ 
       success: false,
       error: err.message 

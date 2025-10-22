@@ -4,6 +4,7 @@ const {
 } = require("../../models/reminders/reminders_model");
 
 const { crearSesionGoogleMeet } = require("../../utils/googleMeetUtils");
+const logger = require("../../utils/logger");
 
 const obtenerRecordatoriosPendientes = async (req, res) => {
   try {
@@ -32,7 +33,7 @@ const obtenerRecordatoriosPendientes = async (req, res) => {
       },
     });
   } catch (err) {
-    console.error("Error al obtener recordatorios pendientes:", err.message);
+    logger.error("Error al obtener recordatorios pendientes:", err.message);
     res.status(500).json({
       success: false,
       error: "Error al obtener los recordatorios pendientes",
@@ -73,7 +74,7 @@ const crearRecordatorio = async (req, res) => {
       message: "Recordatorio creado exitosamente con deeplink de WhatsApp",
     });
   } catch (err) {
-    console.error("Error al crear recordatorio:", err.message);
+    logger.error("Error al crear recordatorio:", err.message);
 
     // Manejar errores específicos
     if (err.message === "Session not found or not scheduled") {
@@ -131,10 +132,10 @@ const generarMensajeWhatsApp = async (sessionData, hostname) => {
       // Crear Google Meet REAL (con hostname para seleccionar credenciales)
       const meetLink = await crearSesionGoogleMeet(sessionData, hostname);
       mensaje += `*Enlace de la sesión:* ${meetLink}\n`;
-      console.log("Google Meet creado exitosamente");
+      logger.log("Google Meet creado exitosamente");
     } catch (error) {
       // Fallback al enlace falso
-      console.warn("Fallback a enlace falso:", error.message);
+      logger.warn("Fallback a enlace falso:", error.message);
       const meetId = generarIdGoogleMeet();
       mensaje += `*Enlace de la sesión:* https://meet.google.com/${meetId}\n`;
     }

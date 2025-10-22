@@ -59,7 +59,7 @@ const actualizarUsuario = async (req, res) => {
     const userData = {};
     if (name !== undefined) userData.name = name;
     if (license_number !== undefined) userData.license_number = license_number;
-  if (irpf !== undefined) userData.irpf = irpf;
+    if (irpf !== undefined) userData.irpf = irpf;
     if (dni !== undefined) userData.dni = dni;
     if (street !== undefined) userData.street = street;
     if (street_number !== undefined) userData.street_number = street_number;
@@ -95,7 +95,7 @@ const actualizarUsuario = async (req, res) => {
     });
   } catch (err) {
     console.error("Error al actualizar usuario:", err.message);
-    
+
     if (err.message === "No hay campos para actualizar") {
       return res.status(400).json({
         success: false,

@@ -1,4 +1,5 @@
 const { getBonuses, getBonusesByPatientId, getBonusHistoryById, useBonusSession, createBonus } = require("../../models/bonuses/bonuses_model");
+const logger = require("../../utils/logger");
 
 const obtenerBonuses = async (req, res) => {
   try {
@@ -21,7 +22,7 @@ const obtenerBonuses = async (req, res) => {
       data: result.data,
     });
   } catch (err) {
-    console.error("Error al obtener bonuses:", err.message);
+    logger.error("Error al obtener bonuses:", err.message);
     res.status(500).json({
       success: false,
       error: "Error al obtener los bonuses",
@@ -50,7 +51,7 @@ const obtenerBonusesPorPaciente = async (req, res) => {
       },
     });
   } catch (err) {
-    console.error("Error al obtener bonuses por paciente:", err.message);
+    logger.error("Error al obtener bonuses por paciente:", err.message);
     res.status(500).json({
       success: false,
       error: "Error al obtener los bonuses del paciente",
@@ -83,7 +84,7 @@ const obtenerHistorialBonus = async (req, res) => {
       data: bonusHistory,
     });
   } catch (err) {
-    console.error("Error al obtener historial del bonus:", err.message);
+    logger.error("Error al obtener historial del bonus:", err.message);
     res.status(500).json({
       success: false,
       error: "Error al obtener el historial del bonus",
@@ -116,7 +117,7 @@ const registrarSesionBonus = async (req, res) => {
       },
     });
   } catch (err) {
-    console.error("Error al registrar sesión del bonus:", err.message);
+    logger.error("Error al registrar sesión del bonus:", err.message);
     
     if (err.message === 'Bonus no encontrado') {
       return res.status(404).json({
@@ -190,7 +191,7 @@ const crearBonus = async (req, res) => {
       data: bonusCreado,
     });
   } catch (err) {
-    console.error("Error al crear bonus:", err.message);
+    logger.error("Error al crear bonus:", err.message);
     res.status(500).json({
       success: false,
       error: "Error al crear el bonus",

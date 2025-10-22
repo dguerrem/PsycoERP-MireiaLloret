@@ -4,6 +4,7 @@ const {
   updateClinicalNote,
   deleteClinicalNote,
 } = require("../../models/clinical_notes/clinical_notes_model");
+const logger = require("../../utils/logger");
 
 // Obtener notas clínicas por ID de paciente
 const obtenerNotasClinicasPorPaciente = async (req, res) => {
@@ -27,7 +28,7 @@ const obtenerNotasClinicasPorPaciente = async (req, res) => {
       data: notasClinicas,
     });
   } catch (err) {
-    console.error("Error al obtener notas clínicas:", err.message);
+    logger.error("Error al obtener notas clínicas:", err.message);
     res.status(500).json({
       success: false,
       error: "Error al obtener las notas clínicas",
@@ -94,7 +95,7 @@ const crearNotaClinica = async (req, res) => {
       data: nuevaNotaClinica,
     });
   } catch (err) {
-    console.error("Error al crear nota clínica:", err.message);
+    logger.error("Error al crear nota clínica:", err.message);
 
     // Manejar errores específicos de base de datos
     if (err.code === "ER_NO_REFERENCED_ROW_2") {
@@ -172,7 +173,7 @@ const actualizarNotaClinica = async (req, res) => {
       data: notaActualizada,
     });
   } catch (err) {
-    console.error("Error al actualizar nota clínica:", err.message);
+    logger.error("Error al actualizar nota clínica:", err.message);
     res.status(500).json({
       success: false,
       error: "Error al actualizar la nota clínica",
@@ -201,7 +202,7 @@ const eliminarNotaClinica = async (req, res) => {
       message: "Nota clínica eliminada exitosamente",
     });
   } catch (err) {
-    console.error("Error al eliminar nota clínica:", err.message);
+    logger.error("Error al eliminar nota clínica:", err.message);
 
     if (err.message === "Nota clínica no encontrada") {
       return res.status(404).json({

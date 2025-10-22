@@ -8,6 +8,7 @@ const {
   clinicHasInvoices,
   getClinicBillableStatus,
 } = require("../../models/clinics/clinics_model");
+const logger = require("../../utils/logger");
 
 const obtenerClinicas = async (req, res) => {
   try {
@@ -29,7 +30,7 @@ const obtenerClinicas = async (req, res) => {
       data: result.data,
     });
   } catch (err) {
-    console.error("Error al obtener clínicas:", err.message);
+    logger.error("Error al obtener clínicas:", err.message);
     res.status(500).json({
       success: false,
       error: "Error al obtener las clínicas",
@@ -167,7 +168,7 @@ const actualizarClinica = async (req, res) => {
       message: "Clínica actualizada exitosamente",
     });
   } catch (err) {
-    console.error("Error al actualizar clínica:", err.message);
+    logger.error("Error al actualizar clínica:", err.message);
 
     if (err.message === "Clinic not found") {
       return res.status(404).json({
@@ -232,7 +233,7 @@ const eliminarClinica = async (req, res) => {
       message: "Clínica eliminada correctamente",
     });
   } catch (err) {
-    console.error("Error al eliminar clínica:", err.message);
+    logger.error("Error al eliminar clínica:", err.message);
     res.status(500).json({
       success: false,
       error: "Error al eliminar la clínica",
@@ -324,7 +325,7 @@ const crearClinica = async (req, res) => {
       data: nuevaClinica,
     });
   } catch (err) {
-    console.error("Error al crear clínica:", err.message);
+    logger.error("Error al crear clínica:", err.message);
 
     if (err.message === "Name is required") {
       return res.status(400).json({

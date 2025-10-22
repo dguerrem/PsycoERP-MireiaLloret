@@ -4,6 +4,7 @@ const {
   getDocumentById,
   deleteDocumentById,
 } = require("../../models/documents/documents_model");
+const logger = require("../../utils/logger");
 
 const { getPatientById } = require("../../models/patients/patients_model");
 const { uploadFileToVPS, deleteFileFromVPS } = require("../../utils/sftp");
@@ -39,7 +40,7 @@ const obtenerDocumentosPorPaciente = async (req, res) => {
       data: documents,
     });
   } catch (err) {
-    console.error("Error retrieving patient documents:", err.message);
+    logger.error("Error retrieving patient documents:", err.message);
     res.status(500).json({
       success: false,
       error: "Error retrieving patient documents",
@@ -142,7 +143,7 @@ const subirDocumento = async (req, res) => {
       data: newDocument,
     });
   } catch (err) {
-    console.error("Error al subir documento:", err.message);
+    logger.error("Error al subir documento:", err.message);
 
     // Manejar errores específicos de multer
     if (err instanceof multer.MulterError) {
@@ -202,7 +203,7 @@ const descargarDocumento = async (req, res) => {
         fileStream.pipe(res);
       })
       .on("error", (err) => {
-        console.error("Error al descargar archivo desde VPS:", err.message);
+        logger.error("Error al descargar archivo desde VPS:", err.message);
         if (!res.headersSent) {
           res.status(500).json({
             success: false,
@@ -211,7 +212,7 @@ const descargarDocumento = async (req, res) => {
         }
       });
   } catch (err) {
-    console.error("Error al descargar documento:", err.message);
+    logger.error("Error al descargar documento:", err.message);
     if (!res.headersSent) {
       res
         .status(500)
@@ -261,7 +262,7 @@ const eliminarDocumento = async (req, res) => {
       message: "Documento eliminado correctamente",
     });
   } catch (err) {
-    console.error("Error al eliminar documento:", err.message);
+    logger.error("Error al eliminar documento:", err.message);
     res.status(500).json({
       success: false,
       error: "Error al eliminar el documento",

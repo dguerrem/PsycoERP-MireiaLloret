@@ -1,4 +1,5 @@
 const bcrypt = require("bcrypt");
+const logger = require("../../utils/logger");
 const { generateToken } = require("../../utils/jwt");
 const {
   getUserByEmail,
@@ -78,7 +79,7 @@ const loginUser = async (req, res) => {
       },
     });
   } catch (error) {
-    console.error("Error en loginUser:", error.message);
+    logger.error("Error en loginUser:", error.message);
     res.status(500).json({
       success: false,
       message: "Error interno del servidor",
@@ -161,7 +162,7 @@ const refreshToken = async (req, res) => {
       },
     });
   } catch (error) {
-    console.error("Error en refreshToken:", error.message);
+    logger.error("Error en refreshToken:", error.message);
     res.status(500).json({
       success: false,
       message: "Error interno del servidor",
@@ -196,7 +197,7 @@ const hashPassword = async (req, res) => {
       },
     });
   } catch (error) {
-    console.error("Error al encriptar contraseña:", error.message);
+    logger.error("Error al encriptar contraseña:", error.message);
     res.status(500).json({
       success: false,
       message: "Error interno del servidor",

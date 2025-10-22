@@ -9,6 +9,7 @@ const {
   getActivePatientsWithClinicInfo,
   hasFutureSessions,
 } = require("../../models/patients/patients_model");
+const logger = require("../../utils/logger");
 
 const obtenerPacientes = async (req, res) => {
   try {
@@ -47,7 +48,7 @@ const obtenerPacientes = async (req, res) => {
         error: "El límite debe ser mayor a 0",
       });
     }
-    
+
     // Construir filtros incluyendo paginación
     const filters = {};
     if (first_name) filters.first_name = first_name;
@@ -82,7 +83,7 @@ const obtenerPacientes = async (req, res) => {
       data: result.data,
     });
   } catch (err) {
-    console.error("Error al obtener pacientes:", err.message);
+    logger.error("Error al obtener pacientes:", err.message);
     res.status(500).json({
       success: false,
       error: "Error al obtener los pacientes",
@@ -122,7 +123,7 @@ const obtenerPacientePorId = async (req, res) => {
       },
     });
   } catch (err) {
-    console.error("Error al obtener paciente por ID:", err.message);
+    logger.error("Error al obtener paciente por ID:", err.message);
     res.status(500).json({
       success: false,
       error: "Error al obtener el paciente",
@@ -202,7 +203,7 @@ const obtenerPacientesInactivos = async (req, res) => {
       data: result.data,
     });
   } catch (err) {
-    console.error("Error al obtener pacientes inactivos:", err.message);
+    logger.error("Error al obtener pacientes inactivos:", err.message);
     res.status(500).json({
       success: false,
       error: "Error al obtener los pacientes inactivos",
@@ -220,14 +221,14 @@ const eliminarPaciente = async (req, res) => {
         error: "ID del paciente es requerido",
       });
     }
-      // Comprobar si el paciente tiene sesiones futuras programadas
-      const tieneSesionesFuturas = await hasFutureSessions(req.db, id);
-      if (tieneSesionesFuturas) {
-        return res.status(400).json({
-          success: false,
-          error: "No se puede eliminar el paciente: tiene sesiones programadas en el futuro",
-        });
-      }
+    // Comprobar si el paciente tiene sesiones futuras programadas
+    const tieneSesionesFuturas = await hasFutureSessions(req.db, id);
+    if (tieneSesionesFuturas) {
+      return res.status(400).json({
+        success: false,
+        error: "No se puede eliminar el paciente: tiene sesiones programadas en el futuro",
+      });
+    }
 
     const eliminado = await deletePatient(req.db, id);
 
@@ -243,7 +244,7 @@ const eliminarPaciente = async (req, res) => {
       message: "Paciente eliminado correctamente",
     });
   } catch (err) {
-    console.error("Error al eliminar paciente:", err.message);
+    logger.error("Error al eliminar paciente:", err.message);
     res.status(500).json({
       success: false,
       error: "Error al eliminar el paciente",
@@ -354,7 +355,7 @@ const crearPaciente = async (req, res) => {
       message: "Paciente creado exitosamente",
     });
   } catch (err) {
-    console.error("Error al crear paciente:", err.message);
+    logger.error("Error al crear paciente:", err.message);
 
     // Manejo de errores específicos de base de datos
     if (err.code === 'ER_DUP_ENTRY') {
@@ -412,7 +413,7 @@ const restaurarPaciente = async (req, res) => {
       message: "Paciente activado exitosamente. Status cambiado a 'en curso'",
     });
   } catch (err) {
-    console.error("Error al activar paciente:", err.message);
+    logger.error("Error al activar paciente:", err.message);
 
     if (err.message === "Patient not found") {
       return res.status(404).json({
@@ -549,7 +550,7 @@ const actualizarPaciente = async (req, res) => {
       message: "Paciente actualizado exitosamente",
     });
   } catch (err) {
-    console.error("Error al actualizar paciente:", err.message);
+    logger.error("Error al actualizar paciente:", err.message);
 
     // Manejo de errores específicos de base de datos
     if (err.code === 'ER_DUP_ENTRY') {
@@ -584,7 +585,7 @@ const obtenerPacientesActivosConClinica = async (req, res) => {
       data: datos,
     });
   } catch (err) {
-    console.error("Error al obtener pacientes activos con clínica:", err.message);
+    logger.error("Error al obtener pacientes activos con clínica:", err.message);
     res.status(500).json({
       success: false,
       error: "Error al obtener pacientes activos con información de clínica",
