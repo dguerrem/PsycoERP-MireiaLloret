@@ -67,6 +67,7 @@ const initializeGoogleAuth = async (hostname) => {
     // Intenta cargar el token guardado
     if (fs.existsSync(paths.token)) {
       const token = JSON.parse(fs.readFileSync(paths.token));
+      
       // Si el token no incluye refresh_token avisar para reautorizar
       if (!token.refresh_token) {
         console.warn(
@@ -74,7 +75,35 @@ const initializeGoogleAuth = async (hostname) => {
           `Consider reauthorizing to obtain a refresh_token.`
         );
       }
+      
       oAuth2Client.setCredentials(token);
+
+      // 🔄 RENOVACIÓN AUTOMÁTICA: Configurar listener para renovar tokens automáticamente
+      oAuth2Client.on('tokens', (newTokens) => {
+        console.log(`🔄 Token refreshed automatically for ${paths.environment}`);
+        
+        // Actualizar el token guardado con el nuevo access_token
+        const updatedToken = { ...token };
+        if (newTokens.access_token) {
+          updatedToken.access_token = newTokens.access_token;
+        }
+        if (newTokens.expiry_date) {
+          updatedToken.expiry_date = newTokens.expiry_date;
+        }
+        // Solo actualizar refresh_token si viene uno nuevo (raro pero posible)
+        if (newTokens.refresh_token) {
+          updatedToken.refresh_token = newTokens.refresh_token;
+        }
+        
+        // Guardar el token actualizado
+        try {
+          fs.writeFileSync(paths.token, JSON.stringify(updatedToken, null, 2));
+          console.log(`✅ Token saved successfully for ${paths.environment}`);
+        } catch (writeError) {
+          console.error(`❌ Error saving refreshed token for ${paths.environment}:`, writeError.message);
+        }
+      });
+      
     } else {
       // Genera la URL de autorización solicitando refresh_token explícitamente
       const authUrl = oAuth2Client.generateAuthUrl({
