@@ -119,25 +119,25 @@ const crearSesion = async (req, res) => {
       });
     }
 
-    // Validar horario laboral (8:00 - 21:00)
+    // Validar horario laboral (7:00 - 22:00)
     const startHour = parseInt(start_time.split(':')[0]);
     const startMinute = parseInt(start_time.split(':')[1]);
     const endHour = parseInt(end_time.split(':')[0]);
     const endMinute = parseInt(end_time.split(':')[1]);
 
-    // Hora de inicio debe ser >= 08:00
-    if (startHour < 8) {
+    // Hora de inicio debe ser >= 07:00
+    if (startHour < 7) {
       return res.status(400).json({
         success: false,
-        error: "La hora de inicio no puede ser anterior a las 08:00",
+        error: "La hora de inicio no puede ser anterior a las 07:00",
       });
     }
 
-    // Hora de fin debe ser <= 21:00
-    if (endHour > 21 || (endHour === 21 && endMinute > 0)) {
+    // Hora de fin debe ser <= 22:00
+    if (endHour > 22 || (endHour === 22 && endMinute > 0)) {
       return res.status(400).json({
         success: false,
-        error: "La hora de fin no puede ser posterior a las 21:00",
+        error: "La hora de fin no puede ser posterior a las 22:00",
       });
     }
 
@@ -272,26 +272,26 @@ const actualizarSesion = async (req, res) => {
       const finalStartTime = start_time || currentSession[0].start_time;
       const finalEndTime = end_time || currentSession[0].end_time;
 
-      // Validar horario laboral (8:00 - 21:00) si se modifican las horas
+      // Validar horario laboral (7:00 - 22:00) si se modifican las horas
       if (start_time || end_time) {
         const startHour = parseInt(finalStartTime.split(':')[0]);
         const startMinute = parseInt(finalStartTime.split(':')[1]);
         const endHour = parseInt(finalEndTime.split(':')[0]);
         const endMinute = parseInt(finalEndTime.split(':')[1]);
 
-        // Hora de inicio debe ser >= 08:00
-        if (startHour < 8) {
+        // Hora de inicio debe ser >= 07:00
+        if (startHour < 7) {
           return res.status(400).json({
             success: false,
-            error: "La hora de inicio no puede ser anterior a las 08:00",
+            error: "La hora de inicio no puede ser anterior a las 07:00",
           });
         }
 
-        // Hora de fin debe ser <= 21:00
-        if (endHour > 21 || (endHour === 21 && endMinute > 0)) {
+        // Hora de fin debe ser <= 22:00
+        if (endHour > 22 || (endHour === 22 && endMinute > 0)) {
           return res.status(400).json({
             success: false,
-            error: "La hora de fin no puede ser posterior a las 21:00",
+            error: "La hora de fin no puede ser posterior a las 22:00",
           });
         }
 
