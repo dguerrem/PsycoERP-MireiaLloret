@@ -84,7 +84,7 @@ export class FormInputComponent {
       return `${this.label} tiene un formato inválido`;
     }
     if (errors['timeRange']) {
-      return 'El horario debe estar entre las 08:00 y las 21:00';
+      return 'El horario debe estar entre las 07:00 y las 22:00';
     }
     if (errors['timeOrder']) {
       return 'La hora de fin debe ser posterior a la hora de inicio';

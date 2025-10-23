@@ -282,7 +282,7 @@ export class NewSessionFormComponent implements OnInit {
   }
 
   /**
-   * Custom validator for time range (8:00 - 21:00)
+   * Custom validator for time range (7:00 - 22:00)
    */
   private timeRangeValidator(control: any) {
     if (!control.value) {
@@ -292,8 +292,8 @@ export class NewSessionFormComponent implements OnInit {
     const time = control.value;
     const [hours, minutes] = time.split(':').map(Number);
     const totalMinutes = hours * 60 + minutes;
-    const minTime = 8 * 60; // 8:00 = 480 minutes
-    const maxTime = 21 * 60; // 21:00 = 1260 minutes
+    const minTime = 7 * 60; // 7:00 = 420 minutes
+    const maxTime = 22 * 60; // 22:00 = 1320 minutes
 
     if (totalMinutes < minTime || totalMinutes > maxTime) {
       return { timeRange: true };
