@@ -42,11 +42,25 @@ export class PatientSelectorComponent {
     const term = this.searchTerm().toLowerCase().trim();
     if (!term) return this.patients;
 
-    return this.patients.filter((patient) =>
-      patient.nombreCompleto.toLowerCase().includes(term) ||
-      patient.nombreClinica.toLowerCase().includes(term)
-    );
+    // Normalize the search term (remove accents/diacritics)
+    const normalizedTerm = this.normalizeString(term);
+
+    return this.patients.filter((patient) => {
+      const normalizedName = this.normalizeString(patient.nombreCompleto.toLowerCase());
+      const normalizedClinic = this.normalizeString(patient.nombreClinica.toLowerCase());
+
+      return normalizedName.includes(normalizedTerm) ||
+             normalizedClinic.includes(normalizedTerm);
+    });
   });
+
+  /**
+   * Normalize a string by removing accents/diacritics
+   * Example: "María" -> "maria"
+   */
+  private normalizeString(str: string): string {
+    return str.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+  }
 
   // Use a getter instead of computed for better control value tracking
   get selectedPatient(): PatientSelector | null {
