@@ -68,8 +68,8 @@
           </div>
         </div>
 
-        <!-- Género -->
-        <div class="grid grid-cols-1 gap-4">
+        <!-- Género y Clínica -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 items-start">
           <div>
             <label for="gender" class="text-sm font-semibold leading-none text-gray-700 peer-disabled:cursor-not-allowed peer-disabled:opacity-70 mb-2 block">
               Género
@@ -84,19 +84,20 @@
               }
             </select>
           </div>
+
+          <div>
+            <app-clinic-selector
+              [control]="$any(filtersForm.get('clinic_id'))"
+              [clinics]="clinics"
+              label="Clínica"
+              placeholder="Buscar clínica...">
+            </app-clinic-selector>
+          </div>
         </div>
 
-        <!-- Clínica y Estado -->
-        <div class="grid grid-cols-1 gap-4" [class.lg:grid-cols-2]="showInactiveTab">
-          <app-clinic-selector
-            [control]="$any(filtersForm.get('clinic_id'))"
-            [clinics]="clinics"
-            label="Clínica"
-            placeholder="Buscar clínica...">
-          </app-clinic-selector>
-
-          <!-- Estado (only for inactive tab) -->
-          @if (showInactiveTab) {
+        <!-- Estado (only for inactive tab) -->
+        @if (showInactiveTab) {
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label for="status" class="text-sm font-semibold leading-none text-gray-700 peer-disabled:cursor-not-allowed peer-disabled:opacity-70 mb-2 block">
                 Estado
@@ -111,8 +112,8 @@
                 }
               </select>
             </div>
-          }
-        </div>
+          </div>
+        }
 
         <!-- Active filters indicator -->
         @if (hasActiveFilters) {

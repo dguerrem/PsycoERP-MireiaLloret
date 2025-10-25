@@ -1,8 +1,8 @@
 <div class="relative">
   <label [ngClass]="{
-    'block font-medium text-gray-700': true,
-    'text-xs mb-1': size === 'sm',
-    'text-sm font-semibold mb-2': size === 'md'
+    'block text-gray-700': true,
+    'text-xs font-medium mb-1': size === 'sm',
+    'text-sm font-semibold leading-none mb-2': size === 'md'
   }">
     {{ label }}
     <span *ngIf="required" class="text-red-500">*</span>
