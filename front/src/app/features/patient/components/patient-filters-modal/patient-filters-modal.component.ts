@@ -17,7 +17,6 @@ import {
 import { CommonModule } from '@angular/common';
 import { PatientFilters } from '../../../../shared/models/patient.model';
 import { Clinic } from '../../../clinics/models/clinic.model';
-import { ClinicsService } from '../../../clinics/services/clinics.service';
 import { ClinicSelectorComponent } from '../../../../shared/components/clinic-selector';
 
 @Component({
@@ -31,16 +30,15 @@ export class PatientFiltersModalComponent implements OnInit, OnChanges {
   @Input() isOpen: boolean = false;
   @Input() currentFilters: PatientFilters = {};
   @Input() showInactiveTab: boolean = false; // Indica si estamos en el tab de inactivos
+  @Input() clinics: Clinic[] = [];
 
   @Output() onApplyFilters = new EventEmitter<PatientFilters>();
   @Output() onClearFilters = new EventEmitter<void>();
   @Output() onCancel = new EventEmitter<void>();
 
   filtersForm!: FormGroup;
-  clinics: Clinic[] = [];
 
   private fb = inject(FormBuilder);
-  private clinicsService = inject(ClinicsService);
 
   // Options for gender select
   protected genderOptions = [
@@ -64,7 +62,6 @@ export class PatientFiltersModalComponent implements OnInit, OnChanges {
 
   ngOnInit(): void {
     this.initializeForm();
-    this.loadClinics();
     this.populateForm();
   }
 
@@ -101,20 +98,6 @@ export class PatientFiltersModalComponent implements OnInit, OnChanges {
     }
   }
 
-  /**
-   * Load all clinics for the select
-   */
-  private loadClinics(): void {
-    this.clinicsService.loadActiveClinics(1, 1000).subscribe({
-      next: (response) => {
-        this.clinics = response.data || [];
-      },
-      error: (error) => {
-        console.error('Error loading clinics:', error);
-        this.clinics = [];
-      }
-    });
-  }
 
 
   /**

@@ -18,6 +18,8 @@ import { PatientsListComponent } from './components/patients-list/patients-list.
 import { PaginationComponent } from '../../shared/components/pagination/pagination.component';
 import { PatientFormComponent } from './components/patient-form/patient-form.component';
 import { PatientFiltersModalComponent } from './components/patient-filters-modal/patient-filters-modal.component';
+import { Clinic } from '../clinics/models/clinic.model';
+import { ClinicsService } from '../clinics/services/clinics.service';
 
 type TabType = 'active' | 'inactive';
 
@@ -40,6 +42,7 @@ type TabType = 'active' | 'inactive';
 export class PatientComponent implements OnInit {
   // Services
   private patientsService = inject(PatientsService);
+  private clinicsService = inject(ClinicsService);
   private router = inject(Router);
 
   // State signals
@@ -52,6 +55,9 @@ export class PatientComponent implements OnInit {
   // Filters state
   showFiltersModal = signal(false);
   currentFilters = signal<PatientFilters>({});
+
+  // Clinics shared state
+  clinics = signal<Clinic[]>([]);
 
   // Separate state for each tab
   activePatients = signal<Patient[]>([]);
@@ -89,9 +95,27 @@ export class PatientComponent implements OnInit {
   }
 
   ngOnInit() {
+    // Load clinics once for all child components
+    this.loadClinics();
+
     // Load data for both tabs to show correct counts
     this.loadActivePatients(1, 12);
     this.loadDeletedPatients(1, 12);
+  }
+
+  /**
+   * Load clinics once to share with child components
+   */
+  private loadClinics(): void {
+    this.clinicsService.loadActiveClinics(1, 1000).subscribe({
+      next: (response) => {
+        this.clinics.set(response.data || []);
+      },
+      error: (error) => {
+        console.error('Error loading clinics:', error);
+        this.clinics.set([]);
+      },
+    });
   }
 
   /**

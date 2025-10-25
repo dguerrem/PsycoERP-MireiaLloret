@@ -7,7 +7,6 @@ import {
   OnChanges,
   SimpleChanges,
   ChangeDetectionStrategy,
-  ChangeDetectorRef,
 } from '@angular/core';
 import {
   FormBuilder,
@@ -19,7 +18,6 @@ import {
 import { CommonModule } from '@angular/common';
 import { Patient } from '../../../../shared/models/patient.model';
 import { Clinic } from '../../../clinics/models/clinic.model';
-import { ClinicsService } from '../../../clinics/services/clinics.service';
 import { ClinicSelectorComponent } from '../../../../shared/components/clinic-selector';
 import { ReusableModalComponent } from '../../../../shared/components/reusable-modal/reusable-modal.component';
 import { FormInputComponent } from '../../../../shared/components/form-input/form-input.component';
@@ -41,9 +39,7 @@ import { FormInputComponent } from '../../../../shared/components/form-input/for
 export class PatientFormComponent implements OnInit, OnChanges {
   @Input() isOpen: boolean = false;
   @Input() patient: Patient | null = null;
-
-  // Clinic selector properties
-  clinics: Clinic[] = [];
+  @Input() clinics: Clinic[] = [];
 
   @Output() onSave = new EventEmitter<Patient>();
   @Output() onCancel = new EventEmitter<void>();
@@ -65,17 +61,13 @@ export class PatientFormComponent implements OnInit, OnChanges {
     { value: 'derivación', label: 'Derivación' },
   ];
 
-  constructor(
-    private fb: FormBuilder,
-    private clinicsService: ClinicsService,
-    private cdr: ChangeDetectorRef
-  ) {
+  constructor(private fb: FormBuilder) {
     this.initializeForm();
   }
 
   ngOnInit(): void {
-    this.initializeForm();
-    this.loadClinics();
+    // Form is already initialized in constructor
+    // Clinics are now provided via @Input from parent component
   }
 
   ngOnChanges(changes: SimpleChanges): void {
@@ -294,21 +286,4 @@ export class PatientFormComponent implements OnInit, OnChanges {
     return labels[fieldName] || fieldName;
   }
 
-  /**
-   * Load all clinics from service
-   */
-  private loadClinics(): void {
-    // Load a large number to get all clinics (not paginated)
-    this.clinicsService.loadActiveClinics(1, 1000).subscribe({
-      next: (response) => {
-        this.clinics = response.data || [];
-        this.cdr.markForCheck(); // Trigger change detection
-      },
-      error: (error) => {
-        console.error('Error loading clinics:', error);
-        this.clinics = [];
-        this.cdr.markForCheck(); // Trigger change detection
-      },
-    });
-  }
 }

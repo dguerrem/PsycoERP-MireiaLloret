@@ -102,6 +102,7 @@
 <app-patient-form
   [isOpen]="showForm()"
   [patient]="editingPatient()"
+  [clinics]="clinics()"
   (onSave)="handleSave($event)"
   (onCancel)="closeForm()">
 </app-patient-form>
@@ -125,6 +126,7 @@
   [isOpen]="showFiltersModal()"
   [currentFilters]="currentFilters()"
   [showInactiveTab]="activeTab() === 'inactive'"
+  [clinics]="clinics()"
   (onApplyFilters)="handleApplyFilters($event)"
   (onClearFilters)="handleClearFilters()"
   (onCancel)="closeFiltersModal()">

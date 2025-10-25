@@ -50,9 +50,15 @@
       <div class="px-6">
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <label class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70" for="first_name">
-              Nombre
-            </label>
+            @if (isEditing()) {
+              <label class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70" for="first_name">
+                Nombre
+              </label>
+            } @else {
+              <div class="text-sm font-medium leading-none mb-2">
+                Nombre
+              </div>
+            }
             <input
               id="first_name"
               formControlName="first_name"
@@ -63,9 +69,15 @@
           </div>
 
           <div>
-            <label class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70" for="last_name">
-              Apellidos
-            </label>
+            @if (isEditing()) {
+              <label class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70" for="last_name">
+                Apellidos
+              </label>
+            } @else {
+              <div class="text-sm font-medium leading-none mb-2">
+                Apellidos
+              </div>
+            }
             <input
               id="last_name"
               formControlName="last_name"
@@ -76,9 +88,15 @@
           </div>
 
           <div>
-            <label class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70" for="dni">
-              DNI
-            </label>
+            @if (isEditing()) {
+              <label class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70" for="dni">
+                DNI
+              </label>
+            } @else {
+              <div class="text-sm font-medium leading-none mb-2">
+                DNI
+              </div>
+            }
             <input
               id="dni"
               formControlName="dni"
@@ -89,9 +107,15 @@
           </div>
 
           <div>
-            <label class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70" for="birth_date">
-              Fecha de Nacimiento
-            </label>
+            @if (isEditing()) {
+              <label class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70" for="birth_date">
+                Fecha de Nacimiento
+              </label>
+            } @else {
+              <div class="text-sm font-medium leading-none mb-2">
+                Fecha de Nacimiento
+              </div>
+            }
             <input
               id="birth_date"
               formControlName="birth_date"
@@ -103,9 +127,15 @@
           </div>
 
           <div>
-            <label class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70" for="occupation">
-              Ocupación
-            </label>
+            @if (isEditing()) {
+              <label class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70" for="occupation">
+                Ocupación
+              </label>
+            } @else {
+              <div class="text-sm font-medium leading-none mb-2">
+                Ocupación
+              </div>
+            }
             <input
               id="occupation"
               formControlName="occupation"
@@ -137,9 +167,15 @@
       <div class="px-6">
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <label class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70" for="email">
-              Email
-            </label>
+            @if (isEditing()) {
+              <label class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70" for="email">
+                Email
+              </label>
+            } @else {
+              <div class="text-sm font-medium leading-none mb-2">
+                Email
+              </div>
+            }
             <input
               id="email"
               formControlName="email"
@@ -150,9 +186,15 @@
           </div>
 
           <div>
-            <label class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70" for="phone">
-              Teléfono
-            </label>
+            @if (isEditing()) {
+              <label class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70" for="phone">
+                Teléfono
+              </label>
+            } @else {
+              <div class="text-sm font-medium leading-none mb-2">
+                Teléfono
+              </div>
+            }
             <input
               id="phone"
               formControlName="phone"
@@ -163,14 +205,20 @@
           </div>
 
           <div class="md:col-span-2">
-            <label class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+            <div class="text-sm font-medium leading-none mb-2">
               Dirección
-            </label>
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mt-2">
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
               <div class="md:col-span-2">
-                <label class="text-xs text-muted-foreground" for="street">
-                  Calle *
-                </label>
+                @if (isEditing()) {
+                  <label class="text-xs text-muted-foreground" for="street">
+                    Calle *
+                  </label>
+                } @else {
+                  <div class="text-xs text-muted-foreground mb-1">
+                    Calle *
+                  </div>
+                }
                 <input
                   id="street"
                   formControlName="street"
@@ -182,9 +230,15 @@
               </div>
 
               <div>
-                <label class="text-xs text-muted-foreground" for="street_number">
-                  Número *
-                </label>
+                @if (isEditing()) {
+                  <label class="text-xs text-muted-foreground" for="street_number">
+                    Número *
+                  </label>
+                } @else {
+                  <div class="text-xs text-muted-foreground mb-1">
+                    Número *
+                  </div>
+                }
                 <input
                   id="street_number"
                   formControlName="street_number"
@@ -196,9 +250,15 @@
               </div>
 
               <div>
-                <label class="text-xs text-muted-foreground" for="door">
-                  Puerta
-                </label>
+                @if (isEditing()) {
+                  <label class="text-xs text-muted-foreground" for="door">
+                    Puerta
+                  </label>
+                } @else {
+                  <div class="text-xs text-muted-foreground mb-1">
+                    Puerta
+                  </div>
+                }
                 <input
                   id="door"
                   formControlName="door"
@@ -210,9 +270,15 @@
               </div>
 
               <div>
-                <label class="text-xs text-muted-foreground" for="postal_code">
-                  Código Postal *
-                </label>
+                @if (isEditing()) {
+                  <label class="text-xs text-muted-foreground" for="postal_code">
+                    Código Postal *
+                  </label>
+                } @else {
+                  <div class="text-xs text-muted-foreground mb-1">
+                    Código Postal *
+                  </div>
+                }
                 <input
                   id="postal_code"
                   formControlName="postal_code"
@@ -224,9 +290,15 @@
               </div>
 
               <div class="md:col-span-2">
-                <label class="text-xs text-muted-foreground" for="city">
-                  Ciudad *
-                </label>
+                @if (isEditing()) {
+                  <label class="text-xs text-muted-foreground" for="city">
+                    Ciudad *
+                  </label>
+                } @else {
+                  <div class="text-xs text-muted-foreground mb-1">
+                    Ciudad *
+                  </div>
+                }
                 <input
                   id="city"
                   formControlName="city"
@@ -238,9 +310,15 @@
               </div>
 
               <div class="md:col-span-2">
-                <label class="text-xs text-muted-foreground" for="province">
-                  Provincia *
-                </label>
+                @if (isEditing()) {
+                  <label class="text-xs text-muted-foreground" for="province">
+                    Provincia *
+                  </label>
+                } @else {
+                  <div class="text-xs text-muted-foreground mb-1">
+                    Provincia *
+                  </div>
+                }
                 <input
                   id="province"
                   formControlName="province"
@@ -275,27 +353,33 @@
       <div class="px-6">
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <label class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+            <div class="text-sm font-medium leading-none mb-2">
               Tipo de Sesión
-            </label>
+            </div>
             <div class="flex h-10 w-full items-center rounded-md border border-gray-200 bg-gray-50 px-3 py-2 text-sm text-gray-700">
               {{ patient.tipo_clinica || 'No especificado' }}
             </div>
           </div>
 
           <div>
-            <label class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+            <div class="text-sm font-medium leading-none mb-2">
               Clínica
-            </label>
+            </div>
             <div class="flex h-10 w-full items-center rounded-md border border-gray-200 bg-gray-50 px-3 py-2 text-sm text-gray-700">
               {{ patient.nombre_clinica || 'No especificada' }}
             </div>
           </div>
 
           <div>
-            <label class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70" for="treatment_start_date">
-              Fecha Inicio Tratamiento
-            </label>
+            @if (isEditing()) {
+              <label class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70" for="treatment_start_date">
+                Fecha Inicio Tratamiento
+              </label>
+            } @else {
+              <div class="text-sm font-medium leading-none mb-2">
+                Fecha Inicio Tratamiento
+              </div>
+            }
             <input
               id="treatment_start_date"
               formControlName="treatment_start_date"
@@ -306,9 +390,15 @@
           </div>
 
           <div>
-            <label class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70" for="status">
-              Estado del Tratamiento
-            </label>
+            @if (isEditing()) {
+              <label class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70" for="status">
+                Estado del Tratamiento
+              </label>
+            } @else {
+              <div class="text-sm font-medium leading-none mb-2">
+                Estado del Tratamiento
+              </div>
+            }
             @if (isEditing()) {
               <select
                 id="status"
