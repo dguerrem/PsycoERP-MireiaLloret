@@ -163,7 +163,7 @@
         </app-form-input>
         <!-- Clinic Selector -->
         <app-clinic-selector [control]="$any(patientForm.get('clinic_id'))" [clinics]="clinics" [required]="true"
-          label="Clínica" placeholder="Buscar clínica...">
+          [disabled]="isEditing" label="Clínica" placeholder="Buscar clínica...">
         </app-clinic-selector>
       </div>
     </section>

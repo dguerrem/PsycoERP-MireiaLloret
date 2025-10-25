@@ -9,11 +9,12 @@
   </label>
 
   <div [ngClass]="{
-    'flex w-full rounded-md border border-gray-300 items-center justify-between hover:border-gray-400 focus-within:outline-none focus-within:ring-2 transition-all duration-200 cursor-pointer': true,
+    'flex w-full rounded-md border border-gray-300 items-center justify-between transition-all duration-200': true,
+    'hover:border-gray-400 focus-within:outline-none focus-within:ring-2 cursor-pointer': !disabled,
     'h-10 bg-gray-50 px-3 py-2 text-sm text-gray-900 focus-within:ring-[#d29f67] focus-within:bg-white focus-within:border-[#d29f67]': size === 'md',
     'bg-white px-2 py-1.5 text-xs text-gray-900 focus-within:ring-cyan-500': size === 'sm',
     'border-red-500': hasError
-  }" (click)="openModal()" tabindex="0" role="button" [attr.aria-expanded]="isModalOpenValue">
+  }" (click)="openModal()" [tabindex]="disabled ? -1 : 0" role="button" [attr.aria-expanded]="isModalOpenValue" [attr.aria-disabled]="disabled">
 
     <div class="flex items-center gap-2 flex-1">
       <div *ngIf="selectedClinic" class="w-3 h-3 rounded-full flex-shrink-0"
@@ -26,7 +27,7 @@
     <div class="flex items-center gap-1">
       <button *ngIf="selectedClinic" type="button"
         class="flex-shrink-0 p-1 hover:bg-gray-200 rounded-full transition-colors"
-        (click)="$event.stopPropagation(); clearSelection()">
+        (click)="handleClearClick($event)">
         <svg class="h-4 w-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
         </svg>

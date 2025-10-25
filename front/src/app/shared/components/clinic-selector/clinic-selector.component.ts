@@ -28,6 +28,7 @@ export class ClinicSelectorComponent {
   @Input() label: string = 'Clínica';
   @Input() required: boolean = false;
   @Input() size: 'sm' | 'md' = 'md'; // 'sm' for smaller inputs (text-xs), 'md' for standard (text-sm)
+  @Input() disabled: boolean = false;
 
   // Internal signals
   private searchTerm = signal<string>('');
@@ -95,10 +96,17 @@ export class ClinicSelectorComponent {
   }
 
   clearSelection(): void {
+    if (this.disabled) return; // Don't clear if disabled
+
     this.control.setValue(null);
     this.control.markAsTouched();
     this.searchTerm.set('');
     this.focusedIndex.set(-1);
+  }
+
+  handleClearClick(event: Event): void {
+    event.stopPropagation();
+    this.clearSelection();
   }
 
   isClinicSelected(clinic: Clinic): boolean {
@@ -113,6 +121,8 @@ export class ClinicSelectorComponent {
   }
 
   openModal(): void {
+    if (this.disabled) return; // Don't open if disabled
+
     this.isModalOpen.set(true);
     this.searchTerm.set('');
 
