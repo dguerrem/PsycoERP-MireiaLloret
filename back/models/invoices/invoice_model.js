@@ -568,7 +568,8 @@ const getIssuedInvoicesOfClinics = async (db, filters = {}) => {
          JSON_OBJECT(
            'unit_price', sessions_by_price.unit_price,
            'sessions_count', sessions_by_price.sessions_count,
-           'total_net', sessions_by_price.total_net
+           'total_net', sessions_by_price.total_net,
+           'concept', sessions_by_price.concept
          ) ORDER BY sessions_by_price.unit_price ASC
        ) as sessions_data
      FROM clinics c
@@ -581,7 +582,8 @@ const getIssuedInvoicesOfClinics = async (db, filters = {}) => {
          i2.clinic_id,
          s.price as unit_price,
          COUNT(s.id) as sessions_count,
-         COALESCE(SUM(s.price * (c2.percentage / 100)), 0) as total_net
+         COALESCE(SUM(s.price * (c2.percentage / 100)), 0) as total_net,
+         CONCAT('(', COUNT(s.id), ') Sesión psicoterapia - ') as concept
        FROM invoices i2
        INNER JOIN invoice_sessions ist ON ist.invoice_id = i2.id
        INNER JOIN sessions s ON ist.session_id = s.id AND s.is_active = true
@@ -617,7 +619,8 @@ const getIssuedInvoicesOfClinics = async (db, filters = {}) => {
         uniqueSessionsData.push({
           unit_price: parseFloat(session.unit_price),
           sessions_count: sessionCount,
-          total_net: sessionNet
+          total_net: sessionNet,
+          concept: session.concept
         });
 
         totalSessions += sessionCount;
