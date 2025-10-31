@@ -583,7 +583,7 @@ const getIssuedInvoicesOfClinics = async (db, filters = {}) => {
          s.price as unit_price,
          COUNT(s.id) as sessions_count,
          COALESCE(SUM(s.price * (c2.percentage / 100)), 0) as total_net,
-         CONCAT('(', COUNT(s.id), ') Sesión psicoterapia - ') as concept
+         CONCAT('(', COUNT(s.id), ') Sesión psicoterapia') as concept
        FROM invoices i2
        INNER JOIN invoice_sessions ist ON ist.invoice_id = i2.id
        INNER JOIN sessions s ON ist.session_id = s.id AND s.is_active = true
