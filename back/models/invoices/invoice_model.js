@@ -6,7 +6,7 @@ const getInvoicesKPIs = async (db, filters = {}) => {
   const currentDate = new Date();
   const targetMonth = month || (currentDate.getMonth() + 1);
   const targetYear = year || currentDate.getFullYear();
-  
+
   // ============================================
   // CARD 1: Total de facturas emitidas (histórico)
   // ============================================
@@ -377,13 +377,20 @@ const getPendingInvoicesOfClinics = async (db, filters = {}) => {
   const targetMonth = month || (currentDate.getMonth() + 1);
   const targetYear = year || currentDate.getFullYear();
 
-  // Obtener clínicas facturables con sesiones pendientes
+  // Obtener clínicas facturables con sesiones pendientes agrupadas por clínica con desglose por precio
   const [pendingClinicsResult] = await db.execute(
     `SELECT
        c.id as clinic_id,
        c.name as clinic_name,
-       COUNT(s.id) as sessions_count,
-       COALESCE(SUM(s.price * (c.percentage / 100)), 0) as total_net
+       COUNT(s.id) as total_sessions,
+       COALESCE(SUM(s.price * (c.percentage / 100)), 0) as total_net_clinic,
+       JSON_ARRAYAGG(
+         JSON_OBJECT(
+           'unit_price', s.price,
+           'sessions_count', sessions_by_price.sessions_count,
+           'total_net', sessions_by_price.total_net
+         ) ORDER BY s.price ASC
+       ) as sessions_data
      FROM clinics c
      INNER JOIN sessions s ON s.clinic_id = c.id
        AND s.is_active = true
@@ -391,19 +398,52 @@ const getPendingInvoicesOfClinics = async (db, filters = {}) => {
        AND s.payment_method != 'pendiente'
        AND MONTH(s.session_date) = ?
        AND YEAR(s.session_date) = ?
+     INNER JOIN (
+       SELECT 
+         clinic_id,
+         price,
+         COUNT(*) as sessions_count,
+         COALESCE(SUM(price * (SELECT percentage FROM clinics WHERE id = clinic_id) / 100), 0) as total_net
+       FROM sessions
+       WHERE is_active = true
+         AND invoiced = 0
+         AND payment_method != 'pendiente'
+         AND MONTH(session_date) = ?
+         AND YEAR(session_date) = ?
+       GROUP BY clinic_id, price
+     ) as sessions_by_price ON sessions_by_price.clinic_id = c.id AND sessions_by_price.price = s.price
      WHERE c.is_active = true AND c.is_billable = true
      GROUP BY c.id, c.name
      ORDER BY clinic_name ASC`,
-    [targetMonth, targetYear]
+    [targetMonth, targetYear, targetMonth, targetYear]
   );
 
-  // Mapear resultados con tipos correctos
-  const pendingInvoicesOfClinics = pendingClinicsResult.map(row => ({
-    clinic_id: parseInt(row.clinic_id),
-    clinic_name: row.clinic_name,
-    sessions_count: parseInt(row.sessions_count),
-    total_net: parseFloat(row.total_net)
-  }));
+  // Mapear resultados parseando el JSON y eliminando duplicados
+  const pendingInvoicesOfClinics = pendingClinicsResult.map(row => {
+    // Parsear sessions_data y eliminar duplicados por unit_price
+    const sessionsData = JSON.parse(row.sessions_data);
+    const uniqueSessionsData = [];
+    const seenPrices = new Set();
+
+    sessionsData.forEach(session => {
+      if (!seenPrices.has(session.unit_price)) {
+        seenPrices.add(session.unit_price);
+        uniqueSessionsData.push({
+          unit_price: parseFloat(session.unit_price),
+          sessions_count: parseInt(session.sessions_count),
+          total_net: parseFloat(session.total_net)
+        });
+      }
+    });
+
+    return {
+      clinic_id: parseInt(row.clinic_id),
+      clinic_name: row.clinic_name,
+      total_sessions: parseInt(row.total_sessions),
+      total_net_clinic: parseFloat(row.total_net_clinic),
+      sessions_data: uniqueSessionsData
+    };
+  });
 
   return pendingInvoicesOfClinics;
 };
@@ -510,62 +550,101 @@ const getIssuedInvoicesOfClinics = async (db, filters = {}) => {
   const targetMonth = month || (currentDate.getMonth() + 1);
   const targetYear = year || currentDate.getFullYear();
 
-  // Obtener facturas de clínicas con información de la clínica
+  // Obtener facturas de clínicas agrupadas por clínica con desglose de sesiones por precio
   const [invoicesResult] = await db.execute(
     `SELECT
-       i.id,
-       i.invoice_number,
-       i.invoice_date,
-       i.clinic_id,
+       c.id as clinic_id,
+       c.name as clinic_name,
        c.fiscal_name,
        c.cif,
        c.billing_address,
-       i.total,
-       i.concept,
-       i.month,
-       i.year,
-       i.created_at
-     FROM invoices i
-     INNER JOIN clinics c ON i.clinic_id = c.id AND c.is_active = true
-     WHERE i.is_active = true
-       AND i.clinic_id IS NOT NULL
+       GROUP_CONCAT(DISTINCT i.invoice_number ORDER BY i.invoice_date DESC) as invoice_numbers,
+       MIN(i.invoice_date) as first_invoice_date,
+       MAX(i.invoice_date) as last_invoice_date,
+       GROUP_CONCAT(DISTINCT i.concept ORDER BY i.invoice_date DESC) as concepts,
+       COUNT(DISTINCT i.id) as total_invoices,
+       COALESCE(SUM(i.total), 0) as total_invoiced,
+       JSON_ARRAYAGG(
+         JSON_OBJECT(
+           'unit_price', sessions_by_price.unit_price,
+           'sessions_count', sessions_by_price.sessions_count,
+           'total_net', sessions_by_price.total_net
+         ) ORDER BY sessions_by_price.unit_price ASC
+       ) as sessions_data
+     FROM clinics c
+     INNER JOIN invoices i ON i.clinic_id = c.id
+       AND i.is_active = true
        AND i.month = ?
        AND i.year = ?
-     ORDER BY i.invoice_date DESC, i.invoice_number DESC`,
-    [targetMonth, targetYear]
+     INNER JOIN (
+       SELECT 
+         i2.clinic_id,
+         s.price as unit_price,
+         COUNT(s.id) as sessions_count,
+         COALESCE(SUM(s.price * (c2.percentage / 100)), 0) as total_net
+       FROM invoices i2
+       INNER JOIN invoice_sessions ist ON ist.invoice_id = i2.id
+       INNER JOIN sessions s ON ist.session_id = s.id AND s.is_active = true
+       INNER JOIN clinics c2 ON i2.clinic_id = c2.id AND c2.is_active = true
+       WHERE i2.is_active = true
+         AND i2.clinic_id IS NOT NULL
+         AND i2.month = ?
+         AND i2.year = ?
+       GROUP BY i2.clinic_id, s.price
+     ) as sessions_by_price ON sessions_by_price.clinic_id = c.id
+     WHERE c.is_active = true
+     GROUP BY c.id, c.name, c.fiscal_name, c.cif, c.billing_address
+     ORDER BY clinic_name ASC`,
+    [targetMonth, targetYear, targetMonth, targetYear]
   );
 
-  // Para cada factura, obtener el número de sesiones
-  const invoices = await Promise.all(
-    invoicesResult.map(async (row) => {
-      const [sessionsCount] = await db.execute(
-        `SELECT COUNT(*) as sessions_count
-         FROM invoice_sessions ist
-         INNER JOIN sessions s ON ist.session_id = s.id AND s.is_active = true
-         WHERE ist.invoice_id = ?`,
-        [row.id]
-      );
+  // Mapear resultados parseando el JSON y calculando totales
+  const invoices = invoicesResult.map(row => {
+    // Parsear sessions_data y eliminar duplicados por unit_price
+    const sessionsData = JSON.parse(row.sessions_data);
+    const uniqueSessionsData = [];
+    const seenPrices = new Set();
 
-      // Formatear fecha a dd/mm/yyyy
-      const date = new Date(row.invoice_date);
-      const formattedDate = `${String(date.getDate()).padStart(2, '0')}/${String(date.getMonth() + 1).padStart(2, '0')}/${date.getFullYear()}`;
+    let totalSessions = 0;
+    let totalNetClinic = 0;
 
-      return {
-        id: parseInt(row.id),
-        invoice_number: row.invoice_number,
-        invoice_date: formattedDate,
-        clinic_id: parseInt(row.clinic_id),
-        fiscal_name: row.fiscal_name || '',
-        cif: row.cif || '',
-        billing_address: row.billing_address || '',
-        sessions_count: parseInt(sessionsCount[0].sessions_count),
-        total: parseFloat(row.total),
-        concept: row.concept || '',
-        month: parseInt(row.month),
-        year: parseInt(row.year)
-      };
-    })
-  );
+    sessionsData.forEach(session => {
+      if (!seenPrices.has(session.unit_price)) {
+        seenPrices.add(session.unit_price);
+        const sessionCount = parseInt(session.sessions_count);
+        const sessionNet = parseFloat(session.total_net);
+
+        uniqueSessionsData.push({
+          unit_price: parseFloat(session.unit_price),
+          sessions_count: sessionCount,
+          total_net: sessionNet
+        });
+
+        totalSessions += sessionCount;
+        totalNetClinic += sessionNet;
+      }
+    });
+
+    // Formatear fecha más reciente a dd/mm/yyyy
+    const lastDate = new Date(row.last_invoice_date);
+    const formattedLastDate = `${String(lastDate.getDate()).padStart(2, '0')}/${String(lastDate.getMonth() + 1).padStart(2, '0')}/${lastDate.getFullYear()}`;
+
+    return {
+      clinic_id: parseInt(row.clinic_id),
+      clinic_name: row.clinic_name,
+      fiscal_name: row.fiscal_name || '',
+      cif: row.cif || '',
+      billing_address: row.billing_address || '',
+      invoice_numbers: row.invoice_numbers ? row.invoice_numbers.split(',') : [],
+      last_invoice_date: formattedLastDate,
+      concepts: row.concepts ? row.concepts.split(',') : [],
+      total_invoices: parseInt(row.total_invoices),
+      total_sessions: totalSessions,
+      total_net_clinic: totalNetClinic,
+      total_invoiced: parseFloat(row.total_invoiced),
+      sessions_data: uniqueSessionsData
+    };
+  });
 
   return invoices;
 };
